@@ -64,6 +64,13 @@ table { border-collapse: collapse; width: 100%; font-size: 12.5px }
 td, th { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
 td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
 .tablewrap { overflow-x: auto }
+.status { font-size: 12.5px; color: var(--muted); margin: -10px 0 20px; max-width: 90ch }
+.status a, .sub a { color: var(--steel) }
+code { font-family: var(--mono); font-size: 0.92em }
+.scale { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 6px }
+.scale i { flex: 0 1 220px; height: 8px; border-radius: 2px; display: block }
+#calc td:nth-child(3) { text-align: right; font-family: var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums }
+#calc td:nth-child(2) { font-family: var(--display); white-space: normal; color: var(--muted) }
 .verdict { font-size: 14px; padding: 12px 14px; border-radius: 8px; background: var(--bg) }
 </style>
 
@@ -73,6 +80,7 @@ td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
     <span class="tag">Exploration prototype · Awkward Turtles · not the final scheduler</span>
   </header>
   <p class="lede">The case's reference house in Basel, with real 2025 weather. Choose how many 1 kW servers sit in the basement and how they are run. Every hour is simulated in your browser: heat to the house, heat into the tank, heat dumped, and what it costs.</p>
+  <p class="status"><b>Status:</b> exploration prototype, not yet reviewed by the team. The numbers are reproduced exactly by an independent script (<code>verify.py</code>). Method, formulas and a worked example: <a href="https://github.com/IllusioQuest/awkard-turtles-basel-26/blob/main/prototypes/year-explorer/METHOD.md" target="_blank" rel="noopener">METHOD.md</a>.</p>
 
   <div class="grid">
     <aside class="panel controls" aria-label="Parameters">
@@ -97,10 +105,17 @@ td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
       </div>
 
       <div class="panel">
+        <h2>How these numbers are calculated</h2>
+        <p class="sub">Live values for your settings, summed over all 8,760 hours. Each hour: demand = space heating + hot water; servers run to cover demand and refill the tank (never more than installed, never less than the minimum load); surplus goes to the tank, then is dumped; missing heat comes from the tank, then the backup heater. <a href="https://github.com/IllusioQuest/awkard-turtles-basel-26/blob/main/prototypes/year-explorer/METHOD.md" target="_blank" rel="noopener">Full method</a></p>
+        <div class="tablewrap"><table id="calc"></table></div>
+      </div>
+
+      <div class="panel">
         <h2>The year, hour by hour</h2>
-        <p class="sub">Each column is a day, each row an hour (00:00 at the top). Click a day to see it below.</p>
+        <p class="sub">Each column is a day (January left), each row an hour (midnight at the top). Darker = more. The pale block from May to September is summer: only hot water is needed. Click a day to see its hours below.</p>
         <div class="row" role="group" aria-label="Heatmap metric" id="metric"></div>
         <canvas id="heat" aria-label="Heatmap of the year"></canvas>
+        <div class="scale"><span id="scale-lo">0</span><i id="scale-bar"></i><span id="scale-hi"></span></div>
         <div class="axis"><span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span><span>Dec</span></div>
       </div>
 
@@ -109,18 +124,19 @@ td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
           <button class="chip" id="d-cold">Coldest day</button><button class="chip" id="d-jan">15 January</button><button class="chip" id="d-jul">15 July</button></div>
         <svg id="day" viewBox="0 0 720 230" width="100%" role="img" aria-label="Hourly heat balance of the selected day"></svg>
         <div class="legend"><span><i style="background:var(--ember)"></i>server heat to house</span><span><i style="background:var(--slate)"></i>backup heater</span><span><i style="background:var(--dump)"></i>dumped</span><span><i style="background:var(--steel)"></i>tank level (right axis)</span></div>
+        <p class="note">Orange + grey together are the house's demand in that hour. Orange includes heat taken from the tank. The blue line is the tank level at the end of each hour.</p>
       </div>
 
       <div class="two">
         <div class="panel">
           <h2>Sweet spot: how many servers?</h2>
-          <p class="sub">Same settings, 1 to 16 servers. The ring marks your choice.</p>
+          <p class="sub">Same settings, 1 to 16 servers. The rings mark your choice. More servers cover more demand, but each one runs fewer hours.</p>
           <svg id="sweep" viewBox="0 0 360 220" width="100%" role="img" aria-label="Coverage, utilisation and dump versus servers"></svg>
           <div class="legend"><span><i style="background:var(--ember)"></i>heat demand covered</span><span><i style="background:var(--steel)"></i>utilisation</span><span><i style="background:var(--dump)"></i>share of server heat dumped</span></div>
         </div>
         <div class="panel">
           <h2>System surplus per year</h2>
-          <p class="sub">Computing income + value of heat used − electricity − hardware. Below zero, nobody wins.</p>
+          <p class="sub">Computing income + value of heat used − electricity − hardware, for 1 to 16 servers. Below zero, nobody wins. With hardware cost 0 and unlimited jobs, more servers always look better: set a hardware cost to see a real optimum.</p>
           <svg id="money" viewBox="0 0 360 220" width="100%" role="img" aria-label="System surplus versus servers"></svg>
         </div>
       </div>
@@ -215,7 +231,27 @@ function render() {
     (pays ? `At ${S.compute.toFixed(2)} CHF per server-hour, computing pays for the electricity not covered by the heat value (break-even ${r.breakEven.toFixed(3)} CHF/h).`
           : `<span class="neg">At ${S.compute.toFixed(2)} CHF per server-hour this does not pay off:</span> computing must earn at least ${r.breakEven.toFixed(3)} CHF/h.`) +
     (S.hw === 0 ? " Hardware costs are not included yet." : "");
-  drawHeat(); drawDay(); drawSweep();
+  renderCalc(r); drawHeat(); drawDay(); drawSweep();
+}
+
+function renderCalc(r) {
+  const n = S.servers, rows = [
+    ["Heat demand", "space heating (case formula, heating days only) + hot water 12 kWh/day", fmt(r.demand) + " kWh"],
+    ["Server-hours", "sum over hours of servers running (fractions = part load)", fmt(r.run) + " h"],
+    ["Server heat produced", "server-hours × 1 kW × 80 %", fmt(r.produced) + " kWh"],
+    ["Heat to the house", "demand − backup (includes heat taken from the tank)", fmt(r.used) + " kWh"],
+    ["Backup heater", "demand the servers and the tank could not cover", fmt(r.backup) + " kWh"],
+    ["Dumped", "server heat with no room in house or tank", fmt(r.dumped) + " kWh"],
+    ["Demand covered", `${fmt(r.used)} ÷ ${fmt(r.demand)}`, fmt(r.coverage * 100, 1) + " %"],
+    ["Utilisation", `${fmt(r.run)} ÷ (${n} × 8,760)`, fmt(r.util * 100, 1) + " %"],
+    ["Electricity cost", `${fmt(r.run)} h × 1 kW × ${S.price.toFixed(4)} CHF/kWh`, chf(r.elec)],
+    ["Value of heat used", `${fmt(r.used)} kWh × ${S.price.toFixed(4)} ÷ 2.5`, chf(r.heatValue)],
+    ["Computing income", `${fmt(r.run)} h × ${S.compute.toFixed(2)} CHF/h (example price, unlimited jobs)`, chf(r.income)],
+    ["Hardware", `${n} × ${fmt(S.hw)} CHF per server and year`, chf(r.hwCost)],
+    ["System surplus", "income + heat value − electricity − hardware", chf(r.surplus)],
+    ["Break-even computing price", "(electricity cost − value of heat used) ÷ server-hours (case formula)", r.breakEven.toFixed(3) + " CHF/h"],
+  ];
+  document.getElementById("calc").innerHTML = `<tr><th>Figure</th><th>How</th><th>Value</th></tr>` + rows.map(([a, b, c]) => `<tr><td>${a}</td><td>${b}</td><td>${c}</td></tr>`).join("");
 }
 
 const METRICS = { load: ["Server load", "--ember"], demand: ["Heat demand", "--ember"], backup: ["Backup heat", "--slate"], dump: ["Dumped heat", "--dump"] };
@@ -231,6 +267,9 @@ function drawHeat() {
     const t = max ? Math.min(1, arr[d * H + k] / max) : 0, c = base.map((b, j) => Math.round(b + (top[j] - b) * Math.sqrt(t)));
     ctx.fillStyle = `rgb(${c})`; ctx.fillRect(d * cw, k * ch, cw + 0.6, ch + 0.6);
   }
+  document.getElementById("scale-bar").style.background = `linear-gradient(90deg, var(--panel), var(${METRICS[metric][1]}))`;
+  document.getElementById("scale-hi").textContent = metric === "load" ? "100 % of servers running" : fmt(max, 1) + " kWh per hour";
+  document.getElementById("scale-lo").textContent = metric === "load" ? "0 %" : "0";
   ctx.strokeStyle = css("--fg"); ctx.lineWidth = 1.5; ctx.strokeRect(selDay * cw, 0.75, Math.max(cw, 2), h - 1.5);
 }
 
@@ -278,7 +317,7 @@ function drawSweep() {
     m += `<rect x="${xx}" y="${Math.min(y0, y1)}" width="${bw - 4}" height="${Math.abs(y1 - y0)}" fill="var(${r.surplus >= 0 ? "--good" : "--bad"})" opacity="${sel ? 1 : 0.45}"/>`;
     if ([1, 4, 8, 12, 16].includes(r.n)) m += `<text x="${xx + (bw - 4) / 2}" y="${Ht - 8}" text-anchor="middle">${r.n}</text>`;
   });
-  svgEl(document.getElementById("money"), m + `<text x="${W - R}" y="${Ht - 8}" text-anchor="end">servers →</text><text x="${L}" y="${T - 2}">CHF per year</text>`);
+  svgEl(document.getElementById("money"), m + `<text x="${L}" y="${T - 2}">CHF per year</text>`);
 }
 
 function renderAssumptions() {
