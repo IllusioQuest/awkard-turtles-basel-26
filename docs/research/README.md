@@ -13,6 +13,8 @@
 | [WP2](#wp2-costs-and-energy-prices) | Costs and energy prices | 1 (financial) | Codex (GPT-6 Astra); status: first version | `docs/research/costs-and-energy.md`, `data/raw/market/costs.csv`, `data/raw/market/energy-prices.csv` |
 | [WP3](#wp3-sites-and-heat-demand-profiles) | Sites and heat-demand profiles | 2 (customers) + 3 (physics input) | Claude subagent (**first version**, 2026-11-20) | `docs/research/sites-and-profiles.md`, `data/raw/sites/site-types.csv`, `data/raw/sites/when2heat/` |
 
+Service brainstorm and current main plan (audio to text, document AI): [`service-brainstorm.md`](service-brainstorm.md).
+
 Not planned yet (later or on request): competitors in heat-from-compute (Qarnot, Heata, Deep Green,
 Cloud&Heat, Nerdalize), regulation (data protection, Legionella), server power curves.
 

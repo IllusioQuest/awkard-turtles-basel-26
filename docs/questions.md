@@ -35,3 +35,9 @@ Stichworte:
 
 - Thermal-aware cloud pricing
 - Heat-demand-aware job auctions
+
+## Added later (English)
+
+- **Trust gap** (from the service brainstorm, 2026-11-20): will customers with confidential data
+  accept their jobs running on a server in a private home? Candidate answers in
+  [`research/service-brainstorm.md`](research/service-brainstorm.md#the-biggest-risk-the-trust-gap).
