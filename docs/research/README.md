@@ -4,12 +4,13 @@
 > with sources, **before** we model anything. Three work packages, one per team member and their
 > agents. They are independent and can run in parallel.
 >
-> Status: planned, not yet assigned. Write your name next to a package when you take it.
+> Status: WP2 has a first version; other package assignments are listed below.
+> Write your name next to a package when you take it.
 
 | WP | Topic | Phase | Owner | Output |
 |---|---|---|---|---|
 | [WP1](#wp1-priced-ai-services-and-compute-prices) | Priced AI services and compute prices | 2 (market) + 1 (income) | Claude subagent (first version) | `docs/research/ai-services.md`, `data/raw/market/ai-services.csv`, `data/raw/market/compute-prices.csv` |
-| [WP2](#wp2-costs-and-energy-prices) | Costs and energy prices | 1 (financial) | *open* | `docs/research/costs-and-energy.md`, `data/raw/market/costs.csv`, `data/raw/market/energy-prices.csv` |
+| [WP2](#wp2-costs-and-energy-prices) | Costs and energy prices | 1 (financial) | Codex (GPT-6 Astra); status: first version | `docs/research/costs-and-energy.md`, `data/raw/market/costs.csv`, `data/raw/market/energy-prices.csv` |
 | [WP3](#wp3-sites-and-heat-demand-profiles) | Sites and heat-demand profiles | 2 (customers) + 3 (physics input) | Claude subagent (**first version**, 2026-11-20) | `docs/research/sites-and-profiles.md`, `data/raw/sites/site-types.csv`, `data/raw/sites/when2heat/` |
 
 Not planned yet (later or on request): competitors in heat-from-compute (Qarnot, Heata, Deep Green,
@@ -90,6 +91,9 @@ let us translate "price per unit" into "income per server-hour" later.
 to CHF documented, a short summary of the 3 most promising workload categories with reasons.
 
 ## WP2: Costs and energy prices
+
+**Owner: Codex (GPT-6 Astra)** · **Status: first version** · Snapshot: 2026-11-20.
+See [findings and gaps](costs-and-energy.md).
 
 **Question:** What does it cost to install and run a heat-producing server in a building, and what
 does the heat it replaces cost? This gives the cost side of the money flows.
