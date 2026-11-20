@@ -4,6 +4,8 @@ Status: library, structure and contract approach approved by the user on 2026-11
 solution plus pure placement/validation implemented. Live service behavior is not implemented.
 Team-wide acceptance is pending.
 Confirmed: C#, separate Docker engines, small app, resilient controllers/gateways, stable browser URL.
+Runtime clarification: every infrastructure service runs in Linux containers. Windows is only
+the development/test host. Native Windows ingress and HTTP.sys are not approved.
 
 ## Libraries and infrastructure
 

@@ -4,6 +4,11 @@
 - **Date:** 2026-11-20
 - **Decided by:** user requires adapter resilience; implementation choice awaits approval
 
+**Withdrawn proposal, never implemented:** the user clarified that Windows is only the
+development/test host and every infrastructure service must run in Linux containers.
+The Windows-native process proposal below is retained only as decision history. Investigate
+Linux-container ingress instead; do not implement native Windows ingress or HTTP.sys.
+
 ## Context
 
 The user rejected a single Docker packet-forwarding adapter even as test infrastructure.
