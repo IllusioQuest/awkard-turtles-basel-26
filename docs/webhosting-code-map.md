@@ -43,3 +43,6 @@ Use the shared `src/DigitalHeat.Core` `IExecutor`/`IScheduler` boundary for late
 do not build a separate heat scheduler. No shared heat interface has been changed by this milestone.
 
 See [runtime guide](webhosting-runtime.md) for commands and verified limits.
+
+Whole-container recovery: ContainerPauseMonitor.cs contains the approved external monitor loop; deploy/monitors.compose.yaml opts into two trusted Linux managers; scripts/Test-ContainerPause.ps1 verifies pause recovery and an unrelated-container negative control.
+

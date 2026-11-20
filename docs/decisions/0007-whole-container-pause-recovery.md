@@ -1,8 +1,8 @@
 # 0007: Whole-container pause recovery for the local lab
 
-- **Status:** proposed; user approval required before implementation
+- **Status:** proposed; user approved trusted-lab implementation on 2026-11-21; team acceptance pending
 - **Date:** 2026-11-20
-- **Decided by:** pending
+- **Decided by:** user (local lab scope)
 
 ## Context
 

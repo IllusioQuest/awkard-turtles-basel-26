@@ -118,3 +118,41 @@ Source for the host-network capability (checked 2026-11-20):
 Passive health semantics: [YARP health checks](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/yarp/dests-health-checks)
 and [YARP 2.3.0 policy source](https://github.com/dotnet/yarp/blob/v2.3.0/src/ReverseProxy/Health/TransportFailureRateHealthPolicy.cs).
 Behavior and measurements here come from the local scripts, not a vendor availability guarantee.
+
+## Whole-container pause milestone (2026-11-21)
+
+The user approved two trusted Linux monitors with access to the outer Docker socket (ADR 0007).
+Implementation: `webhosting/src/Webhosting.Gateway/ContainerPauseMonitor.cs`, activated only by
+`webhosting/deploy/monitors.compose.yaml`. This supersedes the earlier whole-container pause
+limitation above. Both monitors remain outside the gateway containers. No native Windows service
+is added. Each checks gateway identity, requires repeated failures, rechecks paused state and
+Compose labels, then stops the immutable container ID. Docker stop released the paused listener
+without a separate unpause operation in the initial feasibility experiment.
+
+From `webhosting`, after starting the existing network:
+
+```powershell
+docker compose -f deploy/ingress.compose.yaml build gateway-a
+./scripts/Test-ContainerPause.ps1
+```
+
+The script enables the monitors, pauses the active gateway with either monitor stopped and then
+with both running, checks the new gateway at the unchanged URL, and restores the lab. A paused
+Engine C is the negative control: it must remain paused throughout these faults. Result JSON is
+in ignored `TestResults/container-pause.json`. To stop the new managers explicitly:
+`docker compose -f deploy/monitors.compose.yaml stop`.
+
+These measurements start after the pause command, count failed HTTP probes and end at the first
+successful response from the other gateway. Default test timeout is 45 seconds; this is not an SLA.
+Monitor defaults: three failed probes, one-second interval, five-second HTTP/Engine timeout.
+The stop operation requests a two-second grace period. Sequential checks and Docker delays can
+extend recovery considerably. Measured run (seconds rounded by the test script):
+
+| Missing monitor | Paused gateway | Survivor | Seconds after pause command | Failed probes |
+|---|---|---|---:|---:|
+| monitor-a | gateway-b | gateway-a | 24.328 | 10 |
+| monitor-b | gateway-a | gateway-b | 30.823 | 14 |
+| none | gateway-b | gateway-a | 43.397 | 19 |
+
+All three scenarios passed; the unrelated paused container was untouched. Concurrent managers produced bounded request timeouts and retried safely in this run. Recovery was slow, with failed requests; this is not seamless availability. Adversarial stale-identity/recovery-race tests remain pending. The 17 existing core/contract tests pass; the Linux image builds. The socket grants broad host authority despite application allowlists. Controller/etcd orchestration, automatic placement repair, role co-location and host-loss resilience remain unfinished.
+
