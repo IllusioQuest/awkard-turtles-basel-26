@@ -1,6 +1,7 @@
 # Distributed webhosting prototype
 
-Status: Visual Studio solution scaffold created; distributed hosting not implemented.
+Status: Visual Studio solution, deployment DTOs/validation and pure replica placement implemented
+on `feature-webhosting`. Live distributed hosting and failure recovery are not implemented.
 C#, separate engines and a stable browser URL confirmed by the user.
 Ask the user before selecting libraries, project structure or DTO contracts. Once those choices
 are agreed, implementation, tests, documentation, commits and pushing are authorized.
@@ -174,6 +175,29 @@ failure tolerance. Stateful applications need a separate persistence and consist
   No behavioral tests exist yet; this check verifies the scaffold only.
 - Updated the plan after user feedback to require controller/gateway failure recovery, a
   small sample app, C#, independent node engines and failover at the same browser URL.
+- Code commit `753ea19` adds DTOs, validation and deterministic capacity-aware placement.
+  Release build with `-warnaserror` succeeds; all 17 xUnit cases pass. These are pure contract
+  and placement tests, not evidence of live gateway/controller recovery.
+- Docker Desktop is now running. Pulled the nested-engine image `docker:29-dind`, resolved as
+  `docker@sha256:4bbc7223f81db790097c6dea42fb93e05b8fead4f0431fbe6ccaba6e8473201c`.
+- The user requested an explanation of the proposed network adapter before approving it;
+  see [networking proposal](webhosting-networking.md). No adapter has been created.
+
+## Placement method (implemented, infrastructure only)
+
+Inputs are the complete desired workload set, each workload's replica/CPU/memory requirements,
+node health/capacity/eligibility, and existing assignments. Keep healthy existing assignments
+first. Fill gaps on eligible nodes with sufficient remaining CPU and memory, with one replica
+of a workload per node. Prefer fewer assigned replicas, breaking ties by ordinal node ID.
+For each assignment subtract its CPU/memory limits from the node's available budget. Report
+any unplaced replicas as shortfalls; do not silently colocate replicas or overcommit.
+
+Worked example from synthetic test fixtures: three nodes each have 2 CPU cores and 512 MiB;
+API and frontend each request two replicas, each using 1 core and 128 MiB. Losing one node
+leaves 2 x 2 = 4 cores, sufficient for four replicas (4 x 1 = 4 cores), with one API and one
+frontend per survivor (2 x 128 = 256 MiB per node). This is a test fixture, not measured server
+capacity or a heat/energy result. Rejecting new work does not evict running replicas; a future
+drain coordinator must make replacement capacity ready before stopping existing work.
 
 ## Technical references
 

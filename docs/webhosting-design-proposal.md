@@ -1,7 +1,8 @@
 # Webhosting design proposal for user approval
 
 Status: library, structure and contract approach approved by the user on 2026-11-20;
-solution scaffold created. Runtime behavior is not implemented. Team-wide acceptance is pending.
+solution plus pure placement/validation implemented. Live service behavior is not implemented.
+Team-wide acceptance is pending.
 Confirmed: C#, separate Docker engines, small app, resilient controllers/gateways, stable browser URL.
 
 ## Libraries and infrastructure
@@ -53,7 +54,8 @@ Use explicit request/response DTOs rather than serializing internal domain objec
 
 Proposed endpoints: idempotent `PUT /v1/deployments/{id}`, `GET /v1/deployments/{id}`,
 `GET /v1/nodes`, `POST /v1/nodes/{id}/drain`, `POST /v1/nodes/{id}/resume`.
-Reject path/body identity mismatch, invalid resources and overlapping component routes.
+Reject path/body identity mismatch, invalid resources and duplicate component routes. Nested
+prefixes such as `/` and `/api` are supported; the gateway must prefer the longest matching prefix.
 Images must already be available for the offline demo; use immutable image references in repeatable runs.
 Heartbeats use controller receipt time for liveness; sender timestamps are diagnostic only.
 Container ports and advertised endpoints are validated against the configured node network.
@@ -69,7 +71,7 @@ Heat scheduling uses the team's shared policy boundary; do not invent physical i
 
 ## Browser ingress: feasibility must come first
 
-Only the `docker-desktop` WSL distribution is currently installed, and Docker is stopped.
+Only the `docker-desktop` WSL distribution is currently installed; Docker Desktop is now running.
 Docker Desktop hides Linux container networks behind a VM; publishing one gateway's port does
 not make that port fail over. A single additional proxy would remain a single gateway failure point.
 
