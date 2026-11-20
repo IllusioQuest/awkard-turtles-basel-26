@@ -183,8 +183,18 @@ Decision numbers: take the next free number on your branch; if it collides with 
 - **Ask instead of deciding** when the choice belongs to the team: vision, stack, hardware, servers
   per house, business model, scope, anything a juror might ask about. Give a recommendation with
   reasons.
+- **Agree on the approach before building anything substantial** (a model, a calculation, a
+  visualisation, a new module, a published page): propose in a few lines what you will compute,
+  which assumptions and data you will use and what the result will look like, then wait for your
+  human's agreement. Small, clearly scoped tasks your human described precisely can go ahead.
+- **Every result with numbers comes with its calculation path:** a short written method (formulas,
+  inputs with sources, one worked example) that a human can check, and a plain explanation of how
+  to read each chart or figure.
+- **Say what is a prototype or exploration and what is verified.**
+- **Prefer several short check-ins over one large surprise.** When unsure whether to ask, ask.
 - Be economical with time and tokens: read what you need, do not re-read, use subagents for reviews
-  and broad searches.
+  and broad searches. A check-in is cheap compared to rework, so keep check-ins short, also close
+  to a deadline, but do not skip them.
 
 ## 11. Data
 
