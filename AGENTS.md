@@ -46,6 +46,8 @@ Reminder rules:
 | Path | What | Edit? |
 |---|---|---|
 | [`docs/case/challenge.md`](docs/case/challenge.md) | Full case text, verbatim. **Source of truth for scoring.** | never |
+| [`docs/case/DigitalHeat.pdf`](docs/case/DigitalHeat.pdf) | Case presentation slides, original file | never |
+| [`docs/case/DigitalHeat.md`](docs/case/DigitalHeat.md) | Text and figure descriptions of the slides, differences to `challenge.md` | keep as extracted |
 | [`docs/case/key-figures.md`](docs/case/key-figures.md) | Reference-house parameters, must-have checklist, pitch, jury weights | keep in sync |
 | [`docs/case/references.md`](docs/case/references.md) | External sources and where each lives in the repo | yes |
 | [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
