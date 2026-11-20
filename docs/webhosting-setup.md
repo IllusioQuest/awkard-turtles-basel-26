@@ -1,6 +1,8 @@
 # Webhosting prototype workspace
 
-Status: buildable solution scaffold. Distributed hosting and failure recovery are not implemented.
+Status: buildable solution with deployment contracts, validation and pure placement tests.
+Live distributed hosting and failure recovery are not implemented. Code is on `feature-webhosting`;
+documentation is published directly to `main` under `docs/` at the user's request.
 
 ## Open in Visual Studio on Windows
 
@@ -16,6 +18,7 @@ feature band. Run the commands below from the webhosting directory so that the S
 ```powershell
 dotnet restore Webhosting.sln
 dotnet build Webhosting.sln --configuration Release --no-restore
+dotnet test Webhosting.sln --configuration Release
 ```
 
 ## Projects
@@ -29,9 +32,10 @@ dotnet build Webhosting.sln --configuration Release --no-restore
 | Webhosting.Node | Node-local execution and heartbeats |
 | Webhosting.Gateway | YARP routing and health checks |
 
-The three libraries are intentionally empty; no placeholder business logic or tests are included.
-Project references are wired, but YARP, etcd integration and xUnit tests will be added with their
-implementations. Samples, container deployment files and failure scripts are the next milestone.
+Core contains deterministic placement; Contracts contains the agreed DTOs and input validation.
+Infrastructure is still empty. The xUnit project tests contracts, capacity limits, replica
+separation, deterministic reconciliation and placement after simulated node loss. It does not
+exercise real Docker nodes yet. Samples, YARP/etcd integration and failure scripts remain pending.
 
 ## Agreed environment and next steps
 
