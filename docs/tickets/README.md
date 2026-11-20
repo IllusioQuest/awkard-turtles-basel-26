@@ -20,7 +20,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-06](T-06-reference-house-results.md) | Reference-house key figures and assumptions for the draft | 1 Draft | T-05 | anyone | | open |
 | [T-07](T-07-draft-submission.md) | Draft submission package (due 2026-11-21 15:00) | 1 Draft | T-00, T-06 | one owner | | open |
 | [T-08](T-08-explorer-fixes.md) | Year explorer: fixes from the review | 2 Pitch | – | Claude (team lead's session) | | open |
-| [T-09](T-09-site-heat-state-forecast.md) | Per-site heat state and forecast | 2 Pitch | T-00 | Codex | | open |
+| [T-09](T-09-site-heat-state-forecast.md) | Per-site heat state and forecast | 2 Pitch | T-00 | Codex | Nikita / Codex | in progress (design) |
 | [T-10](T-10-multi-site-network.md) | Generic sites and network model | 2 Pitch | T-09 | Codex | | open |
 | [T-11](T-11-routing-optimisation-model.md) | Routing as an optimisation problem: formal model | 2 Pitch | T-09, T-10 | team + Claude (needs discussion) | | open |
 | [T-12](T-12-routing-algorithms.md) | Routing baselines and optimiser | 2 Pitch | T-11, T-05 | Codex | | open |

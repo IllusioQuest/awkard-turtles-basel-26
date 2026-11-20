@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Core / model
 - **Depends on:** T-00
-- **Suggested owner:** Codex  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex  ·  **Owner:** Nikita / Codex · **Status:** in progress (design; implementation awaits scope approval)
 
 ## Goal
 
