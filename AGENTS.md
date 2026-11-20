@@ -61,6 +61,7 @@ Reminder rules:
 | [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
 | [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) | Our interpretation of those notes, open questions | yes |
 | [`docs/vision.md`](docs/vision.md) | Our direction: actors, ownership models, building blocks, tiers, paper outline (draft) | yes, with the team |
+| [`docs/status.md`](docs/status.md) | Work map: who works on what, shared interfaces, integration risks | yes, keep your row current |
 | [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
 | [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
 | [`docs/questions.md`](docs/questions.md) | Open team questions (verbatim, German) and their answers | yes |
@@ -173,6 +174,25 @@ Decision numbers: take the next free number on your branch; if it collides with 
 - Before opening a PR, bring the branch up to date with `main` and resolve conflicts carefully.
   Never force-push to `main`, never rewrite other people's branches.
 - Stay inside your task's files; three people are working in parallel.
+
+### 9a. Integration between parallel work
+
+Three people work in parallel with several agents. Keep the pieces fitting together:
+
+- **Before starting a task,** read [`docs/status.md`](docs/status.md) and check for overlapping
+  work: open branches and PRs, and the last commits on `main` (`git fetch && git branch -r`,
+  `git log --oneline -15 origin/main`).
+- **Build on what exists instead of creating parallel versions:** the shared C# core and its
+  `IScheduler`/`IExecutor` interfaces (branch `feat/core-csharp`, decision 0004), the data in
+  `data/raw/` with its `SOURCE` files, the parameter file `config/reference-house.json`. Never
+  create a second implementation of the heat or economic model. If an interface does not fit,
+  propose a change (decision record) instead of working around it.
+- **Same numbers everywhere.** If two artefacts compute the same figure (e.g. the year explorer
+  prototype and the C# core), they must agree; add a cross-check when you touch either.
+- **Update your row in `docs/status.md`** when you start, when you change an interface, and when
+  you finish (branch, what, interfaces touched, status).
+- **When your work depends on or changes someone else's module,** say so in the PR and tell your
+  human.
 
 ## 10. Communication
 

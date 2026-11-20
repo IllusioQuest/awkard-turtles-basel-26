@@ -77,6 +77,9 @@ The three layers the case owner suggested, plus what we add:
    compute prices, climate change, hardware ageing).
 7. **Demonstrator.** A real job on a laptop, paused and resumed by the same scheduler code.
 
+**UI later (not for the draft):** a configurator for customers (hosts), an admin tool for
+DigitalHeat (tune parameters, see sites), and flow simulations and heat maps on a map.
+
 ## Paper outline (later)
 
 1. Problem: heat demand and computing load do not match in time (12.5 vs. 0.6 servers).
