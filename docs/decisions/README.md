@@ -16,4 +16,5 @@ later.
 | [0001](0001-data-storage.md) | Data storage layout (`data/raw`, `data/derived`, fetch script) | accepted |
 | [0002](0002-agent-guide.md) | Agent working guide (`AGENTS.md`), reviews, Git, deadlines | accepted |
 | [0003](0003-webhosting-prototype.md) | Resilient local webhosting prototype | proposed; user approved stack/structure, team confirmation pending |
-| [0004](0004-csharp-core.md) | Shared C# scheduler and executor boundary | proposed |
+| [0004](0004-redundant-windows-ingress.md) | Redundant Windows ingress experiment | proposed then withdrawn; all runtime services must use Linux containers |
+| [0005](0005-csharp-core.md) | Shared C# scheduler and executor boundary | accepted (PR #2 merged) |

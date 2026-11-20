@@ -1,6 +1,6 @@
-# 0004: Shared C# core for heat-led scheduling
+# 0005: Shared C# core for heat-led scheduling
 
-- **Status:** proposed
+- **Status:** accepted (merged via PR #2 at the team lead's request)
 - **Date:** 2026-11-20
 - **Decided by:** Codex; team confirmation pending
 

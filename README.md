@@ -6,7 +6,7 @@ interruptible computing jobs on distributed servers so that their heat arrives w
 need it, over a full year, with transparent and reproducible numbers.
 
 > Status: C# .NET 8 core proposed for the reference-house draft; see
-> [decision 0004](docs/decisions/0004-csharp-core.md). The team has not accepted
+> [decision 0005](docs/decisions/0005-csharp-core.md). The team has not accepted
 > the broader architecture yet.
 
 ## Start here

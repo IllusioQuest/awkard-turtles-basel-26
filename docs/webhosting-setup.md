@@ -41,6 +41,9 @@ exercise real Docker nodes yet. Samples, YARP/etcd integration and failure scrip
 
 - Develop in Windows / Visual Studio; use Docker Desktop for Linux node containers with separate
   inner Docker engines. Do not install a separate Ubuntu WSL development environment.
+- All infrastructure services, including ingress and gateways, must run in Linux containers.
+  Native Windows ingress was only a proposal and was never implemented. Windows runs the IDE,
+  build/test tools, browser and Docker Desktop, not the deployed application infrastructure.
 - First validate how an ordinary Windows browser can retain its URL while either gateway fails.
   Floating-IP reachability through Docker Desktop remains unproven. Do not interpret this
   scaffold as a working highly available network.
