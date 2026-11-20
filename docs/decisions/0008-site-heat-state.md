@@ -26,7 +26,7 @@ variant applies caller-supplied fractional errors per hour, clamps demand to zer
 synthetic, not a calibrated weather forecast. No random generator or extra library is needed.
 Reject nonfinite/negative demand, invalid tank state, duplicate/blank site identity at the collection
 boundary, invalid horizon and insufficient future data; never pad missing hours silently.
-Keep IScheduler unchanged; callers can pass state.Signal to the existing scheduler. Forecast use
+Keep IScheduler unchanged; add ISiteHeatScheduler.Decide(SiteHeatState) as the optional forecast-aware entry point. An adapter delegates to existing IScheduler using state.Signal for the greedy baseline. Forecast use
 in routing/optimisation belongs to later tickets. No scored annual calculation changes here.
 
 ## Alternatives
@@ -42,4 +42,4 @@ annual tests must remain unchanged and pass. Units remain kWh per hourly step, d
 
 ## Review
 
-Pending fresh-context review. Implementation requires user agreement on the scope while T-00 is open.
+Verdict: go with changes. Add the optional forecast-aware entry point while preserving IScheduler/IExecutor; specify provenance and indexing; validate hardware and arithmetic. Defer collection identity checks until a collection exists. Forecast metadata: kind, sourceSeriesId, sourceIndex, local hour label under the existing Europe/Zurich 24-values-per-day convention. Current and forecast demands are gross site demand, not net of tank discharge. Synthetic error formula: max(0, actualKwh * (1 + fractionalError)); errors must be finite and >= -1, lengths must match, outputs and derived capacities must remain finite. Hardware values must be finite and positive. Implementation awaits scope approval; T-00 remains open.
