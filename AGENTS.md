@@ -9,9 +9,11 @@ only when your task needs them.
 - **Event:** Basel GreenTech 2026 hackathon, case **DigitalHeat** ("Useful heat from computing").
   Team **Awkward Turtles**, 3 people, each working with their own agents in parallel.
 - **The case text and the deep-dive notes are the case owner's view, not our plan.** We are free in
-  what we build: in effect we design a business model for DigitalHeat and then simulate it. The
-  team's own vision will be added here later. Until then, do not derive a product direction from
-  the case owner's examples, and avoid choices that close off options.
+  what we build: in effect we design a business model for DigitalHeat and then simulate it.
+- **Our direction (draft, to be confirmed by the team):** [`docs/vision.md`](docs/vision.md). It
+  must pay off for the host (e.g. a homeowner) *and* for DigitalHeat; work is built in tiers, and
+  tier 1 (must-haves for the draft) comes before everything else. Do not derive further product
+  direction from the case owner's examples.
 - **Long-term direction:** a general simulation of *any* location with a network of computing and
   heat sites over time, solid enough that we might write a paper about it. This is why generality,
   reproducibility and decision records matter from the start.
@@ -58,6 +60,7 @@ Reminder rules:
 | [`docs/case/references.md`](docs/case/references.md) | External sources and where each lives in the repo | yes |
 | [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
 | [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) | Our interpretation of those notes, open questions | yes |
+| [`docs/vision.md`](docs/vision.md) | Our direction: actors, ownership models, building blocks, tiers, paper outline (draft) | yes, with the team |
 | [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
 | [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
 | [`docs/decisions/`](docs/decisions/README.md) | Decision records (ADRs) | new files |
@@ -195,7 +198,7 @@ Decision numbers: take the next free number on your branch; if it collides with 
 
 Fill in when decided (each with a decision record). Until then, do not assume an answer.
 
-- Our vision and product idea
+- Confirming the vision in `docs/vision.md` (currently a draft)
 - Tech stack (language, frameworks, dashboard)
 - Repository layout for code, notebooks and results
 - Central parameter/configuration format (replaces `docs/assumptions.md` later)
