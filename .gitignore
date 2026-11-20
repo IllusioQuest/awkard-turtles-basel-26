@@ -12,3 +12,11 @@ Thumbs.db
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# Large external datasets (see data/README.md)
+data/external/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

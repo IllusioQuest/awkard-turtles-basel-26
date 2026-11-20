@@ -12,11 +12,11 @@
 | Heating demand per hour | `max(0, 10 kW × (20 − T) ÷ 25.6)` on heating days only | T = `temperature_2m` in °C |
 | Heating day | local calendar day (00:00–23:00) with mean of the 24 hourly T below 12 °C | |
 | Constant 25.6 | fixed | 20 − (−5.6 °C coldest hour of 2025) |
-| Expected space heating | ≈ 27,000 kWh/year on 206 heating days | sanity check |
+| Expected space heating | ≈ 27,000 kWh/year on 206 heating days | sanity check; our computation: 26,851 kWh, 206 days |
 | Hot water | 12 kWh/day, all year | household of four, ≈ 50 l/person/day |
 | Heat storage | 1 tank, ≈ 35 kWh usable, no losses | 1,000 l, 30 K spread |
-| Electricity price | ElCom 2026, IWB Basel, H4, total CHF/kWh incl. fees, one flat price | value still to look up |
-| Value of used heat | electricity price ÷ 2.5 | replaces a heat pump with efficiency 2.5 |
+| Electricity price | ElCom 2026, IWB Basel, H4, total CHF/kWh incl. fees, one flat price | **0.3325 CHF/kWh** ([`data/raw/elcom/`](../../data/raw/elcom/SOURCE.md)) |
+| Value of used heat | electricity price ÷ 2.5 | replaces a heat pump with efficiency 2.5 → **0.133 CHF/kWh** |
 
 ## Server assumptions (DigitalHeat)
 
