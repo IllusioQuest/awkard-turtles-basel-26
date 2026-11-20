@@ -1,0 +1,319 @@
+<title>Basel Heat Year</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: control rail + instrument panel. Heat = ember, compute = cold steel, backup = slate. */
+:root {
+  --bg: #f6f4f1; --panel: #ffffff; --fg: #1d1a17; --muted: #6d655d; --line: #e4dfd8;
+  --ember: #e0531f; --ember-soft: #f6b48f; --steel: #2f6f8f; --slate: #a39a91; --dump: #c9b8f0;
+  --good: #2f7d4f; --bad: #b3261e;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15130f; --panel: #1f1c18; --fg: #f1ece6; --muted: #a8a097; --line: #34302a;
+  --ember: #ff6a33; --ember-soft: #8a3d1c; --steel: #6fb3d3; --slate: #6c645c; --dump: #7d68b8;
+  --good: #6cc48f; --bad: #ff7a70; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15130f; --panel: #1f1c18; --fg: #f1ece6; --muted: #a8a097; --line: #34302a;
+  --ember: #ff6a33; --ember-soft: #8a3d1c; --steel: #6fb3d3; --slate: #6c645c; --dump: #7d68b8;
+  --good: #6cc48f; --bad: #ff7a70; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 15px; line-height: 1.45 }
+.wrap { max-width: 1200px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between }
+h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 800; letter-spacing: -0.02em; margin: 0; text-wrap: balance }
+h1 em { font-style: normal; color: var(--ember) }
+.tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.lede { color: var(--muted); max-width: 68ch; margin: 6px 0 20px }
+.grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0 }
+.controls { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px) }
+@media (max-width: 860px) { .controls { position: static } }
+.ctl label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600 }
+.ctl output { font-family: var(--mono); font-weight: 600; color: var(--ember) }
+.ctl input[type=range] { width: 100%; accent-color: var(--ember) }
+.ctl small { color: var(--muted); font-size: 11.5px; display: block }
+.main { display: grid; gap: 20px; min-width: 0 }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.kpi { padding: 12px 14px; border-left: 3px solid var(--line) }
+.kpi b { display: block; font-family: var(--mono); font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em }
+.kpi span { font-size: 12px; color: var(--muted) }
+.kpi.heat { border-color: var(--ember) } .kpi.cold { border-color: var(--steel) } .kpi.dump { border-color: var(--dump) }
+.pos { color: var(--good) } .neg { color: var(--bad) }
+h2 { font-size: 15px; margin: 0 0 4px; font-weight: 700 }
+.sub { font-size: 12.5px; color: var(--muted); margin: 0 0 10px }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px }
+button.chip { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--bg); color: var(--fg);
+  border-radius: 999px; padding: 4px 11px; cursor: pointer }
+button.chip[aria-pressed=true] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+button.chip:focus-visible, input:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px }
+canvas#heat { width: 100%; height: 190px; display: block; cursor: crosshair; border-radius: 4px }
+.axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 4px }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px }
+@media (max-width: 1000px) { .two { grid-template-columns: 1fr } }
+svg text { fill: var(--muted); font-family: var(--mono); font-size: 10px }
+.note { font-size: 12px; color: var(--muted) }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px }
+td, th { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
+.tablewrap { overflow-x: auto }
+.verdict { font-size: 14px; padding: 12px 14px; border-radius: 8px; background: var(--bg) }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>One Basel house, <em>heated by computing</em>, 8,760 hours of 2025</h1>
+    <span class="tag">Exploration prototype · Awkward Turtles · not the final scheduler</span>
+  </header>
+  <p class="lede">The case's reference house in Basel, with real 2025 weather. Choose how many 1 kW servers sit in the basement and how they are run. Every hour is simulated in your browser: heat to the house, heat into the tank, heat dumped, and what it costs.</p>
+
+  <div class="grid">
+    <aside class="panel controls" aria-label="Parameters">
+      <div class="ctl"><label for="servers">Servers per house <output id="o-servers"></output></label>
+        <input type="range" id="servers" min="1" max="16" step="1" value="4"><small>1 kW electric each, 80 % of heat recovered (case)</small></div>
+      <div class="ctl"><label for="minload">Minimum load <output id="o-minload"></output></label>
+        <input type="range" id="minload" min="0" max="100" step="5" value="0"><small>0 % = run only for heat; 100 % = always on, dump the surplus</small></div>
+      <div class="ctl"><label for="tank">Heat storage <output id="o-tank"></output></label>
+        <input type="range" id="tank" min="0" max="200" step="5" value="35"><small>Case: 35 kWh usable, no losses</small></div>
+      <div class="ctl"><label for="price">Electricity price <output id="o-price"></output></label>
+        <input type="range" id="price" min="0.10" max="0.60" step="0.005" value="0.3325"><small>ElCom 2026, IWB Basel, H4: 0.3325 CHF/kWh</small></div>
+      <div class="ctl"><label for="compute">Computing price <output id="o-compute"></output></label>
+        <input type="range" id="compute" min="0" max="1.5" step="0.01" value="0.30"><small>Example input per server-hour sold; sourced prices are being researched. Assumes unlimited jobs.</small></div>
+      <div class="ctl"><label for="hw">Hardware cost <output id="o-hw"></output></label>
+        <input type="range" id="hw" min="0" max="2000" step="50" value="0"><small>Per server and year. Not in the case formula; 0 until our cost research is in.</small></div>
+    </aside>
+
+    <section class="main">
+      <div class="panel">
+        <div class="kpis" id="kpis"></div>
+        <p class="verdict" id="verdict"></p>
+      </div>
+
+      <div class="panel">
+        <h2>The year, hour by hour</h2>
+        <p class="sub">Each column is a day, each row an hour (00:00 at the top). Click a day to see it below.</p>
+        <div class="row" role="group" aria-label="Heatmap metric" id="metric"></div>
+        <canvas id="heat" aria-label="Heatmap of the year"></canvas>
+        <div class="axis"><span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span><span>Dec</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="row"><h2 style="margin:0 12px 0 0" id="dayTitle">Day</h2>
+          <button class="chip" id="d-cold">Coldest day</button><button class="chip" id="d-jan">15 January</button><button class="chip" id="d-jul">15 July</button></div>
+        <svg id="day" viewBox="0 0 720 230" width="100%" role="img" aria-label="Hourly heat balance of the selected day"></svg>
+        <div class="legend"><span><i style="background:var(--ember)"></i>server heat to house</span><span><i style="background:var(--slate)"></i>backup heater</span><span><i style="background:var(--dump)"></i>dumped</span><span><i style="background:var(--steel)"></i>tank level (right axis)</span></div>
+      </div>
+
+      <div class="two">
+        <div class="panel">
+          <h2>Sweet spot: how many servers?</h2>
+          <p class="sub">Same settings, 1 to 16 servers. The ring marks your choice.</p>
+          <svg id="sweep" viewBox="0 0 360 220" width="100%" role="img" aria-label="Coverage, utilisation and dump versus servers"></svg>
+          <div class="legend"><span><i style="background:var(--ember)"></i>heat demand covered</span><span><i style="background:var(--steel)"></i>utilisation</span><span><i style="background:var(--dump)"></i>share of server heat dumped</span></div>
+        </div>
+        <div class="panel">
+          <h2>System surplus per year</h2>
+          <p class="sub">Computing income + value of heat used − electricity − hardware. Below zero, nobody wins.</p>
+          <svg id="money" viewBox="0 0 360 220" width="100%" role="img" aria-label="System surplus versus servers"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Every assumption</h2>
+        <div class="tablewrap"><table id="assumptions"></table></div>
+        <p class="note">Simplifications of this prototype: hot water is spread evenly over 24 h (the case gives only 12 kWh/day); the scheduler only sees the current hour (no forecast); job demand is unlimited, so missed deadlines are not modelled yet; the tank starts empty on 1 January.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+// ---- Parameters (single place; units in names; source for each) ----
+const P = {
+  serverElectricKw:      { v: 1.0,  src: "Case: one rack server uses 1 kW" },
+  heatRecoveryShare:     { v: 0.8,  src: "Case: 80 % of heat recoverable into water" },
+  designHeatingKw:       { v: 10.0, src: "Case: heating formula, 10 kW × (20 − T) ÷ 25.6" },
+  baseTempC:             { v: 20.0, src: "Case: heating formula" },
+  formulaDivisorK:       { v: 25.6, src: "Case: 20 − (−5.6 °C coldest hour 2025)" },
+  heatingDayMeanBelowC:  { v: 12.0, src: "Case: heating day = daily mean below 12 °C" },
+  hotWaterKwhPerDay:     { v: 12.0, src: "Case: 12 kWh per day, all year" },
+  heatPumpCop:           { v: 2.5,  src: "Case: value of heat = electricity price ÷ 2.5" },
+  hoursPerDay:           { v: 24,   src: "Data: 24 hourly values per local day" },
+};
+const S = { servers: 4, minload: 0, tank: 35, price: 0.3325, compute: 0.30, hw: 0 };
+let D = null;           // hourly demand
+let selDay = 0, metric = "load", last = null;
+
+function prepareDemand(temps) {
+  const H = P.hoursPerDay.v, days = temps.length / H, space = new Float64Array(temps.length), hw = new Float64Array(temps.length);
+  let heatingDays = 0, coldest = 0, coldestMean = Infinity;
+  for (let d = 0; d < days; d++) {
+    let sum = 0; for (let h = 0; h < H; h++) sum += temps[d * H + h];
+    const mean = sum / H; if (mean < coldestMean) { coldestMean = mean; coldest = d; }
+    const heating = mean < P.heatingDayMeanBelowC.v; if (heating) heatingDays++;
+    for (let h = 0; h < H; h++) {
+      const i = d * H + h;
+      space[i] = heating ? Math.max(0, P.designHeatingKw.v * (P.baseTempC.v - temps[i]) / P.formulaDivisorK.v) : 0;
+      hw[i] = P.hotWaterKwhPerDay.v / H;
+    }
+  }
+  return { space, hw, days, heatingDays, coldest };
+}
+
+// Greedy heat-led rule with a minimum load: run what the house and the tank can take, never below the floor.
+function simulate(cfg, keep) {
+  const n = cfg.servers, kwHeat = P.serverElectricKw.v * P.heatRecoveryShare.v, cap = cfg.tank, floor = cfg.minload / 100 * n;
+  const N = D.space.length; let tank = 0, run = 0, demand = 0, backup = 0, dumped = 0, produced = 0;
+  const out = keep ? { load: new Float32Array(N), backup: new Float32Array(N), dump: new Float32Array(N), demand: new Float32Array(N), tank: new Float32Array(N), toHouse: new Float32Array(N) } : null;
+  for (let i = 0; i < N; i++) {
+    const d = D.space[i] + D.hw[i];
+    const want = (d + (cap - tank)) / kwHeat;
+    const r = Math.max(Math.min(n, want), floor);
+    const q = r * kwHeat; let bk = 0, dp = 0;
+    if (q >= d) { const add = Math.min(q - d, cap - tank); tank += add; dp = q - d - add; }
+    else { const draw = Math.min(tank, d - q); tank -= draw; bk = d - q - draw; }
+    run += r; demand += d; backup += bk; dumped += dp; produced += q;
+    if (keep) { out.load[i] = r / n; out.backup[i] = bk; out.dump[i] = dp; out.demand[i] = d; out.tank[i] = tank; out.toHouse[i] = d - bk; }
+  }
+  const used = demand - backup, elec = run * P.serverElectricKw.v * cfg.price, heatValue = used * cfg.price / P.heatPumpCop.v;
+  const income = run * cfg.compute, hwCost = cfg.hw * n;
+  return { n, run, demand, backup, dumped, produced, used, elec, heatValue, income, hwCost,
+    coverage: used / demand, util: run / (n * N), dumpShare: produced ? dumped / produced : 0,
+    breakEven: run ? (elec - heatValue) / run : 0, surplus: income + heatValue - elec - hwCost, hourly: out };
+}
+
+const fmt = (x, d = 0) => x.toLocaleString("en-CH", { minimumFractionDigits: d, maximumFractionDigits: d }).replace(/,/g, "'");
+const chf = x => (x < 0 ? "−" : "") + "CHF " + fmt(Math.abs(x));
+
+function render() {
+  for (const k of Object.keys(S)) {
+    const o = document.getElementById("o-" + k);
+    o.textContent = k === "servers" ? S[k] : k === "minload" ? S[k] + " %" : k === "tank" ? S[k] + " kWh"
+      : k === "price" ? S[k].toFixed(4) + " CHF/kWh" : k === "compute" ? S[k].toFixed(2) + " CHF/h" : fmt(S[k]) + " CHF";
+  }
+  last = simulate(S, true);
+  const r = last;
+  const kp = [
+    ["heat", fmt(r.coverage * 100, 1) + " %", "of heat demand covered (space heating + hot water)"],
+    ["dump", fmt(r.dumped) + " kWh", "server heat dumped per year"],
+    ["cold", fmt(r.util * 100, 1) + " %", "utilisation (server-hours ÷ servers × 8,760)"],
+    ["cold", fmt(r.run) + " h", "server-hours sold per year"],
+    ["", r.breakEven.toFixed(3) + " CHF/h", "break-even computing price (case formula)"],
+    ["", `<span class="${r.surplus >= 0 ? "pos" : "neg"}">${chf(r.surplus)}</span>`, "system surplus per year"],
+  ];
+  document.getElementById("kpis").innerHTML = kp.map(([c, v, l]) => `<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join("");
+  const pays = S.compute > r.breakEven;
+  document.getElementById("verdict").innerHTML =
+    `<b>${S.servers} server${S.servers > 1 ? "s" : ""}</b> cover <b>${fmt(r.coverage * 100)} %</b> of this house's ${fmt(r.demand)} kWh heat demand; the backup heater supplies ${fmt(r.backup)} kWh. ` +
+    (pays ? `At ${S.compute.toFixed(2)} CHF per server-hour, computing pays for the electricity not covered by the heat value (break-even ${r.breakEven.toFixed(3)} CHF/h).`
+          : `<span class="neg">At ${S.compute.toFixed(2)} CHF per server-hour this does not pay off:</span> computing must earn at least ${r.breakEven.toFixed(3)} CHF/h.`) +
+    (S.hw === 0 ? " Hardware costs are not included yet." : "");
+  drawHeat(); drawDay(); drawSweep();
+}
+
+const METRICS = { load: ["Server load", "--ember"], demand: ["Heat demand", "--ember"], backup: ["Backup heat", "--slate"], dump: ["Dumped heat", "--dump"] };
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function hexToRgb(h) { h = h.replace("#", ""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function drawHeat() {
+  const cv = document.getElementById("heat"), dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = w * dpr; cv.height = h * dpr; const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  const arr = last.hourly[metric], H = P.hoursPerDay.v, days = D.days; let max = 0;
+  for (const x of arr) if (x > max) max = x; if (metric === "load") max = 1;
+  const base = hexToRgb(css("--panel")), top = hexToRgb(css(METRICS[metric][1])), cw = w / days, ch = h / H;
+  for (let d = 0; d < days; d++) for (let k = 0; k < H; k++) {
+    const t = max ? Math.min(1, arr[d * H + k] / max) : 0, c = base.map((b, j) => Math.round(b + (top[j] - b) * Math.sqrt(t)));
+    ctx.fillStyle = `rgb(${c})`; ctx.fillRect(d * cw, k * ch, cw + 0.6, ch + 0.6);
+  }
+  ctx.strokeStyle = css("--fg"); ctx.lineWidth = 1.5; ctx.strokeRect(selDay * cw, 0.75, Math.max(cw, 2), h - 1.5);
+}
+
+function svgEl(svg, html) { svg.innerHTML = html; }
+function drawDay() {
+  const H = P.hoursPerDay.v, o = selDay * H, hr = last.hourly, W = 720, Ht = 230, L = 34, R = 40, T = 22, B = 24;
+  const date = new Date(Date.UTC(2025, 0, 1 + selDay));
+  document.getElementById("dayTitle").textContent = date.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" }) + " 2025";
+  let ymax = 1; for (let k = 0; k < H; k++) ymax = Math.max(ymax, hr.demand[o + k] + hr.dump[o + k]);
+  ymax = Math.ceil(ymax / 2) * 2; const bw = (W - L - R) / H, y = v => T + (Ht - T - B) * (1 - v / ymax);
+  const tmax = Math.max(S.tank, 1), yt = v => T + (Ht - T - B) * (1 - v / tmax);
+  let s = "";
+  for (let g = 0; g <= ymax; g += ymax / 4) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(g) + 3}" text-anchor="end">${fmt(g, 1)}</text>`;
+  s += `<text x="${L}" y="10">kW</text><text x="${W - R}" y="10" text-anchor="end">tank kWh</text>`;
+  for (let k = 0; k < H; k++) {
+    const x = L + k * bw + 1, w = bw - 2, th = hr.toHouse[o + k], bk = hr.backup[o + k], dp = hr.dump[o + k];
+    s += `<rect x="${x}" y="${y(th)}" width="${w}" height="${y(0) - y(th)}" fill="var(--ember)"/>`;
+    s += `<rect x="${x}" y="${y(th + bk)}" width="${w}" height="${y(th) - y(th + bk)}" fill="var(--slate)"/>`;
+    s += `<rect x="${x}" y="${y(th + bk + dp)}" width="${w}" height="${y(th + bk) - y(th + bk + dp)}" fill="var(--dump)"/>`;
+    if (k % 3 === 0) s += `<text x="${x + w / 2}" y="${Ht - 8}" text-anchor="middle">${String(k).padStart(2, "0")}h</text>`;
+  }
+  const pts = []; for (let k = 0; k < H; k++) pts.push(`${L + k * bw + bw / 2},${yt(hr.tank[o + k])}`);
+  s += `<polyline points="${pts.join(" ")}" fill="none" stroke="var(--steel)" stroke-width="2.5"/>`;
+  s += `<text x="${W - R + 6}" y="${yt(tmax) + 3}">${fmt(tmax)}</text><text x="${W - R + 6}" y="${yt(0) + 3}">0</text>`;
+  svgEl(document.getElementById("day"), s);
+}
+
+function drawSweep() {
+  const rows = []; for (let n = 1; n <= 16; n++) rows.push(simulate({ ...S, servers: n }, false));
+  const W = 360, Ht = 220, L = 34, R = 10, T = 16, B = 24, x = n => L + (W - L - R) * (n - 1) / 15, y = v => T + (Ht - T - B) * (1 - v);
+  let s = "";
+  for (let g = 0; g <= 1.001; g += 0.25) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(g) + 3}" text-anchor="end">${g * 100}%</text>`;
+  for (const n of [1, 4, 8, 12, 16]) s += `<text x="${x(n)}" y="${Ht - 8}" text-anchor="middle">${n}</text>`;
+  for (const [key, col] of [["coverage", "--ember"], ["util", "--steel"], ["dumpShare", "--dump"]]) {
+    s += `<polyline fill="none" stroke="var(${col})" stroke-width="2.5" points="${rows.map(r => `${x(r.n)},${y(r[key])}`).join(" ")}"/>`;
+    const cur = rows[S.servers - 1]; s += `<circle cx="${x(cur.n)}" cy="${y(cur[key])}" r="5" fill="var(--panel)" stroke="var(${col})" stroke-width="2.5"/>`;
+  }
+  svgEl(document.getElementById("sweep"), s);
+  // money
+  const vals = rows.map(r => r.surplus), mx = Math.max(1, ...vals.map(Math.abs)), ym = v => T + (Ht - T - B) * (0.5 - 0.5 * v / mx), bw = (W - L - R) / 16;
+  let m = `<line x1="${L}" x2="${W - R}" y1="${ym(0)}" y2="${ym(0)}" stroke="var(--muted)"/>`;
+  m += `<text x="${L - 6}" y="${ym(mx) + 3}" text-anchor="end">${fmt(mx / 1000, 1)}k</text><text x="${L - 6}" y="${ym(-mx) + 3}" text-anchor="end">−${fmt(mx / 1000, 1)}k</text><text x="${L - 6}" y="${ym(0) + 3}" text-anchor="end">0</text>`;
+  rows.forEach((r, i) => {
+    const xx = L + i * bw + 2, y0 = ym(0), y1 = ym(r.surplus), sel = r.n === S.servers;
+    m += `<rect x="${xx}" y="${Math.min(y0, y1)}" width="${bw - 4}" height="${Math.abs(y1 - y0)}" fill="var(${r.surplus >= 0 ? "--good" : "--bad"})" opacity="${sel ? 1 : 0.45}"/>`;
+    if ([1, 4, 8, 12, 16].includes(r.n)) m += `<text x="${xx + (bw - 4) / 2}" y="${Ht - 8}" text-anchor="middle">${r.n}</text>`;
+  });
+  svgEl(document.getElementById("money"), m + `<text x="${W - R}" y="${Ht - 8}" text-anchor="end">servers →</text><text x="${L}" y="${T - 2}">CHF per year</text>`);
+}
+
+function renderAssumptions() {
+  const rows = Object.entries(P).map(([k, o]) => `<tr><td>${k}</td><td>${o.v}</td><td>${o.src}</td></tr>`);
+  rows.push(`<tr><td>weather</td><td>${D.days} days</td><td>Open-Meteo archive, Basel 47.56 N 7.59 E, 2025, hourly temperature_2m (data/raw/open-meteo)</td></tr>`);
+  rows.push(`<tr><td>heatingDays</td><td>${D.heatingDays}</td><td>Computed with the case rule; case says 206</td></tr>`);
+  rows.push(`<tr><td>spaceHeatingKwhPerYear</td><td>${fmt(D.space.reduce((a, b) => a + b, 0))}</td><td>Computed; case says about 27,000</td></tr>`);
+  document.getElementById("assumptions").innerHTML = `<tr><th>Parameter</th><th>Value</th><th>Source</th></tr>` + rows.join("");
+}
+
+function setupMetric() {
+  const g = document.getElementById("metric");
+  g.innerHTML = Object.entries(METRICS).map(([k, [l]]) => `<button class="chip" data-m="${k}" aria-pressed="${k === metric}">${l}</button>`).join("");
+  g.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; metric = b.dataset.m;
+    g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); drawHeat(); });
+}
+
+async function start() {
+  const data = await (await fetch("explorer-data.json")).json();
+  D = prepareDemand(data.temperature_2m_c);
+  S.price = data.electricity_price_chf_per_kwh; document.getElementById("price").value = S.price;
+  selDay = D.coldest;
+  for (const k of Object.keys(S)) {
+    const el = document.getElementById(k); el.value = S[k];
+    el.addEventListener("input", () => { S[k] = parseFloat(el.value); render(); });
+  }
+  document.getElementById("heat").addEventListener("click", e => {
+    const r = e.currentTarget.getBoundingClientRect(); selDay = Math.min(D.days - 1, Math.floor((e.clientX - r.left) / r.width * D.days)); drawHeat(); drawDay();
+  });
+  document.getElementById("d-cold").onclick = () => { selDay = D.coldest; drawHeat(); drawDay(); };
+  document.getElementById("d-jan").onclick = () => { selDay = 14; drawHeat(); drawDay(); };
+  document.getElementById("d-jul").onclick = () => { selDay = 195; drawHeat(); drawDay(); };
+  window.addEventListener("resize", drawHeat);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", render);
+  setupMetric(); renderAssumptions(); render();
+}
+start();
+</script>
