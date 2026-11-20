@@ -180,8 +180,9 @@ failure tolerance. Stateful applications need a separate persistence and consist
   and placement tests, not evidence of live gateway/controller recovery.
 - Docker Desktop is now running. Pulled the nested-engine image `docker:29-dind`, resolved as
   `docker@sha256:4bbc7223f81db790097c6dea42fb93e05b8fead4f0431fbe6ccaba6e8473201c`.
-- The user requested an explanation of the proposed network adapter before approving it;
-  see [networking proposal](webhosting-networking.md). No adapter has been created.
+- The user rejected a single adapter: ingress must also survive failure. A reviewed two-process
+  Windows ingress experiment is proposed in [ADR 0004](decisions/0004-redundant-windows-ingress.md).
+  No adapter has been created; Windows-native ingress and the failure boundary await approval.
 
 ## Placement method (implemented, infrastructure only)
 

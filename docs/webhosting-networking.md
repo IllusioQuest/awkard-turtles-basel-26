@@ -1,6 +1,8 @@
 # Windows ingress adapter proposal
 
-Status: explanation requested by the user; not approved, implemented or verified.
+Status: the user rejected the single-adapter failure boundary. All service roles, including
+ingress adapters, must tolerate failure. The original design below is superseded as a proposal;
+it was never implemented. A revised experiment is proposed in ADR 0004.
 
 ## Purpose
 
@@ -37,7 +39,21 @@ Docker networks or workloads.
 
 ## Approval requested
 
-Does this test boundary match the user's intended prototype, or must ingress-adapter failure
-also be covered? Wait for the answer before creating the adapter. If approved, first run a small
-gateway-only experiment, measuring recovery and failed requests at one unchanged Windows URL.
-Do not claim the design works until that experiment passes.
+The user answered that adapter failure must also be covered. Do not implement this single-adapter
+design. The revised proposal must have redundant ingress and verify failure of the instance that
+first owns the stable address, not only a secondary worker. The shared laptop/OS failure boundary
+must be explicit; actual host-failure tolerance requires independent hosts.
+
+## Revised candidate after review
+
+Run two Windows-native C# / YARP ingress processes using Kestrel and the same explicit localhost
+address/port. Only one binds successfully; the other stays alive and retries. If the active process
+crashes, the standby attempts to bind that same endpoint. Both can route to either Docker gateway.
+No additional front proxy or singleton supervisor is introduced. This replaces the proposed static
+Docker adapter, and does not need Keepalived for the Windows-facing endpoint.
+
+This is a new design choice awaiting approval, not an implemented solution. Windows exclusive-port
+reuse timing must be measured. Test crashes of either ingress process and both startup orders,
+then restore redundancy and repeat. Killing a process can interrupt requests; an indefinitely
+hung listener still holding its socket needs additional recovery handling outside this candidate.
+See [ADR 0004](decisions/0004-redundant-windows-ingress.md) for the review and test criteria.
