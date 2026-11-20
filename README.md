@@ -49,8 +49,8 @@ case values fixed for scored comparisons.
 
 `DigitalHeat.Core` exposes `IScheduler.Decide(HeatSignal)`, `IExecutor` and
 `SchedulerController.Apply`. `DigitalHeat.YearRun` supplies the simulated executor;
-the real C# job adapter should call `SchedulerController.Apply` with the same
-scheduler and its own `IExecutor`. The output marks missed
+`DigitalHeat.JobRuntime` supplies a Docker executor behind that same interface.
+The output marks missed
 deadlines as `not modelled yet` and assumes immediately available computing work.
 Electricity, used-heat value and case break-even exclude hardware and operating
 costs, so the result is not a full-cost profitability claim.
@@ -66,4 +66,39 @@ server-hours sold. For one full-load 1 kW server-hour whose 0.8 kWh recoverable 
 is all used, electricity costs CHF 0.3325, heat is worth CHF 0.1064, and the case
 break-even is CHF 0.2261 per server-hour. These inputs come from the case and the
 ElCom snapshot, with exact source labels in the JSON file.
+
+## Live control of a containerized job
+
+`DigitalHeat.LiveRun` attaches to an **already running Linux container**. It does not
+start or implement a workload. Nikita's webhosting and Ennio's transcription work own
+their containers, descriptors and measurements; the descriptor format is
+[`config/jobs/job.schema.json`](config/jobs/job.schema.json). It records an ID,
+image or container command, supported controls, work unit, optional deadline,
+runtime and energy per unit (each number with unit and source), and an optional
+host-visible progress file. Missing measurements are `null` with a visible
+`TODO(source)` in the job's documentation. The job must be interruptible and support
+freeze; throttle is optional. Checkpoint is descriptive until its owner provides
+a protocol.
+
+From the repository root, after the owner has started a dedicated container that
+the replay may exclusively control:
+
+```bash
+dotnet run --project src/DigitalHeat.LiveRun -- --date 2025-01-15 --job config/jobs/<owner-job>.json --container <container-id> --cpu-cores <allowed-cpu-cores> --step-seconds <positive-seconds>
+dotnet run --project src/DigitalHeat.LiveRun -- --date 2025-07-15 --job config/jobs/<owner-job>.json --container <container-id> --cpu-cores <allowed-cpu-cores> --step-seconds <positive-seconds> --force-pause-step 12
+```
+
+Press `P` during a terminal replay to force one full-tank/zero-demand signal. The
+forced step option makes the pause repeatable without a keyboard. At the end,
+LiveRun sets the declared CPU allowance and unpauses the container; it does not
+restore an arbitrary prior container state. Use
+Docker Desktop with Linux containers on Windows/macOS, or Docker Engine on Linux.
+`DockerCliContainerControl` is the only class that calls Docker; Nikita's node
+runtime may reuse it or implement `IContainerControl` with its own Docker client.
+The replay uses the same `GreedyHeatScheduler` and `SchedulerController.Apply`
+as YearRun, but each hour uses an independent **reference simulated tank** snapshot,
+not a sensor reading. A forced pause does not modify later reference snapshots.
+`docker stats` CPU use divided by the allowed CPU cores is shown as observed
+CPU load; it does not establish electrical power or recovered heat. See
+[`docs/decisions/0006-generic-job-control.md`](docs/decisions/0006-generic-job-control.md).
 
