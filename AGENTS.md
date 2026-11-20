@@ -183,7 +183,7 @@ Three people work in parallel with several agents. Keep the pieces fitting toget
   work: open branches and PRs, and the last commits on `main` (`git fetch && git branch -r`,
   `git log --oneline -15 origin/main`).
 - **Build on what exists instead of creating parallel versions:** the shared C# core and its
-  `IScheduler`/`IExecutor` interfaces (branch `feat/core-csharp`, decision 0004), the data in
+  `IScheduler`/`IExecutor` interfaces (decision 0005, merged to main), the data in
   `data/raw/` with its `SOURCE` files, the parameter file `config/reference-house.json`. Never
   create a second implementation of the heat or economic model. If an interface does not fit,
   propose a change (decision record) instead of working around it.
