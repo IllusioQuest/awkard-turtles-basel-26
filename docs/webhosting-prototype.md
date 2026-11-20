@@ -35,6 +35,9 @@ Confirmed follow-up requirements:
   including libraries, structure and DTOs; do not require another routine commit/push approval.
 - The user approved the library/structure/contract proposal and selected Windows / Visual Studio
   with Docker Desktop as the working environment. A separate Ubuntu WSL lab is not selected.
+- Clarification: Windows is only the development/test host. Every runtime service, including
+  any ingress adapter, gateway, controller and node, must run in Linux containers. No native
+  Windows ingress or HTTP.sys runtime is approved.
 
 ## Proposed scope and open choices
 
@@ -180,9 +183,9 @@ failure tolerance. Stateful applications need a separate persistence and consist
   and placement tests, not evidence of live gateway/controller recovery.
 - Docker Desktop is now running. Pulled the nested-engine image `docker:29-dind`, resolved as
   `docker@sha256:4bbc7223f81db790097c6dea42fb93e05b8fead4f0431fbe6ccaba6e8473201c`.
-- The user rejected a single adapter: ingress must also survive failure. A reviewed two-process
-  Windows ingress experiment is proposed in [ADR 0004](decisions/0004-redundant-windows-ingress.md).
-  No adapter has been created; Windows-native ingress and the failure boundary await approval.
+- The user rejected a single adapter: ingress must also survive failure. The Windows-native
+  candidate in [ADR 0004](decisions/0004-redundant-windows-ingress.md) was then withdrawn after
+  the Linux-only runtime clarification. No adapter has been created. Linux ingress is unverified.
 
 ## Placement method (implemented, infrastructure only)
 
