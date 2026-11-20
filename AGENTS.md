@@ -182,6 +182,10 @@ Three people work in parallel with several agents. Keep the pieces fitting toget
 - **Before starting a task,** read [`docs/status.md`](docs/status.md) and check for overlapping
   work: open branches and PRs, and the last commits on `main` (`git fetch && git branch -r`,
   `git log --oneline -15 origin/main`).
+- **Check other agents' work during the task, not only at the start.** Re-read `docs/status.md`
+  and fetch recent branches/PRs at each substantial milestone, before changing a shared interface,
+  and before opening a PR. If another agent has changed a dependency, coordinate the handoff in
+  the shared status file or the relevant PR before continuing.
 - **Build on what exists instead of creating parallel versions:** the shared C# core and its
   `IScheduler`/`IExecutor` interfaces (decision 0005, merged to main), the data in
   `data/raw/` with its `SOURCE` files, the parameter file `config/reference-house.json`. Never
