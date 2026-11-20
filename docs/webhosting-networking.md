@@ -1,6 +1,8 @@
-# Windows ingress adapter proposal
+# Webhosting networking: current experiment and earlier proposals
 
-Status: the user rejected the single-adapter failure boundary AND clarified that all runtime
+Current implementation: two Linux host-network gateway containers preserve the browser URL after a gateway crash. The user approved enabling Docker Desktop host networking. See the [runtime guide](webhosting-runtime.md) and [ADR 0006](decisions/0006-linux-host-network-ingress.md) for verified results and limits. Entire-container pause recovery is not solved.
+
+Historical proposals below: the user rejected the single-adapter failure boundary AND clarified that all runtime
 services must run in Linux containers. Neither the static adapter nor the Windows-native ingress
 proposal was implemented. Designs below are retained as history, not implementation instructions.
 
@@ -12,10 +14,10 @@ proposal was implemented. Designs below are retained as history, not implementat
 
 Docker Desktop supplies the Linux VM/kernel for these containers. C#/.NET services target Linux
 container images; they do not need native Windows services, IIS or HTTP.sys. The SDK currently
-builds/tests code on Windows, but no distributed runtime has been launched and no native ingress
+builds/tests code on Windows. Linux gateways and nested-engine samples now run; no native ingress
 was implemented. The Windows laptop remains the shared physical test host.
 
-## Linux ingress candidate to investigate
+## Earlier Linux ingress investigation proposal (completed for crashes only)
 
 Docker Desktop supports opt-in host networking for Linux containers, at TCP/UDP layer 4.
 Investigate two Linux ingress containers with active/standby ownership of the same listening port

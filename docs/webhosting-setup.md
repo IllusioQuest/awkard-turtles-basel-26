@@ -1,55 +1,35 @@
 # Webhosting prototype workspace
 
-Status: buildable solution with deployment contracts, validation and pure placement tests.
-Live distributed hosting and failure recovery are not implemented. Code is on `feature-webhosting`;
-documentation is published directly to `main` under `docs/` at the user's request.
+Code is on `feature-webhosting`; documentation is published directly to `main` under `docs/`.
+The current milestone includes placement/contracts, Linux gateways, a sample application and three
+separate nested Docker engines. Controller/node orchestration and pause recovery remain pending.
 
 ## Open in Visual Studio on Windows
 
-1. Use Visual Studio with .NET 10 support and the **ASP.NET and web development** workload.
-2. Choose **Open a project or solution**, then select `webhosting/Webhosting.sln`.
-3. Build the solution. No Docker engine is required to build this initial scaffold.
-4. To run one starter service, select Controller, Node or Gateway as the startup project.
-   Its `/` endpoint currently returns the ASP.NET template's `Hello World!`, not a hosting API.
+1. Use Visual Studio with .NET 10 support and the ASP.NET and web development workload.
+2. Open `webhosting/Webhosting.sln`.
+3. Build the solution. Docker is not needed for the build or pure unit tests.
+4. Run the Linux infrastructure through the Docker commands in the [runtime guide](webhosting-runtime.md).
+   Selecting Controller or Node as a startup project still runs a template placeholder.
 
-The SDK is pinned in `global.json` to the installed `10.0.401`, allowing newer patches in that
-feature band. Run the commands below from the webhosting directory so that the SDK selection applies.
+The SDK is pinned in `webhosting/global.json` to 10.0.401 with patch roll-forward.
+From the `webhosting` directory:
 
 ```powershell
 dotnet restore Webhosting.sln
-dotnet build Webhosting.sln --configuration Release --no-restore
+dotnet build Webhosting.sln --configuration Release --no-restore -warnaserror
 dotnet test Webhosting.sln --configuration Release
 ```
 
-## Projects
+See the [code map](webhosting-code-map.md) for each project's implemented and planned responsibilities.
+See the [runtime guide](webhosting-runtime.md) for Docker startup, failure tests and measured limits.
 
-| Project | Intended responsibility |
-|---|---|
-| Webhosting.Core | Pure placement rules and domain models |
-| Webhosting.Contracts | Versioned HTTP DTOs, separate from domain models |
-| Webhosting.Infrastructure | Docker and etcd adapters |
-| Webhosting.Controller | Deployment API and reconciliation leadership |
-| Webhosting.Node | Node-local execution and heartbeats |
-| Webhosting.Gateway | YARP routing and health checks |
+Windows runs Visual Studio, build/test tools, browser and Docker Desktop. All deployed services are
+Linux containers. Host networking was enabled with the user's approval. No native Windows ingress,
+HTTP.sys service, additional Ubuntu WSL development environment or separate adapter is required.
+The laptop and outer Docker Desktop engine remain shared test infrastructure.
 
-Core contains deterministic placement; Contracts contains the agreed DTOs and input validation.
-Infrastructure is still empty. The xUnit project tests contracts, capacity limits, replica
-separation, deterministic reconciliation and placement after simulated node loss. It does not
-exercise real Docker nodes yet. Samples, YARP/etcd integration and failure scripts remain pending.
-
-## Agreed environment and next steps
-
-- Develop in Windows / Visual Studio; use Docker Desktop for Linux node containers with separate
-  inner Docker engines. Do not install a separate Ubuntu WSL development environment.
-- All infrastructure services, including ingress and gateways, must run in Linux containers.
-  Native Windows ingress was only a proposal and was never implemented. Windows runs the IDE,
-  build/test tools, browser and Docker Desktop, not the deployed application infrastructure.
-- First validate how an ordinary Windows browser can retain its URL while either gateway fails.
-  Floating-IP reachability through Docker Desktop remains unproven. Do not interpret this
-  scaffold as a working highly available network.
-- Then implement the reviewed design, tests and sample application. Ask the user before new
-  library, structure, DTO or ingress-design choices.
-
-See [design proposal](webhosting-design-proposal.md),
-[implementation plan](webhosting-prototype.md) and
-[ADR 0003](decisions/0003-webhosting-prototype.md).
+The [design proposal](webhosting-design-proposal.md), [implementation plan](webhosting-prototype.md)
+and [ADR 0003](decisions/0003-webhosting-prototype.md) describe the full target. The working crash
+experiment in [ADR 0006](decisions/0006-linux-host-network-ingress.md) is only one milestone toward it.
+Ask the user before new library, structure, DTO or ingress design choices.

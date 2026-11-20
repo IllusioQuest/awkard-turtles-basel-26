@@ -1,0 +1,17 @@
+{
+  "HoursPerDay": { "value": 24, "unit": "hours/day", "source": "docs/case/challenge.md: 24 hourly values per local day" },
+  "HoursPerStep": { "value": 1, "unit": "hours", "source": "docs/case/challenge.md: hourly time steps" },
+  "DesignHeatingKw": { "value": 10, "unit": "kW", "source": "docs/case/challenge.md: reference-house heating formula" },
+  "BaseTemperatureC": { "value": 20, "unit": "°C", "source": "docs/case/challenge.md: reference-house heating formula" },
+  "FormulaDivisorC": { "value": 25.6, "unit": "°C", "source": "docs/case/challenge.md: 20 minus 2025 coldest hourly temperature" },
+  "HeatingDayThresholdC": { "value": 12, "unit": "°C", "source": "docs/case/challenge.md: daily mean strictly below 12 °C" },
+  "HotWaterKwhPerDay": { "value": 12, "unit": "kWh/day", "source": "docs/case/challenge.md: four-person household hot water" },
+  "TankCapacityKwh": { "value": 35, "unit": "kWh", "source": "docs/case/challenge.md: approximate usable storage, no losses" },
+  "ServerElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference" },
+  "HeatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water" },
+  "HeatPumpEfficiency": { "value": 2.5, "unit": "kWh heat/kWh electricity", "source": "docs/case/challenge.md: heat-value divisor" },
+  "ServerCount": { "value": 4, "unit": "servers", "source": "prototypes/year-explorer/index.html: four-server comparison scenario, not a case requirement" },
+  "MinimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "prototypes/year-explorer/index.html: zero-minimum-load comparison scenario" },
+  "ElectricityPriceChfPerKwh": { "value": 0.3325, "unit": "CHF/kWh", "source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100" },
+  "ComputePriceChfPerServerHour": { "value": 0.30, "unit": "CHF/server-hour", "source": "prototypes/year-explorer/index.html: illustrative slider value only; TODO(source) for market-backed compute income" }
+}

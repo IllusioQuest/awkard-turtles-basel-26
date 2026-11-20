@@ -1,7 +1,8 @@
 # Distributed webhosting prototype
 
-Status: Visual Studio solution, deployment DTOs/validation and pure replica placement implemented
-on `feature-webhosting`. Live distributed hosting and failure recovery are not implemented.
+Status: solution, DTOs/validation, placement, Linux gateway crash recovery and nested-engine samples
+implemented on `feature-webhosting`. Controller/node orchestration, pause recovery and full role
+resilience remain pending. See [runtime guide](webhosting-runtime.md) and [code map](webhosting-code-map.md).
 C#, separate engines and a stable browser URL confirmed by the user.
 Ask the user before selecting libraries, project structure or DTO contracts. Once those choices
 are agreed, implementation, tests, documentation, commits and pushing are authorized.
@@ -164,7 +165,7 @@ failure tolerance. Stateful applications need a separate persistence and consist
 - Traffic, power, energy and income are not measured yet. Any later numerical model must use
   measurements or sourced inputs, with units and provenance; missing inputs are `TODO(source)`.
 
-## Work completed
+## Earlier implementation history (superseded by runtime guide)
 
 - Read the project instructions, case, research plan and current team vision/questions/tasks.
 - Fetched the latest `origin/main` and created the requested local `feature-webhosting` branch.
