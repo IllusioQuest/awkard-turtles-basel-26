@@ -9,7 +9,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 |---|---|---|---|---|
 | team | `main` | Case context; data (Open-Meteo Basel 2025, ElCom 2026 IWB H4, WP1 AI service and compute prices, WP2 costs and energy prices, WP3 sites and profiles incl. When2Heat extract); vision draft (`docs/vision.md`); research plan; AGENTS rules | `data/raw/` and its `SOURCE` files | merged |
 | Jona (IllusioQuest) / Codex | `feat/core-csharp` | .NET 8 `DigitalHeat.Core` (heat demand, tank, `IScheduler.Decide(HeatSignal)`, `IExecutor.ApplyTargetLoad`, `SchedulerController.Apply`, `GreedyHeatScheduler`, year simulation, economics), `DigitalHeat.YearRun`, xUnit tests, `config/reference-house.json`, decision 0005 (accepted) | defines `IScheduler`, `IExecutor`, `HeatSignal`, `config/reference-house.json` | merged to main (PR #2); only a `SimulatedExecutor` exists, no real job executor yet |
-| Nikita | `feature-webhosting` | Resilient local webhosting platform prototype (ASP.NET Core/YARP gateways, node-local Docker engines, etcd, replica placement), decision 0003 (proposed); Linux-only runtime, Windows dev host | none with the heat scheduler yet | open, not connected to the heat scheduler |
+| Nikita | `feature-webhosting` | Linux gateway crash experiment, three nested Docker engines, sample, placement/contracts; ADRs 0003 and 0006 proposed | no shared heat interface changed; future integration must use existing IExecutor | runnable networking milestone; controller/etcd/node orchestration, pause recovery and heat integration pending; see webhosting-runtime.md |
 | team lead / Claude | `exp/year-explorer-transparency` | Browser year explorer prototype for the reference house, `METHOD.md`, `verify.py` | own JavaScript model (must match the C# core) | prototype; review findings pending: example computing price drives the surplus headline, verdict ignores hardware, offline demo, heatmap legend |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
@@ -20,7 +20,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
   must both sit behind `IExecutor`.
 - `config/reference-house.json`: parameters of the reference house (`feat/core-csharp`).
 - `data/raw/` with its `SOURCE` files (on `main`).
-- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core).
+- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal).
 
 ## Known integration risks
 

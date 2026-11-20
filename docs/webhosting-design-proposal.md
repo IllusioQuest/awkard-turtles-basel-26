@@ -1,7 +1,7 @@
 # Webhosting design proposal for user approval
 
 Status: library, structure and contract approach approved by the user on 2026-11-20;
-solution plus pure placement/validation implemented. Live service behavior is not implemented.
+placement/validation, Linux gateway crash failover and nested-engine sample implemented. Controller/node orchestration remains pending. See [runtime status](webhosting-runtime.md).
 Team-wide acceptance is pending.
 Confirmed: C#, separate Docker engines, small app, resilient controllers/gateways, stable browser URL.
 Runtime clarification: every infrastructure service runs in Linux containers. Windows is only
@@ -71,7 +71,9 @@ command. These semantics and their achievable guarantees must be checked in impl
 a lease or fencing integer alone does not prove split-brain safety.
 Heat scheduling uses the team's shared policy boundary; do not invent physical inputs in these DTOs.
 
-## Browser ingress: feasibility must come first
+## Browser ingress: original feasibility plan
+
+Update: the user approved the Linux host-network experiment and enabling the setting. Same-URL gateway crash recovery now runs; pause recovery remains unresolved. See [ADR 0006](decisions/0006-linux-host-network-ingress.md). The following records the earlier investigation plan.
 
 Only the `docker-desktop` WSL distribution is currently installed; Docker Desktop is now running.
 Docker Desktop hides Linux container networks behind a VM; publishing one gateway's port does
