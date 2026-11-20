@@ -20,3 +20,6 @@ data/external/
 __pycache__/
 *.pyc
 .venv/
+
+# Agent worktrees (temporary)
+.claude/worktrees/
