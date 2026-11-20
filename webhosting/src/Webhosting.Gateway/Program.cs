@@ -4,6 +4,8 @@ using Yarp.ReverseProxy.Health;
 using Yarp.ReverseProxy.Transforms;
 
 var bootstrap = WebApplication.CreateBuilder(args);
+if (bootstrap.Configuration.GetValue<bool>("Monitor:Enabled"))
+    return await ContainerPauseMonitor.RunAsync(bootstrap.Configuration);
 if (!args.Contains("--gateway-worker") && bootstrap.Configuration.GetValue<bool>("Gateway:Watchdog:Enabled"))
     return await LocalGatewayWatchdog.RunAsync(bootstrap.Configuration);
 
