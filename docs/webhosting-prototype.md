@@ -7,6 +7,14 @@ are agreed, implementation, tests, documentation, commits and pushing are author
 Updated: 2026-11-20.
 Branch: `feature-webhosting`, created from `origin/main` at `90cea5d`.
 
+## Documentation workflow
+
+User instruction (2026-11-20): publish this task's Markdown documentation directly to `main`
+under `docs/`, while code stays on `feature-webhosting`. Use an isolated checkout to commit only
+the intended documentation, then integrate `main` back into the feature branch. Never publish
+unfinished code to `main` as part of a documentation update. Ask about new design choices;
+routine implementation, tests, commits and pushes are authorized after those choices are agreed.
+
 ## Objective
 
 Build a small, Flux-inspired hosting platform owned by this project. Docker represents a

@@ -11,7 +11,7 @@ Status: buildable solution scaffold. Distributed hosting and failure recovery ar
    Its `/` endpoint currently returns the ASP.NET template's `Hello World!`, not a hosting API.
 
 The SDK is pinned in `global.json` to the installed `10.0.401`, allowing newer patches in that
-feature band. Run the commands below from this directory so that the SDK selection applies.
+feature band. Run the commands below from the webhosting directory so that the SDK selection applies.
 
 ```powershell
 dotnet restore Webhosting.sln
@@ -43,6 +43,6 @@ implementations. Samples, container deployment files and failure scripts are the
 - Then implement the reviewed design, tests and sample application. Ask the user before new
   library, structure, DTO or ingress-design choices.
 
-See [design proposal](../docs/webhosting-design-proposal.md),
-[implementation plan](../docs/webhosting-prototype.md) and
-[ADR 0003](../docs/decisions/0003-webhosting-prototype.md).
+See [design proposal](webhosting-design-proposal.md),
+[implementation plan](webhosting-prototype.md) and
+[ADR 0003](decisions/0003-webhosting-prototype.md).
