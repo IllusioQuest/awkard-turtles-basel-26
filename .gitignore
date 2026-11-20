@@ -20,3 +20,8 @@ data/external/
 __pycache__/
 *.pyc
 .venv/
+
+# .NET and generated year results
+**/bin/
+**/obj/
+results/
