@@ -1,0 +1,42 @@
+# Configurable local demo values; not production sizing or case measurements.
+name: webhosting-ingress
+services:
+  gateway-a:
+    image: webhosting-gateway:local
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    network_mode: host
+    environment:
+      Gateway__InstanceId: gateway-a
+      Gateway__Watchdog__Enabled: "true"
+      DOTNET_SYSTEM_NET_DISABLEIPV6: "1"
+    restart: "no"
+  gateway-b:
+    image: webhosting-gateway:local
+    network_mode: host
+    environment:
+      Gateway__InstanceId: gateway-b
+      Gateway__Watchdog__Enabled: "true"
+      DOTNET_SYSTEM_NET_DISABLEIPV6: "1"
+    restart: "no"
+  sample-a:
+    image: webhosting-sample:local
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args:
+        PROJECT: samples/Webhosting.Sample/Webhosting.Sample.csproj
+        ENTRY_DLL: Webhosting.Sample.dll
+    network_mode: host
+    environment:
+      ASPNETCORE_URLS: http://127.0.0.1:18081
+      Sample__InstanceId: sample-a
+    restart: "no"
+  sample-b:
+    image: webhosting-sample:local
+    network_mode: host
+    environment:
+      ASPNETCORE_URLS: http://127.0.0.1:18082
+      Sample__InstanceId: sample-b
+    restart: "no"
