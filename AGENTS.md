@@ -19,7 +19,13 @@ only when your task needs them.
   for when it stops paying off), **marketing** (which priced services we can beat), **physical**
   (simulation of heat and servers). See [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) §7.
   Treat this as one option, not a requirement.
-- **Status:** concept phase. Stack, architecture and repository layout are not decided (§12).
+- **Status:** data collection for the financial and market layers, see
+  [`docs/research/README.md`](docs/research/README.md). Stack, architecture and repository layout
+  are not decided (§12).
+- **Available, not set up yet:** an **ElevenLabs** and a **Lovable** subscription (free for the
+  team). Do not set them up or use them without the team; mention them where they fit (e.g.
+  ElevenLabs as a transcription price point or for pitch audio, Lovable as a dashboard option in
+  the stack decision).
 
 ## 2. Deadlines
 
@@ -52,6 +58,7 @@ Reminder rules:
 | [`docs/case/references.md`](docs/case/references.md) | External sources and where each lives in the repo | yes |
 | [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
 | [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) | Our interpretation of those notes, open questions | yes |
+| [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
 | [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
 | [`docs/decisions/`](docs/decisions/README.md) | Decision records (ADRs) | new files |
 | [`docs/agents/review.md`](docs/agents/review.md) | How to run a fresh-context review | yes |

@@ -15,6 +15,8 @@ data/
 |---|---|---|---|
 | [`raw/open-meteo/`](raw/open-meteo/SOURCE.md) | Hourly weather Basel 2025: temperature + solar irradiance | `python3 scripts/fetch_data.py` (Open-Meteo archive API, no login) | yes (~300 KB) |
 | [`raw/elcom/`](raw/elcom/SOURCE.md) | Electricity price 2026, IWB Basel, category H4, incl. price components | `python3 scripts/fetch_data.py` (ElCom GraphQL API) | yes (snapshot) |
+| `raw/market/` | Researched prices (AI services, compute, costs, energy), one CSV per topic | collected by hand, schema in [`docs/research/README.md`](../docs/research/README.md) | yes |
+| `raw/sites/` | Researched site types and heat-demand profile values | collected by hand, see `docs/research/README.md` (WP3) | yes |
 | [`raw/official/`](raw/official/README.md) | Official hourly profile CSV provided by the organisers with the case | from the organisers (not public) | yes, once we have it |
 | `derived/` | Outputs of our scripts (profiles, results) | rerun the producing script | decided per file, see [`derived/README.md`](derived/README.md) |
 | Alibaba GPU trace 2020 | Job durations and resource requests (inspiration) | see "Large datasets" below | **no** (several GB) |
@@ -55,6 +57,13 @@ Open-Meteo rate-limits repeated requests (HTTP 429). If that happens, wait a min
 existing file is only overwritten after a successful download.
 
 ## Large datasets (not committed)
+
+Where big data lives: **at its original source.** Everyone downloads it with a documented command
+into the git-ignored `data/external/` and processes it locally; only small extracted results (with
+source and the command that produced them) are committed. Reasons: GitHub rejects files over
+100 MB and gets slow for repositories over ~1 GB, and Git LFS's free quota (1 GB) is too small to
+be worth the setup. If the team ever needs to share large intermediate files, use a shared drive or
+a Hugging Face dataset and document the link here.
 
 - **Alibaba GPU cluster trace 2020**: https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2020.
   The repository's README describes the tables and links to a download script for the data files
