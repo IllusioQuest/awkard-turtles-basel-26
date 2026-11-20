@@ -35,8 +35,6 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Next steps
 
-- Assign owners for must-have 1 (job types, laptop measurement) and must-have 2 (real-job executor
-  behind `IExecutor`).
-- Done: `feat/core-csharp` merged (PR #2); C# core reproduces the explorer numbers exactly (58.0 %, 22,661 server-hours, 0.2261 CHF/h).
-- Add a cross-check between the year explorer and the C# core for the default case above.
-- Decide how much webhosting work goes into the draft.
+All planned work is now in the ticket board: [`docs/tickets/README.md`](tickets/README.md)
+(24 tickets, created 2026-11-21 from the whiteboard session). Start with **T-00** (team decisions),
+then the tier-1 tickets T-01 to T-07 for the draft at 15:00.
