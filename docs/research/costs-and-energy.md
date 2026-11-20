@@ -19,6 +19,8 @@ are in [`SOURCE.md`](../../data/raw/market/SOURCE.md).
 We used official agencies, manufacturers, Swiss retailers and service providers.
 Published indicative ranges remain ranges, with separate endpoint rows; we have not
 estimated missing values. A blank currency means a physical or time observation.
+Retailer offer pages and cached excerpts differed during collection; the final
+opened-page recheck is used for the affected price rows.
 Power ratings, accounting lives and tariff eligibility are supporting observations,
 not additional costs. Prices are dated snapshots; no runtime fetching is required.
 
@@ -40,10 +42,10 @@ serve different purposes and cannot be substituted for one another.
 
 | Purchase observation | CHF | Power evidence | Row IDs |
 |---|---:|---|---|
-| Dell PowerEdge R570 CPU rack server | 8,335.43 | 1,100 W PSU capacity only | `cost-server-dell-r570`, `power-server-dell-r570-psu` |
-| PcCom complete RTX 4090 desktop | 9,757 | GPU TGP 450 W; system draw missing | `cost-gpu-pccom-rtx4090-system`, `power-gpu-nvidia-rtx4090-tgp` |
+| Dell PowerEdge R570 CPU rack server | 8,248.03 | 1,100 W PSU capacity only | `cost-server-dell-r570`, `power-server-dell-r570-psu` |
+| PcCom complete RTX 4090 desktop | 8,150 | GPU TGP 450 W; system draw missing | `cost-gpu-pccom-rtx4090-system`, `power-gpu-nvidia-rtx4090-tgp` |
 | brentford S240 GPU rack server, advertised starting price | 28,720 | 3,000 W redundant PSU rating only | `cost-server-brentford-s240-from`, `power-server-brentford-s240-psu` |
-| PNY RTX 6000 Ada card only | 7,538 | 300 W board specification | `cost-gpu-pny-rtx6000-ada`, `power-gpu-pny-rtx6000-ada` |
+| PNY RTX 6000 Ada card only | 8,005.13 | 300 W board specification | `cost-gpu-pny-rtx6000-ada`, `power-gpu-pny-rtx6000-ada` |
 
 These are CPU/GPU purchase anchors, not demonstrated equivalents of the case server.
 The desktop is a consumer alternative; the card excludes its host system. The
@@ -66,7 +68,7 @@ competitiveness. A GPU-only economic or physical lifetime remains `TODO(source)`
 
 | Component observation | CHF | Scope | Row ID |
 |---|---:|---|---|
-| WilTec plate heat exchanger | 44.99 | Component only | `cost-install-wiltec-exchanger` |
+| WilTec plate heat exchanger | 43.76 | Component only | `cost-install-wiltec-exchanger` |
 | Alphacool GPU water block | 420 | Component only | `cost-install-alphacool-gpu-block` |
 
 These components do not form a compatible or sized bill of materials. Complete
