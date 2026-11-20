@@ -63,6 +63,8 @@ Reminder rules:
 | [`docs/vision.md`](docs/vision.md) | Our direction: actors, ownership models, building blocks, tiers, paper outline (draft) | yes, with the team |
 | [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
 | [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
+| [`docs/questions.md`](docs/questions.md) | Open team questions (verbatim, German) and their answers | yes |
+| [`docs/todos.md`](docs/todos.md) | Team task list (verbatim, German) | yes |
 | [`docs/decisions/`](docs/decisions/README.md) | Decision records (ADRs) | new files |
 | [`docs/agents/review.md`](docs/agents/review.md) | How to run a fresh-context review | yes |
 | [`data/`](data/README.md) | Raw and derived data, how to fetch the originals | see rules there |
