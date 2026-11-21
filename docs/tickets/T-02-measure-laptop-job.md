@@ -1,13 +1,8 @@
 # T-02: Measure one real job on a laptop (must-have 1)
 
-> Integration note (T-24): new job descriptors need a sourced `placementPolicy` stating whether
-> processing may happen anywhere, only at the data-origin site, or in named countries. Coordinate
-> the exact field with the T-24 owner before merging a descriptor. The customer or contract,
-> not the job provider, sets the rule; record that authority in `source`.
-
 - **Tier:** 1 Draft  ·  **Area:** Jobs / measurement
 - **Depends on:** T-00
-- **Suggested owner:** anyone with a laptop  ·  **Owner:** Ennio / Claude  ·  **Status:** in progress (branch feat/T-02-transcription-job: container, measurement, scaling to 1 kW)
+- **Suggested owner:** anyone with a laptop  ·  **Owner:** Ennio / Claude  ·  **Status:** in review
 
 ## Goal
 
