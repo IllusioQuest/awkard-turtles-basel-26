@@ -18,6 +18,8 @@ printf "%s\n" "$result" > /home/ubuntu/cs16-install-exit.txt
 wineboot -k >/dev/null 2>&1
 '
 '@
+# Windows checkouts may make here-strings CRLF; sh treats CR as part of arguments/paths.
+$trial=$trial.Replace("`r",'')
 & docker --context desktop-linux exec -d --user ubuntu --env DISPLAY=:20 --env WINEDEBUG=err+all --env WINEPREFIX=/home/ubuntu/.wine-cs16 `
   --env "CS16_INSTALL_TIMEOUT_SECONDS=$($policy.installer_timeout_seconds)" --env "CS16_MAX_LOG_BYTES=$($policy.max_installer_log_bytes)" $ids[0] sh -c $trial
 if($LASTEXITCODE -ne 0){throw 'Installer trial could not be dispatched.'}
