@@ -125,3 +125,14 @@ hardware profiles in `config/hardware/` (see `docs/research/hardware.md`). Sever
 search-result snippets and are marked `low`; re-open the pages before quoting them. Throughput rows
 are third-party benchmarks with other models than our own measurement (`whisper.cpp base`, branch
 `feat/T-02-transcription-job`), so compare quality as well as speed.
+
+## T-37 profitability research (2026-11-21)
+
+Collected by Claude research subagents (ticket T-37) into `power-efficiency.csv` (`pe-*`),
+`purchase-cost.csv` (`pc-*`), `household-capacity.csv` (`hh-*`), `compute-demand.csv` (`cd-*`) and
+`trends-2030.csv` (`tr-*`), same schema as above; three LLM token prices were appended to
+`ai-services.csv` (`ai-llm-*`). Many rows are search snippets (confidence `low`, said in `notes`).
+Twelve key sources were opened afterwards; rows checked that way say "Verified by opening the page" in
+`notes`. Rows with `source_url` = `derived` are calculations whose formula is in `notes`.
+Basel building counts were recounted from the data.bs.ch API (dataset 100230). Summary:
+`docs/research/profitability-inputs.md`.
