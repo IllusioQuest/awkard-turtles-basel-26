@@ -22,6 +22,12 @@ The request is time-bounded: it computes real Monte Carlo tasks until the Fleet 
 
 Requires Docker and the locally available `digitalheat/research-sim:live-demo` image. This image is not downloaded automatically. The configured image, CPU limit, time scale and workload parameters are in `config/live-household-demo.json`. Results and the current live snapshot are written under git-ignored `data/external/live-household/`.
 
+Build the image once when it is not already present (the Python base image must be locally available for an offline build):
+
+```powershell
+docker build -t digitalheat/research-sim:live-demo jobs/research-sim
+```
+
 ```powershell
 dotnet run -c Release --project src/DigitalHeat.FleetApi
 ```
