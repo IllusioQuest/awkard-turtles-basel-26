@@ -77,7 +77,7 @@
   position: absolute;
   left: 16px;
   bottom: 16px;
-  width: 200px;
+  width: 240px;
   padding: 10px 12px;
   background: rgba(22, 22, 22, 0.9);
   border-radius: 8px;
@@ -96,6 +96,31 @@
   display: flex;
   justify-content: space-between;
   color: var(--muted);
+}
+
+/* Ticks at fixed positions on the fixed temperature scale. */
+.legend-ticks.fixed {
+  position: relative;
+  display: block;
+  height: 14px;
+  margin-bottom: 4px;
+}
+
+.legend-ticks.fixed span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.legend-ticks.fixed span:first-child {
+  transform: none;
+}
+
+.legend-ticks.fixed span:last-child {
+  transform: translateX(-100%);
+}
+
+.segmented.speed {
+  flex: none;
 }
 
 .maplibregl-ctrl-attrib {

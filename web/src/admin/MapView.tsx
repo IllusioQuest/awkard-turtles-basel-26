@@ -3,7 +3,7 @@ import { LngLatBounds, Map as MlMap, Marker, setWorkerUrl, type GeoJSONSource, t
 import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { useEffect, useRef } from 'react'
-import { WEATHER_BOUNDS, type WeatherField } from './weather'
+import { WEATHER_BOUNDS, temperatureRgb, type WeatherField } from './weather'
 
 // MapLibre loads its worker from a separate module; let Vite bundle it.
 setWorkerUrl(workerUrl)
@@ -83,13 +83,8 @@ function housesGeoJson(houses: MapHouse[], states: Map<string, MapState>): Featu
   }
 }
 
-// Relative diverging scale over the current temperature spread (5th percentile, median, 95th
-// percentile): colder than the median = blue, warmer = orange, the median is a dark neutral.
-const COLD = [57, 135, 229] // --series-1
-const WARM = [217, 89, 38] // --series-2
-const MIN_ALPHA = 0.05 // at the median temperature
-const MAX_ALPHA = 0.2 //
-const MID = [52, 52, 50] // dark neutral at the median, so the overlay never washes out white
+// Fixed full-colour temperature scale (weather.ts), constant opacity so the map stays readable.
+const ALPHA = 0.32
 const EDGE_FADE = 0.12 // share of width/height over which the overlay fades out at its edges
 
 const smoothstep = (x: number) => {
@@ -107,20 +102,15 @@ function drawWeather(field: WeatherField | null) {
   if (canvas.height !== field.rows) canvas.height = field.rows
   const ctx = canvas.getContext('2d')!
   const img = ctx.createImageData(field.cols, field.rows)
-  const mid = field.medianC
-  const coldSpan = Math.max(0.5, mid - field.lowC)
-  const warmSpan = Math.max(0.5, field.highC - mid)
   field.temperatureC.forEach((temp, i) => {
     const x = (i % field.cols) / (field.cols - 1)
     const y = Math.floor(i / field.cols) / (field.rows - 1)
     const edge = smoothstep(Math.min(x, 1 - x) / EDGE_FADE) * smoothstep(Math.min(y, 1 - y) / EDGE_FADE)
-    const d = Math.max(-1, Math.min(1, (temp - mid) / (temp < mid ? coldSpan : warmSpan)))
-    const end = d < 0 ? COLD : WARM
-    const k = Math.abs(d) ** 0.7
-    img.data[i * 4] = MID[0] + (end[0] - MID[0]) * k
-    img.data[i * 4 + 1] = MID[1] + (end[1] - MID[1]) * k
-    img.data[i * 4 + 2] = MID[2] + (end[2] - MID[2]) * k
-    img.data[i * 4 + 3] = Math.round(255 * (MIN_ALPHA + (MAX_ALPHA - MIN_ALPHA) * Math.sqrt(Math.abs(d))) * edge)
+    const [r, g, b] = temperatureRgb(temp)
+    img.data[i * 4] = r
+    img.data[i * 4 + 1] = g
+    img.data[i * 4 + 2] = b
+    img.data[i * 4 + 3] = Math.round(255 * ALPHA * edge)
   })
   ctx.putImageData(img, 0, 0)
 }

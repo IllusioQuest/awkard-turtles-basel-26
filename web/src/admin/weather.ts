@@ -10,6 +10,45 @@ const IDW_POWER = 2
 const MIN_DIST_DEG = 1e-4 // avoids a division by zero when a cell centre sits on a point
 const LON_SCALE = Math.cos((46.8 * Math.PI) / 180) // degrees of longitude are shorter than degrees of latitude
 
+/**
+ * Fixed temperature colour scale for the map overlay and its legend. The ends do not move with the
+ * data: 2025 grid temperatures span −32 to +37.5 °C (data/raw/swiss-grid/weather-2025-hourly.csv.gz),
+ * only 0.7 % of point-hours lie below −15 °C, so values outside [−20, 35] °C are clamped to the ends.
+ */
+export const TEMP_SCALE_MIN_C = -20
+export const TEMP_SCALE_MAX_C = 35
+export const TEMP_STOPS: { c: number; rgb: [number, number, number] }[] = [
+  { c: -20, rgb: [59, 47, 158] }, // indigo
+  { c: -10, rgb: [44, 123, 214] }, // blue
+  { c: 0, rgb: [43, 183, 201] }, // cyan
+  { c: 8, rgb: [76, 191, 107] }, // green
+  { c: 16, rgb: [227, 211, 74] }, // yellow
+  { c: 25, rgb: [240, 138, 44] }, // orange
+  { c: 35, rgb: [214, 51, 42] }, // red
+]
+export const TEMP_LEGEND_TICKS_C = [-20, -10, 0, 10, 20, 35]
+
+/** Colour of a temperature on the fixed scale (linear between stops, clamped at the ends). */
+export function temperatureRgb(tempC: number): [number, number, number] {
+  const t = Math.max(TEMP_SCALE_MIN_C, Math.min(TEMP_SCALE_MAX_C, tempC))
+  for (let i = 1; i < TEMP_STOPS.length; i++) {
+    const a = TEMP_STOPS[i - 1]
+    const b = TEMP_STOPS[i]
+    if (t <= b.c) {
+      const f = (t - a.c) / (b.c - a.c)
+      return [a.rgb[0] + (b.rgb[0] - a.rgb[0]) * f, a.rgb[1] + (b.rgb[1] - a.rgb[1]) * f, a.rgb[2] + (b.rgb[2] - a.rgb[2]) * f]
+    }
+  }
+  return TEMP_STOPS[TEMP_STOPS.length - 1].rgb
+}
+
+/** CSS gradient of the same scale, for the legend bar. */
+export function temperatureGradientCss(): string {
+  const span = TEMP_SCALE_MAX_C - TEMP_SCALE_MIN_C
+  const stops = TEMP_STOPS.map((s) => `rgb(${s.rgb.join(',')}) ${((s.c - TEMP_SCALE_MIN_C) / span) * 100}%`)
+  return `linear-gradient(90deg, ${stops.join(', ')})`
+}
+
 export interface WeatherField {
   cols: number
   rows: number

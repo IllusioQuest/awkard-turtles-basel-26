@@ -7,11 +7,23 @@ import MockBanner from './MockBanner'
 import SitePanel from './SitePanel'
 import { EconomicsChart, HeatChart, LoadChart, MissedChart, type MissedPoint, type MonthlyPoint, type SeriesPoint } from './charts'
 import { DAY_MS, HOURS_PER_DAY, alignHour, chf, dateTime, dayTick, dec1, lastHour, monthTick, num, pct, wallMs } from './format'
-import { makeInterpolator, type WeatherField, type WeatherInterpolator } from './weather'
+import {
+  TEMP_LEGEND_TICKS_C,
+  TEMP_SCALE_MAX_C,
+  TEMP_SCALE_MIN_C,
+  makeInterpolator,
+  temperatureGradientCss,
+  type WeatherField,
+  type WeatherInterpolator,
+} from './weather'
 import './admin.css'
 
 const CHART_WINDOW_DAYS = 3
-const PLAY_STEP_MS = 120 // one period (hour or day) per tick
+// Playback speeds in simulated periods (hours, or days for daily runs) per second. The view redraws
+// at most MAX_FPS times per second; faster speeds advance several periods per frame and skip the
+// ones in between, so the browser never queues more work than it can draw.
+const PLAY_SPEEDS = [1, 4, 12, 48, 168] as const
+const MAX_FPS = 10
 
 const RANGES = [
   { id: '24h', label: '24 h', hours: 24 },
@@ -68,19 +80,31 @@ function RunView({ source, run, runs, houses, network }: Props) {
   })
   const [playing, setPlaying] = useState(false)
 
+  const [speed, setSpeed] = useState<number>(PLAY_SPEEDS[1])
   useEffect(() => {
     if (!playing) return
+    // Advance by elapsed wall time, not by tick count: when drawing is slow, ticks come late and
+    // more periods are skipped, so the playback speed stays what the user picked.
+    const intervalMs = Math.max(1000 / MAX_FPS, 1000 / speed)
+    let last = performance.now()
+    let carry = 0 // fraction of a period not yet shown
     const timer = setInterval(() => {
+      const now = performance.now()
+      carry += (speed * (now - last)) / 1000
+      last = now
+      const periods = Math.floor(carry)
+      if (periods < 1) return
+      carry -= periods
       setT((prev) => {
-        if (prev + step > maxT) {
+        if (prev >= maxT) {
           setPlaying(false)
           return prev
         }
-        return prev + step
+        return Math.min(maxT, prev + periods * step)
       })
-    }, PLAY_STEP_MS)
+    }, intervalMs)
     return () => clearInterval(timer)
-  }, [playing, step, maxT])
+  }, [playing, step, maxT, speed])
 
   const togglePlay = () => {
     if (!playing && t >= maxT) setT(0)
@@ -239,12 +263,15 @@ function RunView({ source, run, runs, houses, network }: Props) {
         {weather && showWeather && (
           <div className="map-legend">
             <span>Temperature</span>
-            <div className="legend-bar" />
-            <div className="legend-ticks">
-              <span>{dec1.format(weather.lowC)} °C</span>
-              <span>{dec1.format(weather.medianC)} °C</span>
-              <span>{dec1.format(weather.highC)} °C</span>
+            <div className="legend-bar" style={{ background: temperatureGradientCss() }} />
+            <div className="legend-ticks fixed">
+              {TEMP_LEGEND_TICKS_C.map((c) => (
+                <span key={c} style={{ left: `${((c - TEMP_SCALE_MIN_C) / (TEMP_SCALE_MAX_C - TEMP_SCALE_MIN_C)) * 100}%` }}>
+                  {c}
+                </span>
+              ))}
             </div>
+            <span className="note">°C, fixed scale; colder or warmer values show the end colours</span>
           </div>
         )}
 
@@ -280,6 +307,13 @@ function RunView({ source, run, runs, houses, network }: Props) {
               </svg>
             )}
           </button>
+          <div className="segmented compact speed" role="radiogroup" aria-label="Playback speed">
+            {PLAY_SPEEDS.map((v) => (
+              <button key={v} type="button" role="radio" aria-checked={speed === v} className={speed === v ? 'active' : ''} onClick={() => setSpeed(v)}>
+                {v} {step === HOURS_PER_DAY ? 'd' : 'h'}/s
+              </button>
+            ))}
+          </div>
           <div className="timeline-track">
             <input
               type="range"
