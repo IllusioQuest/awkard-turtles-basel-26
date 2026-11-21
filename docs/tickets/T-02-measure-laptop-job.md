@@ -24,7 +24,7 @@ Get a measured runtime and energy per work unit for one real job, scaled to the 
 ## Read first
 
 - `docs/case/challenge.md (must-have 1)`
-- `docs/research/service-brainstorm.md`
+- `docs/research/ideas.md`
 
 ## Rules
 

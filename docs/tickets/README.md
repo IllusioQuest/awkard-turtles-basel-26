@@ -30,8 +30,6 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | | open |
 | [T-17](T-17-admin-dashboard.md) | Admin dashboard (DigitalHeat) | 3 Pitch stretch | T-13, T-00 (UI stack) | anyone (Lovable possible) | Ennio / Claude | in progress (`web/`, /admin, mock data first) |
 | [T-18](T-18-owner-dashboard.md) | Server-owner dashboard (host, private) | 3 Pitch stretch | T-13 | anyone | Ennio / Claude | in progress (`web/`, /household, mock data first) |
-| [T-19](T-19-customer-configurator.md) | Customer configurator and cost-benefit analysis (public) | 3 Pitch stretch | T-10, T-14 | anyone | | open |
-| [T-20](T-20-marketing-website.md) | Marketing website | 4 Later | T-19 | open | | open |
 | [T-21](T-21-pitch.md) | Pitch storyboard, demo script and slides | 2 Pitch | T-00 | team lead + Claude | Team lead / Claude | in progress (storyboard direction agreed: docs/pitch/storyboard.md) |
 | [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | Jona / Claude | in progress (skeleton on main) |
 | [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | retired by user request (T-40) |
@@ -40,11 +38,13 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
 | [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | done (PR #11 merged; 0.66 pinned, 0.687 live cross-check) |
 | [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | Jona / Claude | done (measured, LiveRun-tested) |
-| [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
+| [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decisions 0018, 0020 | Jona / Codex | Jona / Codex | in review (draft PR #25; technical scenario only) |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | done (merged 2026-11-21; Type 1 under decision 0020) |
 | [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | done (PR #20) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | done (PR #26 merged) |
+| [T-42](T-42-free-heat-viability.md) | Free-heat viability from paid demand and realised revenue | 2 Pitch | T-14, T-31, T-35, T-37 | Codex | Jona / Codex | in review |
+
 | [T-41](T-41-client-calculator-web.md) | Web dashboard v1: client heating cost and break-even calculator (shared dark styling) | 2 Pitch | decision 0020 | Ennio | Ennio / Claude | dropped (calculator removed on request; styling kept for T-17/T-18) |
 
 ## Dependency sketch
@@ -53,7 +53,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
       ├─ T-02 ─ T-03 ─ T-04 (live demo)        T-03 ─ T-23
       ├─ T-09 ─ T-10 ─ T-11 ─ T-12 (routing)   T-05 ─ T-13 ─ T-17/T-18
-      ├─ T-15 ─ T-14 ─ T-16, T-19               T-11 + T-13 ─ T-22
+      ├─ T-15 ─ T-14 ─ T-16                     T-11 + T-13 ─ T-22
       └─ T-21 (pitch)
 ```
 
@@ -73,3 +73,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | done: verified Xonotic prototype (PR #22); CS2 deferred |
 
 | [T-40](T-40-gaming-profiles.md) | Reusable gaming profiles and retire webhosting | Nikita / Codex | done (PR #22) |
+
+| [T-42](T-42-gaming-monitor-review.md) | Review and clarify gaming heat monitor | Nikita / Codex | in review (PR #32) |

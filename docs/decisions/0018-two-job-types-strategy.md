@@ -16,7 +16,7 @@ Measured on a laptop (T-02, T-33):
 | Apertus 8B summary | 0.0614 Wh per audio min summarised (0.254 kWh per 1M tokens) | ≈ 3.9 M tokens |
 
 The sourced Basel transcription demand covers about 0.1 % of the reference house's heat demand
-(`docs/research/job-demand.md`). Premium AI work alone cannot make the heat; a filler is needed
+(`docs/research/demand.md`). Premium AI work alone cannot make the heat; a filler is needed
 (T-34, "filler as spot capacity").
 
 ## Decision
@@ -37,7 +37,7 @@ The sourced Basel transcription demand covers about 0.1 % of the reference house
 - **Fill as much as possible, no unpaid work.** Hours that no customer buys are not run; the backup
   heater covers them. Running unpaid would cost CHF 0.33 of electricity per kWh of heat worth
   CHF 0.11. The scored figures assume all offered hours are sold (the case allows "unlimited
-  jobs"). The sourced marketplace fill rate of 0.35 (range 0.2–0.6, `docs/research/filler-demand.md`)
+  jobs"). The sourced marketplace fill rate of 0.35 (range 0.2–0.6, `docs/research/demand.md`)
   is shown as a sensitivity.
 - MVP scope: privacy and isolation between Type 1 and Type 2 are left for later. Webhosting will
   probably be dropped from the business model (Ennio's view; Nikita to confirm).

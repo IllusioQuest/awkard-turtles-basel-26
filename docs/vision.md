@@ -92,8 +92,8 @@ The three layers the case owner suggested, plus what we add:
    compute prices, climate change, hardware ageing).
 7. **Demonstrator.** A real job on a laptop, paused and resumed by the same scheduler code.
 
-**UI later (not for the draft):** a configurator for customers (hosts), an admin tool for
-DigitalHeat (tune parameters, see sites), and flow simulations and heat maps on a map.
+**UI later (not for the draft):** an admin tool for DigitalHeat (tune parameters, see sites),
+and flow simulations and heat maps on a map.
 
 ## Paper outline (later)
 
@@ -144,7 +144,7 @@ The job model of business model v2 (T-34); makes the "filler load" below concret
   broker for simulations and research computing (Monte Carlo, parameter sweeps, Python/C++ batch).
   Heat-led price between electricity cost (0.226 / 0.3325) and Swiss spot (1.80); scored figures
   keep 0.66. Fill as much as possible, no unpaid work; unsold hours go to the backup heater.
-  Scored figures assume all hours sold; fill rate 0.35 (`research/filler-demand.md`) as sensitivity.
+  Scored figures assume all hours sold; fill rate 0.35 (`research/demand.md`) as sensitivity.
 
 ## Under consideration: filler load sold as spot capacity (2026-11-21)
 
@@ -153,7 +153,7 @@ The job model of business model v2 (T-34); makes the "filler load" below concret
 Real demand for our premium service (confidential transcription) fills only a tiny share of a
 house's server capacity: about 436 audio hours per 1 kW server-hour (T-02) against 428 dictation
 jobs/day from all doctors in Basel-Stadt, which gives 0.1 % heat coverage instead of 58 %
-(`research/job-demand.md`). We are therefore considering a **two-tier load model**:
+(`research/demand.md`). We are therefore considering a **two-tier load model**:
 
 - **Premium load:** sensitive batch jobs with deadlines (transcription, document AI), priced per
   work unit, high margin, served first.
@@ -170,7 +170,7 @@ unlimited filler (T-05 extension); team confirmation with Ennio (T-26).
 
 - What a host pays or receives in each ownership model (heat fee? free heat? commission?).
 - Which 4–6 services go into the first matrix.
-- Stack and architecture (still open, see `AGENTS.md` §12).
+- Stack and architecture: decided, see `AGENTS.md` §12.
 - What the draft submission (2026-11-21 15:00) must contain (tier 1 assumes: the must-haves).
 
 ## Review

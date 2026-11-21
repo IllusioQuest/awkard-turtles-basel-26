@@ -1,6 +1,6 @@
 # 0004: Investigate redundant Windows ingress
 
-- **Status:** proposed
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed
 - **Date:** 2026-11-20
 - **Decided by:** user requires adapter resilience; implementation choice awaits approval
 

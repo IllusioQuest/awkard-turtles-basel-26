@@ -1,7 +1,9 @@
 # Finite job supply in the year simulation (T-05)
 
-Status: implemented input boundary; no sourced finite demand scenario is committed yet. The
-reference-house run remains an explicitly unlimited-work comparison, as allowed by the case.
+Status: finite input boundary implemented; the sourced Basel transcription scenario is now
+committed as a technical fixture. T-31 adds a separate mixed-mode extension documented in
+[`mixed-job-queue.md`](mixed-job-queue.md). The reference-house comparison remains an explicitly
+unlimited-work run, as allowed by the case.
 
 ## Input and handoff to T-01
 
@@ -55,9 +57,10 @@ reference-house figures.
 ```bash
 dotnet test src/DigitalHeat.sln
 dotnet run --project src/DigitalHeat.YearRun -- .
-dotnet run --project src/DigitalHeat.YearRun -- . <path-to-sourced-finite-scenario.json>
+dotnet run --project src/DigitalHeat.YearRun -- . config/job-scenarios/transcription-basel.json
 ```
 
 The default unlimited run must retain 58.0% coverage, zero dumped heat, 22,661 server-hours
 and about CHF 0.2261/server-hour case break-even. Its missed-deadline percentage is undefined;
-the submitted finite result waits for sourced T-01 job inputs.
+the finite Basel transcription result is a technical demand scenario, not the current home-site
+business model (decision 0020).

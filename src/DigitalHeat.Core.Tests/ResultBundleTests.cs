@@ -29,6 +29,7 @@ public sealed class ResultBundleTests
             using var inputs = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "parameters.json")));
             Assert.Equal(p.ServerElectricKw.Source, inputs.RootElement.GetProperty("reference_parameters")
                 .GetProperty("server_electric_kw").GetProperty("source").GetString());
+            Assert.False(inputs.RootElement.GetProperty("job_scenario").TryGetProperty("filler", out _));
             foreach (string path in Directory.GetFiles(output, "*.json"))
             {
                 using var doc = JsonDocument.Parse(File.ReadAllText(path));
@@ -58,6 +59,38 @@ public sealed class ResultBundleTests
             Assert.StartsWith("\"label,\"\"quoted\"\"\",1.25,", File.ReadAllLines(path)[1]);
         }
         finally { CultureInfo.CurrentCulture = previous; File.Delete(path); }
+    }
+
+    [Fact]
+    public void MixedExportAddsPerTypeReportWithoutChangingVersionOneSummary()
+    {
+        string root = FindRoot();
+        var p = ReferenceParameters.Load(Path.Combine(root, "config/reference-house.json"));
+        string scenarioPath = Path.Combine(root, "config/job-scenarios/mixed-basel-technical.json");
+        var scenario = JobScenario.Load(scenarioPath);
+        var weather = Enumerable.Range(0, 24)
+            .Select(hour => new WeatherHour($"2025-01-01T{hour:00}:00", 0)).ToArray();
+        var result = YearSimulation.Run(HeatDemand.Build(weather, p), p,
+            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), scenario);
+        string output = Path.Combine(Path.GetTempPath(), "digitalheat-mixed-export-" + Guid.NewGuid());
+        try
+        {
+            ResultBundle.Write(output, root, scenarioPath, result, p, scenario);
+            using var jobs = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "jobs.json")));
+            Assert.Equal("mixed", jobs.RootElement.GetProperty("mode").GetString());
+            Assert.Equal(result.Summary.ServerHours,
+                jobs.RootElement.GetProperty("total_server_hours").GetDouble(), 8);
+            Assert.Equal(result.Summary.ComputingIncomeChf,
+                jobs.RootElement.GetProperty("total_computing_income_chf").GetDouble(), 8);
+            Assert.Equal("research-simulation",
+                jobs.RootElement.GetProperty("filler").GetProperty("id").GetString());
+            AssertSnakeCase(jobs.RootElement);
+            using var summary = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "summary.json")));
+            Assert.Equal(1, summary.RootElement.GetProperty("schema_version").GetInt32());
+            Assert.False(summary.RootElement.GetProperty("sites")[0].GetProperty("summary")
+                .TryGetProperty("filler", out _));
+        }
+        finally { if (Directory.Exists(output)) Directory.Delete(output, true); }
     }
 
     private static void AssertSnakeCase(JsonElement value)

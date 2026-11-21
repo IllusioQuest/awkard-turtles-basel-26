@@ -25,7 +25,7 @@ OUT = ROOT / "data" / "derived" / "profitability" / "summary.json"
 
 # Values that are not in a CSV row, each with its source.
 TYPE2_PINNED_CHF_PER_SERVER_HOUR = 0.66   # docs/research/computing-price.md, team decision 2026-11-21
-FILL_RATE_BASE = 0.35                     # docs/research/filler-demand.md §6 (range 0.2-0.6)
+FILL_RATE_BASE = 0.35                     # docs/research/demand.md §9 (range 0.2-0.6)
 FILL_RATE_LOW, FILL_RATE_HIGH = 0.20, 0.60
 LLM_INPUT_TOKENS, LLM_OUTPUT_TOKENS = 3310, 319  # docs/jobs/llm-summary.md, measured token mix
 BATCH_API_DISCOUNT = 0.5                  # mistral.ai/pricing, noted in ai-llm-mistral-ministral3-8b
