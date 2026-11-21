@@ -34,7 +34,10 @@ public static class EconomicsBundle
             throw new IOException("Export directory must be empty; choose a new run directory.");
         var e = EconomicsParameters.Load(economicsPath);
         string hardwareDir = Path.Combine(root, e.HardwareDirectory);
-        var profiles = HardwareProfile.LoadDirectory(hardwareDir);
+        var allProfiles = HardwareProfile.LoadDirectory(hardwareDir);
+        // Profiles without a configured price set (e.g. a new T-35 family) are listed in run.json, not guessed.
+        var profiles = allProfiles.Where(x => e.TryPriceSetFor(x.Id) is not null).ToArray();
+        var withoutPrices = allProfiles.Where(x => e.TryPriceSetFor(x.Id) is null).Select(x => x.Id).ToArray();
         var runner = new Runner(demand, reference);
         double electricity = reference.ElectricityPriceChfPerKwh.Value;
         double fill = e.FillRate.Value;
@@ -131,6 +134,7 @@ public static class EconomicsBundle
                 Sha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(root, path)))).ToLowerInvariant()
             }).ToArray(),
             Files = new[] { "levers.csv", "required-premium.csv", "win-win.csv", "parameters.json" },
+            HardwareProfilesWithoutPriceSet = withoutPrices,
             Note = "Variant economics (decision 0026). Scored case figures are unchanged; case_break_even uses the case formula. Premium demand is TODO(source): premium shares are a sweep, not a forecast."
         });
     }

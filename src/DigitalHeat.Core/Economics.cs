@@ -150,10 +150,13 @@ public sealed class EconomicsParameters
 
     /// <summary>Price set for a profile: the longest prefix that matches its id, so that e.g. a
     /// refurbished <c>gpu-inference-l4-*</c> profile (T-35) sells at the L4 prices.</summary>
-    public PriceSet PriceSetFor(string hardwareProfileId) =>
-        PriceSets.Where(s => hardwareProfileId.StartsWith(s.HardwareProfilePrefix, StringComparison.Ordinal))
-            .OrderByDescending(s => s.HardwareProfilePrefix.Length).FirstOrDefault()
+    public PriceSet PriceSetFor(string hardwareProfileId) => TryPriceSetFor(hardwareProfileId)
         ?? throw new InvalidDataException($"No price set for hardware profile {hardwareProfileId}.");
+
+    /// <summary>Same lookup, null when no price is configured for the profile.</summary>
+    public PriceSet? TryPriceSetFor(string hardwareProfileId) =>
+        PriceSets.Where(s => hardwareProfileId.StartsWith(s.HardwareProfilePrefix, StringComparison.Ordinal))
+            .OrderByDescending(s => s.HardwareProfilePrefix.Length).FirstOrDefault();
 
     /// <summary>
     /// Value of one kWh of used server heat = cost of producing it with the replaced heater.

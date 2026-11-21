@@ -151,8 +151,9 @@ public sealed class EconomicsTests
         Assert.Equal("gpu-inference-l4", e.PriceSetFor("gpu-inference-l4").HardwareProfilePrefix);
         Assert.Equal("gpu-inference-l4", e.PriceSetFor("gpu-inference-l4-refurbished").HardwareProfilePrefix);
         Assert.Throws<InvalidDataException>(() => e.PriceSetFor("unknown-profile"));
-        foreach (var hw in HardwareProfile.LoadDirectory(Path.Combine(Root(), "config", "hardware")))
-            Assert.NotNull(e.PriceSetFor(hw.Id));
+        Assert.Null(e.TryPriceSetFor("unknown-profile"));
+        foreach (string id in new[] { "cpu-server", "gpu-consumer-rtx4090", "gpu-inference-l4" })
+            Assert.NotNull(e.PriceSetFor(id));
     }
 
     [Fact]
