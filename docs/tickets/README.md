@@ -69,6 +69,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-38](T-38-hybrid-service-review.md) | Review hybrid GPU/CPU service proposal | Nikita / Codex | done: analysis only; implementation awaits user choice |
 
-| [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | working Xonotic demo; runtime profiles in T-40 |
+| [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | done: verified Xonotic prototype (PR #22); CS2 deferred |
 
-| [T-40](T-40-gaming-profiles.md) | Reusable gaming profiles and retire webhosting | Nikita / Codex | in progress |
+| [T-40](T-40-gaming-profiles.md) | Reusable gaming profiles and retire webhosting | Nikita / Codex | done (PR #22) |

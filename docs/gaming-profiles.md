@@ -108,7 +108,7 @@ Linux tools). It creates only its own temporary, network-disabled, resource-limi
 tests argument round-trip without shell execution and legacy-lock exclusion, then removes it.
 It does not run against the player's desktop.
 
-Verified: 21 gaming tests and 40 Core tests pass; gaming solution builds with zero warnings/errors;
+Verified: 21 gaming tests and 41 Core tests pass; gaming solution builds with zero warnings/errors;
 PS5.1 read-only Node C plan and backward-compatible launch dispatch pass; original Xonotic PID
 403 remains unchanged, Intel OpenGL/assets/audio checks pass. A/B/C anonymous HTTP 401 and
 authenticated HTTP 200 remain correct. Gameplay was user-verified before the change, not newly
@@ -119,7 +119,7 @@ observed by automated tests. No real heat, remote GPU, NVIDIA encode or CS2 resu
 User withdrew the webhosting feature. Its tracked solution, controller, gateway, node,
 contracts, samples, tests, Compose and scripts are removed in PR #22. Exact old Compose projects
 `webhosting-scheduler`, `webhosting-isolation`, `webhosting-monitors`, `webhosting-ingress` and
-`webhosting-engines` were inspected by label and their containers removed. Gaming containers
+`webhosting-engines` were inspected by label and their containers and unused networks removed. Gaming containers
 were left running. No global Docker prune, volume/image deletion or unrelated project cleanup.
 Other worktrees and Visual Studio state were preserved.
 
@@ -128,3 +128,5 @@ their commands describe removed code and must not be used as current setup instr
 T-23/T-27/T-36 are retired. Shared Core/JobRuntime, team network simulation and hardware research
 contracts remain because they serve other workloads. This is not a change to the team's business
 model or the scored reference house.
+
+Integration complete: PR #22 merged as `56501a7`; withdrawn hosting PRs #12 and #19 closed. T-39/T-40 finished, ADR 0026 reviewed with changes; team ADR acceptance remains pending.

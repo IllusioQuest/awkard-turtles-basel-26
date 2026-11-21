@@ -121,7 +121,7 @@ ElCom snapshot, with exact source labels in the JSON file.
 
 `DigitalHeat.LiveRun` attaches to an **already running Linux container**. It does not
 start or implement a workload. Ennio's transcription work owns
-their containers, descriptors and measurements; the descriptor format is
+its containers, descriptors and measurements; the descriptor format is
 [`config/jobs/job.schema.json`](config/jobs/job.schema.json). It records an ID,
 image or container command, supported controls, work unit, optional deadline,
 runtime and energy per unit (each number with unit and source), and an optional
@@ -167,3 +167,5 @@ not a sensor reading. A forced pause does not modify later reference snapshots.
 CPU load; it does not establish electrical power or recovered heat. See
 [`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
 
+
+For the separate user-requested browser gaming prototype, see [gaming runtime profiles](docs/gaming-profiles.md). The webhosting feature has been retired.
