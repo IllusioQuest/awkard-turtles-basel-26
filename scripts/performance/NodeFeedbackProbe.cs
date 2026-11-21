@@ -37,8 +37,6 @@ foreach (bool occupied in new[] { false, true })
     var clock = new FrozenClock(now);
     using (var coordinator = new WorkloadCoordinator(manifest.FleetId, Path.Combine(root, "state"), runtime, clock, retainHourlyHeat: true))
     {
-        coordinator.Update(inventory, now); coordinator.Reconcile(runtimes);
-        foreach (var entry in held) coordinator.TryStart(entry.Request, runtimes, entry.Profile, now);
         string directory = Path.Combine(root, "inbox");
         foreach (var node in nodes) NodeFeedbackInbox.Publish(directory, new(node.Id, 1, now, now.AddSeconds(30), now,
             true, sites.Single(s => s.Id == node.SiteId).Heat, "Synthetic fixture", "hourly_baseline"));
@@ -46,8 +44,9 @@ foreach (bool occupied in new[] { false, true })
         var owner = new NodeFeedbackOwner(coordinator, manifest, inbox, policy, clock);
         void Tick()
         {
-            if (owner.Tick(() => manifest).Length != 0 || runtime.Creates != held.Length)
-                throw new InvalidOperationException("Diagnostic changed behavior or admitted a blocked workload.");
+            var errors = owner.Tick(() => manifest);
+            if (errors.Length != 0 || runtime.Creates != held.Length)
+                throw new InvalidOperationException($"Diagnostic changed behavior: {string.Join("; ", errors)}; creates={runtime.Creates}, expected={held.Length}.");
         }
         for (int i = 0; i < WarmupCalls; i++) Tick();
         var elapsed = new double[Samples]; var allocated = new long[Samples];
