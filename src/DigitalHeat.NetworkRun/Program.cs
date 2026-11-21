@@ -11,10 +11,13 @@ using DigitalHeat.Network.Lp;
 //    Writes results/network/reference-house-comparison.json (generated, git-ignored).
 // 2) Scenario run with Type 1 work and filler (decision 0025):
 //    NetworkRun [root] --scenario config/network/<file>.json [--strategy B1,B2,LP] [--type1-share X]
-//               [--phi Y] [--horizon H] [--export]
+//               [--phi Y] [--horizon H] [--export] [--start HOUR --hours N]
+//    --start/--hours run a partial year (probe or experiment window). Type 1 volumes are still derived
+//    from the full year; results are labelled as a partial-year window, not yearly figures.
 //    --export writes results/network/<scenario>/<strategy>/ (map export contract, decision 0025 §7).
 string? rootArg = null, scenarioArg = null;
-int horizon = 48, seed = 20251121;
+int horizon = 48, seed = 20251121, startHour = 0;
+int? windowHours = null;
 double rho = 0.8, phi = 1.0;
 double? type1Share = null;
 bool export = false;
@@ -34,6 +37,8 @@ for (int i = 0; i < args.Length; i++)
         case "--type1-share": type1Share = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--phi": phi = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--export": export = true; break;
+        case "--start": startHour = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
+        case "--hours": windowHours = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
         default:
             if (args[i].StartsWith("--", StringComparison.Ordinal) || rootArg is not null)
                 throw new ArgumentException("Usage: NetworkRun [root] [--horizon H] [--rho R] [--sigma24 a,b] [--seed N] " +
@@ -45,7 +50,7 @@ string root = rootArg is not null ? Path.GetFullPath(rootArg) : FindRepositoryRo
 if (scenarioArg is not null)
 {
     RunScenario(root, Path.GetFullPath(scenarioArg, root), strategyIds, type1Share, phi, horizon, export,
-        string.Join(' ', args));
+        string.Join(' ', args), startHour, windowHours);
     return;
 }
 var p = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
@@ -104,11 +109,18 @@ File.WriteAllText(Path.Combine(output, "reference-house-comparison.json"), JsonS
 Console.WriteLine($"Wrote {Path.Combine(output, "reference-house-comparison.json")}");
 
 static void RunScenario(string root, string scenarioPath, string[] strategyIds, double? type1Share, double phi,
-    int horizon, bool export, string command)
+    int horizon, bool export, string command, int startHour, int? windowHours)
 {
     var scenario = NetworkScenarioLoader.Load(scenarioPath, root);
-    var specs = NetworkScenarioLoader.Type1Specs(scenario, type1Share);
-    var sites = scenario.NetworkSites;
+    var specs = NetworkScenarioLoader.Type1Specs(scenario, type1Share); // volumes from the full year
+    IReadOnlyList<NetworkSite> sites = scenario.NetworkSites;
+    if (windowHours is int wh)
+    {
+        if (startHour < 0 || wh < 1 || startHour + wh > sites[0].Demand.Count)
+            throw new ArgumentOutOfRangeException(nameof(windowHours), "--start/--hours outside the year.");
+        sites = sites.Select(s => s with { Demand = s.Demand.Skip(startHour).Take(wh).ToList() }).ToList();
+        Console.WriteLine($"PARTIAL-YEAR WINDOW: hours {startHour}..{startHour + wh - 1} (not yearly figures).");
+    }
     Console.WriteLine($"Scenario {scenario.Id}: {sites.Count} sites, {sites[0].Demand.Count} h, phi={phi:R}, " +
         $"Type 1 jobs/day: {string.Join(", ", specs.Select((s, i) => $"{sites[i].Id}={s?.JobsPerDay.ToString() ?? "-"}"))}");
     Console.WriteLine("strategy coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
