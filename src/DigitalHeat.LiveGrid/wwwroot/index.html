@@ -4,375 +4,213 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DigitalHeat Live Network</title>
 <style>
-:root{
-  --bg:#0f1417;--panel:#182025;--line:#2a353c;--ink:#eef3f5;--muted:#9aa9b1;--soft:#c9d4da;
-  --ok:#3ccf8e;--bad:#ff5d5d;--move:#ffd166;--spawn:#7cc7ff;
-  --cold:#78bfe0;--mild:#e9e3a2;--warm:#ff9a55;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);
-}
+:root{--bg:#101415;--ink:#13191c;--paper:#f4f6f6;--muted:#8d9a9f;--ok:#2f9e6e;--bad:#d64545;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);overflow:hidden}
-body{display:grid;grid-template-rows:auto 1fr auto;gap:10px;padding:10px 12px}
-button{font:inherit;color:inherit;cursor:pointer;white-space:nowrap}
-/* --- top bar --- */
-header{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;min-width:0}
-.brand{font-weight:800;font-size:20px;letter-spacing:.2px}
-.brand{white-space:nowrap}.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
-.clock{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px}
-.clock svg{width:30px;height:30px;transform:rotate(-90deg)}
-.clock .hour{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
-.clock .sub{font-size:12px;color:var(--muted);white-space:nowrap}
-.spacer{flex:1}
-.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
-.seg button{border:0;background:none;border-radius:999px;padding:6px 12px;font-weight:700;color:var(--muted)}
-.seg button small{font-weight:500;opacity:.6}.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
-.btn{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700}
-.btn:hover{border-color:var(--soft)}
-.btn[aria-pressed=true]{background:var(--spawn);color:#08202f;border-color:var(--spawn)}
-.totals{display:flex;gap:8px}
-.tot{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px 12px;text-align:center;min-width:72px}
-.tot b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
-.tot span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
-.tot.ok b{color:var(--ok)}.tot.bad b{color:var(--bad)}.tot.mv b{color:var(--move)}
-/* --- node grid --- */
-main{display:grid;gap:10px;min-height:0;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
-.node{--room:var(--mild);position:relative;border-radius:18px;background:var(--room);color:#13191c;
-  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:6px 12px;padding:14px 14px 12px 16px;
-  min-height:0;transition:background-color .6s ease,box-shadow .3s;box-shadow:inset 0 0 0 3px #0003}
-.node.flash-spawn{box-shadow:inset 0 0 0 5px var(--spawn),0 0 0 4px #7cc7ff55}
-.node.flash-bad{animation:shake .5s}
-.node.flash-src .slider input{box-shadow:0 0 0 5px var(--move)}
-.node.flash-src{box-shadow:inset 0 0 0 5px var(--move)}
-@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
-.head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.head .name{font-weight:800;font-size:clamp(16px,1.6vw,24px)}
-.head .dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid #0006;transform:translateY(1px)}
-.head .temp{font-weight:800;font-size:clamp(16px,1.6vw,24px);font-variant-numeric:tabular-nums;opacity:.85}
-.chip{font-size:14px;font-weight:800;padding:3px 9px;border-radius:999px;background:#0002;letter-spacing:.3px}
-.chip.run{background:#13191c;color:#fff}.chip.pause{background:#fff8;color:#13191c}.chip.err{background:var(--bad);color:#fff}
-.body{grid-column:1;display:grid;grid-template-rows:auto auto 1fr;gap:8px;min-height:0}
-.server{display:flex;align-items:center;gap:12px}
-.rack{position:relative;width:76px;height:76px;border-radius:16px;background:#13191c;display:grid;place-items:center;flex:none}
-.rack .ring{position:absolute;inset:5px;border-radius:50%;border:4px solid #ffffff22;border-top-color:#fff;animation:spin var(--spin,1.2s) linear infinite}
-.node.paused .rack .ring{animation-play-state:paused;border-top-color:#9fd3ff}
-.node.idle .rack .ring{opacity:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.rack .slot{position:relative;z-index:1}
-.loadbox{flex:1;min-width:0}
-.loadbox .lbl{font-size:15px;font-weight:700;opacity:.75;display:flex;justify-content:space-between}
-.bar{position:relative;height:14px;border-radius:7px;background:#0002;overflow:hidden;margin-top:3px}
-.bar i{position:absolute;inset:0 auto 0 0;background:#13191c;border-radius:7px;transition:width .5s}
-.bar u{position:absolute;top:-2px;bottom:-2px;width:3px;background:#fff;transition:left .5s;box-shadow:0 0 0 1px #13191c}
-.qlbl{font-size:14px;font-weight:800;opacity:.7;text-transform:uppercase;letter-spacing:.6px}
-.queue{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;min-height:44px;overflow:hidden;margin-bottom:6px}
-.queue:empty::after{content:"no waiting tasks";font-size:15px;opacity:.5;padding-top:8px}
-.tok{--c:#888;width:38px;height:38px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
-  font-weight:800;font-size:13px;border:2px solid #fff;box-shadow:0 2px 4px #0005;flex:none;position:relative}
-.tok.big{width:50px;height:50px;font-size:18px}
-.tok.urgent::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px dashed var(--bad)}
-.foot{grid-column:1/3;display:flex;gap:8px;align-items:center}
-.spawn{border:0;background:#13191c;color:#fff;border-radius:12px;padding:9px 14px;font-weight:800;font-size:14px}
-.spawn:hover{background:#000}
-.spawn kbd{font:inherit;font-size:11px;opacity:.6;margin-left:6px;border:1px solid #fff6;border-radius:4px;padding:0 4px}
-.why{flex:1;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;opacity:0;transition:opacity .4s;background:#fffc;border-radius:10px;padding:5px 9px;min-width:0}
-.why.show{opacity:1}
-/* vertical heat slider */
-.slider{grid-column:2;grid-row:1/3;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;gap:4px;width:clamp(54px,5vw,72px)}
-.slider .cap{font-size:14px;font-weight:800;opacity:.7;text-align:center;line-height:1.1}
-.slider input{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:100%;height:100%;min-height:90px;margin:0;
-  background:linear-gradient(to top,var(--cold),var(--mild) 50%,var(--warm));border:3px solid #13191c;border-radius:22px;cursor:ns-resize;touch-action:none}
-.slider input::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;border-radius:50%;background:#fff;border:4px solid #13191c;box-shadow:0 2px 6px #0006}
-.slider input::-moz-range-thumb{width:38px;height:38px;border-radius:50%;background:#fff;border:4px solid #13191c}
-/* --- bottom --- */
-footer{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) minmax(0,.9fr);gap:10px;height:clamp(118px,19vh,170px)}
-.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px;min-height:0;overflow:hidden}
-.box h3{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-.jobs{display:grid;gap:4px}
-.job{display:grid;grid-template-columns:72px 1fr 120px;align-items:center;gap:8px;font-size:15px}
-.job .jb{height:9px;border-radius:5px;background:#ffffff14;overflow:hidden}
-.job .jb i{display:block;height:100%;background:var(--ok);transition:width .4s}
-.job.missed .jb i{background:var(--bad)}.job.missed{color:#ffb3b3}
-.job.finished{color:var(--muted)}
-.job .due{text-align:right;font-variant-numeric:tabular-nums;color:var(--soft)}
-.events{display:grid;gap:3px;font-size:15px}
-.ev{display:flex;gap:8px;align-items:baseline;animation:fadein .4s}
-.ev .k{flex:none;font-size:10px;font-weight:800;text-transform:uppercase;border-radius:5px;padding:1px 6px;min-width:62px;text-align:center}
-.ev .k.move{background:var(--move);color:#3b2a00}.ev .k.spawn{background:var(--spawn);color:#08202f}
-.ev .k.complete,.ev .k.finished{background:var(--ok);color:#03281a}.ev .k.missed{background:var(--bad);color:#fff}.ev .k.info{background:#ffffff22}
-.ev .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--soft)}
-.ev .s{flex:none;color:var(--muted);font-variant-numeric:tabular-nums;font-size:11px}
-@keyframes fadein{from{opacity:0;transform:translateY(-4px)}}
-.legend{font-size:14px;color:var(--soft);line-height:1.45}
-.legend b{color:var(--ink)}
-.legend .orig{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px}
-.legend .orig span{display:inline-flex;align-items:center;gap:5px}
-.legend .orig i{width:11px;height:11px;border-radius:50%;display:inline-block;border:1.5px solid #fff}
-/* --- overlay animations --- */
-#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
-.flyer{position:fixed;left:0;top:0;z-index:51}
-.banner{position:fixed;z-index:52;transform:translate(-50%,-50%);background:var(--spawn);color:#08202f;font-weight:900;
-  padding:10px 18px;border-radius:14px;font-size:clamp(16px,1.8vw,26px);box-shadow:0 8px 30px #0008;white-space:nowrap}
-.banner.bad{background:var(--bad);color:#fff}.banner.ok{background:var(--ok);color:#03281a}
-.burst{position:fixed;z-index:51;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:4px solid var(--spawn)}
-.check{position:fixed;z-index:52;font-weight:900;font-size:34px;color:var(--ok);text-shadow:0 1px 3px #000}
-#offline{position:fixed;inset:0;display:none;place-items:center;background:#000b;z-index:99;font-size:20px;text-align:center;line-height:1.5}
+body{display:grid;grid-template-rows:1fr auto;padding:8px;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;white-space:nowrap}
+main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
+/* a house */
+.node{--room:#e9e3a2;position:relative;border-radius:14px;background:var(--room);color:var(--ink);
+  transition:background-color .8s ease;min-height:0;overflow:hidden}
+.name{position:absolute;left:22px;top:18px;font-weight:700;font-size:clamp(15px,1.4vw,21px);opacity:.55}
+.heat{position:absolute;left:22px;top:44px;font-weight:300;font-size:clamp(28px,3.4vw,52px);font-variant-numeric:tabular-nums;line-height:1}
+.heat small{font-size:.4em;font-weight:500;opacity:.55;margin-left:4px}
+.server{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(84px,9vw,120px);aspect-ratio:1}
+.server svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.server .track{fill:none;stroke:#0000001a;stroke-width:5}
+.server .arc{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.server .slot{position:absolute;inset:0;display:grid;place-items:center}
+.state{position:absolute;left:50%;top:calc(44% + clamp(54px,5.6vw,74px));transform:translateX(-50%);font-size:clamp(12px,1vw,15px);
+  font-weight:600;opacity:.55;white-space:nowrap}
+.queue{position:absolute;left:22px;right:96px;bottom:62px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:84px;overflow:hidden}
+.tok{--c:#888;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
+  font-weight:700;font-size:12px;flex:none;box-shadow:0 1px 2px #0003}
+.tok.big{width:48px;height:48px;font-size:17px}
+.node.paused .slot .tok{filter:saturate(.25) brightness(1.15)}
+.add{position:absolute;left:18px;bottom:16px;border:1.5px solid #13191c55;border-radius:999px;padding:6px 14px;
+  font-weight:600;font-size:14px;opacity:.55;transition:opacity .2s,background .2s}
+.add:hover{opacity:1;background:#ffffff55}
+.note{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);max-width:calc(100% - 260px);font-size:clamp(13px,1.05vw,16px);
+  font-weight:600;background:#ffffffb3;border-radius:999px;padding:5px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  opacity:0;transition:opacity .5s}
+.note.show{opacity:1}.note.ok{color:var(--ok)}.note.bad{color:var(--bad)}
+.slider{position:absolute;right:18px;top:18px;bottom:18px;width:clamp(44px,4vw,58px)}
+.slider input{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:100%;height:100%;margin:0;
+  background:linear-gradient(to top,#78bfe0,#e9e3a2 50%,#ff9a55);border:2px solid #13191c;border-radius:999px;cursor:ns-resize;touch-action:none}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #13191c}
+.slider input::-moz-range-thumb{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid #13191c}
+/* the one status line */
+footer{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:15px;padding:0 6px;min-height:30px}
+footer b{color:var(--paper);font-weight:600}
+.seg{display:flex;gap:2px}
+.seg button{padding:3px 10px;border-radius:999px;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--paper);color:var(--bg)}
+.ticker{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--paper)}
+.ticker span{animation:fade .5s}
+@keyframes fade{from{opacity:0}}
+.quiet{color:var(--muted)}
+.flyer{position:fixed;left:0;top:0;z-index:50;pointer-events:none}
+#help{position:fixed;inset:0;display:none;place-items:center;background:#000a;z-index:90}
+#help.show{display:grid}
+#help div{max-width:620px;background:var(--paper);color:var(--ink);border-radius:16px;padding:22px 26px;font-size:16px;line-height:1.5}
+#help h2{margin:0 0 8px;font-size:20px}
+#offline{position:fixed;inset:0;display:none;place-items:center;background:#000c;color:#fff;z-index:99;font-size:18px;text-align:center;line-height:1.6}
 #offline.show{display:grid}
-@media (max-width:1500px){.brand small{display:none}.tot{min-width:60px;padding:4px 8px}}
-@media (max-width:1400px){.seg button small{display:none}.legend{font-size:12px}.tot span{font-size:10px}}
-@media (max-width:900px){footer{grid-template-columns:1fr;height:auto}.legend{display:none}body{overflow:auto}html,body{overflow:auto}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">DigitalHeat · live network<small>Real Ising tasks in Docker · the network scheduler decides every hour</small></div>
-  <div class="clock" title="One scheduler hour is shown in a few seconds">
-    <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#ffffff22" stroke-width="5"/>
-      <circle id="ring" cx="18" cy="18" r="15" fill="none" stroke="#7cc7ff" stroke-width="5" stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round"/></svg>
-    <div><div class="hour" id="hour">Hour –</div><div class="sub" id="nextStep">connecting…</div></div>
-  </div>
-  <div class="seg" role="group" aria-label="Scheduler" title="S switches">
-    <button data-sched="B2">Network <small>B2</small></button><button data-sched="LP">Optimiser <small>LP</small></button><button data-sched="B1">No network <small>B1</small></button>
-  </div>
-  <button class="btn" id="auto" aria-pressed="false" title="A toggles">Auto-spawn: off</button>
-  <button class="btn" id="reset" title="Empties all queues">Reset</button>
-  <div class="spacer"></div>
-  <div class="totals">
-    <div class="tot ok"><b id="tFin">0</b><span>jobs on time</span></div>
-    <div class="tot mv"><b id="tMov">0</b><span>tasks moved</span></div>
-    <div class="tot bad"><b id="tMis">0</b><span>jobs missed</span></div>
-  </div>
-</header>
 <main id="grid"></main>
 <footer>
-  <div class="box"><h3>Jobs (tasks done · deadline)</h3><div class="jobs" id="jobs"></div></div>
-  <div class="box"><h3>What just happened</h3><div class="events" id="events"></div></div>
-  <div class="box legend" id="legend"></div>
+  <span><b id="hour">Hour –</b> <span class="quiet" id="next"></span></span>
+  <div class="seg" role="group" aria-label="Scheduler">
+    <button data-sched="B2">Network</button><button data-sched="LP">Optimiser</button><button data-sched="B1">No network</button>
+  </div>
+  <span class="ticker" id="ticker"></span>
+  <span id="totals" class="quiet"></span>
+  <button class="quiet" id="auto" title="A">auto-spawn off</button>
+  <button class="quiet" id="helpBtn" title="?">?</button>
 </footer>
-<div id="fx"></div>
-<div id="offline"><div><b>LiveGrid is not reachable.</b><br>Start it from the repository root:<br><code>dotnet run --project src/DigitalHeat.LiveGrid</code></div></div>
+<div id="help"><div>
+  <h2>How to read it</h2>
+  Each panel is a house with one server. The slider sets the room temperature the house wants
+  (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Every hour (a few seconds here) the network scheduler sets each server's load
+  from that heat and moves waiting tasks whose house cannot finish them before their deadline.
+  <br><br>Big circle in the middle: the task running now (ring = measured CPU load; pale = paused).
+  Small circles: waiting tasks. Number = job, colour = house the job came from.
+  1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
+  <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
+</div></div>
+<div id="offline"><div><b>LiveGrid is not reachable.</b><br>From the repository root:<br><code>dotnet run --project src/DigitalHeat.LiveGrid -- --up</code></div></div>
 <script>
 "use strict";
-const PALETTE=["#2563eb","#db2777","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#4d7c0f"];
+const PALETTE=["#2563eb","#c026d3","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#4d7c0f"];
+const ARC=2*Math.PI*46;
 const $=s=>document.querySelector(s);
-const state={nodes:[],since:0,step:0,byId:{},tokens:new Map(),drag:{},sentAt:{},lastLocal:{},range:[15,25],built:false,
-  stepMs:4000,nextAt:0,events:[]};
-const colorOf=id=>PALETTE[Math.max(0,state.nodes.findIndex(n=>n.id===id))%PALETTE.length];
-const labelOf=id=>(state.byId[id]||{}).label||id;
-
+const st={nodes:[],byId:{},since:0,step:0,tokens:new Map(),drag:{},sentAt:{},lastLocal:{},range:[15,25],built:false,stepMs:4000,nextAt:0,tasksPerJob:6};
+const colorOf=id=>PALETTE[Math.max(0,st.nodes.findIndex(n=>n.id===id))%PALETTE.length];
+const labelOf=id=>(st.byId[id]||{}).label||id;
+const cardOf=id=>document.querySelector(`.node[data-id="${id}"]`);
 function mix(a,b,t){const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));const A=p(a),B=p(b);
   return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("");}
-function roomColour(share){return share<.5?mix("#78bfe0","#e9e3a2",share*2):mix("#e9e3a2","#ff9a55",(share-.5)*2);}
-
+const room=s=>s<.5?mix("#78bfe0","#e9e3a2",s*2):mix("#e9e3a2","#ff9a55",(s-.5)*2);
 async function api(path,body){
   const r=await fetch(path,body===undefined?{}:{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-  if(!r.ok&&r.status!==204) throw new Error(await r.text());
-  return r.status===204?null:r.json();
+  if(!r.ok&&r.status!==204)throw new Error(await r.text()); return r.status===204?null:r.json();
 }
-
-/* ---------- building the node cards (once) ---------- */
 function build(s){
-  const grid=$("#grid"); grid.innerHTML="";
-  grid.style.setProperty("--cols",s.nodes.length>4?4:2);
-  s.nodes.slice().sort((a,b)=>a.position-b.position).forEach((n,i)=>{
+  const g=$("#grid"); g.innerHTML=""; g.style.setProperty("--cols",s.nodes.length>4?4:2);
+  s.nodes.slice().sort((a,b)=>a.position-b.position).forEach(n=>{
     const el=document.createElement("section"); el.className="node"; el.dataset.id=n.id;
-    const key=s.nodes.indexOf(n)+1;
-    el.innerHTML=`
-      <div class="head"><span class="dot" style="background:${colorOf(n.id)}"></span><span class="name">${n.label}</span>
-        <span class="temp"></span><span class="chip"></span></div>
-      <div class="slider"><div class="cap">heat<br>wanted</div>
-        <input type="range" min="${s.temperatureRange[0]}" max="${s.temperatureRange[1]}" step="0.5" aria-label="Heat wanted in ${n.label}">
-        <div class="cap pct"></div></div>
-      <div class="body">
-        <div class="server"><div class="rack"><div class="ring"></div><div class="slot"></div></div>
-          <div class="loadbox"><div class="lbl"><span>server load</span><span class="lv"></span></div>
-            <div class="bar" title="black: measured CPU · white mark: scheduler target"><i></i><u></u></div></div></div>
-        <div class="qlbl">waiting here</div>
-        <div class="queue"></div>
-      </div>
-      <div class="foot"><button class="spawn">+ New job<kbd>${key}</kbd></button><div class="why"></div></div>`;
-    grid.appendChild(el);
-    const input=el.querySelector("input");
-    input.value=n.targetTemperatureC;
-    input.addEventListener("pointerdown",()=>state.drag[n.id]=true);
-    const end=()=>{state.drag[n.id]=false;sendTarget(n.id,+input.value,true);};
+    el.innerHTML=`<div class="name">${n.label}</div><div class="heat"></div>
+      <div class="server"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="46"/>
+        <circle class="arc" cx="50" cy="50" r="46" stroke-dasharray="${ARC}" stroke-dashoffset="${ARC}"/></svg><div class="slot"></div></div>
+      <div class="state"></div><div class="queue"></div>
+      <button class="add" title="key ${s.nodes.indexOf(n)+1}">+ job</button><div class="note"></div>
+      <div class="slider"><input type="range" min="${s.temperatureRange[0]}" max="${s.temperatureRange[1]}" step="0.5" aria-label="Target temperature in ${n.label}"></div>`;
+    g.appendChild(el);
+    const input=el.querySelector("input"); input.value=n.targetTemperatureC;
+    input.addEventListener("pointerdown",()=>st.drag[n.id]=true);
+    const end=()=>{st.drag[n.id]=false;send(n.id,+input.value,true);};
     input.addEventListener("pointerup",end); input.addEventListener("change",end);
-    input.addEventListener("input",()=>{state.lastLocal[n.id]=Date.now();paintRoom(el,+input.value);sendTarget(n.id,+input.value,false);});
-    el.querySelector(".spawn").addEventListener("click",()=>spawn(n.id));
+    input.addEventListener("input",()=>{st.lastLocal[n.id]=Date.now();paint(el,+input.value);send(n.id,+input.value,false);});
+    el.querySelector(".add").addEventListener("click",()=>spawn(n.id));
   });
-  $("#legend").innerHTML=`<b>How to read it.</b> The slider is this hour's heat demand of the house. The scheduler
-    (${s.scheduler.id}) sets each server's load from it and moves waiting tasks whose house cannot finish them before the
-    deadline. 1 task ≈ 1 server-hour; 1 hour = ${s.stepSeconds} s. Colour = house the job came from; dashed ring = deadline within 3 h.
-    <div class="orig">${s.nodes.map(n=>`<span><i style="background:${colorOf(n.id)}"></i>${n.label}</span>`).join("")}</div>
-    <div style="margin-top:4px;color:var(--muted)">Keys: 1–${s.nodes.length} new job · A auto-spawn · S scheduler</div>`;
-  state.built=true;
+  $("#nkeys").textContent=s.nodes.length; st.built=true;
 }
-function paintRoom(el,t){
-  const [lo,hi]=state.range, share=Math.min(1,Math.max(0,(t-lo)/(hi-lo)));
-  el.style.setProperty("--room",roomColour(share));
-  el.querySelector(".temp").textContent=`${Math.round(share*100)} % heat wanted`;
-  el.querySelector(".pct").textContent=`${Math.round(share*100)} %`;
+function share(t){const[lo,hi]=st.range;return Math.min(1,Math.max(0,(t-lo)/(hi-lo)));}
+function paint(el,t){const h=share(t);el.style.setProperty("--room",room(h));
+  el.querySelector(".heat").innerHTML=`${t.toFixed(1)}<small>°C</small>`;}
+const timers={};
+function send(id,t,final){
+  const go=()=>{st.sentAt[id]=Date.now();api(`/api/nodes/${id}/target`,{temperatureC:t}).catch(()=>{});};
+  clearTimeout(timers[id]); const wait=250-(Date.now()-(st.sentAt[id]||0));
+  if(final||wait<=0)go(); else timers[id]=setTimeout(go,wait);
 }
-let sendTimer={};
-function sendTarget(id,t,final){
-  const now=Date.now();
-  const go=()=>{state.sentAt[id]=Date.now();api(`/api/nodes/${id}/target`,{temperatureC:t}).catch(()=>{});};
-  clearTimeout(sendTimer[id]);
-  if(final||now-(state.sentAt[id]||0)>250) go(); else sendTimer[id]=setTimeout(go,250-(now-(state.sentAt[id]||0)));
-}
-async function spawn(id){try{await api(`/api/nodes/${id}/spawn`,{});poll();}catch(e){console.warn(e);}}
-
-/* ---------- tokens (one DOM element per task, moved with an animation) ---------- */
-function tokenEl(t){
-  let el=state.tokens.get(t.id);
-  if(!el){el=document.createElement("div");el.className="tok";el.dataset.id=t.id;el.textContent=t.job;
-    el.title=`Job ${t.job}, task ${t.id.slice(-2)}, from ${labelOf(t.origin)}`;el.style.setProperty("--c",colorOf(t.origin));
-    el._fresh=true;state.tokens.set(t.id,el);}
-  el.classList.toggle("urgent",t.dueStep-state.step<=3);
-  return el;
-}
-function flyClone(el,from,to,ms,arc){
-  const c=el.cloneNode(true); c.classList.add("flyer"); c.classList.remove("urgent");
-  c.style.width=from.width+"px";c.style.height=from.height+"px"; document.body.appendChild(c);
-  const dx=to.left-from.left, dy=to.top-from.top, s=to.width/from.width;
-  const a=c.animate([{transform:`translate(${from.left}px,${from.top}px) scale(1)`},
-    {transform:`translate(${from.left+dx/2}px,${from.top+dy/2-arc}px) scale(1.6)`,offset:.5},
-    {transform:`translate(${to.left}px,${to.top}px) scale(${s})`}],{duration:ms,easing:"cubic-bezier(.45,0,.25,1)"});
-  return a.finished.then(()=>c.remove());
+const spawn=id=>api(`/api/nodes/${id}/spawn`,{}).then(poll).catch(()=>{});
+/* tokens: one element per task file; a change of house is a calm flight */
+function tok(t){let e=st.tokens.get(t.id);
+  if(!e){e=document.createElement("div");e.className="tok";e.textContent=t.job;e.style.setProperty("--c",colorOf(t.origin));
+    e.title=`Job ${t.job} from ${labelOf(t.origin)}`;e._new=true;st.tokens.set(t.id,e);}return e;}
+function fly(e,a,b){
+  const c=e.cloneNode(true);c.classList.add("flyer");c.style.width=a.width+"px";c.style.height=a.height+"px";document.body.appendChild(c);
+  const mx=(a.left+b.left)/2,my=Math.min(a.top,b.top)-40,s=b.width/a.width;
+  return c.animate([{transform:`translate(${a.left}px,${a.top}px)`},{transform:`translate(${mx}px,${my}px) scale(1.15)`,offset:.5},
+    {transform:`translate(${b.left}px,${b.top}px) scale(${s})`}],{duration:1400,easing:"cubic-bezier(.4,0,.2,1)"}).finished.then(()=>c.remove());
 }
 function place(s){
-  const want=new Map();
-  for(const n of s.nodes){
-    const card=document.querySelector(`.node[data-id="${n.id}"]`);
-    n.running.forEach(t=>want.set(t.id,{t,box:card.querySelector(".slot"),big:true}));
-    n.waiting.forEach(t=>want.set(t.id,{t,box:card.querySelector(".queue"),big:false}));
-  }
-  const before=new Map(); state.tokens.forEach((el,id)=>{if(el.isConnected)before.set(id,el.getBoundingClientRect());});
-  // remove tokens that are gone (done or dropped); their animation comes from the event
-  state.tokens.forEach((el,id)=>{if(!want.has(id)){el._gone=el.isConnected?el.getBoundingClientRect():null;el.remove();state.tokens.delete(id);goneRects.set(id,el._gone&&{rect:el._gone,el});}});
-  for(const n of s.nodes){
-    for(const kind of ["running","waiting"]){
-      const card=document.querySelector(`.node[data-id="${n.id}"]`);
-      const box=card.querySelector(kind==="running"?".slot":".queue");
-      const els=n[kind].map(t=>{const e=tokenEl(t);e.classList.toggle("big",kind==="running");return e;});
+  const before=new Map();st.tokens.forEach((e,id)=>e.isConnected&&before.set(id,e.getBoundingClientRect()));
+  const want=new Set();
+  for(const n of s.nodes){const card=cardOf(n.id);
+    for(const [kind,box] of [["running",card.querySelector(".slot")],["waiting",card.querySelector(".queue")]]){
+      const els=n[kind].map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");return e;});
       els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
-      [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
-    }
-  }
-  // animate: moves between cards fly, moves inside a card slide, new tokens pop in
-  want.forEach(({t},id)=>{
-    const el=state.tokens.get(id), old=before.get(id), now=el.getBoundingClientRect();
-    if(el._fresh){el._fresh=false;el.animate([{transform:"scale(0)",opacity:0},{transform:"scale(1.4)",opacity:1,offset:.6},{transform:"scale(1)"}],{duration:700,easing:"ease-out"});return;}
-    if(!old)return;
-    const card=a=>document.elementFromPoint(a.left+2,a.top+2)?.closest?.(".node");
-    const dx=old.left-now.left, dy=old.top-now.top;
-    if(Math.abs(dx)+Math.abs(dy)<1)return;
-    const far=Math.hypot(dx,dy)>220;
-    if(far){el.style.visibility="hidden";flyClone(el,old,now,1300,90).then(()=>{el.style.visibility="";
-      el.animate([{transform:"scale(1.5)"},{transform:"scale(1)"}],{duration:300});});}
-    else el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:450,easing:"ease-out"});
-  });
+      [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});}}
+  st.tokens.forEach((e,id)=>{if(!want.has(id)){const r=before.get(id);st.tokens.delete(id);
+    if(r){const c=e.cloneNode(true);c.classList.add("flyer");c.style.width=r.width+"px";c.style.height=r.height+"px";document.body.appendChild(c);
+      c.animate([{transform:`translate(${r.left}px,${r.top}px)`,opacity:1},{transform:`translate(${r.left}px,${r.top-24}px)`,opacity:0}],{duration:900}).finished.then(()=>c.remove());}}});
+  want.forEach(id=>{const e=st.tokens.get(id),a=before.get(id),b=e.getBoundingClientRect();
+    if(e._new){e._new=false;e.animate([{opacity:0,transform:"scale(.4)"},{opacity:1,transform:"scale(1)"}],{duration:700,easing:"ease-out"});return;}
+    if(!a)return;const dx=a.left-b.left,dy=a.top-b.top;if(Math.abs(dx)+Math.abs(dy)<1)return;
+    if(Math.hypot(dx,dy)>200){e.style.visibility="hidden";fly(e,a,b).then(()=>e.style.visibility="");}
+    else e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:500,easing:"ease-out"});});
 }
-const goneRects=new Map();
-
-/* ---------- events → banners, bursts, checks ---------- */
-function cardOf(id){return document.querySelector(`.node[data-id="${id}"]`);}
-function centre(el){const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};}
-function banner(card,text,cls){
-  const p=centre(card), b=document.createElement("div"); b.className="banner "+(cls||""); b.textContent=text;
-  b.style.left=p.x+"px"; b.style.top=(p.y-20)+"px"; document.body.appendChild(b);
-  b.animate([{opacity:0,transform:"translate(-50%,-30%) scale(.7)"},{opacity:1,transform:"translate(-50%,-50%) scale(1.05)",offset:.15},
-    {opacity:1,transform:"translate(-50%,-50%) scale(1)",offset:.8},{opacity:0,transform:"translate(-50%,-90%) scale(1)"}],{duration:2600}).finished.then(()=>b.remove());
-}
-function burst(card){
-  const p=centre(card.querySelector(".queue"));
-  for(let i=0;i<2;i++){const b=document.createElement("div");b.className="burst";b.style.left=p.x+"px";b.style.top=p.y+"px";document.body.appendChild(b);
-    b.animate([{transform:"scale(1)",opacity:1},{transform:"scale(14)",opacity:0}],{duration:900,delay:i*220,easing:"ease-out"}).finished.then(()=>b.remove());}
-  card.classList.add("flash-spawn"); setTimeout(()=>card.classList.remove("flash-spawn"),1400);
-}
-function why(card,text,full){const w=card.querySelector(".why");w.textContent=text;w.title=full||text;w.classList.add("show");
-  clearTimeout(w._t);w._t=setTimeout(()=>w.classList.remove("show"),5000);}
+function note(id,text,cls,full){const c=cardOf(id);if(!c)return;const n=c.querySelector(".note");
+  n.textContent=text;n.title=full||text;n.className="note show "+(cls||"");clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove("show"),4500);}
+function ticker(text){$("#ticker").innerHTML=`<span>${text}</span>`;}
 function handle(e){
-  if(e.kind==="spawn"&&e.to){const c=cardOf(e.to);burst(c);banner(c,`New job ${e.job} · ${state.tasksPerJob} tasks`);}
-  if(e.kind==="move"&&e.to){const src=state.byId[e.from], pct=src?Math.round(src.heatShare*100):"?";
-    why(cardOf(e.to),`← Job ${e.job} from ${labelOf(e.from)} (only ${pct} % heat wanted there)`,e.text);
-    const c=cardOf(e.from); if(c){c.classList.add("flash-src");setTimeout(()=>c.classList.remove("flash-src"),1200);}}
-  if(e.kind==="complete"&&e.task){
-    const g=goneRects.get(e.task); goneRects.delete(e.task);
-    const c=e.from?cardOf(e.from):null; const at=g?.rect?{x:g.rect.left+g.rect.width/2,y:g.rect.top}:c?centre(c.querySelector(".rack")):null;
-    if(at){const k=document.createElement("div");k.className="check";k.textContent="✓";k.style.left=(at.x-8)+"px";k.style.top=at.y+"px";document.body.appendChild(k);
-      k.animate([{transform:"translateY(0) scale(.6)",opacity:1},{transform:"translateY(-46px) scale(1.4)",opacity:0}],{duration:1100}).finished.then(()=>k.remove());}
-  }
-  if(e.kind==="finished"&&e.to)banner(cardOf(e.to),`✓ Job ${e.job} on time`,"ok");
-  if(e.kind==="missed"&&e.to){const c=cardOf(e.to);c.classList.remove("flash-bad");void c.offsetWidth;c.classList.add("flash-bad");banner(c,`✗ Job ${e.job} missed`,"bad");}
+  if(e.kind==="spawn"){note(e.to,`New job ${e.job} · ${st.tasksPerJob} tasks`);ticker(e.text);}
+  if(e.kind==="move"){const src=st.byId[e.from];
+    note(e.to,`← job ${e.job} from ${labelOf(e.from)}`,"",e.text);
+    ticker(`Job ${e.job} → ${labelOf(e.to)} · ${labelOf(e.from)} is set to ${src?src.targetTemperatureC.toFixed(1):"?"} °C, too little heat to finish before the deadline`);}
+  if(e.kind==="finished"){note(e.to,`✓ job ${e.job} on time`,"ok");ticker(e.text);}
+  if(e.kind==="missed"){note(e.to,`✗ job ${e.job} missed`,"bad");ticker(e.text);}
+  if(e.kind==="info")ticker(e.text);
 }
-function renderEvents(){
-  $("#events").innerHTML=state.events.slice(-6).reverse().map(e=>
-    `<div class="ev"><span class="s">h ${e.step}</span><span class="k ${e.kind}">${e.kind==="complete"?"done":e.kind}</span><span class="t" title="${e.text.replace(/"/g,"&quot;")}">${e.text}</span></div>`).join("");
-}
-
-/* ---------- polling ---------- */
 function render(s){
-  state.nodes=s.nodes; state.byId=Object.fromEntries(s.nodes.map(n=>[n.id,n])); state.range=s.temperatureRange;
-  state.step=s.step; state.tasksPerJob=s.tasksPerJob; state.stepMs=s.stepSeconds*1000; state.nextAt=performance.now()+s.msToNextStep;
-  if(!state.built) build(s);
-  for(const n of s.nodes){
-    const el=cardOf(n.id), input=el.querySelector("input");
-    const local=state.drag[n.id]||Date.now()-(state.lastLocal[n.id]||0)<1500;
-    if(!local) input.value=n.targetTemperatureC;
-    paintRoom(el,+input.value);
-    const hasWork=n.running.length+n.waiting.length>0, paused=n.targetLoad===0;
-    el.classList.toggle("paused",paused&&hasWork); el.classList.toggle("idle",!hasWork);
-    const chip=el.querySelector(".chip");
-    chip.className="chip "+(n.error?"err":paused?"pause":"run");
-    chip.textContent=n.error?"Docker error":!hasWork?"idle · no work":paused?(n.heatShare===0?"⏸ no heat wanted · tasks will move":"⏸ paused"):`running at ${Math.round(n.targetLoad*100)} %`;
-    chip.title=n.error||"";
-    const act=n.actualLoad??0;
-    el.querySelector(".bar i").style.width=(act*100)+"%";
-    el.querySelector(".bar u").style.left=`calc(${n.targetLoad*100}% - 1px)`;
-    el.querySelector(".lv").textContent=`${Math.round(act*100)} % measured · ${Math.round(n.targetLoad*100)} % target`;
-    el.style.setProperty("--spin",(1.6-n.targetLoad).toFixed(2)+"s");
-  }
+  st.nodes=s.nodes;st.byId=Object.fromEntries(s.nodes.map(n=>[n.id,n]));st.range=s.temperatureRange;st.step=s.step;
+  st.tasksPerJob=s.tasksPerJob;st.stepMs=s.stepSeconds*1000;st.nextAt=performance.now()+s.msToNextStep;
+  if(!st.built)build(s);
+  for(const n of s.nodes){const el=cardOf(n.id),input=el.querySelector("input");
+    if(!(st.drag[n.id]||Date.now()-(st.lastLocal[n.id]||0)<1500))input.value=n.targetTemperatureC;
+    paint(el,+input.value);
+    const work=n.running.length+n.waiting.length,paused=n.targetLoad===0;
+    el.classList.toggle("paused",paused&&work>0);
+    el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-(n.actualLoad??0))).toFixed(1));
+    el.querySelector(".state").textContent=n.error?"Docker error":!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`;
+    el.querySelector(".state").title=n.error||"";}
   place(s);
   document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));
-  const auto=$("#auto"); auto.setAttribute("aria-pressed",s.autoSpawn); auto.textContent="Auto-spawn: "+(s.autoSpawn?"on":"off");
+  $("#auto").textContent="auto-spawn "+(s.autoSpawn?"on":"off");$("#auto").style.color=s.autoSpawn?"var(--paper)":"";
   $("#hour").textContent=`Hour ${s.step}`;
-  $("#tFin").textContent=s.totals.finished; $("#tMov").textContent=s.totals.moves; $("#tMis").textContent=s.totals.missed;
-  $("#jobs").innerHTML=s.jobs.slice(0,6).map(j=>{const left=j.dueStep-s.step;
-    return `<div class="job ${j.state}"><span><i class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${colorOf(j.origin)}"></i> Job ${j.id}</span>
-      <div class="jb"><i style="width:${100*j.done/j.tasks}%"></i></div>
-      <span class="due">${j.state==="open"?`${j.done}/${j.tasks} · ${left} h left`:j.state==="finished"?"✓ on time":`✗ missed ${j.done}/${j.tasks}`}</span></div>`;}).join("")
-    ||`<div style="color:var(--muted);font-size:13px">No jobs yet. Press “+ New job” in a house (or keys 1–${s.nodes.length}).</div>`;
-  if(s.events.length){
-    const fresh=s.events.filter(e=>e.seq>state.since);
-    if(state.since===0&&s.events.length>1){state.events=s.events;} else {state.events.push(...fresh); fresh.forEach(handle);}
-    state.since=s.events[s.events.length-1].seq; state.events=state.events.slice(-60); renderEvents();
-  }
+  $("#totals").textContent=`${s.totals.finished} on time · ${s.totals.moves} moved · ${s.totals.missed} missed`;
+  if(s.events.length){const fresh=s.events.filter(e=>e.seq>st.since);
+    if(st.since>0)fresh.forEach(handle);
+    else if(!s.events.some(e=>e.kind!=="info"))ticker(`Press + job (or keys 1–${s.nodes.length}) to send work to a house.`);
+    st.since=s.events[s.events.length-1].seq;}
+  else if(!$("#ticker").textContent)ticker(`Press + job (or keys 1–${s.nodes.length}) to send work to a house.`);
 }
 let busy=false;
-async function poll(){
-  if(busy)return; busy=true;
-  try{const s=await api(`/api/state?since=${state.since}`); $("#offline").classList.remove("show"); render(s);}
-  catch(e){$("#offline").classList.add("show");}
-  finally{busy=false;}
-}
-function tick(){
-  const left=Math.max(0,state.nextAt-performance.now()), frac=1-left/state.stepMs;
-  $("#ring").setAttribute("stroke-dashoffset",(94.25*(1-Math.min(1,frac))).toFixed(1));
-  if(state.built)$("#nextStep").textContent=`next decision in ${(left/1000).toFixed(1)} s · 1 h = ${state.stepMs/1000} s`;
-  requestAnimationFrame(tick);
-}
+async function poll(){if(busy)return;busy=true;
+  try{render(await api(`/api/state?since=${st.since}`));$("#offline").classList.remove("show");}
+  catch(e){$("#offline").classList.add("show");}finally{busy=false;}}
+(function tick(){if(st.built)$("#next").textContent=`· next decision in ${(Math.max(0,st.nextAt-performance.now())/1000).toFixed(0)} s`;
+  setTimeout(tick,250);})();
+const nextSched=()=>{const o=["B2","LP","B1"],c=document.querySelector('[data-sched][aria-pressed="true"]')?.dataset.sched;
+  api("/api/scheduler",{id:o[(o.indexOf(c)+1)%o.length]}).then(poll);};
 document.querySelectorAll("[data-sched]").forEach(b=>b.addEventListener("click",()=>api("/api/scheduler",{id:b.dataset.sched}).then(poll)));
-$("#auto").addEventListener("click",()=>api("/api/autospawn",{on:$("#auto").getAttribute("aria-pressed")!=="true"}).then(poll));
-$("#reset").addEventListener("click",()=>{if(confirm("Empty all queues and start over?"))api("/api/reset",{}).then(()=>{state.events=[];poll();});});
-document.addEventListener("keydown",e=>{
-  if(e.target.tagName==="INPUT"&&e.target.type!=="range")return;
-  const k=+e.key; if(k>=1&&k<=state.nodes.length){spawn(state.nodes[k-1].id);return;}
-  if(e.key==="a"||e.key==="A")$("#auto").click();
-  if(e.key==="s"||e.key==="S"){const order=["B2","LP","B1"],cur=document.querySelector('[data-sched][aria-pressed="true"]')?.dataset.sched;
-    api("/api/scheduler",{id:order[(order.indexOf(cur)+1)%order.length]}).then(poll);}
-});
-setInterval(poll,400); poll(); requestAnimationFrame(tick);
+$("#auto").addEventListener("click",()=>api("/api/autospawn",{on:!$("#auto").textContent.endsWith("on")}).then(poll));
+$("#helpBtn").addEventListener("click",()=>$("#help").classList.toggle("show"));
+$("#help").addEventListener("click",()=>$("#help").classList.remove("show"));
+document.addEventListener("keydown",e=>{const k=+e.key;
+  if(k>=1&&k<=st.nodes.length)return spawn(st.nodes[k-1].id);
+  const key=e.key.toLowerCase();
+  if(key==="s")nextSched(); if(key==="a")$("#auto").click(); if(key==="?"||key==="h")$("#help").classList.toggle("show");
+  if(key==="r"&&confirm("Empty all queues and start over?"))api("/api/reset",{}).then(poll);
+  if(key==="escape")$("#help").classList.remove("show");});
+setInterval(poll,400);poll();
 </script>
 </body>
 </html>
