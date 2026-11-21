@@ -9,7 +9,7 @@ internal sealed class AdmissionIndex(WorkloadInventory snapshot)
         .ToDictionary(g => g.Key, g => g.ToArray(), StringComparer.Ordinal);
     public HashSet<string> ExternalIds { get; } = snapshot.ExternalAllocations.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
     public Dictionary<string, ResourceUsage> ExternalByNode { get; } = snapshot.ExternalAllocations.GroupBy(e => e.NodeId, StringComparer.Ordinal)
-        .ToDictionary(g => g.Key, g => ResourceUsage.External(g.ToArray()), StringComparer.Ordinal);
+        .ToDictionary(g => g.Key, g => ResourceUsage.External(g.ToArray(), includeGpus: false), StringComparer.Ordinal);
     public Dictionary<string, ResourceUsage> ExternalByDomain { get; } = ExternalDomains(snapshot);
 
     private static Dictionary<string, ResourceUsage> ExternalDomains(WorkloadInventory snapshot)
@@ -21,15 +21,14 @@ internal sealed class AdmissionIndex(WorkloadInventory snapshot)
 }
 
 /// <summary>Preserves original group enumeration and separate Sum operations; never subtract rounded totals.</summary>
-internal sealed record ResourceUsage(double Cpu, decimal RamMib, decimal Slots, double Heat, HashSet<string?> Gpus)
+internal sealed record ResourceUsage(double Cpu, decimal RamMib, decimal Slots, HashSet<string?> Gpus)
 {
-    public static readonly ResourceUsage Empty = new(0, 0, 0, 0, []);
-    public static ResourceUsage Owned(AllocationView[] claims) => new(
+    public static readonly ResourceUsage Empty = new(0, 0, 0, []);
+    public static ResourceUsage Owned(AllocationView[] claims, bool includeGpus = true) => new(
         claims.Where(c => !c.Paused).Sum(c => c.Request.Resources.CpuCores),
         claims.Sum(c => (decimal)c.Request.Resources.RamMib), claims.Sum(c => (decimal)c.Request.Resources.Slots),
-        claims.Where(c => !c.Paused).Sum(c => c.Request.RecoverableHeatKwhPerHour),
-        claims.Select(c => c.Reservation.GpuDeviceId).ToHashSet());
-    public static ResourceUsage External(ExternalAllocation[] claims) => new(
+        includeGpus ? claims.Select(c => c.Reservation.GpuDeviceId).ToHashSet() : Empty.Gpus);
+    public static ResourceUsage External(ExternalAllocation[] claims, bool includeGpus = true) => new(
         claims.Sum(c => c.Resources.CpuCores), claims.Sum(c => (decimal)c.Resources.RamMib),
-        claims.Sum(c => (decimal)c.Resources.Slots), 0, claims.Select(c => c.GpuDeviceId).ToHashSet());
+        claims.Sum(c => (decimal)c.Resources.Slots), includeGpus ? claims.Select(c => c.GpuDeviceId).ToHashSet() : Empty.Gpus);
 }

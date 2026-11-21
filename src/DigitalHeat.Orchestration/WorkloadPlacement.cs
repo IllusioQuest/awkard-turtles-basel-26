@@ -155,17 +155,17 @@ public sealed class WorkloadPlacement
         var current = inventory!;
         var lookup = index!;
         var owned = held.Values.Where(c => c.Request.Id != ignoreId).ToArray();
-        var bySite = owned.GroupBy(c => c.Reservation.SiteId, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
+        var bySite = owned.Where(c => !c.Paused).GroupBy(c => c.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Sum(c => c.Request.RecoverableHeatKwhPerHour), StringComparer.Ordinal);
         var byNode = owned.GroupBy(c => c.Reservation.NodeId, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
+            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray(), includeGpus: false), StringComparer.Ordinal);
         // Stored domain identity includes allocations whose node disappeared from the current inventory.
         var byDomain = owned.GroupBy(c => c.Reservation.DomainId, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
         foreach (var site in current.Sites)
         {
             if (!JobPlacement.IsEligible(request.PlacementPolicy, new(request.OriginSiteId, site.Id, site.CountryCode))) continue;
-            double committed = site.ExternalCommittedHeatKwh + bySite.GetValueOrDefault(site.Id, ResourceUsage.Empty).Heat;
+            double committed = site.ExternalCommittedHeatKwh + bySite.GetValueOrDefault(site.Id);
             if (!double.IsFinite(committed)) continue;
             double heat = HeatCapacity.RemainingKwh(site.Heat, committed);
             if (heat < request.RecoverableHeatKwhPerHour) continue;
