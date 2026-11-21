@@ -142,6 +142,29 @@ that much audio, so `base`-quality transcription alone cannot fill a house's hea
 heavier jobs per unit of value, or a mix of services, or we state "unlimited jobs" (the case
 allows it) together with this caveat.
 
+## Live control by the shared scheduler (LiveRun, decision 0009)
+
+The same `GreedyHeatScheduler` and `SchedulerController.Apply` as the year simulation drive the
+running container through `DockerJobExecutor`. Logs: `data/raw/measurements/transcription-whisper-base/liverun-2026-11-21/`.
+
+```bash
+E=data/external/transcription
+docker run -d --name dh-transcription --user "$(id -u):$(id -g)" --cpus 8 -e THREADS=8 -e PASSES=0 \
+  -v "$PWD/$E/models:/models:ro,Z" -v "$PWD/$E/work:/work:Z" digitalheat/transcription-whisper run
+for d in 2025-01-15 2025-07-15; do
+  dotnet run --project src/DigitalHeat.LiveRun -- --date $d --job config/jobs/transcription-whisper-base.json \
+    --container dh-transcription --cpu-cores 8 --step-seconds 3 --force-pause-step 12
+done
+docker rm -f dh-transcription
+```
+
+| Day | Scheduler target | Observed container CPU load | Forced pause at 12:00 | Audio processed in 24 steps × 3 s |
+|---|---|---|---|---|
+| 2025-01-15 (demand 7.4–10.4 kWh/h) | 100 % | 84–100 % | 0 % target, 0 % observed | 22.0 audio min |
+| 2025-07-15 (hot water only, 0.5 kWh/h, tank full) | 16 % | 15–16 % | 0 % target, 0 % observed | 2.5 audio min |
+
+"Observed load" is Docker CPU use divided by the allowed cores, not measured heat (decision 0009).
+
 ## Larger model: `large-v3`
 
 **Why:** `base` gets roughly one German word in five wrong. Published German word error rates
