@@ -12,5 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../DigitalHeat.Fleet/DigitalHeat.Fleet.csproj" />
+    <ProjectReference Include="../DigitalHeat.FleetApi/DigitalHeat.FleetApi.csproj" />
   </ItemGroup>
 </Project>

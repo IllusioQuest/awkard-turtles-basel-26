@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.FleetRun", "Dig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Fleet.Tests", "DigitalHeat.Fleet.Tests\DigitalHeat.Fleet.Tests.csproj", "{D68E1149-60B8-4665-B74F-AB89BAA14365}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.FleetApi", "DigitalHeat.FleetApi\DigitalHeat.FleetApi.csproj", "{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,5 +86,9 @@ Global
 		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
