@@ -14,14 +14,15 @@ scripts, disables .blend autoexec, and does not claim Docker isolation or hard R
 CPU quotas. Worker loopback/private token boundary stays in place.
 
 CPU preparation is an ordinary heat-admitted batch job that writes scene.blend
-and metadata. Prepare once before the two timed legs; display its time separately.
+and metadata. Prepare once before the multi-node frame run; display its time separately.
 Use a configured shared local content-addressed artifact directory for this first
 fixture; no new remote artifact transport. Pack dependencies, verify SHA-256 and
 bound size before atomic publication. Register immutable scene/frame profiles only
 after all participating peers confirm the exact asset. Frames use one engine,
 scene hash, Blender version/settings manifest; do not compare mixed Cycles/Eevee
 images. GPU frames require verified EEVEE capability and an exclusive physical GPU.
-Single leg pins GPU frames; multiple leg allows eligible GPU peers. One laptop
+Only multi-node execution is exposed; the user explicitly retired single-node
+and comparison modes. One laptop
 cannot demonstrate multiple physical GPUs. CPU preparation can use another node.
 
 Native frame jobs advertise AllowPause=false. Hold blocks new admission and waits

@@ -70,3 +70,5 @@ later.
 - [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
 
 - [0058 - Portable native Blender runtime](0058-portable-native-render.md): proposed; user approved native adapter, CPU preparation/GPU frames and frame-boundary pause; multiple nodes only.
+
+- [0059 - Adapter-specific runtime validation](0059-runtime-validation-boundary.md): proposed; reviewed with changes; native and Docker validation remain separate behind one executor interface.
