@@ -171,6 +171,26 @@ public class PeerMeshTests : IDisposable
         Assert.Equal(1, runtimes["b"].Creates); Assert.Equal(1, runtimes["b"].Starts);
     }
 
+    [Fact] public void OperatorHoldSurvivesRestartAndHeatCannotResumeIt()
+    {
+        var a=Add("a",1);var b=Add("b",8);Publish();
+        a.Submit(Request("a","render") with {Kind="batch",Lifecycle=new(true,true,false)},CoordinatorTests.Profile.Id);a.Tick();
+        b.SetHold(true);Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.Update(Inventory("b",9,2));b.Tick();Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.Dispose();peers.Remove(b);b=Add("b",9,3);
+        Assert.True(b.Held);b.Tick();Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.SetHold(false);b.Tick();Assert.Equal("running",b.Attempts().Single().Phase);
+        Assert.Equal(1,runtimes["b"].Creates);
+    }
+
+    [Fact] public void HeldOriginDoesNotDispatchQueuedFrame()
+    {
+        var a=Add("a",1);Add("b",8);Publish();a.SetHold(true);
+        a.Submit(Request("a","queued"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Null(a.Jobs().Single().Target);Assert.All(runtimes.Values,r=>Assert.Equal(0,r.Starts));
+        a.SetHold(false);a.Tick();Assert.Equal("b",a.Jobs().Single().Target);
+    }
+
     public void Dispose()
     {
         foreach (var peer in peers) peer.Dispose();

@@ -24,7 +24,10 @@ public sealed record OriginJob(WorkloadRequest Request, string ProfileId, long G
     string? Target = null, string Status = "waiting", long InventoryRevision = 0,
     DateTimeOffset HourStartUtc = default, HeatSignal? Heat = null);
 public sealed record ProposalOutcome(string Origin, string JobId, long Generation, string Identity, string Status);
-public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes);
+public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes)
+{
+    public bool OperatorHold { get; init; }
+}
 
 /// <summary>
 /// Origin-owned peer protocol, not a global scheduler or consensus service. Uses the existing placement
@@ -73,6 +76,15 @@ public sealed class MeshPeer : IDisposable
 
     public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
     public AttemptRecord[] Attempts() => coordinator.Attempts();
+    public bool Held => journal.OperatorHold;
+    /// <summary>Durable hold for a dedicated workload peer. Blocks dispatch and automatic heat resume.</summary>
+    public void SetHold(bool hold)
+    {
+        journal = journal with { OperatorHold = hold }; Save();
+        if (hold)
+            foreach (var row in coordinator.Attempts().Where(a => a.Phase == "running" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
+                coordinator.PauseBatch(row.Attempt.Request.Id);
+    }
 
     public string Submit(WorkloadRequest request, string profileId)
     {
@@ -134,6 +146,7 @@ public sealed class MeshPeer : IDisposable
             changed = true;
         }
         if (changed) Publish();
+        if (journal.OperatorHold) return;
         foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
@@ -180,7 +193,7 @@ public sealed class MeshPeer : IDisposable
         bool changed = false;
         foreach (var row in coordinator.Attempts().Where(a => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
         {
-            if (row.Phase == "running" && noHeat || row.Phase == "paused" && !noHeat)
+            if (row.Phase == "running" && (noHeat || journal.OperatorHold) || row.Phase == "paused" && !noHeat && !journal.OperatorHold)
                 changed |= coordinator.ApplyBatchHeat(row.Attempt.Request.Id, heat, scheduler, clock.GetUtcNow());
         }
         return changed;
@@ -234,7 +247,7 @@ public sealed class MeshPeer : IDisposable
                     throw new InvalidDataException("Existing execution has different requirements.");
                 status = "accepted"; // Expired old offer does not erase an existing/uncertain attempt.
             }
-            else if (!profiles.TryGetValue(proposal.ProfileId, out var profile)) status = "rejected";
+            else if (journal.OperatorHold || !profiles.TryGetValue(proposal.ProfileId, out var profile)) status = "rejected";
             else
             {
                 var result = coordinator.TryStartAtSite(proposal.Request, runtimeNodes, profile, clock.GetUtcNow(),
