@@ -97,3 +97,6 @@ T-66 completed: PR #54 merged at `72e602f`. T-69 follow-up, Nikita/Codex, `fix/T
 
 
 T-69 expanded by user: PR #59 / `757a56b`, ADR 0061 reviewed go with changes. Additive read-only renderer network roster (per-peer reachability + complete-snapshot freshness), owner-link SVG map and two equivalent native Linux GPU server templates. Planned servers stay outside runtime Peers/admission; no hosts supplied/contacted. 102 orchestration tests, native bundle/archive and paused 12-frame UI recovery pass. Actual remote deployment/scaling pending hardware/private addresses/shared assets. See `docs/jobs/gpu-server-network.md`; preserve heat-first policy and native build/recipe gates.
+
+
+T-70, Nikita/Codex, `feat/T-70-warm-gpu-worker`: user chose existing-renderer speed before extra workers. Isolated same-process diagnostic: 8.257s first / 1.015s second frame on Iris Xe, 640x360/32 samples; only two camera frames, not SLA. Warm per-frame execution under ADR 0062 review; preserve current run/results, heat-first policy and frame-boundary pause. No new workers. Depends PR #59 for current UI; evidence in `docs/performance/warm-frame-probe-2026-11-21.json`.
