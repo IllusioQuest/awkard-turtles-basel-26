@@ -79,3 +79,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-43](T-43-universal-workloads.md) | Universal resource-aware workload placement | Nikita / Codex | in review (PR #33) |
 
 | [T-44](T-44-minecraft-server.md) | Minecraft persistent server workload integration | Nikita / Codex | design in progress; edition/version/server/EULA choices pending |
+| [T-45](T-45-federated-scheduling.md) | Federated scheduling and safe job ownership | Jona / Codex | in progress (design and paper draft; runtime prototype pending T-43 handoff) |
