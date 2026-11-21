@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Submission
 - **Depends on:** T-00, T-06
-- **Suggested owner:** one owner  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** one owner  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (fresh-clone check + must-have checklist; contents of the submission depend on T-00)
 
 ## Goal
 
