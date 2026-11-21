@@ -1,67 +1,118 @@
-using System.Globalization;
 using System.Text.Json;
 using DigitalHeat.Core;
 using DigitalHeat.JobRuntime;
+using DigitalHeat.Network;
 
+// Live demo (decision 0042, ticket T-54): the network scheduler moves real Ising tasks between Docker nodes.
+// One line from the repository root (starts the containers, opens the browser, stops them on Ctrl+C):
+//   dotnet run --project src/DigitalHeat.LiveGrid -- --up
+// Options: --config config/live-demo-four-node.json  --port 5087  --no-browser
 var root = FindRoot();
+bool up = args.Contains("--up");
+if (up) Compose("up", "-d", "--build");
+string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
+int port = int.Parse(Arg("--port") ?? "5087");
 var reference = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
-var config = JsonSerializer.Deserialize<DemoConfig>(File.ReadAllText(Path.Combine(root,
-    "config", "live-demo-four-node.json")), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-    ?? throw new InvalidDataException("Empty four-node demo config.");
+var config = JsonSerializer.Deserialize<DemoConfig>(File.ReadAllText(configPath),
+    new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+    ?? throw new InvalidDataException("Empty live demo config.");
 config.Validate();
 if (config.ReferenceServerElectricKw.Value != reference.ServerElectricKw.Value
-    || config.HeatRecoveryShare.Value != reference.HeatRecoveryShare.Value
-    || config.MinimumLoadShare.Value != reference.MinimumLoadShare.Value)
+    || config.HeatRecoveryShare.Value != reference.HeatRecoveryShare.Value)
     throw new InvalidDataException("The live demo's reference values must match config/reference-house.json.");
-var docker = new DockerCliContainerControl();
-var nodes = config.Nodes.Select(n => new LiveNode(n, config, docker,
-    new GreedyHeatScheduler(config.MinimumLoadShare.Value), root)).ToArray();
-double initialTargetC = (config.TargetTemperatureMinC.Value + config.TargetTemperatureMaxC.Value) / 2;
-foreach (var node in nodes) node.SetTarget(initialTargetC);
+
+var cal = new LiveCalibration(config.ReferenceServerElectricKw.Value, config.HeatRecoveryShare.Value,
+    config.ServerHoursPerTask.Value, (int)config.ForecastHorizonSteps.Value,
+    reference.ElectricityPriceChfPerKwh.Value, reference.ElectricityPriceChfPerKwh.Value / reference.HeatPumpEfficiency.Value);
+var docker = new CachedDockerControl(new DockerCliContainerControl());
+double cores = config.AllowedCpuCoresPerContainer.Value;
+var executors = config.Nodes.Select(n => (IExecutor)new DockerJobExecutor(docker, n.Container, cores, supportsThrottle: true)).ToArray();
+string work = Path.Combine(root, "data", "external", "research-sim", "live-demo-work");
+var coordinator = new LiveCoordinator(config, cal, work, executors)
+{
+    ActualLoad = container => docker.Load(container, cores),
+};
+string[] containers = config.Nodes.Select(n => n.Container).ToArray();
+// Start paused (no work yet), so a worker cannot claim a task before the first scheduler decision.
+foreach (var e in executors) e.ApplyTargetLoad(0);
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.SetMinimumLevel(LogLevel.Warning);
 builder.WebHost.UseWebRoot(Path.Combine(root, "src", "DigitalHeat.LiveGrid", "wwwroot"));
-builder.WebHost.UseUrls("http://127.0.0.1:5087");
+builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
 var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.MapGet("/api/state", () => Results.Json(new
-{
-    title = "One laptop · four independent worker nodes",
-    mapping = "Illustrative target temperature is translated to a reference heat signal; it is not a room sensor.",
-    nodes = nodes.Select(n => n.ReadState())
-}));
+app.MapGet("/api/state", (long? since) => Results.Json(coordinator.Read(since ?? 0)));
 app.MapPost("/api/nodes/{id}/target", (string id, TargetRequest request) =>
 {
-    var node = nodes.SingleOrDefault(n => n.Config.Id == id);
-    if (node is null) return Results.NotFound();
     if (!double.IsFinite(request.TemperatureC)
         || request.TemperatureC < config.TargetTemperatureMinC.Value
         || request.TemperatureC > config.TargetTemperatureMaxC.Value)
         return Results.BadRequest(new { error = "Target temperature is outside the demo slider range." });
-    try { return Results.Json(node.SetTarget(request.TemperatureC)); }
-    catch (Exception error) { return Results.Problem(error.Message, statusCode: 503); }
+    return coordinator.SetTarget(id, request.TemperatureC) ? Results.NoContent() : Results.NotFound();
 });
-using var observationStop = new CancellationTokenSource();
-app.Lifetime.ApplicationStopping.Register(() => observationStop.Cancel());
-_ = Task.Run(async () =>
+app.MapPost("/api/nodes/{id}/spawn", (string id) => coordinator.Spawn(id) is { } job ? Results.Json(job) : Results.NotFound());
+app.MapPost("/api/autospawn", (ToggleRequest r) => { coordinator.SetAutoSpawn(r.On); return Results.NoContent(); });
+app.MapPost("/api/scheduler", (SchedulerRequest r) =>
 {
-    while (!observationStop.IsCancellationRequested)
+    try { coordinator.SetScheduler(r.Id); return Results.NoContent(); }
+    catch (InvalidDataException e) { return Results.BadRequest(new { error = e.Message }); }
+});
+app.MapPost("/api/reset", () => { coordinator.Reset(); return Results.NoContent(); });
+
+using var stop = new CancellationTokenSource();
+app.Lifetime.ApplicationStopping.Register(() => stop.Cancel());
+_ = Task.Run(async () =>   // the scheduler clock
+{
+    using var timer = new PeriodicTimer(TimeSpan.FromSeconds(config.StepSeconds.Value));
+    while (await timer.WaitForNextTickAsync(stop.Token).ConfigureAwait(false))
     {
-        try
-        {
-            var cpu = docker.ReadCpuPercents(nodes.Select(n => n.Config.Container).ToArray());
-            foreach (var node in nodes) node.ObserveCpu(cpu[node.Config.Container]);
-        }
-        catch (Exception error)
-        {
-            foreach (var node in nodes) node.SetObservationError(error.Message);
-        }
-        try { await Task.Delay(TimeSpan.FromSeconds(2), observationStop.Token); }
-        catch (OperationCanceledException) { break; }
+        try { coordinator.Step(); }
+        catch (Exception e) { Console.Error.WriteLine($"step failed: {e.Message}"); }
     }
-}, observationStop.Token);
+});
+_ = Task.Run(async () =>   // batched CPU observation, never on the request path
+{
+    while (!stop.IsCancellationRequested)
+    {
+        try { docker.Observe(containers); } catch (Exception) { /* shown as missing reading */ }
+        try { await Task.Delay(TimeSpan.FromSeconds(1), stop.Token); } catch (OperationCanceledException) { break; }
+    }
+});
+Console.WriteLine($"Live demo on http://127.0.0.1:{port}  ({config.Nodes.Length} nodes, scheduler {config.Scheduler}, "
+    + $"1 step = {config.StepSeconds.Value} s)");
+if (up)
+{
+    app.Lifetime.ApplicationStopping.Register(() => Compose("stop", "-t", "1"));
+    if (!args.Contains("--no-browser")) app.Lifetime.ApplicationStarted.Register(() => OpenBrowser($"http://127.0.0.1:{port}"));
+}
 app.Run();
+
+void Compose(params string[] verb)
+{
+    var psi = new System.Diagnostics.ProcessStartInfo("docker") { WorkingDirectory = root };
+    foreach (var a in new[] { "compose", "-f", "compose.live-demo.yml" }.Concat(verb)) psi.ArgumentList.Add(a);
+    using var p = System.Diagnostics.Process.Start(psi) ?? throw new InvalidOperationException("docker not found");
+    p.WaitForExit();
+    if (p.ExitCode != 0) throw new InvalidOperationException($"docker compose {string.Join(' ', verb)} failed (is Docker running?)");
+}
+
+static void OpenBrowser(string url)
+{
+    try
+    {
+        if (OperatingSystem.IsLinux()) System.Diagnostics.Process.Start("xdg-open", url);
+        else System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+    }
+    catch (Exception) { Console.WriteLine($"Open {url} in a browser."); }
+}
+
+string? Arg(string name)
+{
+    int i = Array.IndexOf(args, name);
+    return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+}
 
 static string FindRoot()
 {
@@ -71,94 +122,29 @@ static string FindRoot()
 }
 
 sealed record TargetRequest(double TemperatureC);
-sealed record DemoNodeConfig(string Id, string Container, int Position);
+sealed record ToggleRequest(bool On);
+sealed record SchedulerRequest(string Id);
+sealed record DemoNodeConfig(string Id, string Label, string Container, int Position);
 sealed record DemoConfig(Parameter MinimumLoadShare, Parameter AllowedCpuCoresPerContainer,
     Parameter ReferenceServerElectricKw, Parameter HeatRecoveryShare, Parameter TargetTemperatureMinC,
-    Parameter TargetTemperatureMaxC, DemoNodeConfig[] Nodes)
+    Parameter TargetTemperatureMaxC, Parameter StepSeconds, Parameter ServerHoursPerTask, Parameter TaskLatticeSize,
+    Parameter TaskSweeps, Parameter TasksPerJob, Parameter DeadlineSteps, Parameter ForecastHorizonSteps,
+    Parameter AutoSpawnEverySteps, Parameter Seed, string Scheduler, DemoNodeConfig[] Nodes)
 {
     public void Validate()
     {
         foreach (var p in new[] { MinimumLoadShare, AllowedCpuCoresPerContainer, ReferenceServerElectricKw,
-                     HeatRecoveryShare, TargetTemperatureMinC, TargetTemperatureMaxC })
-            if (!double.IsFinite(p.Value) || string.IsNullOrWhiteSpace(p.Unit) || string.IsNullOrWhiteSpace(p.Source))
+                     HeatRecoveryShare, TargetTemperatureMinC, TargetTemperatureMaxC, StepSeconds, ServerHoursPerTask,
+                     TaskLatticeSize, TaskSweeps, TasksPerJob, DeadlineSteps, ForecastHorizonSteps, AutoSpawnEverySteps, Seed })
+            if (p is null || !double.IsFinite(p.Value) || string.IsNullOrWhiteSpace(p.Unit) || string.IsNullOrWhiteSpace(p.Source))
                 throw new InvalidDataException("Every demo parameter needs a finite value, unit and source.");
-        if (Nodes.Length != 4 || Nodes.Select(n => n.Id).Distinct().Count() != 4
-            || Nodes.Select(n => n.Container).Distinct().Count() != 4
-            || MinimumLoadShare.Value is < 0 or > 1 || AllowedCpuCoresPerContainer.Value <= 0
-            || ReferenceServerElectricKw.Value <= 0 || HeatRecoveryShare.Value is <= 0 or > 1
-            || TargetTemperatureMaxC.Value <= TargetTemperatureMinC.Value)
-            throw new InvalidDataException("Invalid four-node demo configuration.");
-    }
-}
-
-sealed class LiveNode
-{
-    private readonly DemoConfig demo;
-    private readonly DockerJobExecutor executor;
-    private readonly IScheduler scheduler;
-    private readonly string workRoot;
-    private double targetTemperatureC;
-    private double targetLoad;
-    private double actualLoad;
-    private string? error;
-
-    public DemoNodeConfig Config { get; }
-
-    public LiveNode(DemoNodeConfig config, DemoConfig demo, IContainerControl docker,
-        IScheduler scheduler, string workRoot)
-    {
-        Config = config; this.demo = demo; this.scheduler = scheduler; this.workRoot = workRoot;
-        executor = new DockerJobExecutor(docker, config.Container,
-            demo.AllowedCpuCoresPerContainer.Value, supportsThrottle: true);
-        targetTemperatureC = (demo.TargetTemperatureMinC.Value + demo.TargetTemperatureMaxC.Value) / 2;
-    }
-
-    public object SetTarget(double temperatureC)
-    {
-        lock (this)
-        {
-            targetTemperatureC = temperatureC;
-            double span = demo.TargetTemperatureMaxC.Value - demo.TargetTemperatureMinC.Value;
-            double heatShare = (temperatureC - demo.TargetTemperatureMinC.Value) / span;
-            double demandKwh = heatShare * demo.ReferenceServerElectricKw.Value * demo.HeatRecoveryShare.Value;
-            var signal = new HeatSignal(demandKwh, 0, 0, 1,
-                demo.ReferenceServerElectricKw.Value * demo.HeatRecoveryShare.Value);
-            try
-            {
-                var applied = SchedulerController.Apply(signal, scheduler, executor);
-                targetLoad = applied.TargetLoadPerServer;
-                actualLoad = applied.ActualLoadPerServer;
-                error = null;
-            }
-            catch (Exception ex) { error = ex.Message; throw; }
-            return ReadStateUnsafe();
-        }
-    }
-
-    public object ReadState()
-    {
-        lock (this) return ReadStateUnsafe();
-    }
-
-    public void ObserveCpu(double cpuPercent)
-    {
-        lock (this)
-        {
-            actualLoad = Math.Clamp(cpuPercent / (100 * demo.AllowedCpuCoresPerContainer.Value), 0, 1);
-            error = null;
-        }
-    }
-
-    public void SetObservationError(string message)
-    {
-        lock (this) error = message;
-    }
-
-    private object ReadStateUnsafe()
-    {
-        string logPath = Path.Combine(workRoot, "data", "external", "research-sim", "live-demo-work", "out", $"{Config.Id}.csv");
-        int done = File.Exists(logPath) ? Math.Max(0, File.ReadAllLines(logPath).Length - 1) : 0;
-        return new { id = Config.Id, position = Config.Position, targetTemperatureC,
-            targetLoad, actualLoad, completedTasks = done, error };
+        if (Nodes.Length is < 2 or > 16 || Nodes.Select(n => n.Id).Distinct().Count() != Nodes.Length
+            || Nodes.Select(n => n.Container).Distinct().Count() != Nodes.Length
+            || MinimumLoadShare.Value != 0 || AllowedCpuCoresPerContainer.Value <= 0
+            || TargetTemperatureMaxC.Value <= TargetTemperatureMinC.Value || StepSeconds.Value < 0.5
+            || ServerHoursPerTask.Value <= 0 || TasksPerJob.Value < 1 || DeadlineSteps.Value < 1
+            || ForecastHorizonSteps.Value < 1 || AutoSpawnEverySteps.Value < 1)
+            throw new InvalidDataException("Invalid live demo configuration (the live sites assume minimumLoadShare 0).");
+        LiveCoordinator.CreateScheduler(Scheduler);
     }
 }

@@ -9,7 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Jona / Codex | `feat/T-51-four-node-live-demo` (ticket T-54) | One-laptop four-container live scheduler view with real parallel work | existing Core scheduler and Docker executor; local Ising queue; LiveGrid API/UI | in progress; one laptop, four containers; cross-laptop networking remains later |
+| Jona / Codex | `feat/T-51-four-node-live-demo` (ticket T-54) | Live network demo: real B2/LP scheduler moves real Ising tasks between four containers (decision 0042) | `LiveNetwork`/`LiveTaskPlanner` (Network), LiveGrid API/UI, per-node queues in ising.py | in progress (Claude repair done, rehearsal on demo laptop open); two devices planned in 0042 |
 | Nikita / Codex | feat/T-48-live-job-deadlines | Minute-level live batch deadline contract/enforcement, then T-49 admission and T-50 Docker observation improvements | additive deadline metadata/owner polling; ADRs 0037-0039 proposed | T-48 PR #37 verified; T-49 indexing in progress; T-50 queued; games protected |
 | Nikita / Codex | feat/T-53-cs16-linux | Two isolated Wine client nodes for CS 1.6 multiplayer; preserve Minecraft and admission speed | existing runtime profiles/optimized placement reused; no new scheduler | user approved trial; Wine image building, no installer run yet; ADR 0041 reviewed; preflight 1.60/2.52 ms median/p95 at 1,024 nodes |
 | Nikita / Codex | docs/T-52-reborn-assessment | Inspected supplied ReBorn mod; public/community compatibility required | none | user declined isolated Steam/CS:GO setup; no replacement started; Minecraft and Xonotic unchanged; docs/jobs/reborn-compatibility-assessment.md |

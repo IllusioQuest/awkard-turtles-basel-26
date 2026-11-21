@@ -1,7 +1,7 @@
 # T-54: Four-node live heat and work demo
 
 - **Tier:** 2 Pitch
-- **Owner:** Jona / Codex
+- **Owner:** Jona / Codex; repair by Claude (decision 0042)
 - **Status:** in progress
 - **Depends on:** T-03, T-12, T-30, T-43
 
@@ -25,7 +25,17 @@ each.
   sensor reading. The node view stays deliberately minimal: four edge-to-edge room-color panels,
   one gradient temperature slider and animated work in each, with no dashboard header or prose.
 
-## Implementation notes
+## Current state (decision 0042)
+
+- The real network scheduler (B2 default; LP, B1 selectable) decides every step; waiting task files
+  move between per-node queues; containers are paused/throttled through the shared actuation path.
+- New jobs only by button (keys 1–4) or auto-spawn; spawn, move (with reason), done, finished and
+  missed are animated events.
+- One-line start: `dotnet run --project src/DigitalHeat.LiveGrid -- --up`.
+- Tests: `LiveNetworkTests` (C#), `jobs/research-sim/test_fleet.py` (queues under concurrent moves).
+- Next: rehearse on the demo laptop (Docker Desktop on Windows), then two devices (plan in 0042).
+
+## Implementation notes (pilot, superseded by 0042)
 
 - Four-node local task claims and result commits are described in decision
   [0040](../decisions/0040-local-four-node-demo.md).

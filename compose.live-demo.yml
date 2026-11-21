@@ -1,9 +1,11 @@
+# Live demo (decision 0042, ticket T-54): four node workers, each with its own queue under
+# data/external/research-sim/live-demo-work/queue/<node>/. Start: docker compose -f compose.live-demo.yml up -d --build
 services:
   node-1:
     image: digitalheat/research-sim:live-demo
     build: jobs/research-sim
     container_name: digitalheat-node-1
-    environment: { NODE_ID: node-1, WORKERS: "1", PASSES: "0", LIVE_LOOP: "1", CLAIM_LEASE_SECONDS: "120" }
+    environment: { NODE_ID: node-1, LIVE_LOOP: "1" }
     volumes: ["./data/external/research-sim/live-demo-work:/work"]
     cpus: 1.0
     restart: "no"
@@ -11,7 +13,7 @@ services:
     image: digitalheat/research-sim:live-demo
     build: jobs/research-sim
     container_name: digitalheat-node-2
-    environment: { NODE_ID: node-2, WORKERS: "1", PASSES: "0", LIVE_LOOP: "1", CLAIM_LEASE_SECONDS: "120" }
+    environment: { NODE_ID: node-2, LIVE_LOOP: "1" }
     volumes: ["./data/external/research-sim/live-demo-work:/work"]
     cpus: 1.0
     restart: "no"
@@ -19,7 +21,7 @@ services:
     image: digitalheat/research-sim:live-demo
     build: jobs/research-sim
     container_name: digitalheat-node-3
-    environment: { NODE_ID: node-3, WORKERS: "1", PASSES: "0", LIVE_LOOP: "1", CLAIM_LEASE_SECONDS: "120" }
+    environment: { NODE_ID: node-3, LIVE_LOOP: "1" }
     volumes: ["./data/external/research-sim/live-demo-work:/work"]
     cpus: 1.0
     restart: "no"
@@ -27,7 +29,7 @@ services:
     image: digitalheat/research-sim:live-demo
     build: jobs/research-sim
     container_name: digitalheat-node-4
-    environment: { NODE_ID: node-4, WORKERS: "1", PASSES: "0", LIVE_LOOP: "1", CLAIM_LEASE_SECONDS: "120" }
+    environment: { NODE_ID: node-4, LIVE_LOOP: "1" }
     volumes: ["./data/external/research-sim/live-demo-work:/work"]
     cpus: 1.0
     restart: "no"

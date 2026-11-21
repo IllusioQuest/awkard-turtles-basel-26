@@ -1,6 +1,6 @@
 # 0042: Live four-node demo driven by the network scheduler (amends 0040)
 
-- **Status:** proposed
+- **Status:** proposed (implemented on `feat/T-51-four-node-live-demo`, ticket T-54)
 - **Date:** 2026-11-21
 - **Decided by:** Jona (asked to take over PR #41: "use our real scheduling algorithm, run real tasks,
   show where they are"), drafted by Claude
@@ -40,7 +40,23 @@ state polling also needed, and polling repainted the panels with stale server va
    request); polling does not overwrite a slider that is being dragged or was changed in the last
    1.5 s.
 7. Small additive API: `Type1Cohort.Observed(...)` so a live coordinator can build the scheduler's
-   work view from observed task files; a pure, tested `LiveTaskPlanner` maps allocations to file moves.
+   work view from observed task files; pure, tested `LiveNetwork` (state builder) and `LiveTaskPlanner`
+   (allocations → file moves) in `DigitalHeat.Network`.
+8. **Calibration (labelled demo settings, `config/live-demo-four-node.json`):** one node = one site with
+   `ServerCount = 1` (one worker, one task at a time) and `HoursPerStep = 1`; no tank (the slider is this
+   hour's demand); φ = 0, no filler, so a node without tasks pauses; 1 task = 1 server-hour, sized with
+   `ising.py calibrate` to take about one step at one full core.
+9. **Ownership after a move:** cohorts are rebuilt every step per (job, node the files are on now), with
+   that node as origin. Moved work therefore belongs to its new node, which is the one difference from
+   the year simulation (where a cohort keeps its origin); a task moves on only if its new node cannot
+   finish it either. Allocations are server-hours for one hour; they accumulate per (job, from, to)
+   while the scheduler keeps allocating that pair, and a whole task moves once a task's worth has
+   accumulated (credit is dropped when the pair is no longer allocated). Running tasks count as one
+   full task (progress is not observed) and never move.
+10. **Races and deadlines:** a failed rename on either side means the other side won (worker claimed it /
+    coordinator moved it). Files are listed once per step. A job is missed when the step counter reaches
+    its due step (as `WorkLedger.Expire`, `DueHour <= hour`); its waiting tasks are removed, a running
+    task finishes but does not count.
 
 ## Alternatives considered
 
@@ -57,6 +73,33 @@ Limits: one laptop; slider temperature is an illustrative heat-demand input; one
 running tasks do not migrate (no checkpoint transfer). Decision 0040's shared queue is superseded for
 the live demo.
 
+## Two devices with four nodes each (plan, not built)
+
+- **One coordinator, eight sites.** LiveGrid on laptop A keeps running the one scheduler over a single
+  `NetworkState` with eight sites; the config gets a `devices` list (name, base URL) and a `device` per node.
+- **Node agent on laptop B.** The same binary in `--agent` mode owns its four containers and its work
+  folder and exposes a small HTTP API: list task files, accept a task file, hand over a waiting task,
+  set load (pause / CPU quota), CPU readings. Laptop A drives it through a `RemoteContainerControl :
+  IContainerControl`, so the actuation path (`SchedulerController.Apply` → `DockerJobExecutor`) stays the same.
+- **Cross-device move without loss or duplicates:** the source first renames the waiting file into a
+  local `outbox/` (atomic against its own worker), sends it, the destination writes it to its queue
+  (temp + rename) and acknowledges, then the source deletes the outbox copy. An unacknowledged outbox
+  file is returned to its queue after a timeout.
+- **Network:** direct Ethernet cable or a phone hotspot, static IPs, no internet needed; a 4 s step
+  hides any LAN latency. If B is unreachable its nodes are shown offline and marked not eligible.
+- **View:** each laptop shows its own four houses (`?nodes=1-4`, `?nodes=5-8`) or one projector shows
+  all eight (the grid already switches to 4 columns); a token leaving one screen exits at the edge
+  facing the other laptop and enters there (layout recorded in the config).
+- **Effort and risks:** about half a day. Risks: Windows firewall rules, Docker Desktop bind-mount rename
+  semantics (rehearse on the demo laptops), keeping both clocks out of the logic (only A counts steps).
+
 ## Review
 
-To be added after the fresh-context review.
+Fresh-context review (decision-reviewer, 2026-11-21): **go with changes**. Applied:
+(1) capacity units: one node = `ServerCount 1`, `HoursPerStep 1`, φ = 0 (decision item 8);
+(2) ownership after a move: cohorts per (job, current node), whole-task rounding with carried credit,
+test that nothing moves back without a cause (item 9, `LiveNetworkTests`);
+(3) races and deadlines: failed rename = other side won, one listing per step, `DueHour <= hour`
+semantics, running task of a missed job finishes but does not count (item 10); still to rehearse on the
+demo laptop's Docker Desktop. Audience: every move shows its reason (in the receiving house and the
+log); a paused node shows its frozen task.

@@ -9,7 +9,9 @@ The exact critical temperature T_c = 2 / ln(1 + sqrt(2)) ≈ 2.269 (Onsager 1944
 check the results.
 
   prepare   write the task queue to $WORK/in (one JSON file per task)
-  run       process every task that has no result yet; PASSES=0 repeats forever (live demo)
+  run       process every task that has no result yet; PASSES=0 repeats forever
+            with NODE_ID set: live-demo node with its own queue (see _run_node, decision 0042)
+  calibrate print the sweeps for one task of TARGET_SECONDS on this CPU (live-demo task size)
 
 Contract with the host (same shape as the transcription job, docs/jobs/transcription.md):
   $WORK/in/task_NNNN.json          input queue
@@ -26,11 +28,9 @@ import json
 import math
 import os
 import sys
-import threading
 import time
 from multiprocessing import Pool
 from pathlib import Path
-import uuid
 import random
 
 WORK = Path(os.environ.get("WORK", "/work"))
@@ -47,7 +47,6 @@ N_TEMPERATURES = int(os.environ.get("N_TEMPERATURES", "16"))
 N_SEEDS = int(os.environ.get("N_SEEDS", "2"))
 BASE_SEED = int(os.environ.get("BASE_SEED", "20251115"))
 NODE_ID = os.environ.get("NODE_ID", "local")
-CLAIM_LEASE_SECONDS = float(os.environ.get("CLAIM_LEASE_SECONDS", "60"))
 LIVE_LOOP = os.environ.get("LIVE_LOOP", "0").lower() in {"1", "true", "yes"}
 
 WORK_UNIT = "simulation task"
@@ -143,14 +142,14 @@ def write_progress(pass_no: int, done: int, total: int, units_done: int) -> None
 
 
 def run() -> None:
+    if NODE_ID != "local":
+        _run_node(WORK / "out")
+        return
     tasks = [json.loads(p.read_text()) for p in sorted((WORK / "in").glob("task_*.json"))]
     if not tasks:
         sys.exit(f"no tasks in {WORK / 'in'}; run prepare first")
     out_root = WORK / "out"
     out_root.mkdir(parents=True, exist_ok=True)
-    if NODE_ID != "local":
-        _run_node(tasks, out_root)
-        return
     log = out_root / "log.csv"
     if not log.exists():
         log.write_text("pass,task,start_unix_ns,end_unix_ns\n")
@@ -176,160 +175,81 @@ def run() -> None:
             pass_no += 1
 
 
-def _claim_path(pass_no: int, task_id: str) -> Path:
-    return WORK / "claims" / f"pass_{pass_no:03d}" / task_id
+def _run_node(out_root: Path) -> None:
+    """Live-demo node (decision 0042): claim only from this node's own queue, one task at a time.
 
-
-def _claim_task(task_id: str, pass_no: int) -> str | None:
-    """Lease a task using atomic directory creation on the shared volume.
-
-    Expired leases can be stolen. Result publication is separately atomic and exclusive, so a
-    delayed former owner cannot overwrite a result already committed by a successor.
+    $WORK/queue/<node>/<task>.json    waiting; the coordinator may move it to another node's queue
+    $WORK/running/<node>/<task>.json  claimed by this node (atomic rename; never moved)
+    $WORK/done/<task>.json            result, written atomically; then the running file is removed
+    $WORK/out/<node>.csv              task, job, start_unix_ns, end_unix_ns, node_id
+    A rename that fails because the file is gone means the coordinator moved it first: skip it.
+    Earliest deadline first (field due_step), then by file name.
     """
-    claim = _claim_path(pass_no, task_id)
-    claim.parent.mkdir(parents=True, exist_ok=True)
-    token = uuid.uuid4().hex
-    for _ in range(3):
+    queue = WORK / "queue" / NODE_ID
+    running = WORK / "running" / NODE_ID
+    done = WORK / "done"
+    for d in (queue, running, done, out_root):
+        d.mkdir(parents=True, exist_ok=True)
+    node_log = out_root / f"{NODE_ID}.csv"
+    if not node_log.exists():
+        node_log.write_text("task,job,start_unix_ns,end_unix_ns,node_id\n")
+    # A task left in running/ by a killed worker is still ours: finish it first.
+    while True:
+        claimed = sorted(running.glob("*.json"))
+        if not claimed:
+            claimed = _claim_next(queue, running)
+        if claimed is None or not claimed:
+            if not LIVE_LOOP:
+                return
+            time.sleep(0.2)
+            continue
+        path = claimed[0]
         try:
-            claim.mkdir()
-            (claim / "owner.json").write_text(json.dumps({
-                "node_id": NODE_ID, "token": token, "lease_until": time.time() + CLAIM_LEASE_SECONDS
-            }))
-            return token
-        except FileExistsError:
-            try:
-                owner = json.loads((claim / "owner.json").read_text())
-            except (FileNotFoundError, json.JSONDecodeError):
-                try:
-                    if time.time() - claim.stat().st_mtime > CLAIM_LEASE_SECONDS:
-                        expired = claim.with_name(f"{claim.name}.expired-{uuid.uuid4().hex}")
-                        claim.rename(expired)
-                        import shutil
-                        shutil.rmtree(expired, ignore_errors=True)
-                except (FileNotFoundError, OSError):
-                    pass
-                continue
-            if owner.get("lease_until", float("inf")) >= time.time():
-                return None
-            expired = claim.with_name(f"{claim.name}.expired-{uuid.uuid4().hex}")
-            try:
-                claim.rename(expired)
-            except (FileNotFoundError, FileExistsError, OSError):
-                continue
-            import shutil
-            shutil.rmtree(expired, ignore_errors=True)
+            task = json.loads(path.read_text())
+        except (FileNotFoundError, json.JSONDecodeError):
+            path.unlink(missing_ok=True)
+            continue
+        result, start, end = _calculate(task)
+        result["node_id"] = NODE_ID
+        target = done / path.name
+        tmp = done / f".{path.name}.{NODE_ID}.part"
+        tmp.write_text(json.dumps(result))
+        os.replace(tmp, target)
+        path.unlink(missing_ok=True)
+        with node_log.open("a") as f:
+            f.write(f"{task['id']},{task.get('job', '')},{start},{end},{NODE_ID}\n")
+
+
+def _claim_next(queue: Path, running: Path) -> list[Path] | None:
+    """Claim the most urgent waiting task by atomic rename; None if the queue is empty."""
+    waiting = []
+    for p in queue.glob("*.json"):
+        try:
+            waiting.append((json.loads(p.read_text()).get("due_step", 0), p.name, p))
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue  # moved away or still being written by the coordinator
+    for _, name, p in sorted(waiting):
+        try:
+            os.rename(p, running / name)
+            return [running / name]
+        except FileNotFoundError:
+            continue  # the coordinator moved it first
     return None
 
 
-def _run_node(tasks: list[dict], out_root: Path) -> None:
-    """One container node repeatedly claims one task so idle peers can take the next one."""
-    if not math.isfinite(CLAIM_LEASE_SECONDS) or CLAIM_LEASE_SECONDS <= 0:
-        sys.exit("CLAIM_LEASE_SECONDS must be positive")
-    pass_no = 0
-    out = out_root / f"pass_{pass_no:03d}"
-    out.mkdir(exist_ok=True)
-    node_log = out_root / f"{NODE_ID}.csv"
-    if not node_log.exists():
-        node_log.write_text("pass,task,start_unix_ns,end_unix_ns,node_id\n")
-    done = sum((out / f"{task['id']}.json").exists() for task in tasks)
-    write_node_progress(pass_no, done, len(tasks))
-    while True:
-        if all((out / f"{task['id']}.json").exists() for task in tasks):
-            if not LIVE_LOOP:
-                return
-            # The live fleet is a continuous workload: once one shared pass is complete,
-            # all nodes observe the same finished pass and race safely for the next one.
-            pass_no += 1
-            out = out_root / f"pass_{pass_no:03d}"
-            out.mkdir(exist_ok=True)
-            write_node_progress(pass_no, 0, len(tasks))
-            continue
-        task = next((t for t in tasks if not (out / f"{t['id']}.json").exists()
-                     and not _claim_is_live(t["id"], pass_no)
-                     and _claim_task(t["id"], pass_no) is not None), None)
-        if task is None:
-            time.sleep(0.2)
-            continue
-        claim = _claim_path(pass_no, task["id"])
-        token = ""
-        heartbeat_stop = threading.Event()
-        heartbeat = None
-        try:
-            owner_at_start = json.loads((claim / "owner.json").read_text())
-            token = owner_at_start["token"]
-            if owner_at_start.get("node_id") != NODE_ID:
-                continue
-            heartbeat = threading.Thread(target=_renew_claim,
-                args=(claim, NODE_ID, token, heartbeat_stop), daemon=True)
-            heartbeat.start()
-            result, start, end = _calculate(task)
-            owner = json.loads((claim / "owner.json").read_text())
-            if owner.get("token") != token:
-                continue
-            target = out / f"{task['id']}.json"
-            tmp = target.with_name(f"{target.name}.{token}.part")
-            tmp.write_text(json.dumps(result))
-            committed = False
-            try:
-                os.link(tmp, target)
-                committed = True
-            except FileExistsError:
-                pass
-            finally:
-                tmp.unlink(missing_ok=True)
-            if committed:
-                with node_log.open("a") as f:
-                    f.write(f"{pass_no},{task['id']},{start},{end},{NODE_ID}\n")
-        finally:
-            heartbeat_stop.set()
-            if heartbeat is not None:
-                heartbeat.join(timeout=1)
-            try:
-                owner = json.loads((claim / "owner.json").read_text())
-                if owner.get("token") == token:
-                    import shutil
-                    shutil.rmtree(claim)
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass
-        done = sum((out / f"{t['id']}.json").exists() for t in tasks)
-        write_node_progress(pass_no, done, len(tasks))
-
-
-def _claim_is_live(task_id: str, pass_no: int) -> bool:
-    try:
-        owner = json.loads((_claim_path(pass_no, task_id) / "owner.json").read_text())
-        return owner.get("lease_until", 0) >= time.time()
-    except (FileNotFoundError, json.JSONDecodeError):
-        return False
-
-
-def write_node_progress(pass_no: int, done: int, total: int) -> None:
-    """Keep multi-node progress isolated; per-node files need no shared mutable counter."""
-    progress_dir = WORK / "progress"
-    progress_dir.mkdir(parents=True, exist_ok=True)
-    target = progress_dir / f"{NODE_ID}.json"
-    tmp = progress_dir / f"{NODE_ID}.{os.getpid()}.tmp"
-    tmp.write_text(json.dumps({"node_id": NODE_ID, "work_unit": WORK_UNIT, "pass": pass_no,
-                               "tasks_done": done, "tasks_total": total}) + "\n")
-    os.replace(tmp, target)
-
-
-def _renew_claim(claim: Path, node_id: str, token: str, stop: threading.Event) -> None:
-    """Extend active work leases; a Docker pause freezes this heartbeat with the worker."""
-    interval = max(1.0, CLAIM_LEASE_SECONDS / 3)
-    while not stop.wait(interval):
-        try:
-            owner = json.loads((claim / "owner.json").read_text())
-            if owner.get("token") != token or owner.get("node_id") != node_id:
-                return
-            owner["lease_until"] = time.time() + CLAIM_LEASE_SECONDS
-            tmp = claim / f"owner.{token}.tmp"
-            tmp.write_text(json.dumps(owner))
-            os.replace(tmp, claim / "owner.json")
-        except (FileNotFoundError, OSError, json.JSONDecodeError):
-            return
+def calibrate() -> None:
+    """Print the sweep count for which one task takes TARGET_SECONDS on this CPU (live-demo setting)."""
+    target = float(os.environ.get("TARGET_SECONDS", "4"))
+    probe = {"id": "calibrate", "temperature": 2.3, "seed": BASE_SEED, "lattice_size": LATTICE_SIZE,
+             "sweeps": 2000, "thermalisation_sweeps": 200}
+    _, start, end = _calculate(probe)
+    seconds = (end - start) / 1e9
+    sweeps = max(10, round(probe["sweeps"] * target / seconds))
+    print(json.dumps({"lattice_size": LATTICE_SIZE, "probe_sweeps": 2200, "probe_seconds": round(seconds, 3),
+                      "target_seconds": target, "sweeps": sweeps, "thermalisation_sweeps": sweeps // 10}))
 
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "run"
-    {"prepare": prepare, "run": run}.get(cmd, lambda: sys.exit("usage: ising.py prepare | run"))()
+    {"prepare": prepare, "run": run, "calibrate": calibrate}.get(
+        cmd, lambda: sys.exit("usage: ising.py prepare | run | calibrate"))()
