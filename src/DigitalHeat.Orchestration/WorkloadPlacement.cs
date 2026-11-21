@@ -7,33 +7,36 @@ public sealed class WorkloadPlacement
 {
     private readonly object gate = new();
     private WorkloadInventory? inventory;
+    private AdmissionIndex? index;
     private readonly Dictionary<string, AllocationView> held = new(StringComparer.Ordinal);
     private const int HoursPerInterval = 1;
 
     public void Update(WorkloadInventory next, DateTimeOffset nowUtc)
     {
-        ValidateInventory(next, nowUtc);
         var copy = WorkloadJson.Copy(next);
+        ValidateInventory(copy, nowUtc);
+        var nextIndex = new AdmissionIndex(copy);
         lock (gate)
         {
             if (inventory is {} old && (copy.Revision <= old.Revision || copy.IntervalStartUtc < old.IntervalStartUtc))
                 throw new InvalidDataException("Cannot regress inventory revision or hour.");
             foreach (var claim in held.Values)
             {
-                var node = copy.Nodes.SingleOrDefault(n => n.Id == claim.Reservation.NodeId);
+                nextIndex.NodesById.TryGetValue(claim.Reservation.NodeId, out var node);
                 if (node is not null && (node.SiteId != claim.Reservation.SiteId || node.DomainId != claim.Reservation.DomainId))
                     throw new InvalidDataException("Cannot move an allocated node to another site/resource domain.");
-                if (copy.ExternalAllocations.Any(e => e.Id == claim.Request.Id))
+                if (nextIndex.ExternalIds.Contains(claim.Request.Id))
                     throw new InvalidDataException("Owned allocation counted again as external.");
             }
             inventory = copy; // Missing nodes retain their claims; disappearance never proves release.
+            index = nextIndex;
         }
     }
 
     public WorkloadReservation? TryReserve(WorkloadRequest request, DateTimeOffset nowUtc)
     {
-        ValidateRequest(request);
         request = WorkloadJson.Copy(request);
+        ValidateRequest(request);
         lock (gate)
         {
             if (held.TryGetValue(request.Id, out var existing))
@@ -43,10 +46,14 @@ public sealed class WorkloadPlacement
                 return existing.Reservation;
             }
             if (!DeadlineOpen(request, nowUtc) || !Fresh(nowUtc) || request.Kind != "legacy" && !ResourcesFresh(nowUtc)) return null;
-            if (inventory!.ExternalAllocations.Any(e => e.Id == request.Id))
+            if (index!.ExternalIds.Contains(request.Id))
                 throw new InvalidDataException("Workload ID is already externally allocated.");
-            var best = Candidates(request).OrderByDescending(c => c.AvailableHeatKwhBeforeReservation)
-                .ThenBy(c => c.SiteId, StringComparer.Ordinal).ThenBy(c => c.NodeId, StringComparer.Ordinal).FirstOrDefault();
+            WorkloadReservation? best = null;
+            foreach (var candidate in Candidates(request))
+                if (best is null || candidate.AvailableHeatKwhBeforeReservation > best.AvailableHeatKwhBeforeReservation
+                    || candidate.AvailableHeatKwhBeforeReservation == best.AvailableHeatKwhBeforeReservation
+                    && (string.CompareOrdinal(candidate.SiteId, best.SiteId) < 0 || candidate.SiteId == best.SiteId && string.CompareOrdinal(candidate.NodeId, best.NodeId) < 0))
+                    best = candidate;
             if (best is not null) held.Add(request.Id, new(request, best, false));
             return best;
         }
@@ -56,6 +63,7 @@ public sealed class WorkloadPlacement
 
     public bool CanAdmitAfterBatchPause(WorkloadRequest request, DateTimeOffset nowUtc)
     {
+        request = WorkloadJson.Copy(request);
         ValidateRequest(request);
         lock (gate)
         {
@@ -145,32 +153,36 @@ public sealed class WorkloadPlacement
     private IEnumerable<WorkloadReservation> Candidates(WorkloadRequest request, string? ignoreId = null)
     {
         var current = inventory!;
+        var lookup = index!;
         var owned = held.Values.Where(c => c.Request.Id != ignoreId).ToArray();
+        var bySite = owned.GroupBy(c => c.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
+        var byNode = owned.GroupBy(c => c.Reservation.NodeId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
+        // Stored domain identity includes allocations whose node disappeared from the current inventory.
+        var byDomain = owned.GroupBy(c => c.Reservation.DomainId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => ResourceUsage.Owned(g.ToArray()), StringComparer.Ordinal);
         foreach (var site in current.Sites)
         {
             if (!JobPlacement.IsEligible(request.PlacementPolicy, new(request.OriginSiteId, site.Id, site.CountryCode))) continue;
-            double committed = site.ExternalCommittedHeatKwh + owned.Where(c => c.Reservation.SiteId == site.Id && !c.Paused)
-                .Sum(c => c.Request.RecoverableHeatKwhPerHour);
+            double committed = site.ExternalCommittedHeatKwh + bySite.GetValueOrDefault(site.Id, ResourceUsage.Empty).Heat;
             if (!double.IsFinite(committed)) continue;
             double heat = HeatCapacity.RemainingKwh(site.Heat, committed);
             if (heat < request.RecoverableHeatKwhPerHour) continue;
-            foreach (var node in current.Nodes.Where(n => n.SiteId == site.Id && n.Ready && n.NetworkEligible))
+            foreach (var node in lookup.NodesBySite.GetValueOrDefault(site.Id, []).Where(n => n.Ready && n.NetworkEligible))
             {
                 if (request.PinnedNodeId is {} pin && pin != node.Id || request.StorageId is {} storage && !node.StorageIds.Contains(storage)
                     || request.RequiredCapabilities.Except(node.Capabilities, StringComparer.Ordinal).Any()
                     || request.LatencyLimits.Any(limit => !node.Latencies.Any(l => l.PeerId == limit.PeerId && l.RttMs <= limit.MaxRttMs))) continue;
-                var domain = current.Domains.Single(d => d.Id == node.DomainId);
-                var domainNodeIds = current.Nodes.Where(n => n.DomainId == domain.Id).Select(n => n.Id).ToHashSet(StringComparer.Ordinal);
-                // Include owned claims for nodes missing from the new snapshot using their stored domain identity.
-                var domainOwned = owned.Where(c => c.Reservation.DomainId == domain.Id).ToArray();
-                var external = current.ExternalAllocations.Where(e => domainNodeIds.Contains(e.NodeId)).ToArray();
-                if (!Fits(node.Capacity, request.Resources, owned.Where(c => c.Reservation.NodeId == node.Id), external.Where(e => e.NodeId == node.Id))
-                    || !Fits(domain.Capacity, request.Resources, domainOwned, external)) continue;
+                var domain = lookup.DomainsById[node.DomainId];
+                var domainOwned = byDomain.GetValueOrDefault(domain.Id, ResourceUsage.Empty);
+                var domainExternal = lookup.ExternalByDomain.GetValueOrDefault(domain.Id, ResourceUsage.Empty);
+                if (!Fits(node.Capacity, request.Resources, byNode.GetValueOrDefault(node.Id, ResourceUsage.Empty), lookup.ExternalByNode.GetValueOrDefault(node.Id, ResourceUsage.Empty))
+                    || !Fits(domain.Capacity, request.Resources, domainOwned, domainExternal)) continue;
                 string? gpu = null;
                 if (request.GpuCapability is {} capability)
                 {
-                    var occupied = domainOwned.Select(c => c.Reservation.GpuDeviceId).Concat(external.Select(e => e.GpuDeviceId)).ToHashSet();
-                    gpu = domain.Gpus.Where(g => g.Capability == capability && node.GpuDeviceIds.Contains(g.Id) && !occupied.Contains(g.Id)
+                    gpu = domain.Gpus.Where(g => g.Capability == capability && node.GpuDeviceIds.Contains(g.Id) && !domainOwned.Gpus.Contains(g.Id) && !domainExternal.Gpus.Contains(g.Id)
                         && (request.MinGpuVramMib is null || g.VramMib >= request.MinGpuVramMib))
                         .OrderBy(g => g.Id, StringComparer.Ordinal).Select(g => g.Id).FirstOrDefault();
                     if (gpu is null) continue;
@@ -180,13 +192,12 @@ public sealed class WorkloadPlacement
         }
     }
 
-    private static bool Fits(ResourceAmount capacity, ResourceAmount request, IEnumerable<AllocationView> owned, IEnumerable<ExternalAllocation> external)
+    private static bool Fits(ResourceAmount capacity, ResourceAmount request, ResourceUsage owned, ResourceUsage external)
     {
-        var claims = owned.ToArray(); var other = external.ToArray();
         // Decimal aggregation prevents long/integer overflow from admitting impossible RAM/slot sums.
-        return request.CpuCores + claims.Where(c => !c.Paused).Sum(c => c.Request.Resources.CpuCores) + other.Sum(c => c.Resources.CpuCores) <= capacity.CpuCores
-            && (decimal)request.RamMib + claims.Sum(c => (decimal)c.Request.Resources.RamMib) + other.Sum(c => (decimal)c.Resources.RamMib) <= capacity.RamMib
-            && (decimal)request.Slots + claims.Sum(c => (decimal)c.Request.Resources.Slots) + other.Sum(c => (decimal)c.Resources.Slots) <= capacity.Slots;
+        return request.CpuCores + owned.Cpu + external.Cpu <= capacity.CpuCores
+            && (decimal)request.RamMib + owned.RamMib + external.RamMib <= capacity.RamMib
+            && (decimal)request.Slots + owned.Slots + external.Slots <= capacity.Slots;
     }
 
     public static void ValidateRequest(WorkloadRequest request)
@@ -235,20 +246,23 @@ public sealed class WorkloadPlacement
         foreach (var domain in i.Domains)
             if (!ValidResources(domain.Capacity) || domain.Gpus is null || domain.Gpus.Any(g => g is null || string.IsNullOrWhiteSpace(g.Capability) || g.VramMib < 0) || !Unique(domain.Gpus.Select(g => g.Id)))
                 throw new InvalidDataException("Invalid physical resource domain.");
+        var domainsById = i.Domains.ToDictionary(d => d.Id, StringComparer.Ordinal);
+        var siteIds = i.Sites.Select(s => s.Id).ToHashSet(StringComparer.Ordinal);
+        var nodesById = i.Nodes.ToDictionary(n => n.Id, StringComparer.Ordinal);
         foreach (var n in i.Nodes)
         {
-            var domain = i.Domains.SingleOrDefault(d => d.Id == n.DomainId);
-            if (!ValidResources(n.Capacity) || domain is null || !i.Sites.Any(s => s.Id == n.SiteId) || n.Capabilities is null || n.StorageIds is null
+            var domain = n.DomainId is not null ? domainsById.GetValueOrDefault(n.DomainId) : null;
+            if (!ValidResources(n.Capacity) || domain is null || !siteIds.Contains(n.SiteId) || n.Capabilities is null || n.StorageIds is null
                 || n.GpuDeviceIds is null || n.Latencies is null || !Unique(n.Capabilities) || !Unique(n.StorageIds) || !Unique(n.GpuDeviceIds)
                 || n.GpuDeviceIds.Any(g => !domain.Gpus.Any(d => d.Id == g)) || n.Latencies.Any(l => l is null || !double.IsFinite(l.RttMs) || l.RttMs < 0)
                 || !Unique(n.Latencies.Select(l => l.PeerId))) throw new InvalidDataException("Invalid node requirements or physical-domain reference.");
         }
         foreach (var e in i.ExternalAllocations)
         {
-            var node = i.Nodes.SingleOrDefault(n => n.Id == e.NodeId);
+            var node = e.NodeId is not null ? nodesById.GetValueOrDefault(e.NodeId) : null;
             if (node is null || !ValidResources(e.Resources) || e.GpuDeviceId is {} gpu && !node.GpuDeviceIds.Contains(gpu)) throw new InvalidDataException("Invalid external allocation.");
         }
-        if (i.ExternalAllocations.Where(e => e.GpuDeviceId is not null).GroupBy(e => (i.Nodes.Single(n => n.Id == e.NodeId).DomainId, e.GpuDeviceId)).Any(g => g.Count() != 1))
+        if (i.ExternalAllocations.Where(e => e.GpuDeviceId is not null).GroupBy(e => (nodesById[e.NodeId].DomainId, e.GpuDeviceId)).Any(g => g.Count() != 1))
             throw new InvalidDataException("An exclusive external GPU is allocated more than once.");
     }
 }
