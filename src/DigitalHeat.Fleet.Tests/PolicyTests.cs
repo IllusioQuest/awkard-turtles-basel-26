@@ -81,7 +81,8 @@ internal sealed class FakeFleet : IFleetView, IFleetActions
     public IForecastProvider Forecast { get; set; } = new FakeForecast((_, _, _) => 0);
     public Func<long, double> Committed { get; set; } = _ => 0;
     public double CommittedKwh(long deadlineMs) => Committed(deadlineMs);
-    public IJobView Job(JobId id) => Jobs[id.Value];
+    public int JobLookups { get; private set; }
+    public IJobView Job(JobId id) { JobLookups++; return Jobs[id.Value]; }
     public IChunkView Chunk(ChunkId id) => Chunks[id.Value];
 
     public List<long> Wakeups { get; } = [];
@@ -782,5 +783,46 @@ public class MockHeatLedSchedulerTests
         f.Arrive(f.AddJob(T2(maxChunks: 8), 10, 0, 100 * H));
         Assert.Equal(3, f.Chunks.Count);
         Assert.Equal(2, f.Chunks[2].House.Value);
+    }
+
+    [Fact]
+    public void UrgentJobsAreEvaluatedOnceAndServedFirst()
+    {
+        // One busy server (non-checkpointable Type 2, no victim): urgent Type 1 jobs cannot start.
+        // The cost of an hour must not grow with the number of urgent jobs waiting (spec 9.2, point 4).
+        long LookupsPerHour(int urgentJobs, out FakeFleet fleet, out List<JobId> urgent)
+        {
+            var f = Make(out _, (1, 0, 0));
+            f.HourStart();
+            f.Arrive(f.AddJob(T2(checkpointable: false, maxChunks: 1), 10_000, 0, 1000 * H));
+            urgent = [];
+            for (int k = 0; k < urgentJobs; k++)
+            {
+                var j = f.AddJob(T1(maxChunks: 1), 10, 0, 1800 * 1000L);   // urgent on arrival
+                f.Arrive(j);
+                urgent.Add(j);
+            }
+            f.HourStart();   // settle
+            int wakeups = f.Wakeups.Count;
+            int before = f.JobLookups;
+            for (int h = 2; h < 50; h++) { f.NowMs = h * H; f.HourStart(); }
+            Assert.Equal(wakeups, f.Wakeups.Count);   // no re-checks requested
+            fleet = f;
+            return f.JobLookups - before;
+        }
+
+        long small = LookupsPerHour(3, out _, out _);
+        long large = LookupsPerHour(60, out var f, out var urgent);
+        Assert.Equal(small, large);
+        Assert.Single(f.Chunks);   // nobody could start
+
+        // When the server frees up, the earliest urgent job (queue order) takes it before any Type 2 job.
+        f.Chunks[0].Phase = ChunkPhase.Stopped;
+        f.ServerList[0].Chunk = null; f.ServerList[0].Load = 0;
+        f.Jobs[f.Chunks[0].Job.Value].Chunks.Clear();
+        f.Send(new FleetEvent(FleetEventKind.ChunkFinished, f.NowMs, House: f.Chunks[0].House, Chunk: f.Chunks[0].Id, Server: f.Chunks[0].Server));
+        Assert.Equal(2, f.Chunks.Count);
+        Assert.Equal(urgent[0], f.Chunks[1].Job);
+        Assert.Equal(1.0, f.Chunks[1].Load);
     }
 }

@@ -25,8 +25,6 @@ public static class FleetOutput
     ];
 
     // Seed offsets that MockLoadPricing uses (Policies/Pricing.cs).
-    private const long PricingAcceptOffset = 1_000_001;
-    private const long PricingRefOffset = 1_000_003;
 
     private static string R(double d) => d.ToString("R", CultureInfo.InvariantCulture);
     private static string R(double? d) => d is { } v ? R(v) : "";
@@ -151,8 +149,8 @@ public static class FleetOutput
         var sc = run.Scenario;
         var seeds = new JsonObject();
         foreach (var t in run.JobTypes) seeds[t.Id] = sc.Run.Seed + t.Index;
-        seeds["pricing_accept"] = sc.Run.Seed + PricingAcceptOffset;
-        seeds["pricing_reference_noise"] = sc.Run.Seed + PricingRefOffset;
+        seeds["pricing_accept"] = sc.Run.Seed + MockLoadPricing.AcceptSeedOffset;
+        seeds["pricing_reference_noise"] = sc.Run.Seed + MockLoadPricing.RefSeedOffset;
 
         var inputs = new JsonObject();
         if (run.HouseFilePath is { } hp) inputs["house_file"] = FileEntry(sc, hp);

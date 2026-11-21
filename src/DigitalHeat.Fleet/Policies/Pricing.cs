@@ -40,6 +40,9 @@ public sealed class FixedOnlyPricing(PricingSection cfg) : IPricing
 /// </summary>
 public sealed class MockLoadPricing : IPricing
 {
+    /// <summary>Seed offsets of the two random streams (accept draw, weekly reference price); also used by the output.</summary>
+    public const long AcceptSeedOffset = 1_000_001;
+    public const long RefSeedOffset = 1_000_003;
     private const int NearHours = 72;
     private const int HoursPerWeek = 168;
     private const long MsPerHour = FleetTime.MsPerHour;
@@ -57,8 +60,8 @@ public sealed class MockLoadPricing : IPricing
     public MockLoadPricing(PricingSection cfg, long runSeed)
     {
         _cfg = cfg;
-        _acceptRng = new Rng(runSeed + 1_000_001);
-        _refRng = new Rng(runSeed + 1_000_003);
+        _acceptRng = new Rng(runSeed + AcceptSeedOffset);
+        _refRng = new Rng(runSeed + RefSeedOffset);
     }
 
     public string Id => "mock-load";

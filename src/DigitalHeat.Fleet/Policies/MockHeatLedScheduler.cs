@@ -11,8 +11,8 @@ namespace DigitalHeat.Fleet;
 /// hit exactly, the rest paused), then new chunks from the queue (Type 1 earliest deadline first, then
 /// Type 2 earliest deadline first, ties by job id), sized chunk_target_s at load 1.</item>
 /// <item>Urgent Type 1 jobs (slack below urgent_margin_s) run at load 1 regardless of heat on the first house
-/// with a free server, else by stopping a checkpointable Type 2 chunk. Once urgent a job stays urgent and
-/// its chunks stay at load 1 (the urgent chunk would otherwise be throttled by the heat target at once).</item>
+/// with a free server, else by stopping a checkpointable Type 2 chunk (set of victim houses). Evaluated once, when
+/// the job becomes urgent; afterwards it is sticky, sorts first in the queue and its chunks stay at load 1.</item>
 /// </list>
 /// Cost per event is O(change): own sorted queue of open jobs with unassigned units, a set of houses with
 /// a free server, a set of houses below their target (deficit) and a sorted set of Type 1 urgency checks.
@@ -34,7 +34,10 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
     private double[] _cap = [];
 
     // Open jobs with unassigned units that may start another chunk: (class 0 = T1 / 1 = T2, deadline ms, job id).
-    private readonly SortedSet<(int Cls, long DeadlineMs, int Job)> _queue = [];
+    // Key = (0 urgent / 1 not, class, deadline ms, job id): urgent jobs sort first.
+    private readonly SortedSet<(int Urg, int Cls, long DeadlineMs, int Job)> _queue = [];
+    // Houses holding a checkpointable Type 2 chunk that is not checkpointing yet (preemption victims).
+    private readonly SortedSet<int> _victimHouses = [];
     private readonly SortedSet<int> _deficit = [];
     private readonly SortedSet<int> _freeHouses = [];
     private readonly SortedSet<(long DueMs, int Job)> _dueSet = [];
@@ -172,8 +175,8 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
 
     // ------------------------------------------------------------------ queue
 
-    private static (int, long, int) Key(IJobView j) =>
-        (j.Type.Class == JobClass.Type1 ? 0 : 1, j.Request.DeadlineMs, j.Id.Value);
+    private (int, int, long, int) Key(IJobView j) =>
+        (_urgent.Contains(j.Id.Value) ? 0 : 1, j.Type.Class == JobClass.Type1 ? 0 : 1, j.Request.DeadlineMs, j.Id.Value);
 
     private void UpdateQueue(IJobView job)
     {
@@ -216,6 +219,16 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
     private void RefreshFree(int hi)
     {
         if (FreeServer(_v.Houses[hi]) is null) _freeHouses.Remove(hi); else _freeHouses.Add(hi);
+        bool victim = false;
+        foreach (var sid in _v.Houses[hi].Servers)
+        {
+            if (_v.Servers[sid.Value].Chunk is not ChunkId cid) continue;
+            var c = _v.Chunk(cid);
+            if (c.Phase == ChunkPhase.Checkpointing) continue;
+            var j = _v.Job(c.Job);
+            if (j.Type.Class == JobClass.Type2 && j.Type.Lifecycle.Checkpointable) { victim = true; break; }
+        }
+        if (victim) _victimHouses.Add(hi); else _victimHouses.Remove(hi);
     }
 
     private double ChunkUnits(IJobView job)
@@ -263,20 +276,24 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
             rem -= desired * _maxKw;
         }
 
-        while (rem > RemainingKwEps && FreeServer(hv) is ServerId free)
+        while (FreeServer(hv) is ServerId free)
         {
             double load = Math.Min(1.0, rem / _maxKw);
             IJobView? pick = null;
+            bool urgentPick = false;
             foreach (var key in _queue)
             {
+                if (key.Urg != 0 && rem <= RemainingKwEps) break;   // only urgent jobs run without heat demand
                 var job = _v.Job(new JobId(key.Job));
                 if (job.UnassignedUnits <= Eps || job.ActiveChunks.Count >= job.Type.MaxChunks) continue;
                 if (!Allowed(hv.Spec, job)) continue;
+                if (key.Urg == 0) { pick = job; urgentPick = true; break; }
                 if (load < job.Type.Lifecycle.MinLoad - LoadEps) continue;
                 pick = job;
                 break;
             }
             if (pick is null) break;
+            if (urgentPick) load = 1.0;
             _a.Start(pick.Id, free, ChunkUnits(pick), load);
             UpdateQueue(pick);
             rem -= load * _maxKw;
@@ -325,7 +342,7 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
             _dueSet.Remove((due, jid));
             _dueOf.Remove(jid);
             var job = _v.Job(new JobId(jid));
-            if (job.Status is not (JobStatus.Waiting or JobStatus.Active)) { _urgent.Remove(jid); continue; }
+            if (job.Status is not (JobStatus.Waiting or JobStatus.Active)) { _queue.Remove(Key(job)); _urgent.Remove(jid); continue; }
             EvaluateUrgent(job);
         }
     }
@@ -344,11 +361,13 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
             return;
         }
 
-        if (_urgent.Add(job.Id.Value))
-            foreach (var cid in job.ActiveChunks) _eval.Add(_v.Chunk(cid).House.Value);   // raise their loads to 1
+        // Evaluated for preemption once, now. From here on the job is sticky urgent and served through the queue.
+        _queue.Remove(Key(job));
+        _urgent.Add(job.Id.Value);
+        foreach (var cid in job.ActiveChunks) _eval.Add(_v.Chunk(cid).House.Value);   // raise their loads to 1
         if (job.UnassignedUnits > Eps && job.ActiveChunks.Count < job.Type.MaxChunks && StartUrgent(job) is int hi)
             _eval.Add(hi);
-        ScheduleDue(job, NextHourMs(), now + 1000);
+        UpdateQueue(job);
     }
 
     /// <summary>Starts an urgent chunk at load 1; returns the house, or null if it must wait (a server was reserved or none found).</summary>
@@ -369,7 +388,7 @@ public sealed class MockHeatLedScheduler : IFleetScheduler
         }
 
         // No free server: stop a checkpointable Type 2 chunk on the first such house by id.
-        for (int hi = 0; hi < _v.Houses.Count; hi++)
+        foreach (int hi in _victimHouses)
         {
             var hv = _v.Houses[hi];
             if (!Allowed(hv.Spec, job)) continue;
