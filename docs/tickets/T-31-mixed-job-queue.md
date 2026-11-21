@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch (1 Draft if the team wants the two-type balance in the draft)  ·  **Area:** Core / year simulation
 - **Depends on:** T-05 (decision 0010), T-26 (Basel scenario), decision 0018
-- **Suggested owner:** Jona / Codex (owner of the queue)  ·  **Owner:** Jona / Codex  ·  **Status:** in progress
+- **Suggested owner:** Jona / Codex (owner of the queue)  ·  **Owner:** Jona / Codex  ·  **Status:** in review (draft PR #25; technical scenario only)
 
 Decision 0020 supersedes medical transcription as the pitch's Type 1 business job: Type 1 is
 public-document batch LLM, while Type 2 is research simulation. A sourced finite LLM arrival
