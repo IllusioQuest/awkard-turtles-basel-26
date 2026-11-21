@@ -1,0 +1,22 @@
+﻿[
+    {
+        "run":  1,
+        "tasks":  320,
+        "runtime_s":  264,
+        "mean_power_w":  14.02,
+        "idle_power_w":  8.16,
+        "energy_gross_wh":  1.0283,
+        "energy_net_wh":  0.4301,
+        "samples":  252
+    },
+    {
+        "run":  2,
+        "tasks":  320,
+        "runtime_s":  274.4,
+        "mean_power_w":  17.17,
+        "idle_power_w":  8.16,
+        "energy_gross_wh":  1.3089,
+        "energy_net_wh":  0.687,
+        "samples":  262
+    }
+]

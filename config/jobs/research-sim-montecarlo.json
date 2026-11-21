@@ -12,8 +12,16 @@
   ],
   "deadlineHours": null,
   "workUnit": "simulation task",
-  "runtimeSecondsPerWorkUnit": null,
-  "energyKwhPerWorkUnit": null,
+  "runtimeSecondsPerWorkUnit": {
+    "value": 0.858,
+    "unit": "s/work unit",
+    "source": "Own measurement 2026-11-21, Intel Core Ultra 7 255H laptop (Windows 11, Docker Desktop), --cpus 8, 8 workers, 320 tasks per run; run 2 (steady state) of data/raw/measurements/research-sim-ising/energy-2026-11-21, docs/jobs/research-sim.md (wall time 274.4 s / 320 tasks)"
+  },
+  "energyKwhPerWorkUnit": {
+    "value": 4.09e-06,
+    "unit": "kWh/work unit",
+    "source": "Own measurement 2026-11-21, Intel Core Ultra 7 255H laptop (Windows 11, Docker Desktop), --cpus 8, 8 workers, 320 tasks per run; run 2 (steady state) of data/raw/measurements/research-sim-ising/energy-2026-11-21, docs/jobs/research-sim.md (whole laptop, gross, battery meter: 1.3089 Wh / 320 tasks)"
+  },
   "progressFile": "data/external/research-sim/work/progress.json",
   "placementPolicy": {
     "mode": "anywhere",

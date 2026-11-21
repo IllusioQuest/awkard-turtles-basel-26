@@ -136,6 +136,7 @@ T-39: PR #22 now includes atomic per-site heat-capacity gaming reservations and 
 T-39: user approved an isolated Mesa Dozen Vulkan build/probe. ADR 0023 proposed; existing A/B desktops untouched during build. Separate source-pinned image only; no Windows driver changes or game download. Core interfaces unchanged.
 ## T-30 research simulation job (2026-11-21, Jona / Claude)
 Branch `feat/T-30-research-simulation-job`: 2D Ising Monte Carlo container (`jobs/research-sim/`),
-descriptor `config/jobs/research-sim-montecarlo.json`, `docs/jobs/research-sim.md`. Code written; image
-build, laptop measurement and LiveRun not yet run (awaiting user approval for Docker). Runtime and
-energy `TODO(source)`. No shared interface changed.
+descriptor `config/jobs/research-sim-montecarlo.json`, `docs/jobs/research-sim.md`. Done: pure Python
+(PyPI unreachable from the hackathon network), measured on battery (0.858 s and 4.09e-6 kWh per task,
+whole laptop), January/July LiveRun with forced pause through the shared scheduler. New Windows battery
+meter `scripts/measure_job_windows_battery.ps1`. 40 .NET tests pass. No shared interface changed.

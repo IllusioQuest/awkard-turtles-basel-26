@@ -39,7 +39,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
 | [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | PR #11 open |
-| [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | Jona / Claude | in progress (branch feat/T-30-research-simulation-job) |
+| [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | Jona / Claude | done (measured, LiveRun-tested) |
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | done (merged 2026-11-21; Type 1 under decision 0020) |

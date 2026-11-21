@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch (a measured extra job type also strengthens must-have 1 for the draft)  ·  **Area:** Jobs
 - **Depends on:** T-03 (generic executor, decision 0009)
-- **Suggested owner:** anyone with a laptop  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (branch `feat/T-30-research-simulation-job`)
+- **Suggested owner:** anyone with a laptop  ·  **Owner:** Jona / Claude  ·  **Status:** done (measured and LiveRun-tested 2026-11-21) (branch `feat/T-30-research-simulation-job`)
 
 ## Goal
 

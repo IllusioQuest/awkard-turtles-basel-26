@@ -30,16 +30,16 @@ import time
 from multiprocessing import Pool
 from pathlib import Path
 
-import numpy as np
+import random
 
 WORK = Path(os.environ.get("WORK", "/work"))
 PASSES = int(os.environ.get("PASSES", "1"))
 WORKERS = int(os.environ.get("WORKERS", "0")) or os.cpu_count() or 1
 
 # Task grid (env-overridable). Defaults give tasks of a few seconds on a laptop core.
-LATTICE_SIZE = int(os.environ.get("LATTICE_SIZE", "64"))
-SWEEPS = int(os.environ.get("SWEEPS", "4000"))
-THERMALISATION_SWEEPS = int(os.environ.get("THERMALISATION_SWEEPS", "1000"))
+LATTICE_SIZE = int(os.environ.get("LATTICE_SIZE", "32"))
+SWEEPS = int(os.environ.get("SWEEPS", "10000"))
+THERMALISATION_SWEEPS = int(os.environ.get("THERMALISATION_SWEEPS", "2000"))
 T_MIN = float(os.environ.get("T_MIN", "1.5"))
 T_MAX = float(os.environ.get("T_MAX", "3.5"))
 N_TEMPERATURES = int(os.environ.get("N_TEMPERATURES", "16"))
@@ -58,28 +58,30 @@ def simulate(task: dict) -> dict:
     (Newman & Barkema 1999, eqs. 1.36 and 3.15).
     """
     size, temp = task["lattice_size"], task["temperature"]
-    rng = np.random.default_rng(task["seed"])
-    spins = rng.choice(np.array([-1, 1], dtype=np.int8), size=(size, size))
-    parity = np.indices((size, size)).sum(axis=0) % 2
-    masks = [parity == 0, parity == 1]
+    rng = random.Random(task["seed"])
+    n = size * size
+    spins = [rng.choice((-1, 1)) for _ in range(n)]
+    # Periodic neighbours of site i = r * size + c: right, left, down, up.
+    right = [r * size + (c + 1) % size for r in range(size) for c in range(size)]
+    left = [r * size + (c - 1) % size for r in range(size) for c in range(size)]
+    down = [((r + 1) % size) * size + c for r in range(size) for c in range(size)]
+    up = [((r - 1) % size) * size + c for r in range(size) for c in range(size)]
+    # Checkerboard order: all even sites, then all odd sites (one sweep = n updates).
+    order = ([i for i in range(n) if (i // size + i % size) % 2 == 0]
+             + [i for i in range(n) if (i // size + i % size) % 2 == 1])
     # Only dE = 4 and 8 can be rejected; acceptance probabilities exp(-dE/T).
     accept = {4: math.exp(-4.0 / temp), 8: math.exp(-8.0 / temp)}
-    n = size * size
     m_abs, m2, e1, e2 = [], [], [], []
     for sweep in range(task["thermalisation_sweeps"] + task["sweeps"]):
-        for mask in masks:
-            nb = (np.roll(spins, 1, 0) + np.roll(spins, -1, 0)
-                  + np.roll(spins, 1, 1) + np.roll(spins, -1, 1)).astype(np.int16)
-            d_e = 2 * spins.astype(np.int16) * nb
-            prob = np.where(d_e <= 0, 1.0, np.where(d_e == 4, accept[4], accept[8]))
-            flip = mask & (rng.random((size, size)) < prob)
-            spins[flip] *= -1
+        for i in order:
+            d_e = 2 * spins[i] * (spins[right[i]] + spins[left[i]] + spins[down[i]] + spins[up[i]])
+            if d_e <= 0 or rng.random() < accept[d_e]:
+                spins[i] = -spins[i]
         if sweep >= task["thermalisation_sweeps"]:
-            s = spins.astype(np.int32)
-            e = -float((s * (np.roll(s, 1, 0) + np.roll(s, 1, 1))).sum()) / n
-            m = abs(float(s.sum())) / n
+            e = -sum(spins[i] * (spins[right[i]] + spins[down[i]]) for i in range(n)) / n
+            m = abs(sum(spins)) / n
             m_abs.append(m); m2.append(m * m); e1.append(e); e2.append(e * e)
-    mean = lambda xs: float(np.mean(xs))  # noqa: E731
+    mean = lambda xs: sum(xs) / len(xs)  # noqa: E731
     return {
         **task,
         "mean_abs_magnetisation": mean(m_abs),
@@ -94,7 +96,8 @@ def prepare() -> None:
     inbox.mkdir(parents=True, exist_ok=True)
     for old in inbox.glob("task_*.json"):
         old.unlink()
-    temps = np.linspace(T_MIN, T_MAX, N_TEMPERATURES)
+    step = (T_MAX - T_MIN) / (N_TEMPERATURES - 1) if N_TEMPERATURES > 1 else 0.0
+    temps = [T_MIN + k * step for k in range(N_TEMPERATURES)]
     k = 0
     for t in temps:
         for s in range(N_SEEDS):
