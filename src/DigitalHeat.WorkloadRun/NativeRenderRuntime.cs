@@ -5,7 +5,7 @@ using System.Text.Json;
 using DigitalHeat.Orchestration;
 
 internal sealed record NativeRenderOptions(string Executable,string ScriptsDirectory,string AssetsDirectory,
-    string GraphicsApi="opengl",string ExpectedVersion="5.3.0",int Threads=1,bool EnableGpu=false);
+    string GraphicsApi="opengl",string ExpectedVersion="5.3.0",int Threads=1,bool EnableGpu=false,bool KeepGpuWarm=false,double WarmIdleTimeoutSeconds=120);
 internal sealed record PreparedScene(string SceneSha256,string RecipeId,string Blender,string BuildHash);
 internal interface IRenderRuntime:IWorkloadRuntime { RenderArtifact[] Results(); }
 internal sealed record NativeOwnership(string FleetId,string AttemptId,string SpecHash,string Activation,
@@ -13,7 +13,7 @@ internal sealed record NativeOwnership(string FleetId,string AttemptId,string Sp
 
 /// <summary>Trusted native scenes only. Platform/GPU settings stay outside MeshPeer/placement.
 /// CPU/RAM are admission requests, not native OS-enforced quotas. Native frames finish before hold.</summary>
-internal sealed class NativeRenderRuntime : IRenderRuntime
+internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
 {
     private readonly RenderConfig cfg;
     private readonly NativeRenderOptions options;
@@ -22,6 +22,7 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
     private readonly Dictionary<string,Process> children=[];
     private readonly Dictionary<int,(DateTimeOffset At,TimeSpan Cpu)> samples=[];
     private string? blenderBuildHash;
+    private readonly FileSystemWatcher? completionWatcher;
     public string RecipeId { get; }
     public Action? Wake { get; set; }
     public string ProfileImage=>"scene:"+RecipeId;
@@ -32,8 +33,9 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
         this.cfg=cfg;options=cfg.Native!;root=Path.Combine(cfg.StateDirectory,"native-attempts");
         Directory.CreateDirectory(root);Directory.CreateDirectory(options.AssetsDirectory);
         if(options.Threads<1||!File.Exists(options.Executable))throw new InvalidDataException("Invalid native Blender executable/threads");
+        if(!double.IsFinite(options.WarmIdleTimeoutSeconds)||options.WarmIdleTimeoutSeconds<=0)throw new InvalidDataException("Invalid warm-worker idle timeout seconds");
         // Same recipe across OS-specific executables; actual Blender version/build is checked in artifacts.
-        string[] files=["native_worker.py","scene_builder.py","scene_settings.json"];
+        string[] files=["native_worker.py","scene_builder.py","scene_settings.json","warm_worker.py"];
         var contents=files.ToDictionary(f=>f,f=>File.ReadAllBytes(Path.Combine(options.ScriptsDirectory,f)));
         RecipeId=Hash(Encoding.UTF8.GetBytes(options.ExpectedVersion+string.Concat(files.Select(f=>Hash(contents[f])))));
         scriptsDirectory=Path.Combine(cfg.StateDirectory,"recipe",RecipeId);Directory.CreateDirectory(scriptsDirectory);
@@ -43,7 +45,15 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
             if(!File.Exists(target)){File.WriteAllBytes(target+".tmp",file.Value);File.Move(target+".tmp",target);}
         }
 
+        if(options.KeepGpuWarm&&options.EnableGpu){
+            // Warm frames do not exit Blender. Wake the unchanged owner loop on atomic
+            // result publication; its timer remains the fallback if an OS event is lost.
+            completionWatcher=new(root,"exit.json"){IncludeSubdirectories=true,NotifyFilter=NotifyFilters.FileName};
+            completionWatcher.Created+=(_,_)=>Wake?.Invoke();completionWatcher.Renamed+=(_,_)=>Wake?.Invoke();
+            completionWatcher.EnableRaisingEvents=true;
+        }
     }
+    public void Dispose()=>completionWatcher?.Dispose();
     private string DirectoryFor(RuntimeAttempt a)=>Path.Combine(root,a.AttemptId);
     private string RecordPath(RuntimeAttempt a)=>Path.Combine(DirectoryFor(a),"owned.json");
     internal static void WriteJson(string path,object value)
@@ -59,12 +69,12 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
             throw new InvalidOperationException("Native attempt identity mismatch; no process mutation permitted");
         return r;
     }
-    private ProcessStartInfo StartInfo(string directory)
+    private ProcessStartInfo StartInfo(string directory,string script="native_worker.py")
     {
         var p=new ProcessStartInfo(options.Executable){UseShellExecute=false,CreateNoWindow=true,WorkingDirectory=directory,
             RedirectStandardOutput=true,RedirectStandardError=true};
         foreach(string arg in new[]{"--factory-startup","--disable-autoexec","--background","--gpu-backend",options.GraphicsApi,
-            "--threads",options.Threads.ToString(),"--python-exit-code","1","--python",Path.Combine(scriptsDirectory,"native_worker.py"),"--",Path.Combine(directory,"spec.json")})p.ArgumentList.Add(arg);
+            "--threads",options.Threads.ToString(),"--python-exit-code","1","--python",Path.Combine(scriptsDirectory,script),"--",Path.Combine(directory,"spec.json")})p.ArgumentList.Add(arg);
         return p;
     }
     public RenderDeviceReport Probe()
@@ -127,6 +137,7 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
         WriteJson(Path.Combine(dir,"spec.json"),new{mode=cmd[0]=="prepare"?"prepare":"frame",directory=dir,activation=r.Activation,
             recipe_id=RecipeId,settings_file=Path.Combine(scriptsDirectory,"scene_settings.json"),
             frame=cmd[0]=="prepare"?0:int.Parse(cmd[0]),scene_sha256=cmd.Length==3?cmd[2]:null,scene_path=cmd.Length==3?AssetPath(cmd[2]):null});
+        if(IsWarm(a)){StartWarm(a,r);return;}
         var p=new Process{StartInfo=StartInfo(dir),EnableRaisingEvents=true};p.Exited+=(_,_)=>Wake?.Invoke();p.Start();children[a.AttemptId]=p;
         var output=p.StandardOutput.ReadToEndAsync();var error=p.StandardError.ReadToEndAsync();
         _=Task.Run(async()=>{File.WriteAllText(Path.Combine(dir,"stdout.log"),await output);File.WriteAllText(Path.Combine(dir,"stderr.log"),await error);});
@@ -152,6 +163,7 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
         var r=Read(a);if(r.Released)return new("missing",null,false);
         if(!r.LaunchRequested)return new("created",a.AttemptId,false);
         if(r.Pid is null)throw new IOException("Ambiguous native spawn: activation was not granted; inspect before recovery");
+        if(IsWarm(a))return ObserveWarm(a,r);
         using var p=OwnedProcess(r);if(p is not null)return new("running",a.AttemptId,true);
         int code=1;string exit=Path.Combine(DirectoryFor(a),"exit.json");
         if(File.Exists(exit))code=JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(exit)).GetProperty("code").GetInt32();
@@ -160,7 +172,7 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
     public void Stop(RuntimeAttempt a)
     {
         if(!a.Request.Lifecycle.AllowStop)throw new InvalidOperationException("Owner did not authorize stopping native work");
-        var r=Read(a);using var p=OwnedProcess(r);if(p is not null){p.Kill(true);if(!p.WaitForExit(30000))throw new IOException("Native stop remains unconfirmed; retain ownership");}
+        var r=Read(a);if(IsWarm(a)){StopWarm(a,r);return;}using var p=OwnedProcess(r);if(p is not null){p.Kill(true);if(!p.WaitForExit(30000))throw new IOException("Native stop remains unconfirmed; retain ownership");}
         WriteJson(RecordPath(a),r with{ExitCode=1});
     }
     public void Remove(RuntimeAttempt a)
@@ -176,6 +188,7 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
                 string target=AssetPath(hash),temp=target+"."+a.AttemptId+".tmp";File.Copy(source,temp,true);File.Move(temp,target,true);
             }else if(!File.Exists(Path.Combine(dir,"frame.png")))throw new InvalidDataException("Native output PNG missing");
         }
+        if(IsWarm(a))ReleaseWarm(a,r);
         WriteJson(RecordPath(a),r with{Released=true,ExitCode=observed.ExitCode});
         if(children.Remove(a.AttemptId,out var child))child.Dispose();
     }
@@ -188,11 +201,15 @@ internal sealed class NativeRenderRuntime : IRenderRuntime
     public JsonElement Stats()
     {
         var now=DateTimeOffset.UtcNow;var rows=new List<object>();
-        foreach(var pair in children.ToArray()){
+        var owned=children.ToDictionary(p=>p.Key,p=>p.Value);
+        var borrowed=new List<Process>();
+        foreach(var pair in warmJobs.ToArray()){var process=OwnedProcess(pair.Value);if(process is not null){owned[pair.Key]=process;borrowed.Add(process);}}
+        foreach(var pair in owned){
             var p=pair.Value;if(p.HasExited)continue;var cpu=p.TotalProcessorTime;
             double? percent=samples.TryGetValue(p.Id,out var prior)?100*(cpu-prior.Cpu).TotalSeconds/(now-prior.At).TotalSeconds:null;
             samples[p.Id]=(now,cpu);rows.Add(new{attempt=pair.Key,pid=p.Id,cpu_percent_one_core=percent,ram_mib=p.WorkingSet64/(1024d*1024),source="Measured native process; admission resources are not OS quotas"});
         }
+        foreach(var process in borrowed)process.Dispose();
         return JsonSerializer.SerializeToElement(rows);
     }
 }

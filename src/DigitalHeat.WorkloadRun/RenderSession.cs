@@ -81,7 +81,7 @@ internal sealed class RenderSession
         return new{s.Id,s.Phase,s.Held,s.Error,can_start_new=CanStart,configured_peers=cfg.Peers.Count,peer_connection_error=pollingError,
             network=new{origin_peer_id=cfg.Id,configured_peer_ids=cfg.Peers.Keys.ToArray(),planned_gpu_peers=cfg.PlannedGpuPeers,
                 connections,peer_snapshot_utc=peerSnapshotUtc,work_data_stale=pollingError is not null},
-            mode="multiple",frames_per_run=cfg.Frames,completed=s.Frames.Length,frames=s.Frames,width=640,height=360,samples=32,
+            mode="multiple",frames_per_run=s.FrameCount??cfg.Frames,completed=s.Frames.Length,frames=s.Frames,width=640,height=360,samples=32,
             engine=cfg.PreparedSceneMode?"Eevee":"Cycles",device=cfg.PreparedSceneMode?"CPU scene preparation → verified GPU frames":"Capability-gated multi-node frame jobs",
             elapsed_seconds=timing.Elapsed,paused_seconds=timing.Paused,active_seconds=timing.Active,
             preparation=s.Scene,preparation_started_utc=s.PreparationStartedUtc,preparation_finished_utc=s.PreparationFinishedUtc,
