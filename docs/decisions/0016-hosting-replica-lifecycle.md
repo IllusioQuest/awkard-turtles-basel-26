@@ -41,4 +41,10 @@ Warm spare recovery cannot overcome all nodes failing or forbidden placement rul
 Controlled synthetic demo traffic only; heat target is not serving-capacity telemetry.
 
 ## Review
-Pending fresh-context review before implementation.
+Verdict: go with changes. Implemented a requirement for two OTHER ready eligible replicas
+immediately before pause; synchronized admission and in-flight accounting through forwarding
+completion; no pause on drain timeout. Config content fingerprint is rechecked after drain.
+Continuous restore-first reconciliation verifies mutations and restores missing serving capacity.
+Interrupted-transition integration test required; late Docker operations remain a documented
+local-lab limitation rather than a production fencing guarantee.
+
