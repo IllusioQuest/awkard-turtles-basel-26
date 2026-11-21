@@ -1,4 +1,4 @@
-# T-27: Self-updating computing price (snapshotted)
+# T-28: Self-updating computing price (snapshotted)
 
 - **Tier:** 2 Pitch  ·  **Area:** Data
 - **Depends on:** T-26 (price method), T-06 (config)

@@ -2,7 +2,7 @@
 
 > **Team decision (2026-11-21, team lead):** adopt **CHF 0.66 per server-hour** for the draft's scored
 > figures (computing income, margin), keep it adjustable (sensitivity 0.25–1.80). The config change
-> goes through T-06 (Jona). An automatic, snapshotted price update is proposed in T-27.
+> goes through T-06 (Jona). An automatic, snapshotted price update is proposed in T-28.
 
 
 > **Recommendation for the team, not a decision.** Research note of 2026-11-21 (Claude subagent).

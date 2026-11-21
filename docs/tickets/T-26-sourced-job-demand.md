@@ -43,7 +43,7 @@ T-02 measured about 436 audio hours per 1 kW server-hour. Demand, not capacity, 
   (Hetzner-equivalent; spot route 0.68), range 0.25–1.80. Transcription per audio hour is worth
   CHF 55–132 per server-hour but fills only 0.01–0.4 % of a house's capacity.
 - **Team lead's decisions:** price **0.66**, adjustable (→ T-06 updates `config/reference-house.json`;
-  automatic snapshotted update proposed in T-27). **Demand model: to be agreed with Ennio** (see below).
+  automatic snapshotted update proposed in T-28). **Demand model: to be agreed with Ennio** (see below).
 
 ## Question for Ennio / Ennio's agent (T-02 owner)
 
