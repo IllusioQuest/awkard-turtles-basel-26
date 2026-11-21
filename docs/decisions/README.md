@@ -76,3 +76,5 @@ later.
 - [0059 - Adapter-specific runtime validation](0059-runtime-validation-boundary.md): proposed; reviewed with changes; native and Docker validation remain separate behind one executor interface.
 
 - [0061 — Renderer network roster and uniform native GPU workers](0061-render-network-roster.md): proposed; user requested two physical GPU servers, reviewed with changes; configs prepared, no remote hosts available.
+
+- [0062 - Size servers per house by marginal value](0062-marginal-value-server-sizing.md): proposed; T-70; Core `ServerSizing` + reference-house report; reviewed with changes; scored figures unchanged.

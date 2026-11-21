@@ -102,3 +102,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-68](T-68-household-job-log.md) | Household simulated job event log and two-day examples | Codex | in progress |
 
 | [T-69](T-69-render-node-visualization.md) | Explain render timing and visualize physical hosts/node contributions | Nikita / Codex | in review; PR #59; real paused run visually checked |
+| [T-70](T-70-server-sizing.md) | Optimise servers per household (reference house, marginal-value sizing) | Ennio / Claude | done; ADR 0062 |
