@@ -45,6 +45,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | done (merged 2026-11-21; Type 1 under decision 0020) |
 | [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | done (PR #20) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | done (PR #26 merged) |
+| [T-41](T-41-free-heat-viability.md) | Free-heat viability from paid demand and realised revenue | 2 Pitch | T-14, T-31, T-35, T-37 | Codex | Jona / Codex | in review |
 
 ## Dependency sketch
 
