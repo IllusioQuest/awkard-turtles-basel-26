@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Webhosting merge and heat-aware integration notes
 
 The user explicitly requested merging the current prototype on 2026-11-21. Release build passes

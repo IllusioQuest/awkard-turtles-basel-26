@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Webhosting prototype workspace
 
 Code is on `feature-webhosting`; documentation is published directly to `main` under `docs/`.
