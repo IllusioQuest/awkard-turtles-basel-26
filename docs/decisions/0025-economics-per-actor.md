@@ -1,4 +1,4 @@
-# 0017: Economics per actor: system surplus, split, levers and win-win grid
+# 0025: Economics per actor: system surplus, split, levers and win-win grid
 
 - **Status:** proposed
 - **Date:** 2026-11-21

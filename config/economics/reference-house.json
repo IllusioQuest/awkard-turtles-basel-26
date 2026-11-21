@@ -1,5 +1,5 @@
 {
-  "Description": "Economics per actor for the reference house (T-14, decision 0017). Variant economics: the scored case figures (case break-even) are unchanged and come from config/reference-house.json. Prices are per 1 kW server-hour (one server-hour = 1 kWh electricity), see docs/model/economics.md.",
+  "Description": "Economics per actor for the reference house (T-14, decision 0025). Variant economics: the scored case figures (case break-even) are unchanged and come from config/reference-house.json. Prices are per 1 kW server-hour (one server-hour = 1 kWh electricity), see docs/model/economics.md.",
   "HardwareDirectory": "config/hardware",
   "DefaultHardwareProfile": "gpu-inference-l4",
   "FillRate": { "value": 0.35, "unit": "fraction", "source": "docs/research/filler-demand.md section 6: base fill rate of offered filler server-hours (Akash GPU 34 %, vast third-party 30 %); assumption, range 0.2-0.6" },

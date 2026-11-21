@@ -6,7 +6,7 @@ using DigitalHeat.Core;
 namespace DigitalHeat.YearRun;
 
 /// <summary>
-/// Writes the economics bundle (T-14, decision 0017) in the T-13 conventions: lever table,
+/// Writes the economics bundle (T-14, decision 0025) in the T-13 conventions: lever table,
 /// required premium shares and win-win grid. Every number comes from Core.Economics and the
 /// unchanged year simulation; this class only loops over scenarios and writes files.
 /// </summary>
@@ -57,7 +57,7 @@ public static class EconomicsBundle
                     var op = runner.Operation(n, policy, p, fill);
                     levers.AppendLine(LeverRow(hw.Id, n, policy, alt, p, fill, inputs, op, Economics.Evaluate(op, inputs)));
                 }
-                // "base" is the model; the other rows are creative-ideas variants (labelled, decision 0017).
+                // "base" is the model; the other rows are creative-ideas variants (labelled, decision 0025).
                 foreach (var (variant, co2, pv) in Variants)
                 {
                     var vin = Economics.InputsFor(hw, e, reference, alt, electricity, null, co2, pv);
@@ -130,7 +130,7 @@ public static class EconomicsBundle
                 Sha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(root, path)))).ToLowerInvariant()
             }).ToArray(),
             Files = new[] { "levers.csv", "required-premium.csv", "win-win.csv", "parameters.json" },
-            Note = "Variant economics (decision 0017). Scored case figures are unchanged; case_break_even uses the case formula. Premium demand is TODO(source): premium shares are a sweep, not a forecast."
+            Note = "Variant economics (decision 0025). Scored case figures are unchanged; case_break_even uses the case formula. Premium demand is TODO(source): premium shares are a sweep, not a forecast."
         });
     }
 
