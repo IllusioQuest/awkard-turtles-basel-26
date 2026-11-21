@@ -1,7 +1,7 @@
-# T-69: Live one-house request and dashboard
+# T-71: Live one-house request and dashboard
 
-- **Owner:** Codex · **Status:** in progress · **Branch:** `feat/T-69-live-household-demo`
-- **Depends on:** T-68, T-58, T-03 and decision 0061.
+- **Owner:** Codex · **Status:** in progress · **Branch:** `feat/T-71-live-household-demo`
+- **Depends on:** T-68, T-58, T-03 and decision 0063.
 
 Build an offline live demonstration using the existing winter and summer reference-house inputs. The existing Fleet heat-first scheduler controls one dedicated real, interruptible local workload; expose simulated house state and independently observed process state to the household dashboard. Prefer transcription when its assets exist, with the existing Monte Carlo image as the local fallback. Never label simulated heat or simulated job completion as measured process output.
 
@@ -10,7 +10,7 @@ Build an offline live demonstration using the existing winter and summer referen
 - Docker is installed and the `digitalheat/research-sim:live-demo` image is available locally. A one-task Monte Carlo workload ran in a dedicated temporary container; the transcription image and model were not found locally.
 - `HeatFirstFleetScheduler` is the scheduler used by the Fleet annual and day runs. Its actions can be wrapped, but Fleet's virtual chunk-completion timer is independent of actual Docker process progress. Never treat one as proof of the other.
 - The existing `DigitalHeat.LiveRun` uses independent annual tank snapshots and logs only to the console; the Fleet API and household page read static, cached results. A live path needs bounded telemetry and must distinguish simulated house data from actual container observations.
-- Review (decision 0061): pace with a monotonic clock; serialize and confirm process actions; account for simulated completion and real early exit; clean up only a container owned by the demo; test pause, resume and failure paths. A small console proof is the first milestone.
+- Review (decision 0063): pace with a monotonic clock; serialize and confirm process actions; account for simulated completion and real early exit; clean up only a container owned by the demo; test pause, resume and failure paths. A small console proof is the first milestone.
 
 ## Proposed demonstration
 

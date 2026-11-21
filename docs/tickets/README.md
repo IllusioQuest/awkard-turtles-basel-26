@@ -100,4 +100,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-66](T-66-landscape-render.md) | Landscape render comparison on heat-first mesh | Nikita / Codex | in progress; ADR 0052; depends PR #52 |
 | [T-67](T-67-local-fleet-scenarios.md) | Local fleet scenarios (FHNW Dreispitz + indoor pool; Interlaken/Brig-Goms across CH) | Ennio / Claude | done; variant only; PRs #55, #56 |
 | [T-68](T-68-household-job-log.md) | Household simulated job event log and two-day examples | Codex | done (PR #58) |
-| [T-69](T-69-live-household-demo.md) | Live one-house request and dashboard | Codex | in progress |
+| [T-71](T-71-live-household-demo.md) | Live one-house request and dashboard | Codex | in progress |
