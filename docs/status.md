@@ -132,3 +132,5 @@ T-22: `docs/paper/outline.md` with title, draft abstract, candidate contribution
 T-39 interface coordination: user approved largest remaining useful heat capacity. Proposed ADR 0022 factors the existing GreedyHeatScheduler numerator into a shared helper (valid results unchanged), adds a gaming-only in-memory reservation model/demo; does not implement T-11/T-12 network optimisation or alter IScheduler/IExecutor. Runtime launch/preemption remains separate.
 
 T-39: PR #22 now includes atomic per-site heat-capacity gaming reservations and deterministic home/hotel/spa demo. Shared Greedy numerator factored into HeatCapacity (IScheduler/IExecutor unchanged); 14 gaming and 40 Core tests pass. Runtime session launch/preemption still pending. See ADR 0022 and gaming-lab.md; no scored inputs changed.
+
+T-39: user approved an isolated Mesa Dozen Vulkan build/probe. ADR 0023 proposed; existing A/B desktops untouched during build. Separate source-pinned image only; no Windows driver changes or game download. Core interfaces unchanged.
