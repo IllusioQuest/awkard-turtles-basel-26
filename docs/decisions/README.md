@@ -35,3 +35,4 @@ later.
 | 0027, 0028 | L4 GPU basis, economics per actor | reserved on unmerged branch `feat/T-14-economics`; not on `main` |
 | [0029](0029-type1-heat-budget-reservation.md) | Reserve heat-led capacity for Type 1 (B1-reserve/B2-reserve control; LP-persist dropped) | accepted as control experiment (T-12) |
 | [0030](0030-transfer-delay.md) | Transfer delay for moved Type 1 work (amends 0025 §3; data staged at arrival) | proposed; reviewed with changes (T-12) |
+| [0031](0031-mixed-job-queue.md) | Finite jobs and sold filler capacity in one C# year run | proposed; user approved T-31, reviewed with changes |

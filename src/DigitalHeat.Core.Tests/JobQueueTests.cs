@@ -1,3 +1,4 @@
+using System.Globalization;
 using DigitalHeat.Core;
 using Xunit;
 
@@ -94,5 +95,92 @@ public sealed class JobQueueTests
             [valid with { Interruptible = false }]).Validate());
         Assert.Throws<InvalidDataException>(() => new JobScenario("finite", "wait", "test",
             [valid with { ArrivalsPerDay = new Parameter(1, "jobs/day", "TODO(source)") }]).Validate());
+    }
+
+    private static JobScenario Mixed(double arrivals, double soldShare) => new("mixed", "wait",
+        "synthetic mixed-queue test fixture",
+        [Type("type-1", arrivals, 1, 1, 24) with
+            { PriceChfPerServerHour = TestValue(.90, "CHF/server-hour") }],
+        new FillerJobDemand("type-2", "server-hour", TestValue(.66, "CHF/server-hour"),
+            TestValue(soldShare, "fraction")));
+
+    [Fact]
+    public void MixedQueueServesFiniteJobsFirstAndNeverDumpsFillerHeat()
+    {
+        var p = Parameters();
+        var demand = Enumerable.Range(0, 24).Select(hour => new DemandHour(
+            $"2025-01-01T{hour:00}:00", 0, true, 3.2, 0)).ToArray();
+        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
+            new SimulatedExecutor(), Mixed(1, 1));
+        var jobs = Assert.IsType<JobSummary>(result.Summary.Jobs);
+        Assert.Equal(1, jobs.ByType[0].Completed);
+        Assert.Equal(1, jobs.ByType[0].ServerHours, 8);
+        Assert.Equal(95, jobs.Filler!.ServerHours, 8);
+        Assert.Equal(result.Summary.ServerHours, jobs.ByType[0].ServerHours + jobs.Filler.ServerHours, 8);
+        Assert.Equal(result.Summary.ComputingIncomeChf,
+            jobs.ByType[0].ComputingIncomeChf!.Value + jobs.Filler.ComputingIncomeChf, 8);
+        Assert.Equal(1 * .90 + 95 * .66, result.Summary.ComputingIncomeChf, 8);
+        Assert.Equal(0, result.Summary.DumpedHeatKwh, 8);
+    }
+
+    [Fact]
+    public void ConstrainedFillerRunsOnlySoldCapacity()
+    {
+        var p = Parameters();
+        var demand = Enumerable.Range(0, 24).Select(hour => new DemandHour(
+            $"2025-01-01T{hour:00}:00", 0, true, 3.2, 0)).ToArray();
+        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
+            new SimulatedExecutor(), Mixed(1, .35));
+        var jobs = result.Summary.Jobs!;
+        Assert.Equal(1, jobs.ByType[0].ServerHours, 8);
+        Assert.Equal(33.6, jobs.Filler!.ServerHours, 8);
+        Assert.Equal(.6, result.Hours[0].ActualLoadPerServer, 8);
+        Assert.Equal(.35, result.Hours[1].ActualLoadPerServer, 8);
+        Assert.Equal(0, result.Summary.DumpedHeatKwh, 8);
+    }
+
+    [Fact]
+    public void EmptyFiniteQueueWithFullySoldFillerMatchesUnlimitedReference()
+    {
+        var p = Parameters();
+        var lines = File.ReadAllLines(Path.Combine(Root(),
+            "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
+        int header = Array.FindIndex(lines, x => x.StartsWith("time,", StringComparison.Ordinal));
+        var weather = lines.Skip(header + 1).Where(x => x.Length > 0).Select(line =>
+        {
+            var fields = line.Split(',');
+            return new WeatherHour(fields[0], double.Parse(fields[1], CultureInfo.InvariantCulture));
+        }).ToArray();
+        var demand = HeatDemand.Build(weather, p);
+        var unlimited = YearSimulation.Run(demand, p,
+            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(),
+            JobScenario.Load(Path.Combine(Root(), "config", "job-scenarios", "unlimited.json")));
+        var mixed = YearSimulation.Run(demand, p,
+            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), Mixed(0, 1));
+        Assert.Equal(unlimited.Summary.Coverage, mixed.Summary.Coverage, 10);
+        Assert.Equal(unlimited.Summary.DumpedHeatKwh, mixed.Summary.DumpedHeatKwh, 10);
+        Assert.Equal(unlimited.Summary.ServerHours, mixed.Summary.ServerHours, 8);
+        Assert.Equal(unlimited.Summary.BreakEvenChfPerServerHour!.Value,
+            mixed.Summary.BreakEvenChfPerServerHour!.Value, 10);
+        Assert.InRange(mixed.Summary.Coverage, .5804, .5806);
+        Assert.InRange(mixed.Summary.ServerHours, 22660.5, 22661.5);
+        Assert.Equal(0, mixed.Summary.Jobs!.ByType[0].ServerHours);
+        Assert.Equal(mixed.Summary.ServerHours, mixed.Summary.Jobs.Filler!.ServerHours, 8);
+    }
+
+    [Fact]
+    public void MixedScenarioRejectsUnsourcedOrOversoldFiller()
+    {
+        Assert.Throws<InvalidDataException>(() => (Mixed(1, 1) with
+            { Filler = Mixed(1, 1).Filler! with
+                { PriceChfPerServerHour = TestValue(0, "CHF/server-hour") } }).Validate());
+        Assert.Throws<InvalidDataException>(() => Mixed(1, 1.1).Validate());
+        Assert.Throws<InvalidDataException>(() => (Mixed(1, 1) with
+            { Filler = Mixed(1, 1).Filler! with
+                { SoldCapacityShare = new Parameter(.35, "fraction", "TODO(source)") } }).Validate());
+        Assert.Throws<InvalidDataException>(() => (Mixed(1, 1) with
+            { ExcessHeatPolicy = "run-and-dump" }).Validate());
+        Assert.Throws<InvalidDataException>(() => (Mixed(1, 1) with
+            { JobTypes = [Type("type-1", 1, 1, 1, 24)] }).Validate());
     }
 }

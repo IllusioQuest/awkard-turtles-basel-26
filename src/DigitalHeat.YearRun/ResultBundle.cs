@@ -61,6 +61,24 @@ public static class ResultBundle
         });
         WriteJson(Path.Combine(output, "run.json"), run);
         WriteHourly(Path.Combine(output, "sites", SiteId, "hourly.csv"), result.Hours);
+        if (scenario.Mode == "mixed")
+        {
+            var jobs = result.Summary.Jobs ?? throw new InvalidDataException("Mixed run has no job summary.");
+            WriteJson(Path.Combine(output, "jobs.json"), new
+            {
+                SchemaVersion, SiteId, Mode = scenario.Mode, ScenarioPath = scenarioRelative,
+                TotalServerHours = result.Summary.ServerHours,
+                TotalComputingIncomeChf = result.Summary.ComputingIncomeChf,
+                ByType = jobs.ByType.Select(type => new
+                {
+                    type.Id, type.WorkUnit, type.Arrived, type.DueWithinHorizon,
+                    type.Completed, type.Missed, type.Backlog, type.WorkUnitsProcessed,
+                    type.BacklogWorkUnits, type.ServerHours, type.ComputingIncomeChf,
+                    type.MissedDeadlinePercent
+                }),
+                Filler = jobs.Filler
+            });
+        }
         File.WriteAllText(Path.Combine(output, "flows.csv"),
             "local_time,job_id,from_site_id,to_site_id,work_units,work_unit\n", new UTF8Encoding(false));
     }
