@@ -61,3 +61,9 @@ The team lead asked to agree the demand model for the scored figures with you. O
 3. **Only sourced transcription** (coverage 0.1 %, honest "demand is the bottleneck" story).
 
 Please write your answer here or in `docs/status.md` (section "Open coordination").
+
+**Ennio's answer (2026-11-21):** option 1, as two job types: **Type 1** sovereign AI services
+(transcription, local LLM T-29, later OCR/indexing) served first, **Type 2** interruptible batch
+compute (Monte Carlo, simulations) as the heat-producing filler, priced by free capacity. Recorded
+as decision 0015 (proposed, team confirmation pending). Scored figures keep the pinned 0.66 and
+state "Type 2 demand unlimited"; follow-ups T-30 (Type 2 job), T-31 (mixed queue), T-32 (heat-led price).

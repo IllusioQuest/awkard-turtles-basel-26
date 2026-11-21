@@ -22,10 +22,12 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (subagent) | `feat/T-28-price-updater` | T-28: Azure Retail Prices snapshot (Switzerland North) and derived CHF per server-hour (`data/derived/computing-price.json`) | new files only (`scripts/`, `data/raw/market/price-snapshots/`, `data/derived/`); does not change `config/reference-house.json` (T-06) | PR #11 open; derived C1 0.687 vs adopted 0.66 |
 | team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new files only; reference house keeps the case's 1 kW server | in progress |
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none yet; proposes interface changes for T-12 in the decision record | in progress |
+| Ennio / Claude (subagent) | `docs/two-job-types-strategy` | Decision 0015 (two job types, Type 1 pays / Type 2 heats), vision and brainstorm update, T-26 answer, tickets T-30 to T-32 | none (docs only; T-31 will extend the decision-0010 scenario format) | PR open, team confirmation pending |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Open coordination
 
+- **Answered 2026-11-21:** Ennio chose premium + filler as two job types (decision 0015, proposed); see T-26. Mixed queue → T-31 (Jona).
 - **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
 - **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
 - **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).
@@ -44,7 +46,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
   laptop runtime and power/energy measurements (or a visible `TODO(source)`), then test pause,
   resume and throttle using the shared scheduler. No job protocol is imposed by this branch.
 - `data/raw/` with its `SOURCE` files (on `main`).
-- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006).
+- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006), 0014 (routing model, T-11 branch), 0015 (two job types, `docs/two-job-types-strategy`).
 
 ## Known integration risks
 

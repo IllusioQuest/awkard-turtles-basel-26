@@ -39,6 +39,10 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
 | [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | PR #11 open |
+| T-29 | Local LLM job (Apertus 8B via llama.cpp): container and laptop measurement (Type 1, decision 0015) | 2 Pitch | T-03 | – | main session (branch `feat/T-29-local-llm-job`) | in progress (ticket file on its branch) |
+| [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: sandboxed interruptible batch compute (Monte Carlo), measured | 2 Pitch | T-03, T-24; decision 0015 | anyone with a laptop | | open |
+| [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + unlimited Type 2 in one year run | 2 Pitch | T-05, T-26; decision 0015 | Jona / Codex | | open |
+| [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 
 ## Dependency sketch
 

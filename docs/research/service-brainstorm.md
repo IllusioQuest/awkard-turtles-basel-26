@@ -7,6 +7,15 @@
 
 ## Current main plan (may change)
 
+> **Update 2026-11-21 (decision 0015, proposed by Ennio, team confirmation pending):** two job
+> types. **Type 1** = the confidential batch AI below plus a local LLM (T-29); it earns the margin
+> but its demand fills only a tiny share of a house's capacity (T-02, `job-demand.md`).
+> **Type 2** = interruptible batch compute (Monte Carlo, parameter sweeps, research simulations)
+> sold by the server-hour at a heat-led dynamic price; it produces most of the heat. Matches
+> enablers #17 (thermal-aware pricing) and the "sandboxes for AI agents" idea below. The trust gap
+> now has a second side: third-party code in a private home (sandbox, no network, separated from
+> Type 1 data). The text below describes Type 1.
+
 **Confidential batch AI for Swiss customers with sensitive data:**
 
 - **Audio to text** (transcription, incl. Swiss German dialects): meetings, dictations, hearings,

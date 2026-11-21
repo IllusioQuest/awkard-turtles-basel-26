@@ -117,7 +117,28 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
+## Two job types (proposed, decision 0015, 2026-11-21)
+
+Ennio's proposal, which makes the "filler load" below concrete (the section below stays as the
+background):
+
+- **Type 1, sovereign AI services:** transcription (T-02), local LLM (T-29), later OCR and
+  document indexing. Sold per work unit as local, Swiss, data-safe; served first; has deadlines.
+  **Type 1 pays.**
+- **Type 2, interruptible batch compute:** remaining capacity whenever heat is needed, sold as a
+  task queue for simulations and research computations (Python/C++, Monte Carlo, parameter
+  sweeps), priced by free capacity. **Type 2 heats.**
+
+Conditions (decision 0015): Type 2 as short, idempotent, sandboxed tasks without home-network or
+internet access and never on a server holding Type 1 data at the same time; dynamic price floored
+at the marginal cost (0.226 / 0.3325 CHF per server-hour) and capped at the Swiss spot equivalent
+(1.80); scored figures keep the pinned 0.66 and state "Type 2 demand unlimited". Still open: a
+sourced buyer for SLA-free home CPU. Follow-up tickets: T-30 (Type 2 job and sandbox), T-31 (mixed
+queue), T-32 (heat-led price).
+
 ## Under consideration: filler load sold as spot capacity (2026-11-21)
+
+> Made concrete as Type 2 by decision 0015 (proposed); kept here as background.
 
 Real demand for our premium service (confidential transcription) fills only a tiny share of a
 house's server capacity: about 436 audio hours per 1 kW server-hour (T-02) against 428 dictation
