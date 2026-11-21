@@ -36,3 +36,5 @@ later.
 | [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
 
 | [0022](0022-gaming-heat-capacity-placement.md) | Shared useful heat capacity and atomic gaming reservations | proposed; user approved ranking, reviewed with changes |
+
+| [0023](0023-intel-dozen-vulkan-experiment.md) | Isolated Mesa Dozen Vulkan build for Intel WSL | proposed; user approved experiment, reviewed with changes |

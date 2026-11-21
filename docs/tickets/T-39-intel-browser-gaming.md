@@ -40,3 +40,5 @@ separate /opt prefix and pinned Selkies base; no Windows changes or desktop repl
 C: free space is about 21 GB versus official CS2 requirement of 85 GB, so driver experiment
 can proceed but a fresh CS2 install needs another storage decision. Existing Steam manifest
 is not evidence of a usable Linux installation and will not be modified automatically.
+
+Dozen experiment now passes Intel GPU enumeration and vkcube render/presentation, including desktop C. Sources, commands and limits in gaming-lab.md; ADR 0023 reviewed. User browser-C visual check requested. No game downloaded. Current C limits (4 GiB, 2 CPU equivalents) are desktop-smoke limits; a CS2 profile must be separately sized against the 8 GB RAM minimum and available host resources before launch.
