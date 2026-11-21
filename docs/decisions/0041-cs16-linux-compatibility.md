@@ -65,3 +65,19 @@ community target if feasible; only client work is distributed, not a match serve
 
 Reviewed existing runtime assumes trusted operator profiles and is not an untrusted tenant sandbox.
 Use the stronger inspected trial configuration before deciding whether to add the new profile.
+
+Implementation update: draft PR #42. Docker Desktop does not publish the internal-only desktops'
+ports directly in this lab. User approved a reusable configuration-driven TCP relay: fixed
+operator routes, loopback-only host ports, non-root/read-only/no-mount execution, bounded buffers,
+connections and resources; the desktop nodes retain internal-only networks. It is test infrastructure,
+not production HA. User subsequently requested no login on D/E; only their local loopback access
+was changed. Shared job/scheduler interfaces and Minecraft are unchanged. Background repair was
+confirmed by the user. Installer/multiplayer feasibility remains unverified; see the lab guide.
+
+Online-phase clarification after user-reported successful game launch: normal outbound game access
+is explicitly enabled per node via the configured bridge without restarting it or publishing a
+game port. Offline topology remains the Compose default and installer-target precondition. Online
+nodes are an intentional less-isolated variant; socket/host-mount/capability restrictions remain.
+Only D has verified installed assets; E's profile must not claim readiness. User-requested exit
+uses exact user-owned process name inside a uniquely selected node, graceful signal only, not a
+global Wine/node kill. Scheduler/admission strategy and scored figures are unchanged.

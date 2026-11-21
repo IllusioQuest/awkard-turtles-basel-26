@@ -137,12 +137,23 @@ change how much heat is produced, only which work makes it.
 delay costs no deadline here, because the year-round sinks have enough free summer capacity to finish
 the excess in the remaining 12 h. B2 even moves less with a delay: without it, its persistence test
 sends work away that would still have finished at home. With d ≥ 24 h (the deadline) no work can move
-and missed deadlines return to B1's level. LP for d = 4 and 12 h: pending.
+and missed deadlines return to B1's level. The LP keeps 0 % missed at d = 4 h (49,793 moved server-h)
+and d = 12 h (49,847), almost the same as without delay (49,884).
 
 ### C. Forecast error (LP, Type 1 share 30 %)
 
-Pending (full-year LP runs with σ24 = 0.05 / 0.10 / 0.20, ρ = 0.8, seed 20251121; both are
-`TODO(source)` and shown as a sweep).
+Full-year LP runs, synthetic AR(1) error, ρ = 0.8, seed 20251121 (σ24 and ρ are `TODO(source)` and
+shown as a sweep). Output `data/derived/network/experiments/C_forecast_error-lp.csv`.
+
+| Forecast | Coverage | Dumped kWh | Missed Type 1 | Moved server-h | Runtime |
+|---|---:|---:|---:|---:|---:|
+| perfect foresight | 83.42 % | 0 | 0 % | 49,884 | (exp. A) |
+| σ24 = 0.05 | 83.39 % | 0 | 0 % | 49,882 | 1.7 h |
+| σ24 = 0.10 | 83.35 % | 0 | 0 % | 49,929 | 1.7 h |
+| σ24 = 0.20 | 83.23 % | 0 | 0 % | 49,967 | 1.9 h |
+
+Forecast errors cost the network almost nothing: no deadline is missed, coverage drops 0.19 points at
+σ24 = 20 %. The year-round sinks absorb what the forecast gets wrong.
 
 ### How to read it
 

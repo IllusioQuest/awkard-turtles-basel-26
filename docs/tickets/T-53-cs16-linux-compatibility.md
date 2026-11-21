@@ -30,6 +30,30 @@ remained running; laptop load is uncontrolled. Raw evidence:
 `docs/performance/scheduler-cs16-preflight-2026-11-21.json`. This is not a CS-loaded result.
 Code branch explicitly includes PR #38 (and #37) so it reuses that admission implementation.
 
+Current handoff: draft PR #42; two offline Linux desktops and reusable fixed-route TCP relay run
+at localhost:18884/18885. User requested no login, limited to these loopback-only desktops.
+User confirmed background repair and visible installer. First timeout and later global-file-limit
+mistake diagnosed; log-only cap replaces `ulimit -f` (6251f08), with a large-file regression test.
+36 gaming + 46 orchestration + 3 relay + 2 Linux runner checks pass; Docker/HTTP checks pass.
+The user handles installer/license UI after stopping browser control. Installation, multiplayer,
+public-server compatibility, CPU split and game-loaded scheduler timing are not verified.
+See `docs/jobs/cs16-linux-lab.md`; do not mark this ticket done.
+
+Follow-up log fix: Windows CRLF in the here-string appended CR to the installer filename.
+Normalize the shell payload before Linux dispatch. Forced-CRLF argv check and actual retry passed
+the launch-path check; no failed-to-open error remained at inspection. Earlier status-file values
+could be stale/corrupt and did not prove that the installer itself was stuck. Game completion is
+still pending; no Minecraft or scheduler code changed.
+
+Later handoff (8b38550): user confirms CS starts; D's installed files inspected and the existing
+C# launcher now has a windowed 800x600 CS profile. E is explicitly not CS-ready. Generic scoped
+application exit closed D's game without stopping its desktop; standard bindings were retained.
+Clicks/scrolling remain under diagnosis, so controls are not marked fixed. D's offline installer
+network was the internet-access blocker; explicit online transition preserves process/restart
+count, and DNS, HTTPS 200, plus a public server's UDP query response passed. A joined playable
+public match is not verified. Installer execution refuses an online target. Evidence/instructions
+are in the lab guide; Minecraft and admission code unchanged. Two-client and loaded timing pending.
+
 Done criteria: verified client test and real multiplayer connection, repeatable config/commands,
 documented runtime/latency measurements and limitations, tests passing, code PR and shared docs.
 If setup is declined or prerequisites are unavailable, record the actual outcome without claiming
