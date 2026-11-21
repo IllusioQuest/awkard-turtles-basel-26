@@ -13,7 +13,7 @@
   "tasksPerJob": { "value": 6, "unit": "tasks/job", "source": "Demo choice: a job is small enough to finish within its deadline on one warm node." },
   "deadlineSteps": { "value": 10, "unit": "steps", "source": "Demo choice: 10 scheduler hours from arrival; a node at full heat finishes 6 tasks in 6 steps, a node below 60 % heat cannot." },
   "forecastHorizonSteps": { "value": 6, "unit": "steps", "source": "Demo choice: horizon of the persistence forecast passed to the scheduler (the LP plans over it; B2 uses only the current hour)." },
-  "autoSpawnEverySteps": { "value": 3, "unit": "steps", "source": "Demo choice: when auto-spawn is on, one new job arrives every 3 steps at a node drawn with the seed below." },
+  "autoSpawnEverySteps": { "value": 5, "unit": "steps", "source": "Demo choice: when auto-spawn is on, one new job arrives every 5 steps (about half of the four nodes' capacity at medium heat) at a node drawn with the seed below." },
   "seed": { "value": 20261121, "unit": "integer", "source": "Fixed seed for reproducible auto-spawn and task seeds." },
   "scheduler": "B2",
   "nodes": [

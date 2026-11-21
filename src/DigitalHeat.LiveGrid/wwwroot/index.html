@@ -179,7 +179,7 @@ function render(s){
     const work=n.running.length+n.waiting.length,paused=n.targetLoad===0;
     el.classList.toggle("paused",paused&&work>0);
     el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-(n.actualLoad??0))).toFixed(1));
-    el.querySelector(".state").textContent=n.error?"Docker error":!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`;
+    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`;
     el.querySelector(".state").title=n.error||"";}
   place(s);
   document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));

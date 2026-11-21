@@ -28,8 +28,12 @@ public sealed class DockerCliContainerControl : IContainerControl, IBatchedConta
 
     public void Pause(string containerId) => Run("pause", containerId);
     public void Unpause(string containerId) => Run("unpause", containerId);
+    // Docker accepts at most two decimals for --cpus ("value is too precise" otherwise), see ADR 0009.
     public void SetCpuLimit(string containerId, double cpuCores) =>
-        Run("update", "--cpus", cpuCores.ToString("R", CultureInfo.InvariantCulture), containerId);
+        Run("update", "--cpus", FormatCpus(cpuCores), containerId);
+
+    public static string FormatCpus(double cpuCores) =>
+        Math.Max(0.01, Math.Round(cpuCores, 2, MidpointRounding.AwayFromZero)).ToString("0.##", CultureInfo.InvariantCulture);
 
     public double ReadCpuPercent(string containerId)
     {

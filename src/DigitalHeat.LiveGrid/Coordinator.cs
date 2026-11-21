@@ -173,7 +173,14 @@ sealed class LiveCoordinator
                 SchedulerController.Apply(signal, new CommittedDecisionScheduler(signal, decision.PerSite[i]), executors[i]);
                 lock (gate) errors[i] = null;
             }
-            catch (Exception e) { lock (gate) errors[i] = e.Message; }
+            catch (Exception e)
+            {
+                lock (gate)
+                {
+                    if (errors[i] != e.Message) Console.Error.WriteLine($"[{ids[i]}] Docker: {e.Message}");
+                    errors[i] = e.Message;
+                }
+            }
         }
     }
 
@@ -184,6 +191,8 @@ sealed class LiveCoordinator
         try { File.Move(from, to); }
         catch (FileNotFoundException) { return; }      // the worker claimed it first: it stays there
         catch (DirectoryNotFoundException) { return; }
+        catch (IOException) { return; }                 // locked for a moment (Windows): try next step
+        catch (UnauthorizedAccessException) { return; }
         var job = jobs[m.Job];
         double heat = state.States[m.FromNode].Signal.DemandKwh / cal.RecoverableKwhPerStep;
         int left = job.DueStep - step;
@@ -224,7 +233,7 @@ sealed class LiveCoordinator
                 foreach (var f in Directory.GetFiles(Dir("queue", i), $"j{job.Id:0000}-*.json"))
                     if (TryDelete(f)) removed++;
             Add("missed", job.Id, null, job.Origin, $"Job {job.Id} missed its deadline: {job.Tasks - job.Done} of {job.Tasks} tasks "
-                + $"not done ({removed} waiting removed; a running task finishes but does not count)");
+                + $"not done ({removed} waiting removed). No house had enough free heat to take the rest in time.");
         }
     }
 
@@ -246,7 +255,8 @@ sealed class LiveCoordinator
 
     private static bool TryDelete(string f)
     {
-        try { File.Delete(f); return true; } catch (IOException) { return false; }
+        try { File.Delete(f); return true; }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
     }
 
     private string Label(int node) => cfg.Nodes[node].Label;
@@ -279,22 +289,22 @@ sealed class LiveCoordinator
                     heatShare = HeatShare(i), targetLoad = targetLoad[i], actualLoad = ActualLoad?.Invoke(cfg.Nodes[i].Container),
                     error = errors[i],
                     waiting = tasks.Where(t => t.Node == i && !t.Running).OrderBy(t => t.DueStep).ThenBy(t => t.Id)
-                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }),
+                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }).ToArray(),
                     running = tasks.Where(t => t.Node == i && t.Running)
-                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }),
-                }),
+                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }).ToArray(),
+                }).ToArray(),
                 jobs = jobs.Values.OrderByDescending(j => j.Id).Take(12).Select(j => new
                 {
                     id = j.Id, origin = ids[j.Origin], spawnStep = j.SpawnStep, dueStep = j.DueStep, tasks = j.Tasks,
                     done = j.Done, state = j.Missed ? "missed" : j.Done >= j.Tasks ? "finished" : "open",
-                }),
+                }).ToArray(),
                 totals = new
                 {
                     finished = jobs.Values.Count(j => !j.Missed && j.Done >= j.Tasks),
                     missed = jobs.Values.Count(j => j.Missed),
                     moves = events.Count(e => e.Kind == "move"),
                 },
-                events = events.Where(e => e.Seq > since),
+                events = events.Where(e => e.Seq > since).ToArray(),
             };
         }
     }
@@ -336,7 +346,13 @@ sealed class CachedDockerControl(DockerCliContainerControl docker) : IContainerC
     public void SetCpuLimit(string id, double cores)
     {
         lock (limit) if (limit.TryGetValue(id, out double l) && l == cores) return;
-        docker.SetCpuLimit(id, cores);
+        try { docker.SetCpuLimit(id, cores); }
+        catch (InvalidOperationException e) when (e.Message.Contains("paused", StringComparison.OrdinalIgnoreCase))
+        {
+            // Some Docker builds refuse to update a paused container: unpause, then set (runs briefly at the old quota).
+            Unpause(id);
+            docker.SetCpuLimit(id, cores);
+        }
         lock (limit) limit[id] = cores;
     }
 
