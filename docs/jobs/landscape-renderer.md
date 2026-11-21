@@ -261,3 +261,13 @@ The user selected the compatible Linux GPU worker path and confirmed no host is
 available yet. A current Blender 5.3 / self-contained Linux x64 bundle is prepared
 using the same mesh/executor. See [Linux worker deployment](linux-render-worker.md).
 This does not enable a GPU on the Windows laptop or deploy a remote machine.
+
+
+## Current workflow supersedes comparison instructions
+
+The user retired single-node/comparison execution. Use the [native multi-node
+renderer](native-renderer.md): CPU preparation plus consistent GPU Eevee frames.
+Native Intel Iris Xe rendering is now verified on Windows; prior Docker/WSL
+failures remain valid historical measurements, not a claim that the chip cannot
+render. Linux GPU deployment is still unverified. Old comparison outputs remain
+archived; their commands/UI descriptions above are historical.
