@@ -1,0 +1,31 @@
+{
+  "id": "reference-only",
+  "description": "The case's reference house alone (decision 0025). Case values from config/reference-house.json; Type 1 volume is a labelled scenario.",
+  "timezone": "Europe/Zurich",
+  "year": 2025,
+  "sites": [
+    {
+      "id": "basel-reference-house",
+      "name": "Reference house Basel",
+      "kind": "reference-house-case",
+      "canton": "BS",
+      "latitudeDeg": { "value": 47.56, "unit": "deg", "source": "docs/case/challenge.md: Basel (47.56 N, 7.59 E)" },
+      "longitudeDeg": { "value": 7.59, "unit": "deg", "source": "docs/case/challenge.md: Basel (47.56 N, 7.59 E)" },
+      "countryCode": "CH",
+      "serverCount": { "value": 4, "unit": "servers", "source": "config/reference-house.json: four-server draft baseline (prototypes/year-explorer), not a case requirement" },
+      "serverElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference" },
+      "heatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water" },
+      "tankCapacityKwh": { "value": 35, "unit": "kWh", "source": "docs/case/challenge.md: approximate usable storage, no losses" },
+      "minimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "config/reference-house.json: zero-minimum-load comparison scenario (prototypes/year-explorer)" },
+      "electricityPriceChfPerKwh": { "value": 0.3325, "unit": "CHF/kWh", "source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100" },
+      "heatValueChfPerKwh": { "value": 0.133, "unit": "CHF/kWh", "source": "docs/case/challenge.md: electricity price 0.3325 CHF/kWh / heat-pump efficiency 2.5" },
+      "demand": { "model": "case-linear", "weatherFile": "data/raw/open-meteo/basel-2025-hourly.csv", "parameters": "config/reference-house.json" },
+      "type1": {
+        "shareOfHeatLedServerHours": { "value": 0.3, "unit": "fraction", "synthetic": true, "note": "Scenario (decision 0025 §6): Type 1 volume as a share of the site's yearly heat-led server-hours; no sourced arrival rate exists (decision 0020). Sweep 0.1 / 0.3 / 0.5." },
+        "deadlineHours": { "value": 24, "unit": "hours", "synthetic": true, "note": "Assumed 24 h deadline for the batch LLM service (decision 0020)." },
+        "serverHoursPerJob": { "value": 0.000917, "unit": "server-hours/job", "source": "T-33 measurement (docs/jobs/llm-summary.md): 0.92 Wh per document, i.e. about 1,090 documents per 1 kW server-hour (decision 0020); 1 / 1,090 = 0.000917; assumes energy scales linearly" }
+      },
+      "placement": { "mode": "country-allowlist", "allowedCountryCodes": ["CH"], "source": "Scenario policy (decision 0025): Swiss customers' work stays in Switzerland; example, not an existing customer contract" }
+    }
+  ]
+}

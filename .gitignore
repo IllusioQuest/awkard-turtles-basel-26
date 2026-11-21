@@ -28,3 +28,6 @@ __pycache__/
 
 # Agent worktrees (temporary)
 .claude/worktrees/
+
+# Mock map export (regenerate: python scripts/make_network_mock_export.py)
+data/derived/network/*/mock-export/

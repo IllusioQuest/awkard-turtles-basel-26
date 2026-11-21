@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DigitalHeat network · Switzerland</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="viz-root">
+    <header class="top">
+      <div class="title">
+        <h1>Heat-led computing across Switzerland</h1>
+        <p class="sub">Servers run where buildings need heat. Work moves to where heat is wanted.</p>
+      </div>
+      <div class="badges">
+        <span class="badge" id="badge-synthetic" title="Positions, building sizes, server counts and Type 1 volumes are synthetic test values; weather and demand profiles are sourced. See config/network/README.md.">Synthetic test data</span>
+        <span class="badge badge-warn" id="badge-mock" hidden>Mock data · layout only, not a result</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="map-panel" aria-label="Map">
+        <div class="controls">
+          <div class="seg" id="strategy-seg" role="radiogroup" aria-label="Scheduling strategy"></div>
+          <div class="seg" id="metric-seg" role="radiogroup" aria-label="Colour shows">
+            <button data-metric="load" class="on" role="radio" aria-checked="true">Server load</button>
+            <button data-metric="coverage" role="radio" aria-checked="false">Heat covered</button>
+          </div>
+        </div>
+        <svg id="map" role="img" aria-label="Map of Swiss sites; colour shows the selected measure, lines show work moving between sites"></svg>
+        <div class="legend" id="legend"></div>
+        <div class="tooltip" id="tooltip" role="status" hidden></div>
+      </section>
+
+      <aside class="side">
+        <div class="now">
+          <div class="now-date" id="now-date">–</div>
+          <div class="now-grid">
+            <div><span class="k">Heat demand</span><span class="v" id="now-demand">–</span></div>
+            <div><span class="k">From servers</span><span class="v" id="now-used">–</span></div>
+            <div><span class="k">Work moved</span><span class="v" id="now-moved">–</span></div>
+          </div>
+        </div>
+        <h2>Year 2025 · <span id="kpi-strategy">–</span></h2>
+        <div class="kpis" id="kpis"></div>
+        <p class="note" id="run-note"></p>
+        <button class="link" id="toggle-table" aria-expanded="false">Show sites as table</button>
+      </aside>
+    </main>
+
+    <section class="timeline" aria-label="Timeline">
+      <div class="playbar">
+        <button id="play" class="play" aria-label="Play">▶</button>
+        <div class="seg seg-small" id="step-seg" role="radiogroup" aria-label="Step">
+          <button data-step="day" class="on" role="radio" aria-checked="true">Days</button>
+          <button data-step="hour" role="radio" aria-checked="false">Hours</button>
+        </div>
+        <input id="slider" type="range" min="0" max="364" value="14" aria-label="Time">
+      </div>
+      <svg id="chart" role="img" aria-label="Network heat demand and heat from servers per day over 2025"></svg>
+      <div class="chart-legend">
+        <span><i class="sw sw-demand"></i>Heat demand of all sites</span>
+        <span><i class="sw sw-used"></i>Covered by server heat</span>
+        <span><i class="sw sw-moved"></i>Work moved between sites</span>
+      </div>
+    </section>
+
+    <section class="table-view" id="table-view" hidden>
+      <table id="site-table"></table>
+    </section>
+
+    <footer class="foot">
+      Weather: Open-Meteo (CC BY 4.0). Profiles: When2Heat (CC BY 4.0), SIA 2024 / BFE. Boundaries: Natural Earth (public domain).
+      Dataset: <code>config/network/switzerland-test.json</code> · decision 0025.
+    </footer>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

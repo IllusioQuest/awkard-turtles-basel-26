@@ -36,12 +36,20 @@ public sealed record NetworkSite(
         p.ElectricityPriceChfPerKwh.Value / p.HeatPumpEfficiency.Value, demand);
 }
 
-/// <summary>What a network scheduler sees in one hour: every site's signal and forecast.</summary>
+/// <summary>
+/// What a network scheduler sees in one hour: every site's signal and forecast, and (when a work
+/// model runs, decision 0025) the pending Type 1 cohorts and the filler available per site.
+/// </summary>
 public sealed record NetworkState(int HourIndex, string LocalTime, IReadOnlyList<NetworkSite> Sites,
-    IReadOnlyList<SiteHeatState> States);
+    IReadOnlyList<SiteHeatState> States, WorkView? Work = null);
 
-/// <summary>One decision per site, in the order of <see cref="NetworkState.Sites"/>.</summary>
-public sealed record NetworkDecision(IReadOnlyList<SchedulerDecision> PerSite);
+/// <summary>
+/// One load decision per site, in the order of <see cref="NetworkState.Sites"/>. With a work model,
+/// also the Type 1 allocations (cohort, site, server-hours) and the planned filler server-hours per
+/// site. Without allocations (step-1 strategies), all achieved load is filler.
+/// </summary>
+public sealed record NetworkDecision(IReadOnlyList<SchedulerDecision> PerSite,
+    IReadOnlyList<WorkAllocation>? Allocations = null, IReadOnlyList<double>? FillerServerHours = null);
 
 public interface INetworkScheduler
 {

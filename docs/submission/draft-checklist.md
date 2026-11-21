@@ -65,3 +65,8 @@ Legend: ✅ in `main` · 🟡 exists but not merged / partly · ❌ missing
 - What exactly must be submitted at 15:00 (form, repo link, video, slides, text)? → T-00.
 - README section "How to run the demo" (YearRun, LiveRun with the transcription container).
 - Submit by 14:30 at the latest (buffer).
+
+## Update 2026-11-21 06:50
+
+- README now has "Demo in four steps" (YearRun, research-sim container, LiveRun January day, LiveRun July day with forced pause). Commands follow `docs/jobs/research-sim.md`, verified there on a laptop by the job owner; not re-run in the cloud check (Docker Hub rate limit).
+- Since the first check: T-02, T-30, T-33 measured jobs merged; finite/mixed queue (T-31, PR #25) and final T-06 figures (PR #21) in review.
