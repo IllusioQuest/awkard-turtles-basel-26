@@ -126,6 +126,8 @@ def docker(*args: str, check: bool = True) -> str:
 def docker_run_args(a: argparse.Namespace, detach: bool, env: dict[str, str]) -> list[str]:
     # Run as the calling user so the host can delete the outputs between runs.
     args = ["run", "--rm", "--user", f"{os.getuid()}:{os.getgid()}"] + (["-d"] if detach else []) + ["--cpus", str(a.cpus)]
+    if a.memory:
+        args += ["--memory", a.memory]
     if a.name:
         args += ["--name", a.name]
     for m in a.mount:
@@ -286,6 +288,7 @@ def main() -> None:
         p.add_argument("--mount", action="append", default=[], help="docker -v value, repeatable")
         p.add_argument("--env", action="append", default=[], help="KEY=VALUE, repeatable")
         p.add_argument("--cpus", type=float, required=True, help="docker --cpus allowance")
+        p.add_argument("--memory", default="", help="docker --memory limit, e.g. 8g")
         p.add_argument("--progress-file", type=Path, required=True, help="host path of progress.json")
         p.add_argument("--clear", type=Path, action="append", default=[], help="host dir to delete before a run")
         p.add_argument("--idle-seconds", type=float, default=60)

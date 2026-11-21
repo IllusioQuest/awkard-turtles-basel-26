@@ -13,7 +13,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 |---|---|---|---|---|---|---|
 | [T-00](T-00-team-decisions.md) | Team decisions that unblock the tickets | 1 Draft | – | whole team (15 min) | Nikita / Codex (coordination) | in progress |
 | [T-01](T-01-job-catalog.md) | Job model and job catalog (must-have 1) | 1 Draft | T-00 | Codex or anyone | Team lead / Claude | blocked: waiting for Nikita's decision on always-on representation (then Claude implements the schema) |
-| [T-02](T-02-measure-laptop-job.md) | Measure one real job on a laptop (must-have 1) | 1 Draft | T-00 | anyone with a laptop | Ennio / Claude | in review |
+| [T-02](T-02-measure-laptop-job.md) | Measure one real job on a laptop (must-have 1) | 1 Draft | T-00 | anyone with a laptop | Ennio / Claude | done (PR #15) |
 | [T-03](T-03-generic-job-executor.md) | Generic real-job executor behind IExecutor (must-have 2) | 1 Draft | T-02 (job image) | Nikita or Codex (prompt prepared in chat) | Jona / Codex | done (PR #3, decision 0009) |
 | [T-04](T-04-live-demo-run.md) | LiveRun: one day replayed with the real job (demo for must-have 2) | 1 Draft | T-03 | same person as T-03 | Jona / Codex | done (PR #3: DigitalHeat.LiveRun day replay) |
 | [T-05](T-05-jobs-in-year-simulation.md) | Jobs, queue and deadlines in the year simulation (must-have 3) | 1 Draft | T-01 | Codex | Jona / Codex | done (PR #6, decision 0010); sourced finite scenario: T-26 |
@@ -42,7 +42,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: interruptible batch compute (Monte Carlo), measured | 2 Pitch | T-03; decision 0018 | anyone with a laptop | | open |
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
-| [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-29-local-llm-job`) |
+| [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-33-local-llm-job`) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | in progress |
 
 ## Dependency sketch
