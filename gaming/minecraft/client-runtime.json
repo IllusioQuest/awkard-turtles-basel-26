@@ -1,0 +1,12 @@
+{
+  "applications": [{
+    "id": "minecraft", "executable": "/home/ubuntu/.local/share/digitalheat/minecraft-launcher/minecraft-launcher",
+    "working_directory": "/home/ubuntu", "user": "ubuntu",
+    "log_path": "/home/ubuntu/.local/share/digitalheat/minecraft-launcher-startup.log",
+    "arguments": [], "variants": {},
+    "environment": {"DISPLAY": ":20", "XDG_RUNTIME_DIR": "/tmp/runtime-ubuntu", "PULSE_SERVER": "unix:/tmp/runtime-ubuntu/pulse/native"},
+    "required_capabilities": ["minecraft-launcher-installed", "streaming-desktop"]
+  }],
+  "nodes": [{"id": "session-a", "docker_context": "desktop-linux", "compose_project": "digitalheat-gaming", "compose_service": "session-a", "browser_url": "http://localhost:18881", "hardware_profile_id": "minecraft-client-lab"}],
+  "hardware_profiles": [{"id": "minecraft-client-lab", "capabilities": ["minecraft-launcher-installed", "streaming-desktop"], "source": "Prepare-MinecraftClient.ps1 checks installed launcher integrity on the existing Node A. Launcher window observed 2026-11-21. Game rendering, account entitlement and gameplay require user verification; no Minecraft GPU performance claim."}]
+}
