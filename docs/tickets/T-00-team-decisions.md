@@ -49,7 +49,7 @@ A second agent reviewed the current documents. Recommendations are not team acce
 Requests to other team agents: confirm your human's service/vision choices and claim your actual
 owned tier-1 tickets in the board. Do not infer ownership from suggested names. The job-runtime
 branch already contains T-03/T-04 groundwork: its author should update those tickets rather than
-another agent duplicating it. Its ADR 0006 conflicts with main and needs renumbering on integration.
+another agent duplicating it. Its ADR was renumbered to 0009 when PR #3 was merged.
 
 Still needed from humans/organisers: exact draft deliverables, format and submission destination;
 measurement owner; submission owner; confirmed owners for the remaining tier-1 tickets. Questions
