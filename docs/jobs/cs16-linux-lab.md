@@ -110,3 +110,57 @@ Planned first game test: two client sessions perform rendering/input on differen
 authoritative shared match host. This distributes **client workloads**, not a single server tick
 simulation. Do not claim public compatibility from local success. Test a named compatible community
 server without changing authentication/anti-cheat policies once client feasibility is established.
+
+## Installed client, online mode and an exit independent of input capture
+
+The user subsequently confirmed that CS starts. Its installed directory on D is
+`C:\Games\Counter-strike 1.6 Original` (Wine path under that node's own home). Only D has the
+`cs16-installed` capability in `runtime-profiles.cs16.json`; E still cannot launch that profile.
+The user reports bad clicks/scrolling and inability to exit, so input compatibility remains open.
+Standard `MOUSE1 +attack`, `MOUSE2 +attack2`, wheel-next/previous bindings were inspected and kept
+at the user's request. A host-side scoped SIGTERM closed exactly one user-owned `hl.exe` on D;
+it did not stop the desktop, Wine services, Minecraft or any other node. Subsequent scoped exit
+was idempotent. CS was relaunched through the existing C# profile launcher at 800x600 windowed,
+providing a visible game title bar instead of the previous fullscreen trap. Process launch is
+confirmed; user verification of improved input/close behavior is pending. Wine reports software
+rendering (llvmpipe); no frame/input latency measurement is claimed.
+
+```powershell
+# From the feature checkout; no global process kill or container restart:
+./gaming/scripts/Stop-LabApplication.ps1 -Node session-d -ProcessName hl.exe
+./gaming/scripts/Start-Application.ps1 -Application cs16 -Node session-d -Profiles ./gaming/deploy/runtime-profiles.cs16.json
+```
+
+Selkies' installed client binds **Ctrl+Shift+X** to gaming mode, which requests pointer/keyboard
+capture. Three separate Escape presses within about one second release gaming mode. Click the
+stream before using its shortcut; browser pointer lock needs a user gesture. A plain Escape may
+be sent to the remote game rather than leaving fullscreen. The user was asked to test capture
+in Chrome; local browser automation is unavailable, and exact click/scroll symptoms remain under
+investigation. Do not describe controls as fixed merely because a game process exists.
+
+The internet-server problem had a confirmed infrastructure cause: D was still on the installer's
+internal-only network. In response to the user's public-server request, `Set-LabNodeNetwork.ps1`
+attached D to the pre-existing normal bridge with an explicit default-gateway priority. Docker
+PID/restart count were checked unchanged. No host-network mode, elevated capability, host mount,
+Docker socket or new inbound game port was added. D now has normal outbound access; E remains
+offline. This online phase is less network-isolated than installer mode, intentionally. The
+installer launcher explicitly refuses an online target; don't disconnect a live game just to
+rerun setup. Repeated online requests are idempotent. Container recreation via Compose returns
+to the declared offline topology; do not use it to refresh settings during an active session.
+
+```powershell
+./gaming/scripts/Set-LabNodeNetwork.ps1 -Node session-d -Mode online
+./gaming/scripts/Test-Cs16Lab.ps1 -AllowOnlineNodes
+# Explicitly disconnects external game access; use only when that is intended:
+./gaming/scripts/Set-LabNodeNetwork.ps1 -Node session-d -Mode offline
+```
+
+Read-only checks from D passed DNS resolution, HTTPS 200 to Valve's store, and a 99-byte UDP
+A2S_INFO response (type 0x49) from `217.156.22.74:27015`. The
+[server operator's page](https://play.free-arena.ro/ro/server/cs16-classic), accessed 2026-11-21,
+lists this public endpoint and direct-connect instructions. This proves that endpoint's UDP
+query path at test time, **not** client authentication or a playable joined match. A user can try
+`connect 217.156.22.74:27015` in the CS console or add it to Favorites if the bundled master list
+is empty. No Steam/authentication/anti-cheat files or master-server configuration were patched.
+The scheduler code and measured preflight are unchanged; two-client play and loaded timing remain
+pending. The latest controls/network work is in commit `8b38550` of draft PR #42.

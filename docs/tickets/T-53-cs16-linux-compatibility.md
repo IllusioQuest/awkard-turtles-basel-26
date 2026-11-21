@@ -45,6 +45,15 @@ the launch-path check; no failed-to-open error remained at inspection. Earlier s
 could be stale/corrupt and did not prove that the installer itself was stuck. Game completion is
 still pending; no Minecraft or scheduler code changed.
 
+Later handoff (8b38550): user confirms CS starts; D's installed files inspected and the existing
+C# launcher now has a windowed 800x600 CS profile. E is explicitly not CS-ready. Generic scoped
+application exit closed D's game without stopping its desktop; standard bindings were retained.
+Clicks/scrolling remain under diagnosis, so controls are not marked fixed. D's offline installer
+network was the internet-access blocker; explicit online transition preserves process/restart
+count, and DNS, HTTPS 200, plus a public server's UDP query response passed. A joined playable
+public match is not verified. Installer execution refuses an online target. Evidence/instructions
+are in the lab guide; Minecraft and admission code unchanged. Two-client and loaded timing pending.
+
 Done criteria: verified client test and real multiplayer connection, repeatable config/commands,
 documented runtime/latency measurements and limitations, tests passing, code PR and shared docs.
 If setup is declined or prerequisites are unavailable, record the actual outcome without claiming
