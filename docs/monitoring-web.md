@@ -135,3 +135,17 @@ npm run lint
 User-facing browser preview is local; code is in [PR #35](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/35), not yet merged. Documentation
 is committed directly to main per the standing team workflow. Historical T-42 console commands in
 older docs describe that retired version; use this guide for the replacement.
+
+## T-50 observation update
+
+[PR #40](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/40) depends on #35 and replaces
+local repeated Docker CLI observation with reusable built-in .NET named-pipe/Unix-socket reads.
+Unsupported remote contexts retain the bounded CLI fallback. No new port, library or game-control
+endpoint is added. The existing startup commands and `/admin` controls stay the same; logic stays
+in `gaming/monitor/`. Source revision, raw measurements and checks are in
+[the T-50 report](performance/docker-observation-improvement.md).
+
+CPU now requires two valid fresh samples and shows their actual interval. Refresh after the
+five-second observation cache expires; unknown does not mean zero. RAM excludes reported Linux
+inactive-file cache and has its own observation timestamp. These are resource observations, not
+electrical-power readings. Human merge order: #35 then #40 (retarget to main after #35).

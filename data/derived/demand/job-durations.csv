@@ -1,0 +1,9 @@
+source,series,duration_bin,jobs,share_jobs,share_gpu_hours
+alibaba2020,gpu tasks,<1 min,112296,0.1533,0.0002
+alibaba2020,gpu tasks,1-10 min,251579,0.3434,0.0078
+alibaba2020,gpu tasks,10-60 min,180989,0.2470,0.0564
+alibaba2020,gpu tasks,1-4 h,123352,0.1684,0.1659
+alibaba2020,gpu tasks,4-12 h,46481,0.0634,0.2657
+alibaba2020,gpu tasks,12-24 h,12842,0.0175,0.2023
+alibaba2020,gpu tasks,1-3 d,4745,0.0065,0.2310
+alibaba2020,gpu tasks,>3 d,407,0.0006,0.0706

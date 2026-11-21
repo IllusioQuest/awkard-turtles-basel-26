@@ -73,7 +73,7 @@ def run_one(exp: str, args: list[str]) -> list[dict]:
     name = exp + "__" + "_".join(a.strip("-").replace(",", "+") for a in args) + ".json"
     done = RUNS / name
     if done.exists():
-        return json.loads(done.read_text())
+        return json.loads(done.read_text(encoding="utf-8"))
     with tempfile.TemporaryDirectory() as tmp:
         summary = Path(tmp) / "summary.jsonl"
         cmd = [str(BINARY), ".", "--scenario", SCENARIO, *args, "--summary-json", str(summary)]
@@ -85,7 +85,7 @@ def run_one(exp: str, args: list[str]) -> list[dict]:
     for row in rows:
         row["experiment"] = exp
     RUNS.mkdir(parents=True, exist_ok=True)
-    done.write_text(json.dumps(rows))
+    done.write_text(json.dumps(rows), encoding="utf-8")
     print(f"[done] {exp} {' '.join(args)}", flush=True)
     return rows
 
@@ -123,12 +123,12 @@ def main() -> int:
     for exp in sorted({r["experiment"] for r in results}):
         rows = [r for r in results if r["experiment"] == exp]
         suffix = "-lp" if a.lp else ""
-        with open(OUT / f"{exp}{suffix}.csv", "w", newline="") as f:
+        with open(OUT / f"{exp}{suffix}.csv", "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
             w.writeheader()
             for r in rows:
                 w.writerow({**r, "excludeKinds": ",".join(r.get("excludeKinds") or [])})
-        with open(OUT / f"{exp}{suffix}.jsonl", "w") as f:
+        with open(OUT / f"{exp}{suffix}.jsonl", "w", encoding="utf-8") as f:
             for r in rows:
                 f.write(json.dumps({**r, "gitCommit": commit, "scenarioLabel": "synthetic test network, scenario"}) + "\n")
     print(f"wrote {len(results)} rows to {OUT.relative_to(ROOT)} (commit {commit})")

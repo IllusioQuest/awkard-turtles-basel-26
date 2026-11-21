@@ -1,0 +1,126 @@
+{
+  "description": "Inputs of scripts/price_comparison.py (T-16): our cost per unit versus market prices. Every value has a unit and a source; hardware costs come from config/hardware/*.json, electricity and heat value from config/reference-house.json.",
+  "utilisationScenarios": [
+    {
+      "id": "reference-house",
+      "soldShareOfHours": {
+        "value": 0.6467,
+        "unit": "fraction",
+        "source": "results of dotnet run --project src/DigitalHeat.YearRun -- . : 22,661 server-hours / (4 servers x 8,760 h), docs/results/reference-house.md"
+      }
+    },
+    {
+      "id": "filler-fill-rate",
+      "soldShareOfHours": {
+        "value": 0.35,
+        "unit": "fraction",
+        "source": "docs/research/filler-demand.md: base fill rate of interruptible filler marketplaces (assumption built from sources)"
+      }
+    }
+  ],
+  "hoursPerYear": {
+    "value": 8760,
+    "unit": "h/year",
+    "source": "365 days x 24 h (data: 8,760 hourly values, data/raw/open-meteo/SOURCE.md)"
+  },
+  "hardwareProfiles": [
+    "cpu-server",
+    "gpu-inference-l4",
+    "gpu-inference-l4-refurbished"
+  ],
+  "llm": {
+    "inputTokenShare": {
+      "value": 0.91,
+      "unit": "fraction",
+      "source": "docs/jobs/llm-summary.md: measured document mix, 91 % input tokens (T-33)"
+    },
+    "energyKwhPerMillionTokens": {
+      "cpu-server": {
+        "value": 0.254,
+        "unit": "kWh/1M tokens (mix)",
+        "source": "docs/jobs/llm-summary.md: 0.92 Wh per 3,629 tokens, laptop CPU, Apertus 8B, scaled to the 1 kW server by equal energy per token"
+      },
+      "gpu-inference-l4": {
+        "value": 0.04,
+        "unit": "kWh/1M tokens (mix)",
+        "source": "docs/research/l4-throughput.md: recommended 25 M tokens per kWh of a 1 kW L4 server (all tokens, input:output 2:1, vLLM Qwen2.5-7B; conservative reading); range 14.4 M (decision 0027 proxy) to about 93 M (our 91 % input mix from the input/output rates: 0.91/128 + 0.09/25 kWh per 1M); card power 72 W assumed, host 162.5 W"
+      },
+      "gpu-inference-l4-refurbished": {
+        "value": 0.04,
+        "unit": "kWh/1M tokens (mix)",
+        "source": "same card as gpu-inference-l4 (docs/research/l4-throughput.md)"
+      }
+    },
+    "marketRowIds": [
+      "ai-llm-kvant-qwen3-8b",
+      "ai-llm-kvant-granite33-8b",
+      "ai-llm-kvant-mistral-7b",
+      "ai-llm-infomaniak-ministral3-14b",
+      "ai-llm-publicai-apertus-v15-8b",
+      "ai-llm-mistral-ministral3-8b",
+      "ai-llm-or-llama31-8b-deepinfra",
+      "ai-llm-or-llama31-8b-bedrock",
+      "ai-llm-openai-gpt5-nano-batch",
+      "ai-llm-anthropic-haiku55-batch"
+    ],
+    "sensitivityEnergyKwhPerMillionTokens": {
+      "gpu-inference-l4": {
+        "low": 0.0694,
+        "high": 0.0107,
+        "unit": "kWh/1M tokens",
+        "source": "docs/research/l4-throughput.md: 14.4 M tokens/kWh (decision 0027 proxy) and ≈93 M tokens/kWh (input-heavy mix)"
+      }
+    }
+  },
+  "transcription": {
+    "audioHoursPerServerHourFrom": {
+      "value": "TranscriptionAudioHoursPerServerHour",
+      "unit": "audio h/server-hour",
+      "source": "config/hardware/*.json field (CPU: whisper.cpp base measured, T-02; L4: whisper-large-v3-turbo, third-party benchmark)"
+    },
+    "marketRowIds": [
+      "ai-stt-aws-transcribe-batch-euc2",
+      "ai-stt-azure-batch-chn",
+      "ai-stt-google-v2-dynbatch",
+      "ai-stt-openai-4o-mini-transcribe",
+      "ai-stt-elevenlabs-scribe-v3",
+      "ai-stt-deepgram-nova3-prerec"
+    ]
+  },
+  "researchMonteCarlo": {
+    "tasksPerServerHour": {
+      "cpu-server": {
+        "value": 244000,
+        "unit": "tasks/server-hour",
+        "source": "docs/jobs/research-sim.md: 1,000 Wh / 0.00409 Wh per task (2D Ising, laptop, T-30); informative only, no market price per task exists"
+      }
+    },
+    "marketPerServerHour": [
+      {
+        "id": "azure-zurich-on-demand-1kw",
+        "value": 9.7348,
+        "unit": "CHF/1 kW server-hour",
+        "source": "data/derived/computing-price.json a1_on_demand_min (Azure Switzerland North D32as v5, scaled to 1 kW, snapshot 2026-11-21)"
+      },
+      {
+        "id": "azure-zurich-spot-1kw",
+        "value": 1.799,
+        "unit": "CHF/1 kW server-hour",
+        "source": "data/derived/computing-price.json a2_spot_min (Azure Switzerland North spot, scaled to 1 kW)"
+      },
+      {
+        "id": "hetzner-dedicated-1kw",
+        "value": 0.66,
+        "unit": "CHF/1 kW server-hour",
+        "source": "docs/research/computing-price.md: adopted price (Hetzner dedicated server equivalent)"
+      },
+      {
+        "id": "home-host-market-1kw",
+        "value": 0.6873,
+        "unit": "CHF/1 kW server-hour",
+        "source": "data/derived/computing-price.json c1_market_tracking (spot x community/datacentre ratio)"
+      }
+    ],
+    "note": "Compared for the CPU profile only: our Monte Carlo job runs on the host CPU; on an L4 server the cards would idle (docs/research/l4-throughput.md), so a per-server-hour comparison there is not meaningful."
+  }
+}

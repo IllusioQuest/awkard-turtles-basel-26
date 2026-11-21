@@ -59,3 +59,41 @@ system surplus first and split it second. \todo{heat fee and win-win zone (T-14,
 
 \paragraph{Price trends.} \todo{price trends to 2030 and lifetime averages
 (\texttt{profitability-inputs.md}~\S5): token and compute prices fall about 25--29\,\% a year}
+
+\paragraph{Price comparison with known providers.} Table~\ref{tab:price-comparison} sets our cost per
+unit against list prices of known providers (\texttt{docs/research/price-comparison.md}). Running
+costs (electricity minus the value of the heat used) are negligible per unit; hardware and the share
+of hours actually sold decide the price. On an L4 server, transcription costs a small fraction of
+market prices and LLM batch work is in the range of Swiss and global batch offers; a CPU server is
+competitive for neither LLM work nor research computing. Quality, latency guarantees and data location
+are not priced in: our offer is interruptible batch work that stays in Switzerland.
+
+\begin{table}[ht]
+  \centering
+  \caption{Our cost per unit versus market list prices (CHF, 2026-11-21). Full cost includes
+    depreciation and operations at \qty{64.7}{\percent} (\qty{35}{\percent}) sold hours. L4 throughput
+    from third-party benchmarks with assumed card power; CPU values measured on a laptop and scaled
+    to \qty{1}{kW}. Reproduce with \texttt{python3 scripts/price\_comparison.py}
+    (\texttt{data/derived/price\_comparison.csv}).}
+  \label{tab:price-comparison}
+  \small
+  \begin{tabular}{llrl}
+    \toprule
+    Product & Offer & Cost / price & Region \\
+    \midrule
+    LLM 8B, per \num{1e6} tokens & ours, L4, full cost & 0.054 (0.093) & CH \\
+     & ours, CPU, full cost & 0.63 (1.12) & CH \\
+     & kvant Qwen3 8B & 0.034 & CH \\
+     & Mistral Ministral 3 8B & 0.126 & EU \\
+     & Infomaniak Ministral 14B & 0.309 & CH \\
+    \midrule
+    Transcription, per audio hour & ours, L4 (large-v3-turbo), full cost & 0.003 (0.005) & CH \\
+     & Azure batch / Google / OpenAI & 0.151 & Azure: CH \\
+     & AWS Transcribe batch & 0.303 & CH \\
+    \midrule
+    Monte Carlo, per \qty{1}{kW} server-hour & ours, CPU, full cost & 2.49 (4.41) & CH \\
+     & Hetzner dedicated & 0.66 & EU \\
+     & Azure Switzerland North spot & 1.80 & CH \\
+    \bottomrule
+  \end{tabular}
+\end{table}
