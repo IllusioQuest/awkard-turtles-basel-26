@@ -125,6 +125,7 @@
     "First render after cold start/idle retirement can still take about 8\u201310s; later frames reuse state.",
     "One early diagnostic assertion observed failed during an in-progress stop; final stop settled cancelled with owned attempts released. A bounded rerun had no failure before stop.",
     "Windows warm execution verified; Linux bundle built, remote GPU/locking path not exercised; macOS warm mode explicitly unsupported.",
-    "No GPU utilization sensor, measured recovered heat, extra physical GPU or multi-host speedup claim."
+    "No GPU utilization sensor, measured recovered heat, extra physical GPU or multi-host speedup claim.",
+    "Owner restart was tested with the prior run completed/drained; active-frame Blender survival across an owner-process crash was not verified."
   ]
 }
