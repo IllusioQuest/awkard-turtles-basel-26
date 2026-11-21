@@ -5,8 +5,9 @@ import type { DataSource, HouseInfo, HousePeriod, NetworkHour, RunInfo } from '.
 import MapView, { type HeatLayer, type MapState } from './MapView'
 import MockBanner from './MockBanner'
 import SitePanel from './SitePanel'
-import { EconomicsChart, HeatChart, LoadChart, MissedChart, type MissedPoint, type MonthlyPoint, type SeriesPoint } from './charts'
-import { DAY_MS, HOURS_PER_DAY, alignHour, chf, dateTime, dayTick, dec1, lastHour, monthTick, num, pct, wallMs } from './format'
+import { EconomicsChart, HeatChart, LoadChart, MissedChart, type MonthlyPoint, type NetworkBucket } from './charts'
+import { HOURS_PER_DAY, MS_PER_HOUR, alignHour, chf, dateTime, dayHourTick, dayTick, dec1, lastHour, monthTick, num, pct, wallMs } from './format'
+import { resolution } from '../household/series'
 import {
   TEMP_LEGEND_TICKS_C,
   TEMP_SCALE_MAX_C,
@@ -18,7 +19,6 @@ import {
 } from './weather'
 import './admin.css'
 
-const CHART_WINDOW_DAYS = 3
 // Playback speeds in simulated periods (hours, or days for daily runs) per second. The view redraws
 // at most MAX_FPS times per second; faster speeds advance several periods per frame and skip the
 // ones in between, so the browser never queues more work than it can draw.
@@ -74,7 +74,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const [heatLayer, setHeatLayer] = useState<HeatLayer>('none')
   const [showWeather, setShowWeather] = useState(false)
   const [rangeId, setRangeId] = useState<RangeId>('24h')
-  const rangeHours = RANGES.find((r) => r.id === rangeId)!.hours
+  const { hours: rangeHours, label: rangeLabel } = RANGES.find((r) => r.id === rangeId)!
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const id = params.get('house')
     return houses.some((h) => h.id === id) ? id : null
@@ -135,10 +135,17 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
   const weather = useWeatherField(source, run, t, showWeather)
 
-  // Stats over the hours (t − range, t].
+  // Selected window: the run hours [fromH, toH) = the range ending with the selected period, i.e.
+  // (t + step − range, t + step]. The stats and every time chart below use exactly this window.
+  const fromH = Math.max(0, t + step - rangeHours)
+  const toH = Math.min(network.length, t + step)
+  // Bucket size from the household view's helper (network rows are hourly).
+  const { bucketMs, unit } = resolution((toH - fromH) * MS_PER_HOUR, 1)
+  const bucketHours = bucketMs / MS_PER_HOUR
+
   const totals = useMemo(() => {
     const sum = { load: 0, used: 0, dumped: 0, completions: 0, misses: 0, income: 0, cost: 0, n: 0 }
-    for (let h = Math.max(0, t - rangeHours + 1); h <= t && h < network.length; h++) {
+    for (let h = fromH; h < toH; h++) {
       const n = network[h]
       sum.load += n.load
       sum.used += n.heatUsedKwh
@@ -150,20 +157,31 @@ function RunView({ source, run, runs, houses, network }: Props) {
       sum.n++
     }
     return sum
-  }, [network, t, rangeHours])
+  }, [network, fromH, toH])
 
-  const series = useMemo<SeriesPoint[]>(() => {
-    const from = Math.max(0, t - CHART_WINDOW_DAYS * HOURS_PER_DAY)
-    const to = Math.min(network.length - 1, t + CHART_WINDOW_DAYS * HOURS_PER_DAY)
-    return network.slice(from, to + 1).map((n) => ({
-      t: wallMs(run, n.h),
-      load: n.load,
-      heatUsedKw: n.heatUsedKwh,
-      heatDumpedKw: n.heatDumpedKwh,
-      heatDemandKw: n.heatDemandKwh,
-    }))
-  }, [network, t, run])
+  // Hours of the window per bucket: load and heat (kWh per hour = kW) averaged, misses summed.
+  const buckets = useMemo<NetworkBucket[]>(() => {
+    const out: (NetworkBucket & { n: number })[] = []
+    const label = bucketHours < HOURS_PER_DAY ? dayHourTick : dayTick
+    for (let h = fromH; h < toH; h++) {
+      const n = network[h]
+      const i = Math.floor((h - fromH) / bucketHours)
+      let b = out[i]
+      if (!b) {
+        const start = wallMs(run, fromH + i * bucketHours)
+        b = out[i] = { t: start, label: label.format(start), load: 0, heatUsedKw: 0, heatDumpedKw: 0, heatDemandKw: 0, misses: 0, n: 0 }
+      }
+      b.load += n.load
+      b.heatUsedKw += n.heatUsedKwh
+      b.heatDumpedKw += n.heatDumpedKwh
+      b.heatDemandKw += n.heatDemandKwh
+      b.misses += n.misses
+      b.n++
+    }
+    return out.map(({ n, ...b }) => ({ ...b, load: b.load / n, heatUsedKw: b.heatUsedKw / n, heatDumpedKw: b.heatDumpedKw / n, heatDemandKw: b.heatDemandKw / n }))
+  }, [network, fromH, toH, bucketHours, run])
 
+  // Economics per calendar month over the whole run: deliberately not windowed (the year view).
   const monthly = useMemo<MonthlyPoint[]>(() => {
     const byMonth = new Map<number, MonthlyPoint>()
     for (const n of network) {
@@ -177,19 +195,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
     return [...byMonth.values()]
   }, [network, run])
 
-  const missed = useMemo<MissedPoint[]>(() => {
-    const from = Math.max(0, t - CHART_WINDOW_DAYS * HOURS_PER_DAY)
-    const to = Math.min(network.length - 1, t + CHART_WINDOW_DAYS * HOURS_PER_DAY)
-    const byDay = new Map<number, MissedPoint>()
-    for (let h = from; h <= to; h++) {
-      const start = Math.floor(wallMs(run, h) / DAY_MS) * DAY_MS
-      let d = byDay.get(start)
-      if (!d) byDay.set(start, (d = { day: dayTick.format(start), start, misses: 0 }))
-      d.misses += network[h].misses
-    }
-    return [...byDay.values()]
-  }, [network, t, run])
-
   const selected = houses.find((h) => h.id === selectedId) ?? null
   const houseSeries = useAsync(selected ? `series:${run.id}:${selected.id}` : null, () => source.houseSeries(run.id, selected!.id))
 
@@ -197,6 +202,8 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const missedShare = totals.misses / Math.max(1, totals.completions + totals.misses)
   const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers })), [houses])
   const wall = wallMs(run, t)
+  const windowNote = `${rangeLabel} up to the selected ${step === HOURS_PER_DAY ? 'day' : 'hour'}`
+  const perBucket = bucketHours > 1 ? `${windowNote}, mean per ${unit}` : windowNote
 
   return (
     <main className="page admin">
@@ -282,6 +289,9 @@ function RunView({ source, run, runs, houses, network }: Props) {
             state={snapshotOf(selected.id)}
             series={houseSeries.data}
             t={t}
+            fromMs={wallMs(run, fromH)}
+            toMs={wallMs(run, toH)}
+            rangeLabel={rangeLabel}
             onMore={() => navigate(`/admin/${encodeURIComponent(run.id)}/houses/${encodeURIComponent(selected.id)}?h=${t}`)}
             onClose={() => setSelectedId(null)}
           />
@@ -337,25 +347,23 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
       <section className="charts">
         <div className="card">
-          <span className="label">Network load</span>
-          <LoadChart data={series} t={wall} />
+          <ChartHead label="Network load" note={perBucket} />
+          <LoadChart data={buckets} t={wall} />
         </div>
         <div className="card">
-          <span className="label">Heat</span>
-          <HeatChart data={series} t={wall} />
+          <ChartHead label="Heat" note={perBucket} />
+          <HeatChart data={buckets} t={wall} />
         </div>
         <div className="card wide">
-          <span className="label">Computing income and electricity cost per month</span>
+          <ChartHead label="Computing income and electricity cost per month" note="Whole run (not affected by the time range)" />
           <EconomicsChart data={monthly} />
         </div>
         <div className="card wide">
-          <div className="card-head">
-            <span className="label">Missed deadlines per day</span>
-            <span className="note">
-              {num.format(totals.misses)} of {num.format(totals.completions + totals.misses)} in the selected range
-            </span>
-          </div>
-          <MissedChart data={missed} />
+          <ChartHead
+            label={`Missed deadlines per ${unit}`}
+            note={`${num.format(totals.misses)} of ${num.format(totals.completions + totals.misses)} in the selected range`}
+          />
+          <MissedChart data={buckets} />
         </div>
       </section>
     </main>
@@ -385,6 +393,15 @@ function useWeatherField(source: DataSource, run: RunInfo, t: number, enabled: b
     for (const row of rows) for (let i = 0; i < row.length; i++) mean[i] += row[i] / rows.length
     return interpolator.fill(mean)
   }, [enabled, points.data, hours.data])
+}
+
+function ChartHead({ label, note }: { label: string; note: string }) {
+  return (
+    <div className="card-head">
+      <span className="label">{label}</span>
+      <span className="note">{note}</span>
+    </div>
+  )
 }
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
