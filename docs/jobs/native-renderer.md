@@ -128,3 +128,6 @@ These are this interrupted run only, not an animation ETA or GPU speedup.
 The native adapter currently permits one GPU peer per physical host; explicit
 multi-adapter selection is not implemented. More physical GPU hosts can join
 through configured peers/shared artifacts after their own verification.
+
+
+Presentation cleanup: user keeps Minecraft and retires other game labs. PR #54 / `5d6499d` removes their executable setup, retains shared mesh/runtime and Minecraft, and shares the frontend stylesheet with the renderer (header held badge removed). Thirteen scoped containers removed without deleting volumes; only Minecraft server + Node A client remain running. 57 gaming + 98 orchestration tests and power math pass; paused native run and two frames preserved. See `docs/jobs/presentation-cleanup.md` and `docs/performance/presentation-cleanup-2026-11-21.json`. T-66 remains in progress until code PR merges.
