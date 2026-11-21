@@ -21,6 +21,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.NetworkRun", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Network.Tests", "DigitalHeat.Network.Tests\DigitalHeat.Network.Tests.csproj", "{50E8E535-118D-439D-BE10-99BAC4E81BEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Fleet", "DigitalHeat.Fleet\DigitalHeat.Fleet.csproj", "{C825EA6E-06A7-414E-BE95-CE6DB408F085}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.FleetRun", "DigitalHeat.FleetRun\DigitalHeat.FleetRun.csproj", "{5BDDA902-DB05-44A1-8EAD-512514FF6792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Fleet.Tests", "DigitalHeat.Fleet.Tests\DigitalHeat.Fleet.Tests.csproj", "{D68E1149-60B8-4665-B74F-AB89BAA14365}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +72,17 @@ Global
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C825EA6E-06A7-414E-BE95-CE6DB408F085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C825EA6E-06A7-414E-BE95-CE6DB408F085}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C825EA6E-06A7-414E-BE95-CE6DB408F085}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C825EA6E-06A7-414E-BE95-CE6DB408F085}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BDDA902-DB05-44A1-8EAD-512514FF6792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BDDA902-DB05-44A1-8EAD-512514FF6792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BDDA902-DB05-44A1-8EAD-512514FF6792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BDDA902-DB05-44A1-8EAD-512514FF6792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D68E1149-60B8-4665-B74F-AB89BAA14365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
