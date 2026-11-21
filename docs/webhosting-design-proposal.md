@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Webhosting design proposal for user approval
 
 Status: library, structure and contract approach approved by the user on 2026-11-20;

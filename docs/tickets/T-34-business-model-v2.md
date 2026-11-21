@@ -4,6 +4,11 @@
 - **Depends on:** T-14 (economics), T-35 (refurbished hardware), T-11/T-12 (routing)
 - **Suggested owner:** team lead + Claude  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (direction decided 2026-11-21)
 
+> **Update 2026-11-21 (Jona):** business model provisionally fixed: operator model, Type 1 = batch LLM
+> on non-personal documents, Type 2 = research simulations; transcription and webhosting out.
+> See decision [0020](../decisions/0020-business-model-operator-two-job-types.md) and
+> [`docs/business-model.md`](../business-model.md) (the one-page task below, first version).
+
 ## Goal
 
 Turn the night's findings into one coherent business model and make **residential houses profitable**

@@ -2,7 +2,13 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** UI / presentation
 - **Depends on:** T-04 (LiveRun), T-13 (export format)
-- **Suggested owner:** anyone (Lovable possible)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone (Lovable possible)  ·  **Owner:** Jona / Codex (previous attempt)  ·  **Status:** paused — unfinished; user stopped visual work, PR #17 closed
+
+The user reviewed the dark SVG cutaway, a text-first version and a browser-based 3D attempt on
+2026-11-21. None met the requested visual storytelling quality. The user stopped T-25. PR #17
+was closed without merge; the worktree keeps the unfinished experiment for reference. Do not
+present it as the pitch visual or count the ticket as done. T-39's final clip remains a separate
+team-owned task.
 
 ## Goal
 

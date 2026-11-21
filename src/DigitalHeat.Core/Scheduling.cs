@@ -49,7 +49,7 @@ public sealed class GreedyHeatScheduler(double minimumLoadShare) : IScheduler
             || signal.TankStoredKwh < 0 || signal.TankStoredKwh > signal.TankCapacityKwh
             || minimumLoadShare is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(signal));
-        double desiredTotalLoad = (signal.DemandKwh + signal.TankCapacityKwh - signal.TankStoredKwh)
+        double desiredTotalLoad = HeatCapacity.RemainingKwh(signal)
             / signal.RecoverableKwhPerServerAtFullLoad;
         double totalLoad = Math.Clamp(desiredTotalLoad, minimumLoadShare * signal.ServerCount,
             signal.ServerCount);

@@ -11,13 +11,15 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | Jona (IllusioQuest) / Codex | `feat/core-csharp` | .NET 8 `DigitalHeat.Core` (heat demand, tank, `IScheduler.Decide(HeatSignal)`, `IExecutor.ApplyTargetLoad`, `SchedulerController.Apply`, `GreedyHeatScheduler`, year simulation, economics), `DigitalHeat.YearRun`, xUnit tests, `config/reference-house.json`, decision 0005 (accepted) | defines `IScheduler`, `IExecutor`, `HeatSignal`, `config/reference-house.json` | merged to main (PR #2); real Docker executor added by PR #3 |
 | Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | merged to main (PR #6); T-01 sourced job catalog data pending |
 | Jona (IllusioQuest) / Codex | `docs/T-06-final-results` | T-06 adopted compute price and corrected 1 kW hardware illustration for reference-house result variants | updates `config/reference-house.json`, exporter, result docs and derived JSON; no core or runtime interface changes | in review; 40 Core tests pass, six JSON results reproduce byte for byte; finite-only 0% missed-deadline diagnostic; T-31 mixed Type 1/Type 2 queue remains separate |
-| Nikita | `feat/T-36-hosting-scheduler` | Six Linux nodes, heat-aware routing and automatic stateless replica relocation; common batch/always-on catalog | Reuses shared scheduler and locality policy; adds optional serviceMode and LiveRun guard | 45 hosting + 51 core/catalog tests pass; Docker heat/drain/failover and six-node isolation verified; all eight final Docker checks passed; PR #19 awaiting review/merge. Depends on PR #12; docs/webhosting-scheduler.md |
+| Nikita | `featur-gaming` / `main` | T-39/T-40 complete: Xonotic browser demo, heat reservations, reusable gaming profiles; webhosting retired | Gaming profile/Docker-context adapter; shared Core HeatCapacity, no existing scheduler interfaces changed | Merged PR #22 (56501a7). 21 gaming + 41 Core tests pass; zero-warning build, disposable Linux smoke and live auth/graphics checks pass. Automatic heat-to-launch integration remains pending; see gaming-profiles.md. Old hosting PRs #12/#19 closed. |
 | Jona (IllusioQuest) / Codex | `feat/job-runtime` | Generic Docker control of a running job through the shared scheduler; day replay and decision 0009 (was 0006). Does not implement example jobs. | Adds `IContainerControl` and `DockerJobExecutor : IExecutor`; consumes core interfaces without changing them. | merged to main (PR #3); 9 .NET tests pass and a Busybox Docker smoke replay paused, resumed and throttled as requested |
 | Jona (IllusioQuest) / Codex | `feat/T-24-job-data-locality` | T-24 customer/contract-sourced job location policy and pre-execution eligibility guard; coordinate with T-01 catalog owner | `config/jobs/job.schema.json`, `JobDescriptorLoader`, Core `JobPlacement.IsEligible`, `DigitalHeat.LiveRun` preflight | draft PR #9; 31 .NET tests pass, mismatched-site LiveRun smoke denied before Docker; T-01/T-02 descriptors need the new field, T-10/T-12 must reuse guard with trusted site metadata |
+| Jona (IllusioQuest) / Codex | `feat/T-25-animated-house` | T-25 house visual, stopped after user review of SVG, text-first and 3D attempts | presentation files only; no core or scheduler interface change | unfinished and paused by user; draft PR #17 closed without merge; local experiment retained for reference |
 | Ennio / Claude | `feat/T-02-transcription-job` | T-02: whisper.cpp transcription container (`jobs/transcription/`), `scripts/measure_job.py`, measured base and large-v3 on a laptop, scaling to 1 kW, LiveRun January/July replay with the real job (`docs/jobs/transcription.md`) | Adds `config/jobs/transcription-whisper-base.json` and `-large-v3.json` (schema of decision 0009); no shared interface changed | merged (PR #15); base 4.62 s and 0.0382 Wh per audio min (whole laptop), large-v3 70.3 s and 0.477 Wh (CPU package) |
 | Ennio / Claude | `feat/T-33-local-llm-job` | T-33: local LLM batch service (Apertus 8B, llama.cpp) container, laptop measurement, per-token energy and income per server-hour (`docs/jobs/llm-summary.md`) | Adds `config/jobs/llm-summary-apertus-8b.json`, `--memory` option in `scripts/measure_job.py` | PR open; 8.9 s and 0.0614 Wh per audio min summarised, 0.254 kWh per 1M tokens (CPU package) |
+| Ennio / Claude | `docs/T-37-profitability-research` | T-37 profitability research + synthesis; decision 0019 (proposed): Type 2 rides on Type 1 hardware, GPU nodes only, no CPU-only servers | new CSVs in `data/raw/market/`, Azure region snapshot; feeds T-14/T-34 parameters; changes T-30 to a GPU kernel with CPU fallback | merged (PR #20); only batched Type 1 LLM on consumer GPUs clears full cost in year 1 (8-42 % fill); over 6 years at falling commodity prices nothing pays without a premium or fixed contracts; GeForce licence excludes "datacenter deployment" (open risk) |
 | team lead / Claude | `exp/year-explorer-transparency` | Browser year explorer prototype for the reference house, `METHOD.md`, `verify.py` | own JavaScript model (must match the C# core) | prototype; review findings pending: example computing price drives the surplus headline, verdict ignores hardware, offline demo, heatmap legend |
-| team lead / Claude | `feat/T-01-job-catalog` | T-01: schema change for always-on services (webhosting) once Nikita has decided the representation; transcription descriptor comes from T-02 | `config/jobs/job.schema.json`, `JobDescriptorLoader` (decision 0009) | approved: narrow always-on support implemented by Nikita in T-36; broader catalog work remains with Claude |
+| team lead / Claude | `feat/T-01-job-catalog` | T-01: schema change for always-on services (webhosting) once Nikita has decided the representation; transcription descriptor comes from T-02 | `config/jobs/job.schema.json`, `JobDescriptorLoader` (decision 0009) | hosting-specific proposal withdrawn in T-40; unmerged PR #19 closed; broader catalog work remains with Claude |
 | team lead / Claude | `docs/T-07-draft-submission` | T-07: fresh-clone check and must-have checklist (`docs/submission/draft-checklist.md`); README demo section once T-02 is merged | none | in progress |
 | team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
 | team lead / Claude (subagent) | `feat/T-28-price-updater` | T-28: Azure Retail Prices snapshot (Switzerland North) and derived CHF per server-hour (`data/derived/computing-price.json`) | new files only (`scripts/`, `data/raw/market/price-snapshots/`, `data/derived/`); does not change `config/reference-house.json` (T-06) | PR #11 open; derived C1 0.687 vs adopted 0.66 |
@@ -25,10 +27,12 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none yet; proposes interface changes for T-12 in the decision record | in progress |
 | team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new files only; reference house keeps the case's 1 kW server | in progress |
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none; decision 0014 proposes `INetworkScheduler`/`NetworkState`/`NetworkDecision` and an allocation-aware queue for T-12 (own ADR there) | draft ready for team review; 3 team questions in model §11 |
-| team lead / Claude (subagent) | `data/T-35-refurbished-hardware` | T-35: refurbished/second-life hardware (lever D): prices, wear model, `config/hardware/*-refurbished.json`, `docs/research/refurbished-hardware.md` | new profile files only; reuses T-15 `HardwareProfile` loader and schema | in progress |
+| team lead / Claude (subagent) | `data/T-35-refurbished-hardware` | T-35: refurbished/second-life hardware (lever D): prices, wear model, `config/hardware/*-refurbished.json`, `docs/research/refurbished-hardware.md` | new profile files only; reuses T-15 `HardwareProfile` loader and schema (test list extended) | PR open; finding for T-14: add expected wear to all profiles; for T-12: limit cold starts to about 1 per day |
 | team lead / Claude (subagent) | `feat/T-14-economics` | T-14: economics per actor in the C# core (system surplus with premium + filler income, heat value per alternative, hardware profile, operator and host-owned split, case vs full-cost break-even, lever scenarios A/B/D/G, win-win grid export) | extends Core with a new economics module and config file; scored case figures unchanged; reads `config/hardware/*.json` (T-35 profiles plug in) | in progress |
 | Ennio / Claude | `docs/two-job-types-strategy` | Decision 0018 (two job types: Type 1 transcription + batch LLM, Type 2 CPU batch compute filler with heat-led price), tickets T-30 to T-32 | none (docs only) | merged (PR #16) |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
+| Jona / Claude (takeover) | `feat/T-12-network-validation` → main | T-12 step 3: LP validation on switzerland-test, B1-reserve/B2-reserve (decision 0029), experiments A–D (`scripts/network_experiments.py`), docs and paper §5/§8 | adds `NetworkRun` options (`--start/--hours`, `--exclude-kinds`, `--summary-json`, `--sigma24` in scenario mode); no change to the map export format (decision 0025 §7) | in progress; LP experiments running |
+| Ennio / Claude | `feat/first-web-dashboard` | Web dashboard in `web/` (Vite, React, Recharts, MapLibre): admin network map `/admin` (T-17), household dashboard `/household` (T-18); client calculator (T-41) dropped; dashboards on deterministic mock data; ElCom cantonal median prices added to `scripts/fetch_data.py` | `data/raw/elcom/canton-median-h4-2026.json`; no core interfaces. Next: feed `/admin` from `docs/model/network-map-data.md` (T-12 dataset) | in review |
 
 ## Open coordination
 
@@ -61,7 +65,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 1. **Generic real-job executor implemented** (must-have 2). Fake-control tests and a neutral
    Busybox container demonstrate command mapping; an owner-supplied real job is still needed for
    the scored end-to-end demo.
-2. **Must-have 1 example jobs:** Nikita owns webhosting; Ennio's transcription job is measured (PR for T-02). At least one
+2. **Must-have 1 example jobs:** Nikita owns the separate gaming experiment (webhosting retired in T-40); Ennio's transcription job is measured (PR for T-02). At least one
    measured laptop run and energy scaling to 1 kW remain to be verified by their owners.
 3. **Year explorer (JavaScript) and C# core must give the same numbers.** Explorer default:
    4 servers, min load 0 %, tank 35 kWh, 0.3325 CHF/kWh → 58.0 % covered, 0 kWh dumped,
@@ -113,3 +117,52 @@ T-36/T-23: six-node real Docker lifecycle and failover checks pass; 45 hosting +
 
 ## Nikita: hybrid service review (T-38)
 Reviewed the user-supplied GPU/CPU engineering manual against shared scheduler and vendor docs. Findings and proposed scope: research/hybrid-gpu-cpu-review.md. No code or interface changes; implementation awaits user choice. T-36 remains in PR #19. T-37 was already occupied by profitability research, hence T-38.
+
+Nikita / Codex: T-39 on featur-gaming, Intel browser gaming discovery. Script pushed; host graphics paths exist but ordinary containers lack access. No Vulkan/encoding/CS2 support proven. Awaiting streaming-stack choice; see tickets/T-39-intel-browser-gaming.md. Shared scheduler interfaces unchanged.
+
+## Business model provisionally fixed (2026-11-21, Jona / Claude)
+Branch `docs/T-34-business-model-fixed`: decision 0020 (operator model; Type 1 = batch LLM on non-personal
+documents, Type 2 = research simulations; transcription and webhosting out of the business model) and
+`docs/business-model.md`. Reviewed (go with changes, applied). Docs only; no code, interface or scored
+figure changed. Affects: T-30 (now a Monte Carlo research kernel), T-31 (Type 1 = LLM), T-14 (operator
+model as main case), T-21 storyboard money scene. Ennio: 0018/0019 status lines updated, please check.
+T-39 milestone: two healthy Selkies nodes, Intel OpenGL accelerated, CPU H.264 capture/encode proven; Vulkan CPU-only and VAAPI failed. Browser smoke and zero-heat admission choice pending. See gaming-lab.md. No session coordinator or CS2 gameplay claim.
+
+T-39 update: browser desktop/input now confirmed by user screenshot/test. Summer session placement should use hotel/spa heat sites regardless of player location, preserving active matches. Live wallpaper stretch applied; GPU Vulkan/CS2 and coordinator still pending. No available useful-heat site fallback needs user choice.
+## Paper skeleton (2026-11-21, Jona / Claude)
+T-22: `docs/paper/outline.md` with title, draft abstract, candidate contributions, sections, figure list
+(which run produces each figure) and team questions. Docs only.
+
+T-39 interface coordination: user approved largest remaining useful heat capacity. Proposed ADR 0022 factors the existing GreedyHeatScheduler numerator into a shared helper (valid results unchanged), adds a gaming-only in-memory reservation model/demo; does not implement T-11/T-12 network optimisation or alter IScheduler/IExecutor. Runtime launch/preemption remains separate.
+
+T-39: PR #22 now includes atomic per-site heat-capacity gaming reservations and deterministic home/hotel/spa demo. Shared Greedy numerator factored into HeatCapacity (IScheduler/IExecutor unchanged); 14 gaming and 40 Core tests pass. Runtime session launch/preemption still pending. See ADR 0022 and gaming-lab.md; no scored inputs changed.
+
+T-39: user approved an isolated Mesa Dozen Vulkan build/probe. ADR 0023 proposed; existing A/B desktops untouched during build. Separate source-pinned image only; no Windows driver changes or game download. Core interfaces unchanged.
+## T-30 research simulation job (2026-11-21, Jona / Claude)
+Branch `feat/T-30-research-simulation-job`: 2D Ising Monte Carlo container (`jobs/research-sim/`),
+descriptor `config/jobs/research-sim-montecarlo.json`, `docs/jobs/research-sim.md`. Done: pure Python
+(PyPI unreachable from the hackathon network), measured on battery (0.858 s and 4.09e-6 kWh per task,
+whole laptop), January/July LiveRun with forced pause through the shared scheduler. New Windows battery
+meter `scripts/measure_job_windows_battery.ps1`. 40 .NET tests pass. No shared interface changed.
+
+T-39 Dozen milestone: source build succeeded, hardware Vulkan identifies Intel Iris Xe (API 1.2.335), vkcube succeeds headlessly and in separate Selkies desktop C (18883), A/B untouched. Experimental/non-conformant; VAAPI still unavailable, no CS2 claim. User cube-stream confirmation and storage choice pending; current C: ~20 GB versus Valve's 85 GB requirement.
+
+T-39 latest: user confirmed C login. Selected Xonotic original FPS instead of CS2. Official archive checksum passed; game runs on C with Intel OpenGL, assets and stereo audio startup verified; user browser gameplay/input check pending. Uniform background applied. Code 81644fd pushed to PR #22. Automatic game launch/preemption/stream routing after reservation remains pending; no measured FPS/energy claim.
+## T-12 network scheduler (2026-11-21, Jona / Claude)
+Decision 0024 (reviewed). New projects `DigitalHeat.Network` (no third-party deps), `DigitalHeat.Network.Lp`
+(OR-Tools GLOP), `DigitalHeat.NetworkRun`, `DigitalHeat.Network.Tests`; `HeatBalance.Step` and `WeatherCsv` moved into Core
+(scored outputs bit-identical). Step 1: B0/B1/rolling-horizon LP/UB on the reference house, B1 = UB. Next: jobs with
+deadlines (step 2), Swiss multi-site dataset and map export (step 3). `docs/model/network-scheduler.md`.
+
+T-39 cleanup in progress on featur-gaming: user confirmed playable Xonotic and requested explanation/cleanup first. Refactor gaming reservation readability and repeated script container lookup; preserve commands and runtime behavior. Live automatic distribution remains deferred.
+
+## T-12 step 3: Swiss test dataset (2026-11-21, Jona / Claude)
+`config/network/switzerland-test.json`: 33 sites in 9 cities (reference house, SFH, MFH, hotel-spa, indoor pool), Open-Meteo 2025
+weather per city, sourced profiles, synthetic fields marked per field; `scripts/build_network_dataset.py` (reproducible).
+Data for the network map: `docs/model/network-map-data.md`; mock export git-ignored (`scripts/make_network_mock_export.py`).
+The network map itself is built by Ennio; `prototypes/network-map-draft/` only holds reusable parts (cantons GeoJSON, loader).
+
+
+## T-40 final handoff (2026-11-21)
+
+PR #22 merged to main as 56501a7 with user authorization. Webhosting code is removed; its historical guides are marked retired. Hosting PRs #12/#19 are closed, not merged. Exact old hosting Docker projects had their containers and unused networks removed; gaming and unrelated projects/data remain. Profiles choose an already provisioned node through a Docker context, but automatic reservations-to-launch, failure reconciliation and session routing are still future integration. T-39/T-40 do not change scored house parameters or the team business model. Current implementation/commands: [gaming profiles](gaming-profiles.md).

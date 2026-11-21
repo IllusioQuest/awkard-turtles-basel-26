@@ -1,3 +1,5 @@
+> RETIRED by user request in T-40. Webhosting is withdrawn; do not resume this feature. Preserve this ticket as historical context.
+
 # T-27: Separate hosting frontend and API across node pools
 
 - **Tier:** 2 Pitch · **Area:** Webhosting privacy prototype

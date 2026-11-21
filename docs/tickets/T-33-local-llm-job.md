@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Jobs / measurement
 - **Depends on:** T-02 (measurement harness, transcript as input)
-- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** in review
+- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** done (merged 2026-11-21)
 
 ## Goal
 

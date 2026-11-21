@@ -1,0 +1,32 @@
+﻿[
+    {
+        "run":  1,
+        "tasks":  32,
+        "runtime_s":  28.4,
+        "mean_power_w":  11.46,
+        "idle_power_w":  10.38,
+        "energy_gross_wh":  0.0903,
+        "energy_net_wh":  0.0085,
+        "samples":  27
+    },
+    {
+        "run":  2,
+        "tasks":  32,
+        "runtime_s":  28.4,
+        "mean_power_w":  15.79,
+        "idle_power_w":  10.38,
+        "energy_gross_wh":  0.1245,
+        "energy_net_wh":  0.0427,
+        "samples":  27
+    },
+    {
+        "run":  3,
+        "tasks":  32,
+        "runtime_s":  28.3,
+        "mean_power_w":  16.77,
+        "idle_power_w":  10.38,
+        "energy_gross_wh":  0.132,
+        "energy_net_wh":  0.0503,
+        "samples":  27
+    }
+]

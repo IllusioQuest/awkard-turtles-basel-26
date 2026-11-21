@@ -45,6 +45,13 @@ electricity, heat fee, commission). Things that must be visible in that calculat
 - Show the **case break-even** (scored: electricity cost only) and **our full-cost break-even**
   side by side, clearly labelled.
 
+## Business model (provisionally fixed, 2026-11-21)
+
+Operator model, two job types: Type 1 = batch LLM service on non-personal documents, Type 2 =
+research simulations. Transcription and webhosting are out of the business model. See
+[`business-model.md`](business-model.md) and decision
+[0020](decisions/0020-business-model-operator-two-job-types.md). The sections below are background.
+
 ## Ownership models (both are allowed, as a parameter)
 
 - **Operator model:** DigitalHeat owns and operates the servers, sells the computing and gives the
@@ -125,7 +132,7 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
-**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability. **Per job type (decision 0018):** Type 1 (AI services) on GPU, Type 2 (batch compute) on CPU; scored reference-house figures use the CPU values measured on the laptop.
+**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability. **Per job type (decision 0019, proposed):** no CPU-only servers. Every heater is a GPU node (consumer class RTX 4090/5090 as cost basis, L4 as comparison); Type 1 has priority, and Type 2 fills the leftover heat-led hours on the same node (GPU-capable codes on the GPU, CPU-only codes on the host CPU). Reasons and sources: `decisions/0019-gpu-nodes-for-all-job-types.md`. Scored reference-house figures keep the abstract 1 kW server.
 
 ## Two job types (proposed, decision 0018, 2026-11-21)
 

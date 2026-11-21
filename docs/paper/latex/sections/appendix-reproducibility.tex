@@ -1,0 +1,33 @@
+\section{Reproducibility}
+\label{app:repro}
+
+All inputs are committed with \texttt{SOURCE} files (\texttt{data/raw/}), runs are deterministic
+(fixed seeds), and every output row records the command that produced it. The reference-house
+export repeats with identical SHA-256 hashes of its outputs
+(\texttt{scripts/export\_reference\_house.py}).
+
+\begin{table}[ht]
+  \centering
+  \caption{One command per table. Paths are relative to the repository root.}
+  \label{tab:repro}
+  \begin{tabular}{p{0.28\linewidth}p{0.66\linewidth}}
+    \toprule
+    Table & Command and output \\
+    \midrule
+    \ref{tab:house-sizes} (reference house, 3/4/5 servers) &
+      \texttt{python scripts/export\_reference\_house.py} $\to$ \texttt{data/derived/reference-house/*.json} \\
+    \ref{tab:house-strategies} (strategies, reference house) &
+      \texttt{dotnet run -{}-project src/DigitalHeat.NetworkRun -{}- .} \\
+    \ref{tab:exp-a}, \ref{tab:exp-b}, \ref{tab:exp-d}, \ref{tab:reserve}, \ref{tab:exp-e} (greedy) &
+      \texttt{python3 scripts/network\_experiments.py} $\to$ \texttt{data/derived/network/experiments/*.csv} \\
+    LP columns of \ref{tab:exp-a}, \ref{tab:exp-d}, \ref{tab:exp-e}; \ref{tab:exp-c} &
+      \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4} \pending{} \\
+    \ref{tab:surplus} (surplus) &
+      \texttt{python3 scripts/profitability\_inputs.py}; values in \texttt{docs/business-model.md} \\
+    Tests &
+      \texttt{dotnet test src/DigitalHeat.sln} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\todo{list of figures F1--F10 with their commands (\texttt{docs/paper/outline.md})}

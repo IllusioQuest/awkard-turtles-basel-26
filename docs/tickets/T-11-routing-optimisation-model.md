@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Model / paper
 - **Depends on:** T-09, T-10
-- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** draft ready for team review (PR, decision 0014)
+- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** done as draft (PR #13 merged, decision 0014 proposed; team review pending)
 
 ## Goal
 

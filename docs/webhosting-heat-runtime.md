@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # T-23: Hosting and heat-runtime integration
 
 Status: integration experiment in progress; always-on catalog entry requires T-01 owner agreement.

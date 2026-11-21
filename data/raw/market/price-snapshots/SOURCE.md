@@ -30,3 +30,13 @@ a different product), `meterName` (`… Spot`, `… Low Priority`, or plain = pa
 - The snapshot holds Windows, Low Priority and Cloud Services meters too (raw stays raw); the
   derivation selects the Linux Virtual Machines on-demand and Spot meters only.
 - vCPU and RAM per size are not in the API; they come from `config/computing-price-method.json`.
+
+## Regional comparison snapshot (T-37, 2026-11-21)
+
+`azure-region-comparison-2026-11-21.json`: the same API, one query per region (`switzerlandnorth`,
+`germanywestcentral`, `westeurope`, `northeurope`, `francecentral`), filter
+`priceType eq 'Consumption' and serviceName eq 'Virtual Machines'` and the SKUs D32as v5, D32s v5,
+F32s v2, NC24ads A100 v4 and NV36ads A10 v5, with `currencyCode=CHF` (Azure's billing conversion).
+Items are unchanged and grouped by region. It is used for the Swiss-location premium rows
+`cp-region-azure-*` in `../compute-prices.csv`. SKUs with more than one Linux meter per region were
+skipped as ambiguous. Fetched ad hoc with Python `urllib` (command in `docs/research/profitability-inputs.md` §8).
