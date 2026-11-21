@@ -1,4 +1,4 @@
-# T-25: Separate hosting frontend and API across node pools
+# T-27: Separate hosting frontend and API across node pools
 
 - **Tier:** 2 Pitch · **Area:** Webhosting privacy prototype
 - **Depends on:** existing hosting gateway and nested-engine lab
@@ -11,3 +11,4 @@ use synthetic content, and verify that frontend/API routes and images are separa
 Test a failed node in each pool; do not claim zero downtime or host-operator confidentiality.
 Keep the existing lab usable. T-24 owns data-locality policy; no parallel policy implementation.
 Completion requires reproducible tests, code PR, and docs with topology and limitations.
+

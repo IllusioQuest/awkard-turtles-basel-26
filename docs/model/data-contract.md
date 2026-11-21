@@ -75,3 +75,11 @@ Configuration structure extensions require contract review.
 Configuration source strings are public export content: never include personal data or secrets.
 Only repository inputs, hashes, aggregate metrics and configuration are exported; no process
 environment, user payloads or credentials. Hosts must still review free-text inputs before publication.
+
+## Verified showcase
+Generated at clean code revision 8651786d863a10c99e73421c63a42b90b93f4258:
+    dotnet run --project src/DigitalHeat.YearRun -- . config/job-scenarios/unlimited.json --output data/derived/reference-house-v1
+All 29 core/runtime/export tests passed. Legacy and bundle hourly files matched byte-for-byte
+in the generation checkout; coverage matched exactly. Git checkout may normalize line endings.
+The showcase is 8,760 hourly rows; hashes identify inputs at generation (line endings affect hashes).
+Committed on feat/T-13-result-export, pending PR review.
