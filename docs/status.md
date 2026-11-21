@@ -20,7 +20,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 | Ennio / Claude | `main` (`web/`) | T-17/T-18 web dashboard; next: feed `/admin` from the T-12 dataset (`docs/model/network-map-data.md`) | none | first version merged (PR #30) |
 | team lead / Claude | `docs/T-07-draft-submission` | T-07 draft package, must-have checklist | none | in progress |
 | Nikita / Codex | `featur-gaming` | Gaming lab follow-up: automatic heat-to-launch integration (`docs/gaming.md`) | none | pending |
-| Jona / Codex | `codex/T-45-federated-scheduling` | T-45 federated job ownership design and paper proposal | future ownership claims; current interfaces unchanged | ADR 0035 reviewed; T-43 runtime handoff needed before implementation; T-22 paper section added for review |
+| Jona / Codex | `codex/T-45-federated-scheduling` | T-45 federated job ownership design, claim-validation model and paper proposal | new pure Network claim gate; existing Core/T-43 interfaces unchanged | ADR 0035 reviewed; 25 Network tests pass; T-43 runtime handoff needed for live integration; T-22 paper section added for review |
 
 ## Open coordination
 

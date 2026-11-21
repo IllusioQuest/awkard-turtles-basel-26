@@ -31,6 +31,11 @@ The ownership service may be replicated, but it is still a **logically central a
 2. Keep the current single-coordinator implementation as a baseline. Add a node-local controller adapter only after T-43 owner coordination; preserve the shared C# scheduling path.
 3. Test on two physical devices plus an independent third voter or managed quorum. Two nodes alone cannot both maintain majority after a split. Measure job availability, duplicate attempts, heat used, missed deadlines, recovery time and control-plane traffic. Never present model outcomes as field measurements.
 
+The first executable step is `FederatedClaimGate` in `DigitalHeat.Network`. It validates
+externally supplied quorum evidence, generation, lease window, prior-attempt state and the
+existing customer locality rule. It does not issue claims, form a quorum, or control Docker.
+Network tests exercise the fail-closed boundary and the unchanged local heat path.
+
 ## Limits
 
 Lease safety requires bounded clock error or a service-issued monotonic lease mechanism, durable quorum state, authenticated nodes, executor fencing and clear behavior for an unreachable ownership service. These are unimplemented. Local-only data must not be included in remote offers or copied for placement. A quorum failure can stop new placement; that is the chosen safety tradeoff. T-43's coordinator remains the pitch implementation. No multi-device result is yet verified.

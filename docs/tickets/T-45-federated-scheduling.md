@@ -16,6 +16,15 @@ Remove the permanent single-coordinator assumption without changing the scored r
 - Add a clearly labelled research proposal to the paper, with an evaluation design rather than unmeasured results.
 - Coordinate the runtime boundary with T-43 and paper text with T-22; do not change their owned files without handoff.
 
+## First prototype
+
+`FederatedClaimGate` is a pure, deterministic admission boundary in `DigitalHeat.Network`.
+It checks quorum evidence supplied by a trusted service, claim time/generation, old-attempt
+termination and the existing `JobPlacement.IsEligible` rule. It is not a quorum service or Docker
+integration. `dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj` exercises
+partition, stale policy, locality and uncertain old-process cases. The local heat test uses the
+existing `GreedyHeatScheduler` and `SchedulerController` path.
+
 ## Done when
 
 - A job cannot start twice under the modelled failure cases; invalid locality cannot be bypassed.
