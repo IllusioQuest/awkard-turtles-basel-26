@@ -27,8 +27,8 @@ IScheduler scheduler = jobScenario.Mode == "unlimited"
     ? new SingleSiteUnlimitedNetworkScheduler(
         NetworkScenarioLoader.Load(Path.Combine(root, "config", "network", "reference-only.json"), root)
             .NetworkSites.Single(),
-        new NetworkGreedyJobsScheduler())
-    : new GreedyHeatScheduler(parameters.MinimumLoadShare.Value);
+        new HeatFirstNetworkScheduler())
+    : new HeatFirstScheduler(parameters.MinimumLoadShare.Value);
 var result = YearSimulation.Run(demand, parameters, scheduler, new SimulatedExecutor(), jobScenario);
 string output = Path.Combine(root, "results", "reference-house");
 if (bundlePath is not null)
@@ -76,4 +76,3 @@ static void VerifyElectricitySnapshot(string path, ReferenceParameters p)
     if (Math.Abs(publishedChfPerKwh - p.ElectricityPriceChfPerKwh.Value) > 1e-9)
         throw new InvalidDataException("Config electricity price differs from ElCom snapshot.");
 }
-

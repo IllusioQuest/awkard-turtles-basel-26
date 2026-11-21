@@ -4,6 +4,7 @@ using DigitalHeat.Orchestration;
 
 try
 {
+    if (args.Length == 2 && args[0] == "mesh-node") { await MeshNodeHost.Run(args[1]); return 0; }
     if (args.Length == 3 && args[0] == "mesh-demo")
     {
         Console.WriteLine(JsonSerializer.Serialize(PeerMeshDemo.Run(args[1], args[2]), WorkloadJson.Options));
@@ -206,8 +207,8 @@ try
         case "heat":
             var allocation = coordinator.Allocations().Single(c => c.Request.Id == id);
             var signal = config.Inventory.Sites.Single(s => s.Id == allocation.Reservation.SiteId).Heat;
-            if (!coordinator.ApplyBatchHeat(id, signal, new GreedyHeatScheduler(0), nowUtc)) return 3;
-            Console.WriteLine("Applied shared GreedyHeatScheduler decision to the owned batch executor."); break;
+            if (!coordinator.ApplyBatchHeat(id, signal, new HeatFirstScheduler(0), nowUtc)) return 3;
+            Console.WriteLine("Applied shared HeatFirstScheduler decision to the owned batch executor."); break;
         case "stop": coordinator.StopAndRelease(id); Console.WriteLine("Confirmed termination/removal; claim released. Local volumes preserved."); break;
         case "backup":
         case "restore-empty":

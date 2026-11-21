@@ -114,10 +114,7 @@ public sealed class ForecastSection
 
 public sealed class SchedulerSection
 {
-    [JsonPropertyName("id")] public string Id { get; set; } = "mock-heat-led";
-    [JsonPropertyName("low_share")] public double LowShare { get; set; } = 0.3;
-    [JsonPropertyName("high_share")] public double HighShare { get; set; } = 0.9;
-    [JsonPropertyName("urgent_margin_s")] public double UrgentMarginS { get; set; } = 3600;
+    [JsonPropertyName("id")] public string Id { get; set; } = "mesh-heat-first";
     [JsonPropertyName("chunk_target_s")] public double ChunkTargetS { get; set; } = 3600;
 }
 

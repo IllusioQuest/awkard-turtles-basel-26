@@ -46,7 +46,7 @@ public class PlacementTests
         Assert.Empty(busy.Allocations()); // The eligible spa is not a fallback.
     }
 
-    [Fact] public void B2SelectedSiteCanBeAdmittedWithoutAnIndependentCrossSiteChoice()
+    [Fact] public void SelectedSiteCanBeAdmittedWithoutAnIndependentCrossSiteChoice()
     {
         NetworkSite Site(string id, double heatKwh) => new(id, id, 0, 0, "CH", 1, 1, 1, 0, 0, 1, 0.3, 0.1,
             [new("2025-07-15T18:00", 0, false, heatKwh, 0), new("2025-07-15T19:00", 0, false, heatKwh, 0)]);
@@ -57,7 +57,7 @@ public class PlacementTests
         var states = sites.Select((s, i) => new SiteHeatState(s.Id,
             new HeatSignal(s.Demand[0].TotalHeatKwh, 0, 0, 1, 1),
             HeatForecast.Build(s.Demand, s.Id, 0, 1))).ToArray();
-        var decision = new NetworkGreedyJobsScheduler().Decide(new NetworkState(0, sites[0].Demand[0].LocalTime,
+        var decision = new HeatFirstNetworkScheduler().Decide(new NetworkState(0, sites[0].Demand[0].LocalTime,
             sites, states, ledger.View()));
         var chosenSite = sites[decision.Allocations!.Single().SiteIndex];
         Assert.Equal("spa", chosenSite.Id);

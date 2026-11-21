@@ -4,7 +4,7 @@ namespace DigitalHeat.Network;
 
 /// <summary>
 /// Runs the same network work scheduler inside Core's reference-house loop when compute work is
-/// unlimited. The demand series supplies the NetworkState time axis and forecast; B2 itself uses
+/// unlimited. The demand series supplies the NetworkState time axis and forecast; the shared policy uses
 /// only the current signal. Finite cohorts require WorkLedger and are intentionally unsupported.
 /// </summary>
 public sealed class SingleSiteUnlimitedNetworkScheduler : IScheduler

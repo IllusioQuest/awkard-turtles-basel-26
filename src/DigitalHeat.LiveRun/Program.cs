@@ -26,7 +26,7 @@ try
     var weather = ReadWeather(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
     var demand = HeatDemand.Build(weather, parameters);
     var reference = YearSimulation.Run(demand, parameters,
-        new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor());
+        new HeatFirstScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor());
     var selected = reference.Hours.Select((hour, index) => (hour, index))
         .Where(x => x.hour.LocalTime.StartsWith(date, StringComparison.Ordinal)).ToArray();
     if (selected.Length != (int)parameters.HoursPerDay.Value)
@@ -37,7 +37,7 @@ try
     var control = new DockerCliContainerControl();
     var executor = new DockerJobExecutor(control, options["--container"], cpuCores,
         job.SupportedControlLevels.Contains("throttle"));
-    var scheduler = new GreedyHeatScheduler(parameters.MinimumLoadShare.Value);
+    var scheduler = new HeatFirstScheduler(parameters.MinimumLoadShare.Value);
     Console.WriteLine($"Replaying {date} for {job.Id}; press P for one forced pause. " +
         "Each hour uses an independent reference tank snapshot; achieved load is Docker CPU use, not measured heat.");
     try

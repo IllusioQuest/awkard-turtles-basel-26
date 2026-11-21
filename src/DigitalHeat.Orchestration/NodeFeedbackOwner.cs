@@ -115,7 +115,7 @@ public sealed class NodeFeedbackOwner
     private void PauseBatchWithoutHeat(WorkloadInventory projected)
     {
         // Only the shared scheduler may request a batch pause from heat; games have no pause path.
-        var scheduler = new GreedyHeatScheduler(0);
+        var scheduler = new HeatFirstScheduler(0);
         var sitesById = projected.Sites.ToDictionary(s => s.Id, StringComparer.Ordinal);
         foreach (var row in coordinator.Attempts().Where(a => a.Phase == "running" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
         {

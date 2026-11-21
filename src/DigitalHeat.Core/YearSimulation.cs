@@ -36,8 +36,7 @@ public static class YearSimulation
             ? new JobQueueExecutor(jobScenario, executor, hoursPerDay, demand.Count, count,
                 p.HoursPerStep.Value) : null;
         IExecutor effectiveExecutor = queue ?? executor;
-        IScheduler effectiveScheduler = jobScenario is null ? scheduler
-            : new ExcessHeatPolicyScheduler(scheduler, jobScenario.ExcessHeatPolicy);
+        IScheduler effectiveScheduler = scheduler;
         for (int step = 0; step < demand.Count; step++)
         {
             var hour = demand[step];

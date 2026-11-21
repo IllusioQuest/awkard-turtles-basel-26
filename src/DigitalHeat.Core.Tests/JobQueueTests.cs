@@ -25,6 +25,18 @@ public sealed class JobQueueTests
             TestValue(throughput, "work units/server-hour"), TestValue(deadlineHours, "hours"));
 
     [Fact]
+    public void EqualDeadlinesUseStableTypeAndArrivalJobIds()
+    {
+        var scenario = new JobScenario("finite", "wait", "synthetic tie fixture",
+            [Type("z-type", 1, 1, 1, 1), Type("a-type", 1, 1, 1, 1)]);
+        var queue = new JobQueueExecutor(scenario, new SimulatedExecutor(), 24, 1, 1, 1);
+        queue.BeginHour(0); queue.ApplyTargetLoad(1);
+        var jobs = queue.Finish();
+        Assert.Equal(1, jobs.ByType.Single(t => t.Id == "a-type").Completed);
+        Assert.Equal(1, jobs.ByType.Single(t => t.Id == "z-type").Missed);
+    }
+
+    [Fact]
     public void HeatFreeDayMissesJobsAndEveryHourStillBalances()
     {
         var p = Parameters();
@@ -32,7 +44,7 @@ public sealed class JobQueueTests
             [Type("batch", 10, 4, 1, 12)]);
         var demand = Enumerable.Range(0, 48).Select(hour => new DemandHour(
             $"2025-07-{hour / 24 + 1:00}T{hour % 24:00}:00", 25, false, 0, 0)).ToArray();
-        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
+        var result = YearSimulation.Run(demand, p, new HeatFirstScheduler(0),
             new SimulatedExecutor(), scenario);
         var jobs = Assert.IsType<JobSummary>(result.Summary.Jobs);
         Assert.Equal(20, jobs.Arrived);
@@ -54,18 +66,15 @@ public sealed class JobQueueTests
     }
 
     [Fact]
-    public void RunAndDumpPolicyCompletesWorkAndRecordsSurplusHeat()
+    public void RetiredRunAndDumpPolicyFailsExplicitly()
     {
         var p = Parameters();
         var scenario = new JobScenario("finite", "run-and-dump", "synthetic test fixture",
             [Type("batch", 10, 4, 1, 12)]);
         var demand = Enumerable.Range(0, 48).Select(hour => new DemandHour(
             $"2025-07-{hour / 24 + 1:00}T{hour % 24:00}:00", 25, false, 0, 0)).ToArray();
-        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
-            new SimulatedExecutor(), scenario);
-        Assert.Equal(20, result.Summary.Jobs!.Completed);
-        Assert.Equal(0, result.Summary.Jobs.Missed);
-        Assert.True(result.Summary.DumpedHeatKwh > 0);
+        Assert.Throws<InvalidDataException>(() => YearSimulation.Run(demand, p, new HeatFirstScheduler(0),
+            new SimulatedExecutor(), scenario));
     }
 
     [Fact]
@@ -110,7 +119,7 @@ public sealed class JobQueueTests
         var p = Parameters();
         var demand = Enumerable.Range(0, 24).Select(hour => new DemandHour(
             $"2025-01-01T{hour:00}:00", 0, true, 3.2, 0)).ToArray();
-        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
+        var result = YearSimulation.Run(demand, p, new HeatFirstScheduler(0),
             new SimulatedExecutor(), Mixed(1, 1));
         var jobs = Assert.IsType<JobSummary>(result.Summary.Jobs);
         Assert.Equal(1, jobs.ByType[0].Completed);
@@ -129,7 +138,7 @@ public sealed class JobQueueTests
         var p = Parameters();
         var demand = Enumerable.Range(0, 24).Select(hour => new DemandHour(
             $"2025-01-01T{hour:00}:00", 0, true, 3.2, 0)).ToArray();
-        var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
+        var result = YearSimulation.Run(demand, p, new HeatFirstScheduler(0),
             new SimulatedExecutor(), Mixed(1, .35));
         var jobs = result.Summary.Jobs!;
         Assert.Equal(1, jobs.ByType[0].ServerHours, 8);
@@ -153,10 +162,10 @@ public sealed class JobQueueTests
         }).ToArray();
         var demand = HeatDemand.Build(weather, p);
         var unlimited = YearSimulation.Run(demand, p,
-            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(),
+            new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(),
             JobScenario.Load(Path.Combine(Root(), "config", "job-scenarios", "unlimited.json")));
         var mixed = YearSimulation.Run(demand, p,
-            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), Mixed(0, 1));
+            new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), Mixed(0, 1));
         Assert.Equal(unlimited.Summary.Coverage, mixed.Summary.Coverage, 10);
         Assert.Equal(unlimited.Summary.DumpedHeatKwh, mixed.Summary.DumpedHeatKwh, 10);
         Assert.Equal(unlimited.Summary.ServerHours, mixed.Summary.ServerHours, 8);

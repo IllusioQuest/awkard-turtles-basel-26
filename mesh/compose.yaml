@@ -1,0 +1,28 @@
+x-node: &node
+  image: digitalheat-mesh-node:lab
+  pull_policy: never
+  privileged: true
+  cpus: 0.75
+  mem_limit: 1024m
+  pids_limit: 512
+  environment:
+    MESH_TOKEN: ${MESH_TOKEN:?Run Start-MeshLab.ps1}
+    MESH_JOB_IMAGE: ${MESH_JOB_IMAGE:?Run Start-MeshLab.ps1}
+  networks: [mesh]
+services:
+  home:
+    <<: *node
+    volumes: ['home:/var/lib/mesh', './TestResults/home.json:/etc/mesh/node.json:ro']
+  hotel:
+    <<: *node
+    volumes: ['hotel:/var/lib/mesh', './TestResults/hotel.json:/etc/mesh/node.json:ro']
+  spa:
+    <<: *node
+    volumes: ['spa:/var/lib/mesh', './TestResults/spa.json:/etc/mesh/node.json:ro']
+networks:
+  mesh:
+    internal: true
+volumes:
+  home:
+  hotel:
+  spa:

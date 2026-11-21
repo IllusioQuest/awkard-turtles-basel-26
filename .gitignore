@@ -38,3 +38,6 @@ data/derived/network/experiments/runs/
 # Fleet simulation runs (T-58); small reference runs are force-added
 data/derived/fleet/*
 !data/derived/fleet/README.md
+
+# Local mesh credentials, published binaries, configs and Docker image archives.
+/mesh/TestResults/

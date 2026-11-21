@@ -96,32 +96,6 @@ public static class HeatLedLp
     }
 }
 
-/// <summary>
-/// Rolling-horizon LP (decision 0014 §6.2): every hour, plan the window current hour + forecast,
-/// commit only the current hour's load. Uses the forecast the state carries, so its label tells
-/// whether it is realistic (forecast error) or an upper bound (perfect foresight).
-/// </summary>
-public sealed class RollingHorizonLpScheduler : INetworkScheduler
-{
-    public string Id => "LP";
-    public string Label => "LP rolling horizon (heat-led, lexicographic), commits 1 h";
-
-    public NetworkDecision Decide(NetworkState state)
-    {
-        var windows = state.Sites.Select((site, i) =>
-        {
-            var s = state.States[i];
-            var demand = new double[1 + s.Forecast.Hours.Count];
-            demand[0] = s.Signal.DemandKwh;
-            for (int k = 0; k < s.Forecast.Hours.Count; k++) demand[k + 1] = s.Forecast.Hours[k].NeededHeatKwh;
-            return new LpSiteWindow(site, demand, s.Signal.TankStoredKwh);
-        }).ToArray();
-        var plans = HeatLedLp.Solve(windows);
-        return new NetworkDecision(plans.Select((p, i) =>
-            new SchedulerDecision(Math.Clamp(p.LoadServers[0] / state.Sites[i].ServerCount, 0, 1))).ToArray());
-    }
-}
-
 /// <summary>Full-year LP with perfect foresight: an upper bound only, never a scored result.</summary>
 public static class FullYearUpperBound
 {

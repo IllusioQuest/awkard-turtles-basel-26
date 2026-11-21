@@ -109,9 +109,9 @@ public class CoordinatorTests : IDisposable
     {
         var runtime = new Runtime(); using var c = Start(runtime);
         c.TryStart(PlacementTests.Request("batch", "batch"), Nodes, Profile, PlacementTests.Now);
-        Assert.True(c.ApplyBatchHeat("batch", new(0, 0, 0, 1, 0.8), new GreedyHeatScheduler(0), PlacementTests.Now));
+        Assert.True(c.ApplyBatchHeat("batch", new(0, 0, 0, 1, 0.8), new HeatFirstScheduler(0), PlacementTests.Now));
         Assert.True(c.Allocations().Single().Paused);
-        Assert.True(c.ApplyBatchHeat("batch", new(1, 0, 0, 1, 0.8), new GreedyHeatScheduler(0), PlacementTests.Now));
+        Assert.True(c.ApplyBatchHeat("batch", new(1, 0, 0, 1, 0.8), new HeatFirstScheduler(0), PlacementTests.Now));
         Assert.False(c.Allocations().Single().Paused);
     }
 

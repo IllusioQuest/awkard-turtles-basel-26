@@ -17,14 +17,13 @@ public class HeatFirstJobsTests
         return new(0, "2025-01-01T00:00", sites, states, ledger.View());
     }
 
-    [Fact] public void HeatFirstDeliberatelyDiffersFromOriginPreferringBaseline()
+    [Fact] public void HeatFirstIgnoresOriginPreference()
     {
         var state = State();
-        Assert.Equal(0, new NetworkGreedyJobsScheduler().Decide(state).Allocations!.Single().SiteIndex);
-        Assert.Equal(1, new HeatFirstJobsScheduler().Decide(state).Allocations!.Single().SiteIndex);
+        Assert.Equal(1, new HeatFirstNetworkScheduler().Decide(state).Allocations!.Single().SiteIndex);
     }
     [Fact] public void LocalityEligibilityRemainsMandatoryDespiteRemoteHeat()
-        => Assert.Equal(0, new HeatFirstJobsScheduler().Decide(State("origin-site")).Allocations!.Single().SiteIndex);
+        => Assert.Equal(0, new HeatFirstNetworkScheduler().Decide(State("origin-site")).Allocations!.Single().SiteIndex);
     [Fact] public void HeatTiesUseSharedOrdinalSiteOrder()
-        => Assert.Equal(1, new HeatFirstJobsScheduler().Decide(State(remoteHeat: 1)).Allocations!.Single().SiteIndex);
+        => Assert.Equal(1, new HeatFirstNetworkScheduler().Decide(State(remoteHeat: 1)).Allocations!.Single().SiteIndex);
 }

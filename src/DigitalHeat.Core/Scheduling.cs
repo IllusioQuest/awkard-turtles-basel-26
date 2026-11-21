@@ -39,8 +39,9 @@ public static class SchedulerController
     }
 }
 
-/// <summary>Greedy heat-following rule used by the existing year explorer.</summary>
-public sealed class GreedyHeatScheduler(double minimumLoadShare) : IScheduler
+/// <summary>Shared useful-heat load policy. A configured mandatory minimum is explicit and may
+/// produce dumped heat; new-job admission independently requires useful heat capacity.</summary>
+public sealed class HeatFirstScheduler(double minimumLoadShare) : IScheduler
 {
     public SchedulerDecision Decide(HeatSignal signal)
     {

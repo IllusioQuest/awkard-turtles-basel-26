@@ -1,10 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using DigitalHeat.Core;
 
 namespace DigitalHeat.Orchestration;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "message_type")]
+[JsonDerivedType(typeof(PeerOffer), "offer")]
+[JsonDerivedType(typeof(PeerProposal), "proposal")]
+[JsonDerivedType(typeof(PeerReply), "reply")]
 public abstract record PeerMessage;
 public sealed record PeerOffer(string PeerId, long Sequence, DateTimeOffset ExpiresAtUtc,
     WorkloadInventory Inventory, string[] Profiles) : PeerMessage;
@@ -132,8 +137,8 @@ public sealed class MeshPeer : IDisposable
         foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
-        foreach (var job in journal.Jobs.OrderBy(j => j.Request.Kind == "interactive" ? 0 : 1)
-            .ThenBy(j => j.Request.Deadline?.DueAtUtc ?? DateTimeOffset.MaxValue).ThenBy(j => j.Request.Id, StringComparer.Ordinal).ToArray())
+        foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
+            j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
             if (job.Status == "accepted") continue;
             if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
@@ -169,7 +174,7 @@ public sealed class MeshPeer : IDisposable
 
     private bool ApplyLocalHeat()
     {
-        var scheduler = new GreedyHeatScheduler(0);
+        var scheduler = new HeatFirstScheduler(0);
         var heat = inventory.Sites[0].Heat;
         bool noHeat = scheduler.Decide(heat).TargetLoadPerServer == 0;
         bool changed = false;
