@@ -77,6 +77,7 @@ All results are own runs on one Intel Iris Xe, Blender 5.3.0/OpenGL,
   PID. Four reused the exact loaded scene; the first reused the process/context.
 - Owner-host restart preserved the earlier four-frame run. Stop finished the
   active frame and released owned attempts. A bounded new-run/stop check passed.
+  Active-frame Blender survival across an owner-process crash was not verified.
 - One early diagnostic assertion saw a failed state while a stop was in progress;
   final cancellation settled with released attempts. A bounded follow-up rerun
   had no failure before stopping. This is retained as a limitation, not hidden.
