@@ -75,3 +75,5 @@ coordination between people, shared interfaces and integration risks. Keep your 
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
 
+
+Renderer work: Nikita/Codex, feat/T-66-landscape-render; depends PR #52. Reuses MeshPeer, no separate placement policy. CPU/GPU probe, browser timing comparison and pause/resume. Games untouched; ADR 0052.

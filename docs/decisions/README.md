@@ -59,3 +59,4 @@ later.
 
 | [0051](0051-one-heat-first-policy.md) | One heat-first policy; retire competing modes | proposed; user approved; reviewed with changes; T-65; PR #52 |
 
+| [0052](0052-landscape-render.md) | Landscape frame render benchmark | proposed; user approved; T-66 |

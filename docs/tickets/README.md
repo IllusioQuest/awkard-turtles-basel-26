@@ -97,3 +97,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-64](T-64-linux-mesh-batch-lab.md) | Private Linux mesh and real batch executors | Nikita / Codex | in progress; ADR 0050; separate inner engines approved |
 
 | [T-65](T-65-one-heat-first-policy.md) | Retire competing scheduler policies; one heat-first policy | Nikita / Codex | in progress; ADR 0051; explicit user request |
+| [T-66](T-66-landscape-render.md) | Landscape render comparison on heat-first mesh | Nikita / Codex | in progress; ADR 0052; depends PR #52 |
