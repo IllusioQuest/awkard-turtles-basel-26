@@ -62,3 +62,5 @@ later.
 | [0052](0052-landscape-render.md) | Landscape frame render benchmark | proposed; user approved; T-66 |
 | [0053](0053-mixed-render-frame-devices.md) | Configurable mixed CPU/GPU frame jobs | user approved 80/20; reviewed with changes; T-66 follow-up |
 | [0054](0054-failed-render-cancellation.md) | Cancel only a failed render comparison, retain data | user approved; reviewed with changes; T-66 |
+
+- [0055 — Verified Eevee rendering for Intel WSL graphics](0055-eevee-intel-render.md): proposed; user-approved capability test, reviewed with changes.
