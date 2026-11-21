@@ -145,6 +145,7 @@ without replacing its model or creating a second physical/economic implementatio
 
 | Location | Responsibility |
 |---|---|
+| `gaming/DigitalHeat.Gaming.sln` | Visual Studio solution for the shared Core, gaming library, console demo and tests |
 | `gaming/src/DigitalHeat.Gaming/GamingModels.cs` | Existing site, node, snapshot, request and reservation contracts |
 | `gaming/src/DigitalHeat.Gaming/SessionPlacement.cs` | Validation, eligibility, ranking and synchronized accounting |
 | `src/DigitalHeat.Core/HeatCapacity.cs` | Shared useful-heat capacity formula |
@@ -156,7 +157,7 @@ without replacing its model or creating a second physical/economic implementatio
 | `gaming/scripts/Start-Xonotic.ps1` | Manual game launch, working directory, audio environment and lock |
 | `gaming/TestResults/` | Ignored local credentials, diagnostics and run evidence |
 
-Read-only checks from the gaming checkout:
+Open `gaming/DigitalHeat.Gaming.sln` in Visual Studio to navigate the code. It builds with zero warnings/errors. Existing CLI commands remain available. Read-only checks from the gaming checkout:
 
     dotnet run --project gaming/demo
     dotnet test gaming/tests
