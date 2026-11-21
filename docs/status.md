@@ -31,6 +31,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (subagent) | `feat/T-14-economics` | T-14: economics per actor in the C# core (system surplus with premium + filler income, heat value per alternative, hardware profile, operator and host-owned split, case vs full-cost break-even, lever scenarios A/B/D/G, win-win grid export) | extends Core with a new economics module and config file; scored case figures unchanged; reads `config/hardware/*.json` (T-35 profiles plug in) | in progress |
 | Ennio / Claude | `docs/two-job-types-strategy` | Decision 0018 (two job types: Type 1 transcription + batch LLM, Type 2 CPU batch compute filler with heat-led price), tickets T-30 to T-32 | none (docs only) | merged (PR #16) |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
+| Jona / Claude (takeover) | `feat/T-12-network-validation` → main | T-12 step 3: LP validation on switzerland-test, B1-reserve/B2-reserve (decision 0029), experiments A–D (`scripts/network_experiments.py`), docs and paper §5/§8 | adds `NetworkRun` options (`--start/--hours`, `--exclude-kinds`, `--summary-json`, `--sigma24` in scenario mode); no change to the map export format (decision 0025 §7) | in progress; LP experiments running |
 
 ## Open coordination
 

@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Core / algorithms
 - **Depends on:** T-11, T-05
-- **Suggested owner:** Codex  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (step 1 done: engine, B0/B1, rolling-horizon LP, UB; decision 0024, `docs/model/network-scheduler.md`)
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (Claude, takeover 2026-11-21): steps 1–2 on main; step 3 validation + experiments A/B/D done, LP experiments running; decision 0029
 
 ## Goal
 
@@ -30,3 +30,13 @@ Implement and compare scheduling/routing strategies on the same interface.
 ## Rules
 
 - Follow AGENTS.md: agree the approach with your human first (§10), build on the shared C# core and data (§9a), every number with a source (§5), update `docs/status.md`.
+
+## Progress (2026-11-21, takeover session)
+
+- Step 3 validation: B1/B2 reproduced; LP runtime ≈ 0.22–0.38 s per hour on 33 sites (30–60 min/year).
+- Control strategies B1-reserve/B2-reserve (decision 0029): local timing does not explain B2's gain.
+- Experiments A (Type 1 share), B (φ), D (network mix) in `data/derived/network/experiments/`;
+  LP runs for A, C (forecast error) and D running (`python3 scripts/network_experiments.py --lp --jobs 4`).
+- Docs: `docs/model/network-scheduler.md` (step 2/3, results, how to read), `docs/paper/outline.md` §5/§8.
+- Next: fill LP results; optional transfer delay/cost (needs decision 0025 amendment); optional LiveRun
+  on the network engine (decision 0024 step 1b).
