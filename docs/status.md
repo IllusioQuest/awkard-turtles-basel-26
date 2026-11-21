@@ -85,3 +85,11 @@ T-13: 29 tests pass; 8,760-row showcase generated from clean 8651786, legacy hou
 T-13 ready for review in PR #10 (29 tests, exact hourly legacy comparison). T-27 images build; internal bridge ingress failed. Awaiting user choice on per-node firewall rules before network rollout. Existing hosting lab left running; privacy research and topology in docs/webhosting-privacy.md.
 T-27: four independent frontend/API engines verified with firewall isolation, 17 hosting tests, browser inspection, all four node-kill recovery scenarios and paused-gateway recovery. Runtime guide contains measured results; code PR pending, no automatic controller or heat-routing claim.
 T-13 complete: PR #10 verified merged as e554f196; snake_case export contract and showcase are now on main. T-27 remains a separate reviewed implementation branch.
+
+## Hosting scheduler handoff (2026-11-21 03:15 Europe/Zurich)
+Nikita / Codex claims T-29 for the user's requested scheduler connection. Proposed scope is a
+hosting adapter using existing IScheduler and JobPlacement, keeping both component replicas
+running; decision 0015 is pending user agreement/review. No T-10/T-12 network optimiser or shared
+schema files are claimed. T-01 owner: user has been asked to choose one batch/always-on catalog
+versus separate catalogs; no approval is implied until that reply is recorded.
+T-29 decision 0015 reviewed (go with changes): mandatory pre-selection locality filtering, whole-set fallback for incomplete telemetry, controlled-demo traffic only. User routing/catalog choices pending; runtime unchanged. T-27 PR #12 is still a code dependency outside main at this check.
