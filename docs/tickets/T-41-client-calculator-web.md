@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** UI
 - **Depends on:** decision 0020 (operator model)
-- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** in review
+- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** dropped (2026-11-21: calculator removed on request, only admin and household dashboards are kept; shared styling and ElCom canton prices remain)
 
 ## Goal
 

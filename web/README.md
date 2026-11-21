@@ -1,7 +1,7 @@
 # Web dashboard
 
 Vite + React + TypeScript, Recharts for charts, MapLibre for the map, react-day-picker for date
-ranges. All dashboard data except the calculator defaults is **mock data** for now.
+ranges. All dashboard data is **mock data** for now (electricity prices: ElCom per canton).
 
 ```
 npm install
@@ -11,12 +11,10 @@ npm run build    # type check and production build
 
 | Route | Page | Ticket |
 |---|---|---|
-| `/` | Client calculator: heating cost, savings, break-even (operator model) | T-41 |
-| `/admin` | Network dashboard: map, heat maps, weather, time machine, charts, missed deadlines | T-17 |
+| `/admin` (`/` redirects here) | Network dashboard: map, heat maps, weather, time machine, charts, missed deadlines | T-17 |
 | `/household`, `/household/:siteId` | Per-household dashboard with date range, forecast and live mode | T-18 |
 
-- `src/params.ts`: calculator defaults (reference house) with unit and source; ElCom canton prices
-- `src/calc.ts`: operator-model host balance, pure functions
+- `src/params.ts`: ElCom canton electricity prices
 - `src/admin/mock.ts`: deterministic mock network (sites, weather, load, jobs); replace with exported runs (T-13)
 - `src/household/series.ts`: household time series in range-dependent buckets
 - `src/index.css`, `src/admin/admin.css`, `src/admin/chartStyle.tsx`: shared styling

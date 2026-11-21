@@ -1,7 +1,6 @@
 // Time series for one household, aggregated into buckets that fit the selected range.
 // Values come from the same mock site model as the admin dashboard (admin/mock.ts).
 
-import { cantonHeatPriceChfPerKwh } from '../params'
 import { HOURS_PER_DAY, MS_PER_HOUR, siteState, type Site } from '../admin/mock'
 
 const DAY_MS = HOURS_PER_DAY * MS_PER_HOUR
@@ -23,7 +22,6 @@ export interface Bucket {
   heatUsedKwh: number
   heatDemandKwh: number
   heatDumpedKwh: number
-  savingsChf: number
   tankLevel: number
   temperatureC: number
 }
@@ -33,7 +31,6 @@ const uncertainty = (daysAhead: number) => Math.min(0.35, 0.04 + 0.01 * daysAhea
 
 export function householdSeries(site: Site, from: number, to: number, now: number): Bucket[] {
   const { bucketMs, sampleMs } = resolution(to - from)
-  const heatPrice = cantonHeatPriceChfPerKwh(site.canton) ?? 0
   const sampleHours = sampleMs / MS_PER_HOUR
   const start = Math.floor(from / bucketMs) * bucketMs
   const out: Bucket[] = []
@@ -69,7 +66,6 @@ export function householdSeries(site: Site, from: number, to: number, now: numbe
       heatUsedKwh: used,
       heatDemandKwh: demand,
       heatDumpedKwh: dumped,
-      savingsChf: used * heatPrice,
       tankLevel: tank / n,
       temperatureC: temp / n,
     })
@@ -86,7 +82,6 @@ export function householdSeries(site: Site, from: number, to: number, now: numbe
       heatUsedKwh: s.heatUsedKw,
       heatDemandKwh: s.heatDemandKw,
       heatDumpedKwh: s.heatDumpedKw,
-      savingsChf: s.heatUsedKw * heatPrice,
       tankLevel: s.tankLevel,
       temperatureC: s.temperatureC,
     }
@@ -107,7 +102,6 @@ export function totals(buckets: Bucket[]) {
     heatDumpedKwh: sum((b) => b.heatDumpedKwh),
     coveredShare: heatDemandKwh > 0 ? Math.min(1, heatUsedKwh / heatDemandKwh) : 0,
     powerKwh: sum((b) => b.powerKwh),
-    savingsChf: sum((b) => b.savingsChf),
     avgLoad: buckets.length ? sum((b) => b.load) / buckets.length : 0,
     avgTemperatureC: buckets.length ? sum((b) => b.temperatureC) / buckets.length : 0,
   }

@@ -48,37 +48,7 @@ h1 {
   padding: 56px 32px;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 48px;
-  align-items: start;
-}
-
-@media (max-width: 860px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Inputs */
-
-.inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field > span {
-  color: var(--ink-2);
-  font-size: 13px;
-}
+/* Controls */
 
 input,
 select,
@@ -102,18 +72,6 @@ input:focus,
 select:focus {
   background: var(--surface-2);
   box-shadow: 0 0 0 2px var(--accent);
-}
-
-.field-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.field-value {
-  color: var(--ink);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
 }
 
 input[type='range'] {
@@ -197,22 +155,7 @@ input[type='range']:focus-visible::-webkit-slider-thumb {
   background: var(--accent);
 }
 
-.segmented .sub {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.segmented button.active .sub {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* Results */
-
-.results {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
+/* Text */
 
 .label {
   display: block;
@@ -220,52 +163,11 @@ input[type='range']:focus-visible::-webkit-slider-thumb {
   font-size: 13px;
 }
 
-.hero-value {
-  display: block;
-  font-size: 56px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  margin-top: 4px;
-}
-
-.figures {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--gap);
-  margin: 0;
-}
-
-.figures > div {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 20px;
-}
-
-.figures dt {
-  color: var(--ink-2);
-  font-size: 13px;
-}
-
-.figures dd {
-  margin: 4px 0 0;
-  font-size: 24px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
 .note {
   display: block;
   margin-top: 2px;
   color: var(--muted);
   font-size: 13px;
-}
-
-.chart {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 20px 20px 12px;
 }
 
 .recharts-cartesian-axis-tick-value {

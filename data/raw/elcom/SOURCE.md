@@ -44,7 +44,7 @@ Derived for the reference house:
 | Endpoint | same GraphQL API, field `cantonMedianObservations` |
 | Query | period `2026`, category `H4`, product `standard`; full query stored in the file |
 | Retrieved | 2026-11-21 by `scripts/fetch_data.py` (`ELCOM_CANTONS`) |
-| Used by | web calculator (`web/src/params.ts`): heat price per canton = total ÷ 2.5 |
+| Used by | web dashboards (`web/src/params.ts`): electricity price per site canton in the mock network |
 
 - `canton` is the BFS canton number (1 = Zürich … 26 = Jura).
 - Without the `product` filter the API returns two rows per canton; the second is a cheaper
