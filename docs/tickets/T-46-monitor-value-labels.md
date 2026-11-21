@@ -1,24 +1,27 @@
-# T-46: Explain console monitoring values
+# T-46: Transfer monitoring data into the admin web dashboard
 
-Owner: Nikita / Codex. Status: in progress.
+Owner: Nikita / Codex. Status: implementation checked; preparing code PR.
 Branch: feat/T-46-monitor-value-labels. Depends on T-42 (already integrated).
 
 ## Scope
 
-Clarify the existing console's labels, units and explanations without changing scheduling,
-observations, heat calculations, interfaces or dependencies. Separate Docker observations from
-in-memory reservations and hourly model predictions. Identify configured application scope so
-Minecraft readiness is not inferred from a Xonotic monitor. Explain all values in the details view.
+User superseded the console work: integrate data directly into existing /admin, retire the terminal
+entry point/dependency, and keep existing monitoring logic in its original folder. Transfer strict
+snake_case inputs and snapshots through a thin read-only local API, without new heat/scheduling
+formulas. Separate observations, assumptions and model values; explain units and sources. No game
+control, no Minecraft readiness inferred from the configured Xonotic desktop monitor. ADR 0036.
 
 ## Coordination
 
 Checked main, shared status, open PRs and T-45 on 2026-11-21. Jona / Codex's T-45 branch changes
-the Network protocol model and paper, not this renderer. T-14 economics and T-18 homeowner
+the Network protocol model and paper, not the monitor. T-14 economics and T-18 homeowner
 dashboard remain separate work. Their progress is reported from branch/status evidence, not
-assumed live agent activity. No messages sent and no other agent's files modified.
+assumed live agent activity. No external messages sent. Existing admin logic is preserved with
+only a monitoring component import/render; household and other agent-owned model files untouched.
 
 ## Validation
 
-Build and existing gaming tests; inspect rendered January/July outputs at narrow/wide terminal
-widths, with and without details. No tests for presentation. Document command and reading guide
-on main. No live game/container changes.
+Clean API build; 42 gaming/monitor tests, frontend build/lint, API Host/Origin/input/content-type
+smoke and read-only Docker snapshot, browser controls/July values/value-guide checks. No presentation
+unit tests. See [web monitoring guide](../monitoring-web.md) for commands, field meanings, source
+and failure boundaries. Documentation on main; code feature PR pending. No live game changes.
