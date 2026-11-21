@@ -9,7 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Nikita / Codex | planned: feat/T-43-universal-workloads | T-43 universal resource/heat/locality admission; game-specific example pending | proposed generic admission boundary above existing Core heat/locality; no implementation yet | awaiting three user design answers; ADR 0033 proposed |
+| Nikita / Codex | feat/T-43-universal-workloads | T-43 resource-aware workload placement and scoped Docker lifecycle | generic atomic admission + legacy gaming adapter; existing Core heat/locality unchanged | 29 orchestration + 36 gaming tests; shared regressions and isolated Docker/backup proof; final PR preparation; universal-workloads.md |
 | Nikita / Codex | `fix/T-42-monitor-integration` | Review/clarify new gaming console; integrate author monitor under T-42 (T-41 already taken) | Existing Core/placement unchanged; read-only resource probe and console controls | PR #32 ready; 36 gaming/46 Core/20 Network tests and clean build; original author checkout preserved; gaming-monitor-review.md |
 | Jona / Codex | `docs/T-06-final-results` | T-06 reference-house price and cost sensitivity | none | PR #21 open |
 | Jona / Claude | `feat/T-14-economics` | T-14 economics per actor on the 0020 job model and L4 basis (decisions 0027, 0028 on that branch) | new economics module and config; scored case figures unchanged | PR #27 open |

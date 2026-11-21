@@ -1,6 +1,6 @@
 # 0033: Universal workload admission above shared heat placement
 
-Status: proposed; user approved general direction, concrete choices pending. T-43.
+Status: proposed; user approved C#/Docker, Xonotic+batch first and local backups; implementation authorized. T-43.
 
 ## Proposal
 
@@ -58,7 +58,7 @@ acceptance before the selected game's requirements are established with the user
 
 ## Review
 
-Fresh limited-context verdict: go with changes. Applied the accounting, restart and enforcement rules below. Concrete APIs and persistence guarantees remain proposed until the user answers the important design choices; acceptance is not inferred from elapsed time.
+Fresh limited-context verdict: go with changes. Applied the accounting, restart and enforcement rules below. User approved the recommended first milestone; implementation follows the corrections. Team acceptance of this ADR remains pending.
 
 ### Review corrections
 
@@ -85,3 +85,11 @@ Smaller first delivery recommended by reviewer: fixed trusted inventory, one coo
 conservative GPUs, local storage, reserve/start/observe/stop/release for isolated workloads.
 Checkpointing, replication, HA and automatic resource reclamation can be deferred; user choices
 still determine the example and storage scope. The first milestone must document these limits.
+
+## Approved first implementation detail
+
+One trusted controller host/operator uses a stable per-fleet OS file lock (including across different journal directories), flushed atomic local JSON journal, deterministic container names and fleet/attempt/spec ownership labels. Startup discovers unknown owned containers and fails closed; uncertain missing starts keep their claims. This is not cross-host fencing or HA, and operators must not run competing controllers under different OS users/hosts. GPU admission is exclusive per declared physical device; cooperative external accounting is required. The running Xonotic stays external/protected.
+
+## Implementation review and proof
+
+One shared WorkloadPlacement now backs the compatibility gaming adapter and resource-aware API. Independent code review corrections: validate runtime mappings/images before batch preemption; do not pause if retained RAM/GPU prevents admission; recover/cancel positively observed created containers; require fresh inventory to start a recovered claim; bind backup to the released attempt's claimed storage and restore only to a new fleet namespace. Real Docker proof includes shared-scheduler pause/resume and private-file cold backup/restore. No running game was adopted or stopped. GPU VRAM requirements fail closed when device memory is unknown.
