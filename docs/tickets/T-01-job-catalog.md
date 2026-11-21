@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core / jobs
 - **Depends on:** T-00
-- **Suggested owner:** Codex or anyone  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex or anyone  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (plan proposed, waiting for approval)
 
 ## Goal
 
