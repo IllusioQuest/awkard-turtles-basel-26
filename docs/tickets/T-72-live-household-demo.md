@@ -1,6 +1,6 @@
 # T-72: Live one-house request and dashboard
 
-- **Owner:** Codex · **Status:** in progress · **Branch:** `feat/T-72-live-household-demo`
+- **Owner:** Codex · **Status:** done (PR #61) · **Branch:** `feat/T-72-live-household-demo`
 - **Depends on:** T-68, T-58, T-03 and decision 0064.
 
 Build an offline live demonstration using the existing winter and summer reference-house inputs. The existing Fleet heat-first scheduler controls one dedicated real, interruptible local workload; expose simulated house state and independently observed process state to the household dashboard. Prefer transcription when its assets exist, with the existing Monte Carlo image as the local fallback. Never label simulated heat or simulated job completion as measured process output.
