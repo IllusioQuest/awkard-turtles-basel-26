@@ -150,3 +150,8 @@ Decision 0024 (reviewed). New projects `DigitalHeat.Network` (no third-party dep
 (OR-Tools GLOP), `DigitalHeat.NetworkRun`, `DigitalHeat.Network.Tests`; `HeatBalance.Step` and `WeatherCsv` moved into Core
 (scored outputs bit-identical). Step 1: B0/B1/rolling-horizon LP/UB on the reference house, B1 = UB. Next: jobs with
 deadlines (step 2), Swiss multi-site dataset and map export (step 3). `docs/model/network-scheduler.md`.
+
+## T-12 step 3: Swiss test dataset and map data (2026-11-21, Jona / Claude, branch `feat/T-12-step3-swiss-map`)
+`config/network/switzerland-test.json` (33 sites, 9 cities; weather per city from Open-Meteo, profiles from case/SIA/BFE/When2Heat; synthetic fields marked),
+`scripts/build_network_dataset.py`, mock export in the decision 0025 format (`data/derived/network/switzerland-test/mock-export/`, `scripts/make_network_mock_export.py`),
+field reference `docs/model/network-map-data.md`. Map UI is Ennio's; `prototypes/network-map-draft/` keeps only reusable parts (cantons GeoJSON, loader). No `src/` changes.

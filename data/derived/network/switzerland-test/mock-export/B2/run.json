@@ -1,0 +1,23 @@
+{
+  "mock": true,
+  "note": "MOCK data for map layout only; not a scheduler result.",
+  "scenario": "switzerland-test",
+  "strategy": "B2",
+  "strategyLabel": "B2 network greedy (mock)",
+  "gitCommit": null,
+  "forecast": {
+    "label": "none (mock)",
+    "sigma24": null,
+    "rho": null,
+    "seed": null
+  },
+  "fillRate": 1,
+  "type1Share": 0.3,
+  "horizonHours": null,
+  "inputs": [
+    {
+      "path": "config/network/switzerland-test.json",
+      "sha256": "c58449bf15af84466d0785def7c1bfe60842a8e66dab8b06e9b8ced7deb08e8e"
+    }
+  ]
+}

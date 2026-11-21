@@ -1,0 +1,278 @@
+{
+  "strategy": "B2",
+  "mock": true,
+  "network": {
+    "coverage": 0.8224311850909172,
+    "dumpedHeatKwh": 0.0,
+    "utilisation": 0.8271359816982806,
+    "serverHours": 7289185.466875,
+    "missedDeadlinePercent": 0.0,
+    "movedServerHours": 57052.37889657537
+  },
+  "sites": [
+    {
+      "siteId": "basel-reference-house-case-1",
+      "coverage": 0.559188785028295,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 21829.70825,
+      "type1ServerHours": 6081.098547534247,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "basel-sfh-1",
+      "coverage": 0.5625498935381736,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 20779.57,
+      "type1ServerHours": 4940.975192808219,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "basel-mfh-1",
+      "coverage": 0.6271599423517032,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 57969.404375000006,
+      "type1ServerHours": 14962.042422260274,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "basel-hotel-spa-1",
+      "coverage": 0.7231346316283409,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 180331.689,
+      "type1ServerHours": 467.8139274657536,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "basel-indoor-pool-1",
+      "coverage": 0.9947565710517454,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 779640.0,
+      "type1ServerHours": 3721.6746974315074,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "zurich-sfh-1",
+      "coverage": 0.6466175534959149,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 26627.98025,
+      "type1ServerHours": 6092.692819999999,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "zurich-mfh-1",
+      "coverage": 0.6367771225256785,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 159270.15175000002,
+      "type1ServerHours": 40186.733439999996,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "zurich-hotel-spa-1",
+      "coverage": 0.7453365043263861,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 230122.699375,
+      "type1ServerHours": 9490.01334,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "zurich-indoor-pool-1",
+      "coverage": 0.9947565710517454,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 779640.0,
+      "type1ServerHours": 0.0,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "bern-sfh-1",
+      "coverage": 0.6304039845206579,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 27443.165,
+      "type1ServerHours": 6318.818731164384,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "bern-mfh-1",
+      "coverage": 0.633500749097343,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 90013.54725,
+      "type1ServerHours": 22592.70792979452,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "bern-hotel-spa-1",
+      "coverage": 0.7563998479885068,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 332343.18425,
+      "type1ServerHours": 6325.487014041096,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "bern-indoor-pool-1",
+      "coverage": 0.9947565710517454,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 779640.0,
+      "type1ServerHours": 0.0,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "geneva-sfh-1",
+      "coverage": 0.5692505503906652,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 21056.984375,
+      "type1ServerHours": 5002.954222602739,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "geneva-mfh-1",
+      "coverage": 0.602016532264942,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 107960.04087499999,
+      "type1ServerHours": 28303.148900616437,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "geneva-hotel-spa-1",
+      "coverage": 0.7408053212818593,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 263911.914875,
+      "type1ServerHours": 4084.8633618835624,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "geneva-indoor-pool-1",
+      "coverage": 0.9947565710517454,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 779640.0,
+      "type1ServerHours": 1314.1410898972601,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lausanne-sfh-1",
+      "coverage": 0.5517847140154927,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 21504.432249999998,
+      "type1ServerHours": 5121.126425068493,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lausanne-mfh-1",
+      "coverage": 0.6236993524963351,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 125182.843375,
+      "type1ServerHours": 32063.49575797945,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lausanne-hotel-spa-1",
+      "coverage": 0.7353682409848014,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 157184.96675,
+      "type1ServerHours": 6821.560504452056,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lucerne-sfh-1",
+      "coverage": 0.6557816134410632,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 25897.445874999998,
+      "type1ServerHours": 5877.825378835617,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lucerne-mfh-1",
+      "coverage": 0.6166302555286947,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 140540.048,
+      "type1ServerHours": 35940.47268746576,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lucerne-hotel-spa-1",
+      "coverage": 0.7396954709655414,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 149326.00175,
+      "type1ServerHours": 8112.9500961986305,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "st-gallen-sfh-1",
+      "coverage": 0.6270738034968258,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 28318.620750000002,
+      "type1ServerHours": 6579.763508082191,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "st-gallen-mfh-1",
+      "coverage": 0.6479025557338804,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 149884.557,
+      "type1ServerHours": 37466.197610479445,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "st-gallen-hotel-spa-1",
+      "coverage": 0.7701707402655775,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 356685.17525,
+      "type1ServerHours": 9414.992206438355,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lugano-sfh-1",
+      "coverage": 0.4834357792322087,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 13170.5345,
+      "type1ServerHours": 3583.5216771917803,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lugano-mfh-1",
+      "coverage": 0.5070918642260397,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 37264.868875,
+      "type1ServerHours": 11179.4606625,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lugano-hotel-spa-1",
+      "coverage": 0.6592320316180771,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 140910.8475,
+      "type1ServerHours": 0.0,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "lugano-indoor-pool-1",
+      "coverage": 0.9947565710517454,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 779640.0,
+      "type1ServerHours": 367.63867280821927,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "chur-sfh-1",
+      "coverage": 0.5358894819568928,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 20482.910125,
+      "type1ServerHours": 4869.412149965753,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "chur-mfh-1",
+      "coverage": 0.5906296107101627,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 141032.63237500002,
+      "type1ServerHours": 36654.00661407534,
+      "missedServerHours": 0.0
+    },
+    {
+      "siteId": "chur-hotel-spa-1",
+      "coverage": 0.7240832148119573,
+      "dumpedHeatKwh": 0.0,
+      "serverHours": 343939.542875,
+      "type1ServerHours": 6931.243985958902,
+      "missedServerHours": 0.0
+    }
+  ]
+}
