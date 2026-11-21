@@ -65,3 +65,11 @@ community target if feasible; only client work is distributed, not a match serve
 
 Reviewed existing runtime assumes trusted operator profiles and is not an untrusted tenant sandbox.
 Use the stronger inspected trial configuration before deciding whether to add the new profile.
+
+Implementation update: draft PR #42. Docker Desktop does not publish the internal-only desktops'
+ports directly in this lab. User approved a reusable configuration-driven TCP relay: fixed
+operator routes, loopback-only host ports, non-root/read-only/no-mount execution, bounded buffers,
+connections and resources; the desktop nodes retain internal-only networks. It is test infrastructure,
+not production HA. User subsequently requested no login on D/E; only their local loopback access
+was changed. Shared job/scheduler interfaces and Minecraft are unchanged. Background repair was
+confirmed by the user. Installer/multiplayer feasibility remains unverified; see the lab guide.

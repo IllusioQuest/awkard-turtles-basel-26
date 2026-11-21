@@ -30,6 +30,15 @@ remained running; laptop load is uncontrolled. Raw evidence:
 `docs/performance/scheduler-cs16-preflight-2026-11-21.json`. This is not a CS-loaded result.
 Code branch explicitly includes PR #38 (and #37) so it reuses that admission implementation.
 
+Current handoff: draft PR #42; two offline Linux desktops and reusable fixed-route TCP relay run
+at localhost:18884/18885. User requested no login, limited to these loopback-only desktops.
+User confirmed background repair and visible installer. First timeout and later global-file-limit
+mistake diagnosed; log-only cap replaces `ulimit -f` (6251f08), with a large-file regression test.
+36 gaming + 46 orchestration + 3 relay + 2 Linux runner checks pass; Docker/HTTP checks pass.
+The user handles installer/license UI after stopping browser control. Installation, multiplayer,
+public-server compatibility, CPU split and game-loaded scheduler timing are not verified.
+See `docs/jobs/cs16-linux-lab.md`; do not mark this ticket done.
+
 Done criteria: verified client test and real multiplayer connection, repeatable config/commands,
 documented runtime/latency measurements and limitations, tests passing, code PR and shared docs.
 If setup is declined or prerequisites are unavailable, record the actual outcome without claiming
