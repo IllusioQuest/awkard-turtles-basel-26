@@ -1,4 +1,4 @@
-# 0012: Job data-locality eligibility
+# 0013: Job data-locality eligibility
 
 - **Status:** proposed
 - **Date:** 2026-11-21

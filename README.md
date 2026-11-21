@@ -100,7 +100,7 @@ Missing or mismatched location data blocks a restricted job **before Docker cont
 These CLI values are self-reported demo inputs; production routing needs trusted site
 identity and must call `JobPlacement.IsEligible` before assigning work. The current
 single-site year simulation does not enforce geographic routing. See
-[`docs/decisions/0012-job-data-locality.md`](docs/decisions/0012-job-data-locality.md).
+[`docs/decisions/0013-job-data-locality.md`](docs/decisions/0013-job-data-locality.md).
 
 From the repository root, after the owner has started a dedicated container that
 the replay may exclusively control:
