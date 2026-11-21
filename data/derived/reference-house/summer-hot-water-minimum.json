@@ -14,7 +14,7 @@
     "Coverage": 0.19548168735029767,
     "ElectricityCostChf": 2537.390625,
     "HeatValueChf": 811.9649999996764,
-    "ComputingIncomeChf": 2289.375,
+    "ComputingIncomeChf": 5036.625,
     "BreakEvenChfPerServerHour": 0.2261000000000424,
     "MissedDeadlines": "not modelled yet",
     "JobDemandAssumption": "unlimited jobs; excess heat policy: wait; source: docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
@@ -93,9 +93,9 @@
       "Source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100"
     },
     "ComputePriceChfPerServerHour": {
-      "Value": 0.3,
+      "Value": 0.66,
       "Unit": "CHF/server-hour",
-      "Source": "prototypes/year-explorer/index.html: illustrative slider value only; TODO(source) for market-backed compute income"
+      "Source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract."
     }
   },
   "JobScenario": {
@@ -110,7 +110,8 @@
     "Config": "config/reference-house.json",
     "JobScenario": "config\\job-scenarios\\unlimited.json",
     "VariantConfig": "config/reference-house-results.json",
-    "HardwareCostResearch": "data/raw/market/costs.csv"
+    "HardwareCostResearch": "data/raw/market/costs.csv",
+    "HardwareProfile": "config/hardware/cpu-server.json"
   },
   "Variant": {
     "Id": "summer-hot-water-minimum",
@@ -126,9 +127,17 @@
   "HardwareIllustration": {
     "Status": "illustrative partial cost, not a full-cost result",
     "Purpose": "User approved this clearly labelled example on 2026-11-21. Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
+    "HardwareProfile": "config/hardware/cpu-server.json",
+    "EstimatedUnitElectricKw": {
+      "value": 0.1625,
+      "unit": "kW/unit",
+      "source": "estimate: Xeon 6507P TDP 150 W (data/raw/market/hardware.csv hw-power-intel-xeon-6507p-tdp) + 32 GB x 0.392 W/GB (Cloud Carbon Footprint memory coefficient, docs/research/computing-price.md §2) = 162.5 W; fans, storage and PSU losses missing, TODO(source): measured wall power"
+    },
+    "EstimatedUnitsPerCaseServer": 6.153846153846153,
+    "EstimatedPurchaseCostChfPerCaseServer": 50757.10769230769,
     "PurchaseCost": {
       "RowId": "cost-server-dell-r570",
-      "ValueChfPerServer": 8248.03,
+      "ValueChfPerUnit": 8248.03,
       "SourceUrl": "https://www.digitec.ch/de/s1/product/dell-poweredge-r570-xeon-6507p-32-gb-rack-server-server-66461463",
       "Accessed": "2026-11-20"
     },
@@ -138,9 +147,9 @@
       "SourceUrl": "https://www.microsoft.com/investor/reports/ar22/",
       "Accessed": "2026-11-20"
     },
-    "AnnualDepreciationChf": 1374.6716666666669,
-    "BreakEvenWithThisDepreciationOnlyChfPerServerHour": 0.40623715533719773,
-    "SystemSurplusAfterThisDepreciationOnlyChf": -810.7222916669905
+    "AnnualDepreciationChf": 8459.517948717948,
+    "BreakEvenWithThisDepreciationOnlyChfPerServerHour": 1.3346363405363828,
+    "SystemSurplusAfterThisDepreciationOnlyChf": -5148.318573718272
   },
   "FullCost": {
     "Status": "unknown: no comparable hardware system, complete installation or operations quote",
