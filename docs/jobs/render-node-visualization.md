@@ -69,3 +69,6 @@ Reproduce the timing calculation: GET `/ui/status`, collect
 frames. Inspect `peers[].physical_host_id`, `physical_gpu_id`, `attempts` and
 `results` for node contributions. The source data and calculation are preserved
 in [the evidence file](../performance/render-node-map-2026-11-21.json).
+
+
+User-expanded network map and two-server configuration follow-up: see [GPU server network](gpu-server-network.md), ADR 0061 and PR #59 / 757a56b. That follow-up adds read-only connection/freshness fields; the initial map above did not change the snapshot contract. Planned servers are explicitly not connected.
