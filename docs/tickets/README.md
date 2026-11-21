@@ -90,3 +90,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-53](T-53-cs16-linux-compatibility.md) | CS 1.6 Linux compatibility and scheduler regression check | Nikita / Codex | draft PR #42; desktop/background checks pass; installer/multiplayer pending; ADR 0041 |
 | [T-55](T-55-gaming-gpu-eligibility.md) | Preserve heat and speed with GPU eligibility | Nikita / Codex | validation complete; draft PR #44; ADR 0043 reviewed; actual CS GPU dispatch gated |
 
+| [T-56](T-56-node-feedback.md) | Event-driven node capacity and heat feedback | Nikita / Codex | in progress; ADR 0044; local JSON adapter approved |
