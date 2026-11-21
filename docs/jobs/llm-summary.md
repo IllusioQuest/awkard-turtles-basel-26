@@ -1,6 +1,6 @@
 # Job: local LLM batch service (Apertus 8B, llama.cpp)
 
-Ticket T-33. Type 1 service (decision 0018): confidential batch LLM work, priced per token. It is
+Ticket T-33. Type 1 service (decisions 0018, 0020): batch LLM work on non-personal documents, priced per token. It is
 measured here on the first use case, meeting minutes from a transcript. **Status: measured on one
 laptop (CPU). Type 1 runs on GPU servers in the pitch scenario; these CPU figures are the
 measured, scored baseline.**
