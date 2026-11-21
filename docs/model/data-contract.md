@@ -68,6 +68,12 @@ Summary coverage is server_heat_used_kwh / total_heat_demand_kwh. A schematic ch
 export says demand=10 and useful=6, coverage is 0.6; these are explanatory, not measured figures.
 Break-even excludes hardware/integration/operations; retain profitability_note in presentations.
 
+## Economics bundle (additive, T-14)
+A separate opt-in export, `YearRun . --economics config/economics/reference-house.json --output DIR`,
+writes run.json (same provenance fields plus kind=economics), parameters.json, levers.csv,
+required-premium.csv and win-win.csv in the conventions above. It does not change summary.json or
+the hourly files. Columns and formulas: docs/model/economics.md (decision 0025).
+
 ## Compatibility and privacy
 Renaming/removing fields or changing units/meaning requires a schema_version bump.
 Consumers may ignore additive fields; adding new core metrics does not silently add summary fields.

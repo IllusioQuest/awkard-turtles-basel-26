@@ -1,6 +1,6 @@
 # 0025: Economics per actor: system surplus, split, levers and win-win grid
 
-- **Status:** proposed
+- **Status:** proposed (renumbered from 0017, which main took for the always-on catalog)
 - **Date:** 2026-11-21
 - **Decided by:** team lead / Claude (subagent), ticket T-14; team confirms later
 
@@ -22,15 +22,19 @@ scored case figures unchanged (§5.1), output in the T-13 bundle conventions.
    filler fills φ of the rest), i.e. the deterministic expectation of `F = φ·N` of decision 0014.
    This is a new `DemandLimitedExecutor : IExecutor` (achieved load = min(target, a)) passed to
    the unchanged `YearSimulation.Run` with the unchanged `GreedyHeatScheduler`. Heat used, backup,
-   dump and server-hours therefore come from the same hourly tank balance. Premium hours =
-   `S·p/a`, filler hours = `S·φ(1−p)/a`.
+   dump and server-hours therefore come from the same hourly tank balance. Premium is served
+   first in every hour: premium load = `min(actual, p)`, filler = the rest; premium capacity the
+   heat-led schedule leaves unused is reported as unserved (changed after review).
 2. **System surplus per year** (pure function, `Economics.Evaluate`):
    `surplus = I_premium + I_filler + V_heat − E − D − W − O` with
    `E` = server kWh × electricity price, `V_heat` = heat used × price of replaced heat
    (heat pump: electricity ÷ 2.5 as in the case; gas: fuel price ÷ boiler efficiency;
    oil: litre price ÷ (kWh per litre × efficiency)), `D` = N × purchase ÷ lifetime,
    `W` = N × purchase × wear share per year (`TODO(source)` until T-35, value 0),
-   `O` = N × operations per server-year (hardware profile). Unsold hours: server off (idle draw
+   `O` = N × operations per server-year (hardware profile), installation per site ÷ lifetime
+   (`TODO(source)`, value 0; the bundle reports the affordable installation budget; added after
+   review). Labelled variants from `creative-ideas.md` (CO₂ credits, own-PV electricity) are off in
+   the base case. Unsold hours: server off (idle draw
    of GPUs is `TODO(source)`).
 3. **Split.** Operator model: DigitalHeat owns the hardware, pays electricity, operations and
    wear, keeps all compute income, charges the host a heat fee per kWh (default 0 = free heat,
@@ -45,9 +49,10 @@ scored case figures unchanged (§5.1), output in the T-13 bundle conventions.
    surplus = 0, as a share of the profile's price; this is how D is judged until T-35 profiles
    exist, which then plug in via `config/hardware/*.json`).
 5. **Lever table + win-win grid** written by `DigitalHeat.YearRun --economics <config> --output
-   <dir>`: `run.json` (T-13 provenance), `economics/levers.csv` (profile × server count (A) ×
-   premium share (B) × policy heat-led/always-on (G) × heat alternative), `economics/win-win.csv`
-   (filler price × electricity price × fill rate, both models), `economics/parameters.json`.
+   <dir>`: `run.json` (T-13 provenance), `levers.csv` (profile × server count (A) × premium share
+   (B) × policy heat-led/always-on (G) × heat alternative), `required-premium.csv`, `win-win.csv`
+   (filler price × electricity price × fill rate, both models), `parameters.json`. The legacy and
+   v1 `summary.json` are not touched.
    Parameters: `config/economics/reference-house.json`, every value `{value, unit, source}`.
 
 ## Alternatives considered
@@ -68,4 +73,17 @@ scored case figures unchanged (§5.1), output in the T-13 bundle conventions.
 
 ## Review
 
-Pending (see below once run).
+Fresh-context review (separate Claude session with only the packet, 2026-11-21): **go with
+changes.** Applied:
+
+1. The proportional split `S·p/a` did not mean "premium first": now per hour premium =
+   `min(actual, p)`, with an `unserved_premium_server_hours` column; the docs say that a premium share
+   holds year-round only with always-on (G vs. SLA).
+2. Full cost lacked installation: added `InstallationChfPerSite` (`TODO(source)`, 0) amortised over
+   the lifetime (no discounting, stated) and an affordable-installation column.
+3. Scored figures must not drift: the capped runs write only to the economics bundle; a test checks
+   that the uncapped run (φ = 1) reproduces the scored server-hours, heat value and case break-even.
+4. Stated that with heat fee 0 the operator win-win reduces to DigitalHeat > 0.
+
+Not adopted: its simpler alternative (grid over filler price × fill rate only, one model), because
+the electricity axis and both models were explicitly requested and cost no extra simulation.

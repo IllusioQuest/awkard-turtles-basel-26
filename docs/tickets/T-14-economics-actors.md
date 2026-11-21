@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Core / economics
 - **Depends on:** T-15
-- **Suggested owner:** Codex or Jona  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress (branch `feat/T-14-economics`)
+- **Suggested owner:** Codex or Jona  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in review (PR from `feat/T-14-economics`, decision 0025, `docs/model/economics.md`)
 
 ## Goal
 
