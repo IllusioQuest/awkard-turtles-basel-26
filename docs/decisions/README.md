@@ -29,3 +29,4 @@ later.
 | [0015](0015-hosting-heat-routing.md) | Shared heat scheduler in hosting routing | proposed; approval/review pending |
 | [0016](0016-hosting-replica-lifecycle.md) | Six-node heat-guided hosting lifecycle | proposed; user approved scope, review pending |
 | [0017](0017-always-on-catalog.md) | Always-on entries and safe batch-control guard | proposed; scope approved, review pending |
+| [0018](0018-two-job-types-strategy.md) | Two job types: sovereign AI services (Type 1) + batch compute filler (Type 2), job model of T-34 | proposed (Ennio); team confirmation pending |
