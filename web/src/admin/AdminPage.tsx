@@ -262,7 +262,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
         {weather && showWeather && (
           <div className="map-legend">
-            <span>Temperature (°C){run.periodHours >= HOURS_PER_DAY ? ', daily mean' : ''}</span>
+            <span>Temperature (°C)</span>
             <div className="legend-bar" style={{ background: temperatureGradientCss() }} />
             <div className="legend-ticks fixed">
               {TEMP_LEGEND_TICKS_C.map((c) => (
