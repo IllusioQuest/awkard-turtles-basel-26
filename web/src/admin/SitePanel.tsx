@@ -1,57 +1,62 @@
 import { useMemo } from 'react'
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { chf, dateTime, dec1, num, pct, pct1 } from './format'
-import { HOURS_PER_DAY, MS_PER_HOUR, PHYSICS, SITE_TYPES, siteState, type Site, type SiteState } from './mock'
+import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
+import { chf, dateTime, dec1, num, pct, wallMs } from './format'
 
 interface Props {
-  site: Site
-  state: SiteState
+  run: RunInfo
+  house: HouseInfo
+  state: HousePeriod | undefined // the house's period at the selected hour
+  series: HousePeriod[] | undefined // all periods of the house (undefined while loading or unavailable)
   t: number
-  now: number
+  onMore: () => void
   onClose: () => void
 }
 
-const PANEL_WINDOW_H = 48
+const HOURS_PER_DAY = 24
+const SPARK_HOURLY = 48
+const SPARK_DAILY = 14
 
-export default function SitePanel({ site, state, t, now, onClose }: Props) {
-  const history = useMemo(() => {
-    const out = []
-    for (let h = -PANEL_WINDOW_H; h <= 0; h++) {
-      const at = t + h * MS_PER_HOUR
-      out.push({ t: at, load: siteState(site, at, at > now).load })
-    }
-    return out
-  }, [site, t, now])
+export default function SitePanel({ run, house, state, series, t, onMore, onClose }: Props) {
+  const daily = run.periodHours === HOURS_PER_DAY
+  const sparkPeriods = daily ? SPARK_DAILY : SPARK_HOURLY
 
+  const history = useMemo(
+    () => (series ?? []).filter((p) => p.h <= t && p.h > t - sparkPeriods * run.periodHours).map((p) => ({ t: wallMs(run, p.h), load: p.load })),
+    [series, t, run, sparkPeriods],
+  )
+
+  // Hourly runs: the 24 hours up to t; daily runs: the day starting at t.
   const day = useMemo(() => {
-    const totals = { used: 0, dumped: 0, jobs: 0, missed: 0, income: 0, cost: 0 }
-    for (let h = 0; h < HOURS_PER_DAY; h++) {
-      const s = siteState(site, t - h * MS_PER_HOUR, t > now)
-      totals.used += s.heatUsedKw
-      totals.dumped += s.heatDumpedKw
-      totals.jobs += s.jobsPerHour
-      totals.missed += s.missedPerHour
-      totals.income += s.incomeChfPerHour
-      totals.cost += s.electricityChfPerHour
+    const totals = { used: 0, dumped: 0, late: 0, income: 0, cost: 0 }
+    for (const p of series ?? []) {
+      if (p.h > t || p.h <= t - HOURS_PER_DAY) continue
+      totals.used += p.heatUsedKwh
+      totals.dumped += p.heatDumpedKwh
+      totals.late += p.lateWorkKwh
+      totals.income += p.incomeChf
+      totals.cost += p.electricityCostChf
     }
     return totals
-  }, [site, t, now])
+  }, [series, t])
 
-  const rows: [string, string][] = [
-    ['Type', SITE_TYPES[site.type].label],
-    ['Location', `${site.city}, ${site.canton}`],
-    ['Servers', `${num.format(state.serversRunning)} of ${site.servers} running`],
-    ['Heat capacity', `${dec1.format(site.servers * PHYSICS.recoveredShare)} kW`],
-    ['Outdoor temperature', `${dec1.format(state.temperatureC)} °C`],
-    ['Heat demand', `${dec1.format(state.heatDemandKw)} kW`],
-    ['Heat delivered', `${dec1.format(state.heatUsedKw)} kW`],
-    ['Tank', `${pct.format(state.tankLevel)} of ${site.tankKwh} kWh`],
-  ]
+  const kw = (kwh: number) => `${dec1.format(kwh / run.periodHours)} kW`
+  const rows: [string, string][] = state
+    ? [
+        ['Location', [house.municipality, house.canton].filter(Boolean).join(', ') || '–'],
+        ['Servers', `${dec1.format(state.load * house.servers)} of ${house.servers} running`],
+        ['Heat capacity', `${dec1.format(house.servers * run.maxElectricKwPerServer * run.heatRecoveryShare)} kW`],
+        ['Outdoor temperature', `${dec1.format(state.temperatureC)} °C`],
+        ['Heat demand', kw(state.heatDemandKwh)],
+        ['Heat delivered', kw(state.heatUsedKwh)],
+        ['Heat produced', kw(state.heatProducedKwh)],
+        ['Tank', `${pct.format(house.tankKwh > 0 ? state.tankEndKwh / house.tankKwh : 0)} of ${num.format(house.tankKwh)} kWh`],
+      ]
+    : [['Location', [house.municipality, house.canton].filter(Boolean).join(', ') || '–']]
   const dayRows: [string, string][] = [
     ['Heat delivered', `${num.format(day.used)} kWh`],
     ['Heat dumped', `${num.format(day.dumped)} kWh`],
-    ['Jobs', num.format(day.jobs)],
-    ['Missed deadlines', `${num.format(day.missed)} (${pct1.format(day.missed / Math.max(1, day.jobs))})`],
+    ['Late work', `${dec1.format(day.late)} kWh`],
     ['Computing income', chf.format(day.income)],
     ['Electricity cost', chf.format(day.cost)],
   ]
@@ -60,8 +65,8 @@ export default function SitePanel({ site, state, t, now, onClose }: Props) {
     <aside className="panel">
       <div className="panel-head">
         <div>
-          <h2>{site.name}</h2>
-          <span className="note">{site.id}</span>
+          <h2>{house.id}</h2>
+          <span className="note">{[house.municipality, house.canton].filter(Boolean).join(', ')}</span>
         </div>
         <button type="button" className="close" onClick={onClose} aria-label="Close">
           ×
@@ -69,7 +74,7 @@ export default function SitePanel({ site, state, t, now, onClose }: Props) {
       </div>
 
       <div className="panel-hero">
-        <span className="stat-value">{state.online ? pct.format(state.load) : 'Offline'}</span>
+        <span className="stat-value">{state ? pct.format(state.load) : '–'}</span>
         <span className="note">load</span>
       </div>
 
@@ -88,7 +93,7 @@ export default function SitePanel({ site, state, t, now, onClose }: Props) {
           <Line dataKey="load" stroke="var(--series-1)" strokeWidth={2} dot={false} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
-      <span className="note">last 48 h</span>
+      <span className="note">{daily ? `last ${SPARK_DAILY} days` : `last ${SPARK_HOURLY} h`}</span>
 
       <dl className="kv">
         {rows.map(([k, v]) => (
@@ -99,7 +104,7 @@ export default function SitePanel({ site, state, t, now, onClose }: Props) {
         ))}
       </dl>
 
-      <span className="label">Last 24 h</span>
+      <span className="label">{daily ? 'This day' : 'Last 24 h'}</span>
       <dl className="kv">
         {dayRows.map(([k, v]) => (
           <div key={k}>
@@ -108,6 +113,10 @@ export default function SitePanel({ site, state, t, now, onClose }: Props) {
           </div>
         ))}
       </dl>
+
+      <button type="button" className="more" onClick={onMore}>
+        More
+      </button>
     </aside>
   )
 }

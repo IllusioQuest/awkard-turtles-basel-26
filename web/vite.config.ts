@@ -5,5 +5,9 @@ import { defineConfig, searchForWorkspaceRoot } from 'vite'
 export default defineConfig({
   plugins: [react()],
   // The calculator reads sourced data straight from the repository's data/raw folder.
-  server: { fs: { allow: [searchForWorkspaceRoot(process.cwd()), '../data/raw'] } },
+  server: {
+    fs: { allow: [searchForWorkspaceRoot(process.cwd()), '../data/raw'] },
+    // Fleet-results API: dotnet run --project src/DigitalHeat.FleetApi
+    proxy: { '/api': 'http://localhost:5080' },
+  },
 })
