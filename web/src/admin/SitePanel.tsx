@@ -73,6 +73,10 @@ export default function SitePanel({ run, house, state, series, t, onMore, onClos
         </button>
       </div>
 
+      <button type="button" className="more" onClick={onMore}>
+        More
+      </button>
+
       <div className="panel-hero">
         <span className="stat-value">{state ? pct.format(state.load) : '–'}</span>
         <span className="note">load</span>
@@ -113,10 +117,6 @@ export default function SitePanel({ run, house, state, series, t, onMore, onClos
           </div>
         ))}
       </dl>
-
-      <button type="button" className="more" onClick={onMore}>
-        More
-      </button>
     </aside>
   )
 }
