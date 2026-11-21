@@ -6,9 +6,10 @@
       "working_directory": "/home/ubuntu/.wine-cs16/drive_c/Games/Counter-strike 1.6 Original",
       "user": "ubuntu",
       "log_path": "/home/ubuntu/cs16-game.log",
-      "arguments": ["hl.exe", "-game", "cstrike", "-windowed", "-w", "800", "-h", "600", "-console"],
+      "arguments": ["hl.exe", "-game", "cstrike", "-gl", "-windowed", "-w", "800", "-h", "600", "-console"],
       "variants": {
-        "input-check": ["+mlook", "+m_pitch", "0.022", "+cl_pitchup", "89", "+cl_pitchdown", "89", "+bind", "F8", "toggleconsole"]
+        "input-check": ["+mlook", "+m_pitch", "0.022", "+cl_pitchup", "89", "+cl_pitchdown", "89", "+bind", "F8", "toggleconsole"],
+        "local-gl-check": ["-condebug", "+sv_lan", "1", "+maxplayers", "4", "+map", "de_dust2"]
       },
       "environment": {"DISPLAY": ":20", "WINEPREFIX": "/home/ubuntu/.wine-cs16", "WINEDEBUG": "err+all", "LIBGL_ALWAYS_SOFTWARE": "true", "XDG_RUNTIME_DIR": "/tmp/runtime-ubuntu", "PULSE_SERVER": "unix:/tmp/runtime-ubuntu/pulse/native"},
       "required_capabilities": ["wine32", "cs16-installed", "streaming-desktop"]
