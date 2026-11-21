@@ -1,4 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net8.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
-  <ItemGroup><ProjectReference Include="../../../src/DigitalHeat.Core/DigitalHeat.Core.csproj" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="../../../src/DigitalHeat.Core/DigitalHeat.Core.csproj" /><ProjectReference Include="../../../src/DigitalHeat.Orchestration/DigitalHeat.Orchestration.csproj" /></ItemGroup>
 </Project>

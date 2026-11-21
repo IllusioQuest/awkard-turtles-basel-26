@@ -42,6 +42,6 @@ positive, preserve raw evidence and explain why no valid heat figure was obtaine
 
 ## Review
 
-Pending one fresh limited-context review of this boundary and measurement gate. This record does
-not claim measurement results, successful Minecraft gameplay, live migration, recovered water heat
-or a multi-node shared simulation.
+Fresh limited-context boundary review: go with changes. Applied predeclared measurement windows, capacity units and regression/noise policy; calibration-only opt-in; separate useful-heat recovery approval; application save proof plus successful non-OOM exit; same-world restart and cold restore tests. Code review additionally led to restoring the original idle-pause setting, recomputing export acceptance from raw samples, and cleaning up a failed measurement safely. The battery trial was rejected; heat-based startup stays blocked. See ../minecraft-server.md for evidence and calculation path.
+
+Browser-client follow-up reuses the existing Selkies Node A and desktop application runtime with the official Linux launcher, installed into its private persistent home. No new shared runtime interface or game modification. Microsoft sign-in and client download remain user actions; account caches must never enter git or world backups. Launcher window and TCP reachability observed, authenticated gameplay pending. User subsequently authorized publication to main; gameplay verification is still pending.
