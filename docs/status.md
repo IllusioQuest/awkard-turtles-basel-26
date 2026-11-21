@@ -153,3 +153,8 @@ deadlines (step 2), Swiss multi-site dataset and map export (step 3). `docs/mode
 
 T-39 cleanup in progress on featur-gaming: user confirmed playable Xonotic and requested explanation/cleanup first. Refactor gaming reservation readability and repeated script container lookup; preserve commands and runtime behavior. Live automatic distribution remains deferred.
 
+## T-12 step 3: Swiss test dataset (2026-11-21, Jona / Claude)
+`config/network/switzerland-test.json`: 33 sites in 9 cities (reference house, SFH, MFH, hotel-spa, indoor pool), Open-Meteo 2025
+weather per city, sourced profiles, synthetic fields marked per field; `scripts/build_network_dataset.py` (reproducible).
+Data for the network map: `docs/model/network-map-data.md`; mock export git-ignored (`scripts/make_network_mock_export.py`).
+The network map itself is built by Ennio; `prototypes/network-map-draft/` only holds reusable parts (cantons GeoJSON, loader).
