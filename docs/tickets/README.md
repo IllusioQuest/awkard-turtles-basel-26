@@ -81,3 +81,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-44](T-44-minecraft-server.md) | Minecraft persistent server workload integration | Nikita / Codex | code integrated; gameplay test pending; measured heat gate blocked |
 | [T-45](T-45-federated-scheduling.md) | Federated scheduling and safe job ownership | Jona / Codex | in progress (design, offer/claim model and paper; live runtime not implemented) |
 | [T-46](T-46-monitor-value-labels.md) | Transfer monitoring data into existing admin web app | Nikita / Codex | implementation checked; PR #35 in review; ADR 0036 |
+| [T-47](T-47-swiss-grid-data.md) | Data for the Swiss-wide simulation: weather grid + forecasts, buildings and heat demand, ElCom per municipality, compute demand and prices | Ennio / Claude | in progress |

@@ -1,0 +1,36 @@
+series,day_index_mod7,requests,requests_rel
+ChatGPT / API log,0,682368,1.0091
+ChatGPT / API log,1,700254,1.0356
+ChatGPT / API log,2,726833,1.0749
+ChatGPT / API log,3,753815,1.1148
+ChatGPT / API log,4,524963,0.7764
+ChatGPT / API log,5,538195,0.7959
+ChatGPT / API log,6,806866,1.1933
+ChatGPT / Conversation log,0,27497,1.2602
+ChatGPT / Conversation log,1,28707,1.3157
+ChatGPT / Conversation log,2,21007,0.9628
+ChatGPT / Conversation log,3,10168,0.4660
+ChatGPT / Conversation log,4,14221,0.6518
+ChatGPT / Conversation log,5,26016,1.1923
+ChatGPT / Conversation log,6,25121,1.1513
+GPT-4 / API log,0,40685,1.2379
+GPT-4 / API log,1,75878,2.3087
+GPT-4 / API log,2,36478,1.1099
+GPT-4 / API log,3,10388,0.3161
+GPT-4 / API log,4,17237,0.5245
+GPT-4 / API log,5,13848,0.4213
+GPT-4 / API log,6,35547,1.0816
+GPT-4 / Conversation log,0,13290,1.2847
+GPT-4 / Conversation log,1,12578,1.2159
+GPT-4 / Conversation log,2,10047,0.9712
+GPT-4 / Conversation log,3,5549,0.5364
+GPT-4 / Conversation log,4,7418,0.7171
+GPT-4 / Conversation log,5,11466,1.1084
+GPT-4 / Conversation log,6,12067,1.1665
+all,0,763840,1.0305
+all,1,817417,1.1028
+all,2,794365,1.0717
+all,3,779920,1.0522
+all,4,563839,0.7607
+all,5,589525,0.7953
+all,6,879601,1.1867

@@ -51,3 +51,22 @@ Derived for the reference house:
   product. We use the standard product. Check: Basel-Stadt median = 33.25 Rp./kWh, identical to
   the IWB value above.
 - Same caveats as above (H4 profile, VAT treatment to verify).
+
+## All municipalities, categories H1–H8, 2026 (T-47)
+
+| Field | Value |
+|---|---|
+| Files | `municipalities-2026/H1.json` … `H8.json` (API response wrapped with query and retrieval time) |
+| Query | `observations(period: "2026", category: [Hn])`, fields operator, municipality, canton, `coverageRatio`, `total` (Rp./kWh) |
+| Retrieved | 2026-11-21 by `scripts/fetch_elcom_municipalities.py` |
+| Derived | `data/derived/elcom/price-per-municipality-2026.csv`: one row per municipality and category; several operators per municipality → coverage-weighted mean (`coverageRatio`), plus min/max; CHF/kWh |
+| Coverage | 2,123 municipalities, ≈ 2,970 operator–municipality rows per category |
+| Check | Basel (BFS 2701) H4 = 0.3325 CHF/kWh, as in the case |
+
+Categories are ElCom's standard household consumption profiles ("house types"). The only one with a
+source so far: **H4 = 4,500 kWh/a** (ElCom FAQ, https://www.elcom.admin.ch/de/faq-stromtarife).
+Annual consumption and dwelling description for H1–H3 and H5–H8: TODO(source) (the ElCom website
+renders them with JavaScript; LINDAS query timed out on 2026-11-21).
+
+Medians over municipalities 2026, CHF/kWh: H1 0.352, H2 0.310, H3 0.273, H4 0.278, H5 0.258,
+H6 0.234, H7 0.250, H8 0.264. Yearly flat tariffs only (no time-of-day prices).
