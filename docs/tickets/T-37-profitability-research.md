@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Research / economics inputs
 - **Depends on:** T-15 (hardware profiles), T-26 (job demand), decision 0018 (two job types)
-- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** in review
+- **Suggested owner:** Ennio  ·  **Owner:** Ennio / Claude  ·  **Status:** done (PR #20)
 
 ## Goal
 

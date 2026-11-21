@@ -43,7 +43,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-33-local-llm-job`) |
-| [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | in review (branch `docs/T-37-profitability-research`) |
+| [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | done (PR #20) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | in progress |
 
 ## Dependency sketch
