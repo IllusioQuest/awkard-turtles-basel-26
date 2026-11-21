@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using DigitalHeat.Gaming;
 using System.Text.RegularExpressions;
 
@@ -28,10 +29,10 @@ public sealed class ReadOnlyDockerCommands(ServicePolicy policy, CancellationTok
         { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true } };
         foreach (var argument in arguments) process.StartInfo.ArgumentList.Add(argument);
         process.Start();
-        var output = process.StandardOutput.ReadToEndAsync();
-        var error = process.StandardError.ReadToEndAsync();
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(deadline);
         timeout.CancelAfter(TimeSpan.FromSeconds(policy.DockerCommandTimeoutSeconds));
+        var output = ReadBounded(process.StandardOutput.BaseStream, retain: true, timeout.Token);
+        var error = ReadBounded(process.StandardError.BaseStream, retain: false, timeout.Token);
         try { process.WaitForExitAsync(timeout.Token).GetAwaiter().GetResult(); }
         catch (OperationCanceledException)
         {
@@ -43,5 +44,18 @@ public sealed class ReadOnlyDockerCommands(ServicePolicy policy, CancellationTok
         _ = error.GetAwaiter().GetResult(); // Never return stderr, host details or process arguments to snapshots/logs.
         if (process.ExitCode != 0) throw new InvalidOperationException("docker_observation_unavailable");
         return text;
+    }
+    private async Task<string> ReadBounded(Stream stream, bool retain, CancellationToken cancel)
+    {
+        const int BufferBytes = 8192;
+        using var result = new MemoryStream(); var buffer = new byte[BufferBytes]; long total = 0; int count;
+        while ((count = await stream.ReadAsync(buffer, cancel)) > 0)
+        {
+            total += count;
+            // Continue draining to avoid blocking the child, but never retain beyond the policy cap.
+            if (retain && total <= policy.DockerObservation.MaxResponseBytes) result.Write(buffer, 0, count);
+        }
+        if (total > policy.DockerObservation.MaxResponseBytes) throw new InvalidOperationException("docker_observation_response_too_large");
+        return retain ? Encoding.UTF8.GetString(result.ToArray()) : "";
     }
 }
