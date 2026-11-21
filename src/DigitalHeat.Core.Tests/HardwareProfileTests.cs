@@ -19,7 +19,8 @@ public sealed class HardwareProfileTests
     {
         var reference = ReferenceParameters.Load(Path.Combine(Root(), "config", "reference-house.json"));
         var profiles = HardwareProfile.LoadDirectory(Dir());
-        Assert.Equal(["cpu-server", "gpu-consumer-rtx4090", "gpu-inference-l4"], profiles.Select(x => x.Id));
+        Assert.Equal(["cpu-server-refurbished", "cpu-server", "gpu-consumer-rtx4090", "gpu-inference-l4-refurbished",
+            "gpu-inference-l4", "gpu-inference-t4-refurbished"], profiles.Select(x => x.Id));
         foreach (var p in profiles)
         {
             Assert.Equal(reference.ServerElectricKw.Value, p.ServerElectricKw.Value);
@@ -49,6 +50,19 @@ public sealed class HardwareProfileTests
         var l4 = HardwareProfile.Load(Path.Combine(Dir(), "gpu-inference-l4.json"));
         Assert.False(l4.IdleElectricKw.IsKnown);
         Assert.StartsWith("TODO(source)", l4.IdleElectricKw.Source);
+    }
+
+    [Fact]
+    public void RefurbishedProfilesHaveShorterLifeAndLowerPrice()
+    {
+        foreach (var (refurbished, fresh) in new[] { ("cpu-server-refurbished", "cpu-server"),
+                     ("gpu-inference-l4-refurbished", "gpu-inference-l4"), ("gpu-inference-t4-refurbished", "gpu-inference-l4") })
+        {
+            var r = HardwareProfile.Load(Path.Combine(Dir(), refurbished + ".json"));
+            var n = HardwareProfile.Load(Path.Combine(Dir(), fresh + ".json"));
+            Assert.True(r.LifetimeYears.Value < n.LifetimeYears.Value);
+            Assert.True(r.PurchasePriceChfPerServer.Value < n.PurchasePriceChfPerServer.Value);
+        }
     }
 
     [Theory]

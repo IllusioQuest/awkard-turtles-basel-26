@@ -5,12 +5,20 @@ using DigitalHeat.Core;
 using DigitalHeat.Network;
 using DigitalHeat.Network.Lp;
 
-// Strategy comparison on the reference house (decision 0024, step 1).
-// Usage: NetworkRun [repository-root] [--horizon HOURS] [--rho RHO] [--sigma24 S1,S2,...] [--seed N]
-// Writes results/network/reference-house-comparison.json (generated, git-ignored).
-string? rootArg = null;
+// Two modes.
+// 1) Strategy comparison on the reference house (decision 0024, step 1), the default:
+//    NetworkRun [repository-root] [--horizon HOURS] [--rho RHO] [--sigma24 S1,S2,...] [--seed N]
+//    Writes results/network/reference-house-comparison.json (generated, git-ignored).
+// 2) Scenario run with Type 1 work and filler (decision 0025):
+//    NetworkRun [root] --scenario config/network/<file>.json [--strategy B1,B2,LP] [--type1-share X]
+//               [--phi Y] [--horizon H] [--export]
+//    --export writes results/network/<scenario>/<strategy>/ (map export contract, decision 0025 §7).
+string? rootArg = null, scenarioArg = null;
 int horizon = 48, seed = 20251121;
-double rho = 0.8;
+double rho = 0.8, phi = 1.0;
+double? type1Share = null;
+bool export = false;
+string[] strategyIds = ["B1", "B2"];
 double[] sigmas = [0.05, 0.10, 0.20];
 for (int i = 0; i < args.Length; i++)
 {
@@ -21,13 +29,25 @@ for (int i = 0; i < args.Length; i++)
         case "--seed": seed = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--sigma24":
             sigmas = args[++i].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray(); break;
+        case "--scenario": scenarioArg = args[++i]; break;
+        case "--strategy": strategyIds = args[++i].Split(','); break;
+        case "--type1-share": type1Share = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
+        case "--phi": phi = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
+        case "--export": export = true; break;
         default:
             if (args[i].StartsWith("--", StringComparison.Ordinal) || rootArg is not null)
-                throw new ArgumentException("Usage: NetworkRun [root] [--horizon H] [--rho R] [--sigma24 a,b] [--seed N]");
+                throw new ArgumentException("Usage: NetworkRun [root] [--horizon H] [--rho R] [--sigma24 a,b] [--seed N] " +
+                    "| [root] --scenario FILE [--strategy B1,B2,LP] [--type1-share X] [--phi Y] [--export]");
             rootArg = args[i]; break;
     }
 }
 string root = rootArg is not null ? Path.GetFullPath(rootArg) : FindRepositoryRoot();
+if (scenarioArg is not null)
+{
+    RunScenario(root, Path.GetFullPath(scenarioArg, root), strategyIds, type1Share, phi, horizon, export,
+        string.Join(' ', args));
+    return;
+}
 var p = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
 var demand = HeatDemand.Build(WeatherCsv.Read(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv")), p);
 // Basel coordinates from the case (docs/case/challenge.md).
@@ -82,6 +102,42 @@ File.WriteAllText(Path.Combine(output, "reference-house-comparison.json"), JsonS
     strategies = rows
 }, new JsonSerializerOptions { WriteIndented = true }));
 Console.WriteLine($"Wrote {Path.Combine(output, "reference-house-comparison.json")}");
+
+static void RunScenario(string root, string scenarioPath, string[] strategyIds, double? type1Share, double phi,
+    int horizon, bool export, string command)
+{
+    var scenario = NetworkScenarioLoader.Load(scenarioPath, root);
+    var specs = NetworkScenarioLoader.Type1Specs(scenario, type1Share);
+    var sites = scenario.NetworkSites;
+    Console.WriteLine($"Scenario {scenario.Id}: {sites.Count} sites, {sites[0].Demand.Count} h, phi={phi:R}, " +
+        $"Type 1 jobs/day: {string.Join(", ", specs.Select((s, i) => $"{sites[i].Id}={s?.JobsPerDay.ToString() ?? "-"}"))}");
+    Console.WriteLine("strategy coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
+    foreach (var id in strategyIds)
+    {
+        INetworkScheduler scheduler = id switch
+        {
+            "B1" => new LocalGreedyJobsScheduler(),
+            "B2" => new NetworkGreedyJobsScheduler(),
+            "LP" => new RollingHorizonWorkLpScheduler(),
+            _ => throw new ArgumentException($"Unknown strategy {id} (B1, B2, LP).")
+        };
+        var ledger = new WorkLedger(sites, specs, sites.Select(_ => phi).ToArray(), sites[0].Demand.Count,
+            NetworkScenarioLoader.HoursPerDay);
+        var sw = Stopwatch.StartNew();
+        // Greedy strategies ignore the forecast; the LP plans on perfect foresight of demand here
+        // (labelled), with pending work only (decision 0025 §4).
+        var result = NetworkSimulation.Run(sites, scheduler, new PerfectForesightForecasts(),
+            id == "LP" ? horizon : 1, work: ledger);
+        var n = NetworkExport.Network(result);
+        var t1 = result.Work!.Type1;
+        Console.WriteLine($"{id,-8} {n.Coverage,8:P2} {n.DumpedHeatKwh,11:F1} {n.ServerHours,9:F0} {n.Utilisation,7:P2} " +
+            $"{(t1.MissedDeadlinePercent is double m ? m.ToString("F2", CultureInfo.InvariantCulture) : "n/a"),12} " +
+            $"{t1.MovedServerHours,18:F1} {sw.Elapsed.TotalSeconds,7:F1}s");
+        if (export)
+            Console.WriteLine("  exported to " + NetworkExport.Write(root, scenario, result,
+                new NetworkRunInfo(phi, type1Share, specs, "NetworkRun " + command)));
+    }
+}
 
 static string FindRepositoryRoot()
 {
