@@ -73,6 +73,7 @@ public sealed partial class FleetEngine
             job.LastCheckpointHouse = -1;
         }
         job.StatusValue = JobStatus.Active;
+        LogJobEvent(house, job, chunk.Index, "started");
         MarkDirty(house);
         MarkDirty(chunk);
         return chunk.Id;
@@ -119,6 +120,8 @@ public sealed partial class FleetEngine
         if (old == load) return;
         chunk.LoadValue = load;
         if (old > 0 && load == 0) CountPause(house, job);
+        if (old > 0 && load == 0) LogJobEvent(house, job, chunk.Index, "paused");
+        if (old == 0 && load > 0) LogJobEvent(house, job, chunk.Index, "resumed");
         if (old == 0 && load > 0 && chunk.PhaseValue == ChunkPhase.Working && life.ResumeOverheadS > 0)
         {
             chunk.PhaseValue = ChunkPhase.Overhead;
@@ -138,6 +141,7 @@ public sealed partial class FleetEngine
         var house = chunk.ServerState.House;
         Settle(house, _nowMs);
         job.Stops++;
+        LogJobEvent(house, job, chunk.Index, "stopped");
         if (job.TypeValue.Lifecycle.Checkpointable)
         {
             double done = chunk.Done;

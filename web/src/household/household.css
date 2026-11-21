@@ -135,3 +135,13 @@
 @media (max-width: 560px) {
   .household .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.job-log { margin-top: 16px; }
+.job-log h2 { margin: 0 0 4px; font-size: 18px; }
+.job-log-list { list-style: none; margin: 16px 0 0; padding: 0; }
+.job-log-entry { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--grid); }
+.job-log-dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--series-1); }
+.job-log-dot-paused, .job-log-dot-stopped { background: var(--series-2); }
+.job-log-message { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.job-log-entry time { flex: none; text-align: right; }
+@media (max-width: 560px) { .job-log-entry { align-items: flex-start; flex-wrap: wrap; } .job-log-entry time { margin-left: 21px; } }

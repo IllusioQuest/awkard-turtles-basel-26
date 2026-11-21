@@ -112,6 +112,20 @@ export interface WeatherHours {
   temperatureC: number[][] // [hour][point], point order of /api/weather/points
 }
 
+export interface JobEvent {
+  timeMs: number
+  jobId: string
+  jobType: string
+  chunkId: number | null
+  kind: 'started' | 'paused' | 'resumed' | 'stopped' | 'completed'
+}
+
+export interface JobEventLog {
+  available: boolean
+  truncated: boolean
+  events: JobEvent[]
+}
+
 /** What the pages read; implemented by the API client and by the mock fallback. */
 export interface DataSource {
   runs(): Promise<RunInfo[]>
@@ -119,6 +133,7 @@ export interface DataSource {
   network(runId: string): Promise<NetworkHour[]>
   snapshots(runId: string, fromH: number, toH: number): Promise<Snapshot[]> // one per hour in [fromH, toH)
   houseSeries(runId: string, houseId: string): Promise<HousePeriod[]>
+  jobEvents(runId: string, houseId: string, fromMs: number, toMs: number): Promise<JobEventLog>
   weatherPoints(): Promise<WeatherPoint[]>
   weather(runId: string, fromH: number, toH: number): Promise<WeatherHours>
 }

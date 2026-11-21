@@ -21,7 +21,7 @@ public static class FleetOutput
         "Hot water is flat; heat demand uses the case's linear formula; the tank is lossless.",
         "Arrivals are Poisson (real LLM traffic is burstier, BurstGPT CV 2.2 per minute).",
         "Job sizes are known when a job arrives.",
-        "The mock scheduler and mock pricing are placeholders; the results describe them, not our real policy.",
+        "Pricing is a scenario model and may not represent actual customer contracts; this is a simulation, not a live execution.",
     ];
 
     // Seed offsets that MockLoadPricing uses (Policies/Pricing.cs).
@@ -39,6 +39,9 @@ public static class FleetOutput
 
         JobsInputCsv.Write(Path.Combine(dir, "jobs-input.csv"), run.Jobs);
         WriteLines(Path.Combine(dir, "jobs.csv"), JobsCsv(run));
+        string eventsPath = Path.Combine(dir, "job-events.csv");
+        if (run.Scenario.Logging.JobEvents) WriteLines(eventsPath, JobEventsCsv(run));
+        else if (File.Exists(eventsPath)) File.Delete(eventsPath);
         WriteLines(Path.Combine(dir, "houses-summary.csv"), HousesCsv(run));
         WriteLines(Path.Combine(dir, "network-hourly.csv"), NetworkCsv(run));
         string tsPath = Path.Combine(dir, "houses-timeseries.csv");
@@ -80,6 +83,20 @@ public static class FleetOutput
         AccountColumns.Where(c => c.Name != "electricity_chf").ToArray();
 
     // ---------------------------------------------------------------- jobs
+
+    private static IEnumerable<string> JobEventsCsv(FleetRun run)
+    {
+        yield return "time_ms,house_id,job_id,job_type,chunk_id,kind";
+        foreach (var e in run.Result.JobEvents)
+            yield return string.Join(',', I(e.TimeMs), CsvField(e.HouseId), CsvField(e.JobId), CsvField(e.JobType),
+                e.ChunkId is { } chunk ? I(chunk) : "", CsvField(e.Kind));
+    }
+
+    private static string CsvField(string value)
+    {
+        if (value.Contains('\n') || value.Contains('\r')) throw new InvalidDataException("Job event identifiers cannot contain line breaks.");
+        return value.Contains(',') || value.Contains('"') ? '"' + value.Replace("\"", "\"\"") + '"' : value;
+    }
 
     private static IEnumerable<string> JobsCsv(FleetRun run)
     {

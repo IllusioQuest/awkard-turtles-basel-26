@@ -1,7 +1,7 @@
 // DataSource backed by the fleet-results API (docs/model/fleet-api.md), with in-memory caching.
 // Snapshots and weather are fetched in day-aligned blocks so that playing the timeline is smooth.
 
-import type { DataSource, HouseInfo, HousePeriod, NetworkHour, RunInfo, Snapshot, WeatherHours, WeatherPoint } from './types'
+import type { DataSource, HouseInfo, HousePeriod, JobEventLog, NetworkHour, RunInfo, Snapshot, WeatherHours, WeatherPoint } from './types'
 
 const HOURLY_BLOCK_H = 48
 const DAILY_BLOCK_H = 336 // 14 days, below the API maximum of 744 hours per request
@@ -47,6 +47,16 @@ export class ApiSource implements DataSource {
     return this.memo(`series:${runId}:${houseId}`, () =>
       getJson<HousePeriod[]>(`/api/runs/${encodeURIComponent(runId)}/houses/${encodeURIComponent(houseId)}/series`),
     )
+  }
+
+  jobEvents(runId: string, houseId: string, fromMs: number, toMs: number) {
+    const url = `/api/runs/${encodeURIComponent(runId)}/houses/${encodeURIComponent(houseId)}/job-events?fromMs=${fromMs}&toMs=${toMs}`
+    return this.memo(`job-events:${runId}:${houseId}:${fromMs}:${toMs}`, async () => {
+      const res = await fetch(url)
+      if (res.status === 404) return { available: false, truncated: false, events: [] }
+      if (!res.ok) throw new Error(`${url}: ${res.status}`)
+      return (await res.json()) as JobEventLog
+    })
   }
 
   weatherPoints() {
