@@ -1,6 +1,6 @@
 # T-77 — Measure and improve renderer runtime
 
-Owner: Nikita/Codex. Status: in review; PR #69. Branch: perf/T-77-render-runtime.
+Owner: Nikita/Codex. Status: done; PR #69 merged, timeout follow-up included on main. Branch: perf/T-77-render-runtime.
 Depends on GPU shades/budgets PR #68. User approved staged profiling, warm reuse
 and shared-GPU concurrency investigation. Keep five roles, approved budgets,
 heat-first admission, quality settings and prior results. Ask before changing

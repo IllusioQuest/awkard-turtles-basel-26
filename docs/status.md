@@ -130,3 +130,6 @@ T-77 Nikita/Codex perf/T-77-render-runtime: profiling native scene/load/render a
 
 
 T-77 PR69/593fe8b,0abf3e1:117 tests; native timings, immutable released-result cache, bounded per-GPU submission waves, no unchanged session rewrites, verified scene reuse and native journal replacement fix. Two48-frame MP4 runs93.3555/131.3246s; preparation0.99469->0.00972worker-seconds, scene identity preserved. Benchmark1/2 medians9.9772/7.8012s for6frames;3-worker warmup timed out60s and owned diagnostic jobs cancelled. User explicitly keeps3 simultaneous renders. Do not claim stable overall speedup or change concurrency. Docs/performance evidence on main, Minecraft unchanged.
+
+
+T-77 integration complete: PR69 merged at c205fc7; user requested pull/push main and the post-merge timeout follow-up0abf3e1 is now included.117 tests previously passed; follow-up changes only diagnostic timeout configuration, Python syntax rechecked. Runtime unchanged by this Git synchronization.
