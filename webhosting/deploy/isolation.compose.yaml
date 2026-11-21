@@ -1,0 +1,64 @@
+# Opt-in trusted local lab, not a hostile-operator privacy boundary.
+name: webhosting-isolation
+x-engine: &engine
+  image: docker:29-dind@sha256:4bbc7223f81db790097c6dea42fb93e05b8fead4f0431fbe6ccaba6e8473201c
+  privileged: true
+  environment: { DOCKER_TLS_CERTDIR: "" }
+  command: ["dockerd", "--host=unix:///var/run/docker.sock"]
+  restart: "no"
+x-gateway: &gateway
+  image: webhosting-gateway:local
+  network_mode: host
+  volumes: ["./isolation-gateway.json:/app/appsettings.json:ro"]
+  restart: "no"
+x-monitor: &monitor
+  image: webhosting-gateway:local
+  user: root
+  network_mode: host
+  volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+  environment:
+    Monitor__Enabled: "true"
+    Monitor__Project: webhosting-isolation
+    Monitor__Services__0: gateway-a
+    Monitor__Services__1: gateway-b
+    Monitor__FailureThreshold: "3"
+    Monitor__IntervalSeconds: "1"
+    Monitor__TimeoutSeconds: "5"
+    DOTNET_SYSTEM_NET_DISABLEIPV6: "1"
+  restart: "no"
+services:
+  frontend-a:
+    <<: *engine
+    ports: ["127.0.0.1:18481:8080"]
+    volumes: ["frontend-a-data:/var/lib/docker"]
+    labels: { webhosting.component: frontend }
+  frontend-b:
+    <<: *engine
+    ports: ["127.0.0.1:18482:8080"]
+    volumes: ["frontend-b-data:/var/lib/docker"]
+    labels: { webhosting.component: frontend }
+  api-c:
+    <<: *engine
+    ports: ["127.0.0.1:18483:8080"]
+    volumes: ["api-c-data:/var/lib/docker"]
+    labels: { webhosting.component: api }
+  api-d:
+    <<: *engine
+    ports: ["127.0.0.1:18484:8080"]
+    volumes: ["api-d-data:/var/lib/docker"]
+    labels: { webhosting.component: api }
+  gateway-a:
+    <<: *gateway
+    environment: { Gateway__InstanceId: gateway-a, Gateway__Watchdog__Enabled: "true", DOTNET_SYSTEM_NET_DISABLEIPV6: "1" }
+  gateway-b:
+    <<: *gateway
+    environment: { Gateway__InstanceId: gateway-b, Gateway__Watchdog__Enabled: "true", DOTNET_SYSTEM_NET_DISABLEIPV6: "1" }
+  monitor-a:
+    <<: *monitor
+  monitor-b:
+    <<: *monitor
+volumes:
+  frontend-a-data:
+  frontend-b-data:
+  api-c-data:
+  api-d-data:
