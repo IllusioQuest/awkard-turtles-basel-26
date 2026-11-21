@@ -100,7 +100,8 @@ sites with summer heat demand.
     \texttt{python3 scripts/network\_experiments.py}; LP columns:
     \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}. Output:
     \texttt{data/derived/network/experiments/A\_type1\_share.csv}. Coverage is \qty{83.42}{\percent}
-    and dumped heat \qty{0}{kWh} in every greedy run (B2-reserve \qty{83.40}{\percent}).}
+    and dumped heat \qty{0}{kWh} in every greedy and LP run (B2-reserve \qty{83.40}{\percent}). LP: rolling
+    horizon \qty{48}{h}, perfect heat foresight, arrived work only; about 72--81~min per simulated year.}
   \label{tab:exp-a}
   \small
   \begin{tabular}{rrrrrrr}
@@ -108,10 +109,10 @@ sites with summer heat demand.
     Type 1 & B1 & B2 & B2 moved & B2-reserve & LP & LP moved \\
     share & missed & missed & [server-h] & moved [server-h] & missed & [server-h] \\
     \midrule
-    \qty{10}{\percent} & \qty{0}{\percent} & \qty{0}{\percent} & \num{7725} & \num{7725} & \pending{} & \pending{} \\
-    \qty{30}{\percent} & \qty{15.69}{\percent} & \qty{0}{\percent} & \num{102754} & \num{64230} & \pending{} & \pending{} \\
-    \qty{50}{\percent} & \qty{25.19}{\percent} & \qty{0}{\percent} & \num{205267} & \num{161968} & \pending{} & \pending{} \\
-    \qty{70}{\percent} & \qty{29.47}{\percent} & \qty{0}{\percent} & \num{309325} & \num{265260} & \pending{} & \pending{} \\
+    \qty{10}{\percent} & \qty{0}{\percent} & \qty{0}{\percent} & \num{7725} & \num{7725} & \qty{0}{\percent} & \num{0} \\
+    \qty{30}{\percent} & \qty{15.69}{\percent} & \qty{0}{\percent} & \num{102754} & \num{64230} & \qty{0}{\percent} & \num{49884} \\
+    \qty{50}{\percent} & \qty{25.19}{\percent} & \qty{0}{\percent} & \num{205267} & \num{161968} & \qty{0}{\percent} & \num{149009} \\
+    \qty{70}{\percent} & \qty{29.47}{\percent} & \qty{0}{\percent} & \num{309325} & \num{265260} & \qty{0}{\percent} & \num{253300} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -124,6 +125,15 @@ work above that cannot run at home without dumping heat. If the network contains
 sinks (hotels with spas, indoor pools), the work moves there and no deadline is missed. Remove them
 and moving still happens, but \qty{13.80}{\percent} of jobs are missed, because every house is short
 at the same time (Table~\ref{tab:exp-d}).
+
+The rolling-horizon LP misses no more deadlines than B2 and moves much less work: \num{49884} instead
+of \num{102754} moved server-hours at a Type~1 share of \qty{30}{\percent} (\qty{-51}{\percent}),
+\qty{-27}{\percent} at \qty{50}{\percent} and \qty{-18}{\percent} at \qty{70}{\percent}
+(Table~\ref{tab:exp-a}). Its last priority stage keeps work at home unless moving helps, and it sees
+the whole network's heat budget over \qty{48}{h}. In the residential-only network it moves only
+\num{3001} server-hours (B2: \num{63333}) and misses slightly fewer jobs (\qty{13.07}{\percent}
+versus \qty{13.80}{\percent}): moving work between houses that are all short of summer heat
+barely helps, and the LP recognises this.
 
 \begin{table}[ht]
   \centering
@@ -139,8 +149,8 @@ at the same time (Table~\ref{tab:exp-d}).
     Network & Sites & B1 & B2 & B2 moved & Coverage & LP & LP moved \\
     & & missed & missed & [server-h] & & missed & [server-h] \\
     \midrule
-    all sites & 33 & \qty{15.69}{\percent} & \textbf{\qty{0}{\percent}} & \num{102754} & \qty{83.42}{\percent} & \pending{} & \pending{} \\
-    residential only & 19 & \qty{15.69}{\percent} & \textbf{\qty{13.80}{\percent}} & \num{63333} & \qty{63.18}{\percent} & \pending{} & \pending{} \\
+    all sites & 33 & \qty{15.69}{\percent} & \textbf{\qty{0}{\percent}} & \num{102754} & \qty{83.42}{\percent} & \qty{0}{\percent} & \num{49884} \\
+    residential only & 19 & \qty{15.69}{\percent} & \textbf{\qty{13.80}{\percent}} & \num{63333} & \qty{63.18}{\percent} & \qty{13.07}{\percent} & \num{3001} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -248,13 +258,13 @@ test network with synthetic forecast errors. On the single house the effect is s
     33 synthetic sites (scenario data). Synthetic AR(1) error with $\rho = 0.8$, seed 20251121;
     $\sigma_{24}$ and $\rho$ are \texttt{TODO(source)} and shown as a sweep. Reproduce with
     \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}; output
-    \texttt{data/derived/network/experiments/C\_forecast\_error-lp.csv} (not yet produced).}
+    \texttt{data/derived/network/experiments/C\_forecast\_error-lp.csv}; the perfect-foresight row is the LP run of experiment~A at \qty{30}{\percent}. Rows with $\sigma_{24} > 0$ are still running.}
   \label{tab:exp-c}
   \begin{tabular}{lrrrr}
     \toprule
     Forecast & Coverage & Dumped [kWh] & Missed Type 1 & Moved [server-h] \\
     \midrule
-    perfect foresight & \pending{} & \pending{} & \pending{} & \pending{} \\
+    perfect foresight & \qty{83.42}{\percent} & \num{0} & \qty{0}{\percent} & \num{49884} \\
     $\sigma_{24} = 0.05$ & \pending{} & \pending{} & \pending{} & \pending{} \\
     $\sigma_{24} = 0.10$ & \pending{} & \pending{} & \pending{} & \pending{} \\
     $\sigma_{24} = 0.20$ & \pending{} & \pending{} & \pending{} & \pending{} \\

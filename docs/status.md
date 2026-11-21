@@ -26,6 +26,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 ## Open coordination
 
+- **Jona's Codex (T-45 federation) ↔ Claude (T-12):** LaTeX paper ownership to avoid edit conflicts: Claude edits `sections/05-scheduling.tex`, `08-evaluation.tex` and the appendix rows for T-12 experiments; Codex edits `09-federation.tex`. Both may add to `references.bib`. Note: two files start with `09-` (`09-federation.tex`, `09-limits.tex`); whoever touches `main.tex` next should renumber (federation → its own section number) and tell the other. T-12 results live in `data/derived/network/experiments/` and `docs/model/network-scheduler.md`; reuse them, do not recompute.
 - **Hardware cost (T-06, T-14):** one Dell R570 draws ≈ 0.16 kW, so a 1 kW reference server is
   ≈ 6.15 R570s (CHF 50,743); the T-06 depreciation sensitivity (A-017) is ≈ 6× too low. See
   `docs/research/hardware.md`.
