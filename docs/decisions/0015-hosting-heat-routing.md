@@ -45,3 +45,4 @@ https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/yarp/middlewa
 Adding the shared Core reference requires repository-root Docker build context with both
 webhosting/ and src/DigitalHeat.Core/ sources. Update and test legacy build commands too.
 
+

@@ -1,4 +1,4 @@
-# T-29: Connect hosting request routing to the shared heat scheduler
+# T-36: Connect hosting request routing to the shared heat scheduler
 
 - **Tier:** 2 Pitch · **Area:** Hosting / scheduler integration
 - **Depends on:** T-09, T-24, T-27
@@ -40,3 +40,4 @@ User chose automatic pause/move rather than routing-only, then approved six node
 component), two serving replicas per component and a common batch/always-on catalog.
 Decision 0016 extends 0015. Implementation must verify readiness-before-switch, request drain,
 safe aborts, locality denial and gateway failure during a transition. T-01 notified via its ticket.
+

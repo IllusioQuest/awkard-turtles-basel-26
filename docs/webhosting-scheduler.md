@@ -1,4 +1,4 @@
-# Heat-guided hosting with six Linux nodes (T-29)
+# Heat-guided hosting with six Linux nodes (T-36)
 
 Status: implementation and Docker verification in progress; no measured heat claim.
 User approved six-node automatic stateless relocation/pause and a common batch/always-on catalog.
@@ -83,3 +83,4 @@ An HTTP success count is not energy. Node administrators and gateway operators c
 Exclusive host-port ownership is not cross-host consensus/fencing; late remote Docker operations
 may survive a killed gateway. Interrupted-transition recovery must be tested, and transient errors
 remain possible. The physical laptop and Docker Desktop remain shared dependencies.
+

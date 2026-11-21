@@ -28,3 +28,4 @@ later.
 | [0013](0013-job-data-locality.md) | Job data-locality eligibility | proposed |
 | [0015](0015-hosting-heat-routing.md) | Shared heat scheduler in hosting routing | proposed; approval/review pending |
 | [0016](0016-hosting-replica-lifecycle.md) | Six-node heat-guided hosting lifecycle | proposed; user approved scope, review pending |
+| [0017](0017-always-on-catalog.md) | Always-on entries and safe batch-control guard | proposed; scope approved, review pending |

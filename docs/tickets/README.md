@@ -58,5 +58,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-27](T-27-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | PR #12 ready for review |
 
 
-| [T-29](T-29-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | in progress; design approval pending |
+| [T-36](T-36-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | in progress; approved, Docker lifecycle checks passed |
 | [T-34](T-34-business-model-v2.md) | Business model v2: sovereign GPU cloud that heats homes profitably | 2 Pitch | T-14, T-35, T-11/T-12 | team lead + Claude | Team lead / Claude | in progress |
+

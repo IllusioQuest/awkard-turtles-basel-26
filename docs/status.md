@@ -96,3 +96,12 @@ versus separate catalogs; no approval is implied until that reply is recorded.
 T-29 decision 0015 reviewed (go with changes): mandatory pre-selection locality filtering, whole-set fallback for incomplete telemetry, controlled-demo traffic only. User routing/catalog choices pending; runtime unchanged. T-27 PR #12 is still a code dependency outside main at this check.
 T-29: Nikita approved six-node automatic stateless replica move/pause and common batch/always-on catalog. T-01 decision is now recorded in its ticket; schema/loader implementation remains Claude-owned. Lifecycle decision 0016 under review; gateway controller reuses shared scheduler and locality, scored model unchanged.
 T-29 implementation on feat/T-29-hosting-scheduler (stacked on unmerged T-27): shared scheduler + locality + synchronized admission/drain lifecycle; 43 tests pass. Six-node Linux build/integration running. T-01 catalog approval recorded; no competing schema edits.
+
+Hosting scheduler ticket renumbered to T-36 because Ennio has a separate remote branch
+feat/T-29-local-llm-job. No LLM files changed. Runtime code branch is now feat/T-36-hosting-scheduler.
+Eight real Docker checks passed including actual pause states, heat swap, request drain,
+stale/partial heat, locality denial and active-gateway kill after observing pause phase.
+T-23/T-01 handoff: no unmerged implementation exists on feat/T-01-job-catalog (triple-dot diff
+against main empty). Nikita now implements the narrow approved serviceMode loader/schema guard
+and frontend/API catalog descriptors to finish the requested integration; Claude retains broader
+catalog/research ownership. No new economic or measurement values are invented.

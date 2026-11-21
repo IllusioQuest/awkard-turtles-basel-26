@@ -48,3 +48,4 @@ Continuous restore-first reconciliation verifies mutations and restores missing 
 Interrupted-transition integration test required; late Docker operations remain a documented
 local-lab limitation rather than a production fencing guarantee.
 
+
