@@ -13,6 +13,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.JobRuntime", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.LiveRun", "DigitalHeat.LiveRun\DigitalHeat.LiveRun.csproj", "{12892611-183A-4B2B-8F60-0D7EC9383279}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Network", "DigitalHeat.Network\DigitalHeat.Network.csproj", "{37E5EAB2-C1DE-4E56-9314-D59ACE530371}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Network.Lp", "DigitalHeat.Network.Lp\DigitalHeat.Network.Lp.csproj", "{9EBA4085-BB38-4D81-AF6A-DA65E3E5417B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.NetworkRun", "DigitalHeat.NetworkRun\DigitalHeat.NetworkRun.csproj", "{D210857A-BAE3-4063-BEFF-BD0350D1B5F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Network.Tests", "DigitalHeat.Network.Tests\DigitalHeat.Network.Tests.csproj", "{50E8E535-118D-439D-BE10-99BAC4E81BEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +50,21 @@ Global
 		{12892611-183A-4B2B-8F60-0D7EC9383279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12892611-183A-4B2B-8F60-0D7EC9383279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12892611-183A-4B2B-8F60-0D7EC9383279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37E5EAB2-C1DE-4E56-9314-D59ACE530371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37E5EAB2-C1DE-4E56-9314-D59ACE530371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37E5EAB2-C1DE-4E56-9314-D59ACE530371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37E5EAB2-C1DE-4E56-9314-D59ACE530371}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EBA4085-BB38-4D81-AF6A-DA65E3E5417B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EBA4085-BB38-4D81-AF6A-DA65E3E5417B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EBA4085-BB38-4D81-AF6A-DA65E3E5417B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EBA4085-BB38-4D81-AF6A-DA65E3E5417B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D210857A-BAE3-4063-BEFF-BD0350D1B5F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D210857A-BAE3-4063-BEFF-BD0350D1B5F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D210857A-BAE3-4063-BEFF-BD0350D1B5F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D210857A-BAE3-4063-BEFF-BD0350D1B5F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
