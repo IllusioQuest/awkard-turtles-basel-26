@@ -48,3 +48,5 @@ later.
 | [0037](0037-minute-live-job-deadlines.md) | Minute-level bounded live-job deadlines | proposed; user approved; reviewed with changes; PR #37 |
 | [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; reviewed with changes; PR #38 depends on #37 |
 | [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation transport | proposed; user approved; reviewed with changes; PR #40 depends on #35 |
+| 0040 | Local four-node demo | reserved on `feat/T-51-four-node-live-demo` |
+| [0041](0041-cs16-linux-compatibility.md) | Isolated CS 1.6 Linux compatibility trial | proposed; user approved two-node Wine trial; reviewed with changes; T-53 |

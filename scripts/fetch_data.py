@@ -121,13 +121,13 @@ def fetch_elcom(cfg: dict = ELCOM) -> None:
         "response": result,
     }
     cfg["target"].parent.mkdir(parents=True, exist_ok=True)
-    cfg["target"].write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
+    cfg["target"].write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"[fetch] ElCom -> {cfg['target'].relative_to(REPO_ROOT)}")
 
 
 def read_open_meteo(path: Path) -> list[tuple[str, float]]:
     """Return (local time ISO string, temperature_2m in °C) per hour."""
-    lines = path.read_text().splitlines()
+    lines = path.read_text(encoding="utf-8").splitlines()
     start = next(i for i, line in enumerate(lines) if line.startswith("time,"))
     reader = csv.reader(lines[start:])
     header = next(reader)
@@ -168,7 +168,7 @@ def check_open_meteo() -> bool:
 
 
 def check_elcom() -> bool:
-    snapshot = json.loads(ELCOM["target"].read_text())
+    snapshot = json.loads(ELCOM["target"].read_text(encoding="utf-8"))
     obs = snapshot["response"]["data"]["observations"]
     basel = [o for o in obs if o["municipalityLabel"] == "Basel"]
     passed = len(basel) == 1 and basel[0]["total"] > 0
@@ -182,7 +182,7 @@ def check_elcom() -> bool:
 
 
 def check_elcom_cantons() -> bool:
-    snapshot = json.loads(ELCOM_CANTONS["target"].read_text())
+    snapshot = json.loads(ELCOM_CANTONS["target"].read_text(encoding="utf-8"))
     obs = snapshot["response"]["data"]["cantonMedianObservations"]
     cantons = {o["canton"] for o in obs}
     basel = [o["total"] for o in obs if o["canton"] == "12"]

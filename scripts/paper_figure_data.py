@@ -48,7 +48,7 @@ def main() -> None:
                                num(lp, "type1MissedDeadlinePercent"),
                                num(b2, "type1MovedServerHours", 1e-3), num(b2r, "type1MovedServerHours", 1e-3),
                                num(lp, "type1MovedServerHours", 1e-3)]))
-    (OUT / "a_type1_share.dat").write_text("\n".join(lines) + "\n")
+    (OUT / "a_type1_share.dat").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     d = rows("D_network_mix")
     lines = ["network B1missed B2missed LPmissed"]
@@ -56,7 +56,7 @@ def main() -> None:
         b1, b2, lp = (pick(d, s, excludeKinds=excl) for s in ("B1", "B2", "LP"))
         lines.append(" ".join([label, num(b1, "type1MissedDeadlinePercent"),
                                num(b2, "type1MissedDeadlinePercent"), num(lp, "type1MissedDeadlinePercent")]))
-    (OUT / "d_network_mix.dat").write_text("\n".join(lines) + "\n")
+    (OUT / "d_network_mix.dat").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}")
 
 
