@@ -14,4 +14,4 @@ Delete the tracked webhosting tree and retire its active ticket references. Pres
 
 ## Review
 
-Pending one fresh-context review.
+Fresh-context verdict: go with changes. Applied: every application acquires desktop-wide and legacy Xonotic locks in that order, protecting the already-running old launcher. Profiles are explicitly trusted operator configuration, with strict snake_case fields, validated environment names, absolute executable paths and required references. Docker argv uses ArgumentList; the fixed inner shell quotes each profile value. Disposable offline Linux-container smoke verifies literal shell metacharacters and existing legacy-lock exclusion. All tracked feature references checked before retirement; shared research contracts remain. User approval covers the general direction and merge; team acceptance remains pending.

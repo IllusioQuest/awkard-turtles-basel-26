@@ -1,3 +1,5 @@
+> T-40 update: [profile-driven C# launcher and webhosting retirement](gaming-profiles.md). The architecture below describes the heat-placement boundary; automatic reservation-to-launch integration remains pending.
+
 # How the browser gaming prototype works
 
 Current verified state, 2026-11-21. T-39, branch `featur-gaming`, PR #22. The user confirmed

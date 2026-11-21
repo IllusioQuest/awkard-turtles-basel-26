@@ -1,7 +1,0 @@
-# Local Visual Studio state and .NET build outputs
-.vs/
-**/bin/
-**/obj/
-*.user
-*.suo
-TestResults/

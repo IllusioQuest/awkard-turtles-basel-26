@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Hosting privacy and component isolation (T-27)
 
 Status: four-node prototype verified on feat/T-27-hosting-isolation; PR #12 ready for review. Current commands/results: [runtime guide](webhosting-isolation-runtime.md). Do not use real personal data.

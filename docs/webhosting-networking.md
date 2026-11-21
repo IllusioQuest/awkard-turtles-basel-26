@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Webhosting networking: current experiment and earlier proposals
 
 Current implementation: two Linux host-network gateway containers preserve the browser URL after a gateway crash. The user approved enabling Docker Desktop host networking. See the [runtime guide](webhosting-runtime.md) and [ADR 0006](decisions/0006-linux-host-network-ingress.md) for verified results and limits. Entire-container pause recovery is not solved.

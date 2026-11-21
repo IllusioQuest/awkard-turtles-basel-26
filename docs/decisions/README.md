@@ -42,3 +42,5 @@ later.
 | [0022](0022-gaming-heat-capacity-placement.md) | Shared useful heat capacity and atomic gaming reservations | proposed; user approved ranking, reviewed with changes |
 
 | [0023](0023-intel-dozen-vulkan-experiment.md) | Isolated Mesa Dozen Vulkan build for Intel WSL | proposed; user approved experiment, reviewed with changes |
+
+| [0026](0026-profile-driven-gaming-runtime.md) | Profile-driven C# gaming runtime and retirement of webhosting | proposed; user authorized, reviewed with changes, implemented PR #22; team acceptance pending |

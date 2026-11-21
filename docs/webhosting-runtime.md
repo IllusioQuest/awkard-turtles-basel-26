@@ -1,3 +1,5 @@
+> RETIRED (T-40): the user withdrew webhosting. This page is historical evidence; its code and setup commands are no longer supported. See [gaming profiles](gaming-profiles.md).
+
 # Linux webhosting runtime experiment
 
 Status: a runnable networking milestone on `feature-webhosting`, not completed distributed
