@@ -34,7 +34,9 @@ The ownership service may be replicated, but it is still a **logically central a
 The first executable step is `FederatedClaimGate` in `DigitalHeat.Network`. It validates
 externally supplied quorum evidence, generation, lease window, prior-attempt state and the
 existing customer locality rule. It does not issue claims, form a quorum, or control Docker.
-Network tests exercise the fail-closed boundary and the unchanged local heat path.
+`FederatedOfferSelection` filters stale, contradictory and ineligible offers and ranks by the
+shared useful-heat helper. Neither component sends network messages. Network tests exercise both
+fail-closed boundaries and the unchanged local heat path.
 
 ## Limits
 

@@ -3,7 +3,7 @@
 - **Tier:** 3 Later
 - **Owner:** Jona / Codex
 - **Status:** in progress
-- **Depends on:** T-12, T-43
+- **Depends on:** T-12; T-43 only for live Docker integration
 
 ## Goal
 
@@ -24,6 +24,10 @@ termination and the existing `JobPlacement.IsEligible` rule. It is not a quorum 
 integration. `dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj` exercises
 partition, stale policy, locality and uncertain old-process cases. The local heat test uses the
 existing `GreedyHeatScheduler` and `SchedulerController` path.
+`FederatedOfferSelection` independently filters expired, contradictory and contractually forbidden
+site offers and ranks remaining sites by the shared `HeatCapacity.RemainingKwh` rule. Offers never
+authorize a start. The offer selection and claim gate together are a protocol model; they do not
+send messages or form a quorum. Network tests cover both pieces.
 
 ## Done when
 
