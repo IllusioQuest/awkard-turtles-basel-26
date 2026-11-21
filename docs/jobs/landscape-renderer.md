@@ -204,3 +204,24 @@ Cycles oneAPI: https://docs.blender.org/manual/en/3.6/render/cycles/gpu_renderin
 Docker Desktop's documented Windows GPU compute path is NVIDIA/WSL2:
 https://docs.docker.com/desktop/features/gpu/ . The Intel OpenGL path is a separate
 measured lab experiment, not an assertion of official Docker Cycles support.
+
+
+Eevee probe results: Ubuntu Blender 5.0.1 with Mesa 26.0.8 identifies accelerated
+D3D12 Intel Iris Xe, but exposes OpenGL 4.1 and aborts during Blender context
+initialization. Its Vulkan probe using the existing Mesa Dozen 26.0.8 driver
+rejects missing logical operations, dual-source blending, multi-viewport and
+VK_EXT_provoking_vertex. Neither produced a completed image. Do not advertise
+Eevee GPU support from this enumeration alone. Evidence:
+[GPU compatibility](../performance/render-gpu-compatibility-2026-11-21.json).
+
+These tests do not establish that every possible newer driver fails. Official
+sources list Blender 5.3.0 (2026-11-10) and Mesa 26.2.3; neither was built/tested
+in this bounded experiment. Keep version-pinned capability verification for any
+replacement image. Sources: https://download.blender.org/release/Blender5.3/ and
+https://docs.mesa3d.org/relnotes/26.2.3.html (accessed 2026-11-21).
+
+The user is choosing the next path: compatible Linux GPU worker (recommended to
+preserve Linux-only nodes), an explicitly approved native Windows worker test,
+or an older Blender compatibility image. No Windows install or renderer change
+has been made. Diagnostic fixes are pushed in PR #54, commit 931912c; not deployed
+over the running comparison. Existing CPU comparison stays available.

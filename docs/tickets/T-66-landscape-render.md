@@ -15,3 +15,5 @@ Implementation: PR #54, feat/T-66-landscape-render. Ready for review; 76 orchest
 Reported timeout repaired and node split reverified: 84 tests pass; status stays responsive during rendering and paused-peer warning; user-approved 80/20 frame allocation and failed-comparison cancellation implemented. Actual follow-up uses hotel then hotel/spa. See docs/performance/render-followup-node-split-2026-11-21.json. PR #54 updated; GPU hardware test/full 48-frame run remain separate.
 
 GPU follow-up in progress: correct probe bindings/backend diagnostics and error exit codes; isolated user-approved Eevee capability experiment under ADR 0055. Existing active comparison and games preserved.
+
+Eevee capability tests did not pass (OpenGL 4.1 limit; Vulkan missing features). Evidence in docs/performance/render-gpu-compatibility-2026-11-21.json; diagnostic patch 931912c pushed, not deployed over active comparison. Awaiting hardware/compatibility path choice.
