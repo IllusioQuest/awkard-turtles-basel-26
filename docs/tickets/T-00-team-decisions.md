@@ -56,3 +56,6 @@ measurement owner; submission owner; confirmed owners for the remaining tier-1 t
 have been sent to Nikita. T-00 remains in progress, not done, until these answers are recorded.
 Other teammates' chats are not accessible in this local app; this repository packet is the shared
 coordination channel, not evidence that they have responded.
+
+User clarification: service/vision/hardware-direction decisions are for Ennio's agent. No approval of those recommendations was given. Nikita asked agents to coordinate the missing submission/ownership facts; no answer is available on the fetched branches as of 2026-11-21 01:03. Ennio's agent should record its human's decisions here. These tasks are not being implemented by the T-09 agent.
+
