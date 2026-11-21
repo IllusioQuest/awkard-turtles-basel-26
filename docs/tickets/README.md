@@ -82,3 +82,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-45](T-45-federated-scheduling.md) | Federated scheduling and safe job ownership | Jona / Codex | in progress (design, offer/claim model and paper; live runtime not implemented) |
 | [T-46](T-46-monitor-value-labels.md) | Transfer monitoring data into existing admin web app | Nikita / Codex | implementation checked; PR #35 in review; ADR 0036 |
 | [T-47](T-47-scheduler-performance.md) | Measure scheduler latency and scaling | Nikita / Codex | analysis complete; 62 cases + raw evidence; diagnostics only |
+| [T-48](T-48-live-job-deadlines.md) | Minute-level live batch deadlines | Nikita / Codex | in progress; user-approved targets; ADR 0037 |
+| [T-49](T-49-admission-performance.md) | Indexed admission and safe copy optimization | Nikita / Codex | queued after T-48; ADR 0038 |
+| [T-50](T-50-docker-observation-performance.md) | Faster local Docker observations | Nikita / Codex | queued; depends on PR #35; ADR 0039 |
