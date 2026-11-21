@@ -36,6 +36,7 @@ public sealed class NodeFeedbackOwner
     private readonly WorkloadConfiguration manifest;
     private readonly NodeFeedbackInbox inbox;
     private readonly TimeProvider clock;
+    private readonly NodeFeedbackPolicy policy;
     private readonly string manifestIdentity, nodesIdentity;
     private WorkloadInventory inventory;
     private long revision;
@@ -44,7 +45,7 @@ public sealed class NodeFeedbackOwner
         NodeFeedbackPolicy policy, TimeProvider? clock = null)
     {
         if (manifest.Workloads.Length > policy.MaxQueuedJobs) throw new InvalidDataException("Manifest exceeds feedback owner queue bound.");
-        this.coordinator = coordinator; this.manifest = manifest; this.inbox = inbox; this.clock = clock ?? TimeProvider.System;
+        this.coordinator = coordinator; this.manifest = manifest; this.inbox = inbox; this.clock = clock ?? TimeProvider.System; this.policy = policy;
         inventory = WorkloadJson.Copy(manifest.Inventory);
         manifestIdentity = WorkloadJson.Identity(manifest.Workloads); nodesIdentity = WorkloadJson.Identity(manifest.RuntimeNodes);
         foreach (var prior in coordinator.Attempts())
@@ -72,6 +73,7 @@ public sealed class NodeFeedbackOwner
                 || next.Inventory.Revision == inventory.Revision && WorkloadJson.Identity(next.Inventory) != WorkloadJson.Identity(inventory))
                 throw new InvalidDataException("Accepted jobs/endpoints changed or inventory revision regressed/conflicted.");
             new WorkloadPlacement().Update(next.Inventory, clock.GetUtcNow());
+            policy.Validate(next.Inventory);
             inventory = WorkloadJson.Copy(next.Inventory);
             errors.AddRange(inbox.Read(inventory, clock.GetUtcNow()));
             projected = inbox.Project(inventory, checked(++revision), clock.GetUtcNow());
