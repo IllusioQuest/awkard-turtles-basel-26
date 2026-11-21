@@ -1,0 +1,36 @@
+{
+  "observed_date": "2026-11-21",
+  "hardware": "Intel Iris Xe",
+  "windows_driver": "31.0.101.4146",
+  "cycles": {
+    "blender": "3.4.1 Debian",
+    "compiled_backends": [
+      "CUDA",
+      "HIP"
+    ],
+    "devices": []
+  },
+  "eevee_opengl": {
+    "blender": "5.0.1 Ubuntu",
+    "mesa": "26.0.8",
+    "renderer": "D3D12 (Intel(R) Iris(R) Xe Graphics)",
+    "accelerated": true,
+    "opengl_version": "4.1",
+    "completed_render": false,
+    "failure": "Blender requires OpenGL 4.3; context initialization aborted"
+  },
+  "eevee_vulkan": {
+    "blender": "5.0.1 Ubuntu",
+    "mesa_dozen": "26.0.8",
+    "completed_render": false,
+    "missing_features": [
+      "logical operations",
+      "dual source blending",
+      "multi viewport",
+      "VK_EXT_provoking_vertex"
+    ]
+  },
+  "scope": "Isolated containers with /dev/dxg and read-only WSL libraries; no games changed. Newest Blender 5.3 and Mesa 26.2.3 were discovered in official sources but NOT tested. Do not claim all possible drivers/backends were exhausted.",
+  "diagnostic_fix_commit": "931912c",
+  "validation": "WorkloadRun clean build; 84 orchestration tests pass; corrected probe reports compiled backends. Fix not deployed over active comparison."
+}

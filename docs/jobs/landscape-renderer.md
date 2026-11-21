@@ -179,3 +179,49 @@ a stable speedup or scaled into a 48-frame SLA. Evidence:
 ../performance/render-followup-node-split-2026-11-21.json. The user-facing comparison is left
 cancelled/held with Run comparison enabled; diagnostic frames are separate IDs. Refresh the
 browser to load the repaired polling code. GPU remains unverified/unavailable on this laptop.
+
+
+## GPU diagnosis follow-up (2026-11-21)
+
+The local inventory identifies Intel Iris Xe, Windows driver 31.0.101.4146.
+The Debian Blender 3.4.1 renderer reports compiled Cycles backends CUDA/HIP,
+no oneAPI backend, and zero compute GPUs. The old startup probe also omitted
+configured device mounts during enumeration and discarded backend errors.
+The correction probes with execution's bindings, reports compiled backends/errors,
+and makes Blender Python failures return a nonzero exit code. Clean WorkloadRun
+build and 84 orchestration tests pass. This is a diagnostic correction, not proof
+of GPU acceleration. Do not remove the GPU verification gate to silence the UI.
+
+An isolated Eevee test on the newer existing Mesa stack is user-approved and in
+progress (ADR 0055). The old Debian-stack probe stalled during graphics setup and
+was stopped; it did not pass. Running games and the active Cycles comparison are
+not modified. Keep GPU configuration outside the scheduler. A physical GPU may
+be advertised by only one independent peer domain. GPU frames without eligible
+heat stay queued under the ordinary heat-first policy.
+
+Sources, accessed 2026-11-21: Blender's GPU manual lists Intel Arc/Xe HPG for
+Cycles oneAPI: https://docs.blender.org/manual/en/3.6/render/cycles/gpu_rendering.html .
+Docker Desktop's documented Windows GPU compute path is NVIDIA/WSL2:
+https://docs.docker.com/desktop/features/gpu/ . The Intel OpenGL path is a separate
+measured lab experiment, not an assertion of official Docker Cycles support.
+
+
+Eevee probe results: Ubuntu Blender 5.0.1 with Mesa 26.0.8 identifies accelerated
+D3D12 Intel Iris Xe, but exposes OpenGL 4.1 and aborts during Blender context
+initialization. Its Vulkan probe using the existing Mesa Dozen 26.0.8 driver
+rejects missing logical operations, dual-source blending, multi-viewport and
+VK_EXT_provoking_vertex. Neither produced a completed image. Do not advertise
+Eevee GPU support from this enumeration alone. Evidence:
+[GPU compatibility](../performance/render-gpu-compatibility-2026-11-21.json).
+
+These tests do not establish that every possible newer driver fails. Official
+sources list Blender 5.3.0 (2026-11-10) and Mesa 26.2.3; neither was built/tested
+in this bounded experiment. Keep version-pinned capability verification for any
+replacement image. Sources: https://download.blender.org/release/Blender5.3/ and
+https://docs.mesa3d.org/relnotes/26.2.3.html (accessed 2026-11-21).
+
+The user is choosing the next path: compatible Linux GPU worker (recommended to
+preserve Linux-only nodes), an explicitly approved native Windows worker test,
+or an older Blender compatibility image. No Windows install or renderer change
+has been made. Diagnostic fixes are pushed in PR #54, commit 931912c; not deployed
+over the running comparison. Existing CPU comparison stays available.
