@@ -144,3 +144,135 @@ CHF 0.48–1.49. Hardware cost per kW, not efficiency, decides the full-cost cas
 - Fleet-scale operations cost (CHF 59 per box-month is a retail managed-service price and
   dominates the CPU column).
 - Demand for interruptible home-hosted capacity at these prices.
+
+## 6. Corrected hybrid CPU/GPU calculations (T-38, 2026-11-21)
+
+Requested follow-up to the [hybrid service review](hybrid-gpu-cpu-review.md). These calculations
+check the user-supplied *DigitalHeat Deep Technical Engineering Manual (GPU + CPU)*, pages 1-6.
+They do not replace the scored reference configuration, accept a hardware purchase, or establish
+measured performance. Sections 1-4 remain exploratory economic normalisations: fractional boxes
+or cards per kW are accounting equivalents, not a validated physical build.
+
+### 6.1 Inputs and evidence boundary
+
+| Input | Value | Source / status |
+|---|---:|---|
+| Reference electrical power | 1 kW per case server | [Case](../case/challenge.md), fixed scored assumption |
+| Reference water heat recovery | 0.8 kWh per electrical kWh | Case assumption; not a measured GPU cooling-loop efficiency |
+| Reference usable tank capacity | 35 kWh, lossless | Case assumption |
+| Domestic hot water | 12 kWh/day, represented as 0.5 kW constant | Case daily total / 24 hours |
+| Example server count | 4 | Manual's scenario; a variant, not a new fixed requirement |
+| GPU active / idle power | 550-750 W / 15 W | Manual p. 1; TODO(source): hardware measurement |
+| CPU active / idle power | 180-250 W / 25 W | Manual p. 1; TODO(source): hardware measurement |
+| Other system power | 50-80 W | Manual p. 1; TODO(source): wall-power boundary and idle measurement |
+| Illustrative benchmark | 140 W for a 60 s job | Manual p. 6; hypothetical example, not our measurement |
+
+All interval calculations below use hours, kW and kWh. Power is a rate; tank capacity is energy.
+For a constant interval, energy_kwh = power_kw * duration_hours. Apply the 80% recovery only
+once. Physical limits, idle load and actual recovery require measurements before use in hardware
+variants; they must not silently change the scored case model.
+
+### 6.2 Hybrid electrical budget
+
+Adding the manual's subsystem envelopes gives:
+
+- Active low endpoint = 550 + 180 + 50 = **780 W**.
+- Active high endpoint = 750 + 250 + 80 = **1,080 W**.
+- If the stated other-system range also applies at idle, idle = 15 + 25 + (50 to 80)
+  = **90-120 W**, not 40 W for the whole node.
+- Applying the case recovery factor illustratively gives **0.624-0.864 kW** recovered at the
+  active endpoints, and **0.072-0.096 kW** at those conditional idle endpoints.
+
+These are sums of claimed ranges, not measured or guaranteed operating bounds. CPU, GPU,
+PSU losses and chassis measurements must have non-overlapping boundaries before adding them.
+A 1 kW budget does not prove that a selected workload fills it. A GPU power cap is an upper
+limit, not a demand target, and CPU quota is not a linear wattage control. The existing abstract
+1 kW comparison remains useful for accounting, while a real machine needs its own profile.
+
+### 6.3 Four-server heat balance and corrected tank timing
+
+At the reference full load:
+
+- Electrical power = 4 * 1 = **4 kW**.
+- Recoverable thermal power = 4 * 0.8 = **3.2 kW**.
+- During a DHW-only interval, net charge rate = 3.2 - 0.5 = **2.7 kW**.
+- Four hours adds 2.7 * 4 = **10.8 kWh** to the tank (provided that headroom exists).
+- Filling an empty 35 kWh tank takes 35 / 2.7 = **12.96 hours**, with that demand and output
+  held constant. Four hours fills it only if it already contains at least 35 - 10.8 = **24.2 kWh**.
+
+The ideal daily energy equivalent for DHW is a different calculation:
+
+- Required full-load fleet runtime = 12 / 3.2 = **3.75 hours/day**.
+- Fleet duty fraction = 3.75 / 24 = **15.625%**.
+- Equivalent continuous reference servers = 12 / (0.8 * 24) = **0.625**.
+- Daily electricity = 4 * 3.75 = **15 kWh**, recovering 15 * 0.8 = **12 kWh**.
+
+This assumes zero energy outside active periods, sufficient useful queued work, no losses,
+compatible timing, and the same tank energy at the start and end of the comparison day. It is
+not proof that every day follows a 3.75-hour schedule. During that active block the tank gains
+2.7 * 3.75 = 10.125 kWh; the other 20.25 hours consume 0.5 * 20.25 = 10.125 kWh. Idle power,
+live sessions, startup overhead and a different initial tank state change the result. Stopping
+containers does not power off the physical machine.
+
+### 6.4 Temperature examples checked against the case
+
+On a heating day, demand_kw = max(0, 10 * (20 - temperature_c) / 25.6) + 0.5.
+Heating-day eligibility uses the mean of the day's 24 hourly temperatures, not the current hour
+alone. The following rows are constant-temperature worked examples on eligible heating days.
+Backup values assume the tank supplies no energy during the hour.
+
+| Temperature | Space heat (kW) | Total including DHW (kW) | Four-server output (kW) | Deficit before storage discharge (kW) |
+|---|---:|---:|---:|---:|
+| -5.6 C | 10.00000 | 10.50000 | 3.2 | 7.30000 |
+| -4 C | 9.37500 | 9.87500 | 3.2 | 6.67500 |
+| +6 C | 5.46875 | 5.96875 | 3.2 | 2.76875 |
+| +10 C | 3.90625 | 4.40625 | 3.2 | 1.20625 |
+| Non-heating day | 0 | 0.50000 | 3.2 | 0; 2.7 kW available to charge storage |
+
+Thus the manual's +10 C charging diagram cannot represent a constant +10 C heating day:
+4.40625 kW demand exceeds 3.2 kW supply. A warm hour on a non-heating day must be identified
+explicitly instead. The table's peak-total-to-summer ratio is 10.5 / 0.5 = **21**, not 18;
+space heating alone divided by DHW would be 10 / 0.5 = 20. Neither ratio is an annual result.
+
+### 6.5 Benchmark energy and explicitly idealised scaling
+
+For the manual's hypothetical 140 W, 60-second job:
+
+- Electrical energy = 140 * 60 = 8,400 joules = 8,400 / 3,600 = **2.333 Wh/job**
+  = **0.002333 kWh/job**.
+- Recoverable heat under the case assumption = 0.8 * 2.333 = **1.867 Wh/job**.
+- Measured-example serial rate = 3,600 / 60 = **60 jobs/hour**.
+- Ideal power-normalisation factor = 1,000 / 140 = **7.143**.
+- Ideal aggregate rate = 60 * 7.143 = **428.571 jobs/hour per kW**.
+- Cross-check: 428.571 * 2.333 Wh is approximately **1,000 Wh** electrical per hour;
+  recoverable heat is **800 Wh** per hour.
+
+This preserves energy per job by assumption. It can represent ideal parallel replication of
+identical efficiency; it does not establish that a single job finishes in 8.4 seconds on a
+new rack server. CPU/GPU contention, memory capacity, model, batching and platform overhead
+can all change efficiency. Report real throughput and energy separately for each hardware and
+workload combination. GPU-board plus CPU-package counters are not whole-system wall energy.
+For sampled watts, energy_kwh = sum(power_w * interval_seconds) / 3,600,000. For cumulative
+energy counters, account for wraparound and missing samples before deriving power.
+
+### 6.6 CPU quota interpretation and limits of the new results
+
+CPU quota / period = allocated CPU equivalents. Therefore 50,000 / 100,000 = **0.5 CPU**,
+not 50% of every core. For example, half of an explicitly allocated 8-CPU allowance requires
+4 CPU equivalents: quota 400,000 with period 100,000, subject to the actual node constraints.
+This allocates CPU time, not 50% electrical power.
+
+No new gaming/rendering profitability figure is justified yet. Required inputs remain
+TODO(source): wall power and idle consumption, cooling-loop capture, render time and energy
+per frame/scene, gaming concurrency and latency, customer demand, realised price, licensing,
+and a physically buildable hardware bill of materials. The existing profiles' market prices
+cannot be reused as demonstrated income for this new service.
+
+Technical references (checked 2026-11-21):
+- [Linux cgroup v2 CPU quota](https://docs.kernel.org/admin-guide/cgroup-v2.html).
+- [NVIDIA power-limit semantics](https://docs.nvidia.com/deploy/nvidia-smi/).
+- [NVIDIA WSL limitations](https://docs.nvidia.com/cuda/wsl-user-guide/index.html).
+
+Verification: independently evaluated all arithmetic in PowerShell; checked dimensional units
+and the reference formula against docs/case/challenge.md. This is a documentation correction,
+not a change to config/hardware, the shared scheduler, scored figures or economic calculations.
