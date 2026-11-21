@@ -2,7 +2,7 @@
 
 - **Tier:** 3 Variant (not a scored figure)
 - **Owner:** Ennio / Claude
-- **Status:** in progress
+- **Status:** done (PRs #55, #56)
 - **Depends on:** T-58 (fleet simulation), T-60/T-65 (`mesh-heat-first` fleet scheduler)
 
 ## Goal
