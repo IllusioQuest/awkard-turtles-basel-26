@@ -11,7 +11,7 @@ public sealed record SiteSummary(string SiteId, double ServerCount, double Total
 public sealed record SiteResult(NetworkSite Site, IReadOnlyList<HourResult> Hours, SiteSummary Summary);
 
 public sealed record NetworkResult(string SchedulerId, string SchedulerLabel, string ForecastLabel,
-    int HorizonHours, IReadOnlyList<SiteResult> Sites);
+    int HorizonHours, IReadOnlyList<SiteResult> Sites, WorkResult? Work = null);
 
 /// <summary>
 /// Hourly loop over all sites (decision 0024). Each hour: build every site's signal and forecast,
@@ -22,7 +22,8 @@ public sealed record NetworkResult(string SchedulerId, string SchedulerLabel, st
 public static class NetworkSimulation
 {
     public static NetworkResult Run(IReadOnlyList<NetworkSite> sites, INetworkScheduler scheduler,
-        IForecastProvider forecasts, int horizonHours, IReadOnlyList<IExecutor>? executors = null)
+        IForecastProvider forecasts, int horizonHours, IReadOnlyList<IExecutor>? executors = null,
+        WorkLedger? work = null)
     {
         if (sites.Count == 0) throw new ArgumentException("No sites.", nameof(sites));
         if (horizonHours < 1) throw new ArgumentOutOfRangeException(nameof(horizonHours));
@@ -41,6 +42,7 @@ public static class NetworkSimulation
 
         for (int h = 0; h < hours; h++)
         {
+            work?.BeginHour(h);
             int horizon = Math.Min(horizonHours, hours - h);
             var states = new SiteHeatState[sites.Count];
             for (int i = 0; i < sites.Count; i++)
@@ -50,7 +52,7 @@ public static class NetworkSimulation
                     site.ServerCount, site.RecoverableKwhPerServerHour);
                 states[i] = new SiteHeatState(site.Id, signal, forecasts.Build(i, site, padded[i], h, horizon));
             }
-            var decision = scheduler.Decide(new NetworkState(h, sites[0].Demand[h].LocalTime, sites, states));
+            var decision = scheduler.Decide(new NetworkState(h, sites[0].Demand[h].LocalTime, sites, states, work?.View()));
             if (decision.PerSite.Count != sites.Count)
                 throw new InvalidOperationException("Network decision must contain one entry per site.");
             for (int i = 0; i < sites.Count; i++)
@@ -63,6 +65,13 @@ public static class NetworkSimulation
                 double produced = applied.ActualLoadPerServer * site.ServerCount * site.RecoverableKwhPerServerHour;
                 var balance = HeatBalance.Step(produced, hour.TotalHeatKwh, tanks[i], site.TankCapacityKwh);
                 tanks[i] = balance.TankStoredKwh;
+                if (work is not null)
+                {
+                    // All achieved load is filler when a strategy plans no allocations (step-1 strategies).
+                    double achievedServerHours = applied.ActualLoadPerServer * site.ServerCount * site.HoursPerStep;
+                    work.Apply(i, decision.Allocations ?? [],
+                        decision.FillerServerHours?[i] ?? achievedServerHours, achievedServerHours);
+                }
                 rows[i].Add(new HourResult(hour.LocalTime, hour.TotalHeatKwh, hour.SpaceHeatKwh, hour.HotWaterKwh,
                     applied.TargetLoadPerServer, applied.ActualLoadPerServer, produced, balance.DirectUsedKwh,
                     balance.TankChargeKwh, balance.TankDischargeKwh, balance.TankStoredKwh, balance.DumpedHeatKwh,
@@ -71,7 +80,7 @@ public static class NetworkSimulation
             }
         }
         var results = sites.Select((s, i) => new SiteResult(s, rows[i], Summarise(s, rows[i]))).ToArray();
-        return new NetworkResult(scheduler.Id, scheduler.Label, forecasts.Label, horizonHours, results);
+        return new NetworkResult(scheduler.Id, scheduler.Label, forecasts.Label, horizonHours, results, work?.Finish());
     }
 
     /// <summary>Same formulas as <see cref="YearSimulation"/> (case break-even: electricity − used heat value).</summary>
