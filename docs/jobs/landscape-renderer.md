@@ -149,3 +149,15 @@ GPU utilization can also include CPU scene preparation and other workloads. Both
 the same allocation plan across recovery; image/frame-count changes are rejected. A queued
 frame can expire before it obtains an executor and is still reported, rather than waiting forever.
 Node cards show current frame number, actual backend and completed frame counts in the run.
+
+User-approved failed-run recovery now has a scoped cancellation: hold all render peers, fence
+all possible frame IDs of the failed comparison (including not-yet-observed submissions), cancel
+only its stoppable batch attempts, and wait for every peer to confirm release. Preserve completed
+PNG images, logs, journal history and heat commitments. Delayed submissions/proposals/replies do
+not recreate cancelled work. Cancellation is terminal for Resume, including after restart; a new
+comparison has a new ID and archives the old comparison record. Partially acknowledged cancellation
+remains held and cannot enable a new run. Games/Minecraft are excluded. ADR 0054.
+
+The earlier failed run contained a nonzero frame exit after a renderer-node restart; its failed
+result must not be relabelled successful. The user explicitly approved cancelling its unfinished
+jobs and preparing a clean run. This is separate from the successful four-frame verification.
