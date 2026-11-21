@@ -302,7 +302,7 @@ public sealed class MeshPeer : IDisposable
         string temporary = journalPath + ".tmp";
         using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
         { JsonSerializer.Serialize(stream, journal, WorkloadJson.Options); stream.Flush(true); }
-        File.Move(temporary, journalPath, true);
+        JournalReplace.Move(temporary, journalPath);
     }
     public void Dispose() => coordinator.Dispose();
 }
