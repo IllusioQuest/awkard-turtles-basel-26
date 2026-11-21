@@ -1,0 +1,11 @@
+{
+  "source": "Real create-before-ack interruption on private Linux peer; synthetic heat",
+  "tested_at_utc": "2026-11-21T16:31:23.4061856+00:00",
+  "job_id": "home.recovery-058a6351",
+  "engine_id": "53558111-c212-4054-9634-d2086e949840",
+  "attempt_id": "a16854df374142abaff4b61521f9aaa6",
+  "original_created_container_id": "98c7a1fb53344f21fd45690c9955a1039ab8f079928af83e2abde2addbfff887",
+  "recovered_container_id": "98c7a1fb53344f21fd45690c9955a1039ab8f079928af83e2abde2addbfff887",
+  "phase": "running",
+  "unique_container": true
+}

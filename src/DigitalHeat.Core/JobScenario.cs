@@ -20,7 +20,7 @@ public sealed record JobScenario(string Mode, string ExcessHeatPolicy, string So
     public void Validate()
     {
         if (Mode is not ("unlimited" or "finite" or "mixed")
-            || ExcessHeatPolicy is not ("wait" or "run-and-dump")
+            || ExcessHeatPolicy != "wait"
             || string.IsNullOrWhiteSpace(Source)
             || Source.Contains("TODO(source)", StringComparison.OrdinalIgnoreCase)
             || JobTypes is null)

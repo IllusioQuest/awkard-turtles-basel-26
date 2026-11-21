@@ -58,9 +58,8 @@ public sealed class NodeFeedbackOwner
         manifestIdentity = WorkloadJson.Identity(manifest.Workloads);
         nodesIdentity = WorkloadJson.Identity(manifest.RuntimeNodes);
         // The accepted manifest is immutable. Sort once; do not repeat this on every notification.
-        admissionOrder = manifest.Workloads.OrderBy(w => w.Request.Kind == "interactive" ? 0 : 1)
-            .ThenBy(w => w.Request.Deadline?.DueAtUtc ?? DateTimeOffset.MaxValue)
-            .ThenBy(w => w.Request.Id, StringComparer.Ordinal).ToArray();
+        admissionOrder = manifest.Workloads.OrderBy(w => new JobPriority(
+            w.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, w.Request.Id)).ToArray();
         foreach (var prior in coordinator.Attempts())
         {
             var entry = manifest.Workloads.SingleOrDefault(w => w.Request.Id == prior.Attempt.Request.Id);
@@ -115,7 +114,7 @@ public sealed class NodeFeedbackOwner
     private void PauseBatchWithoutHeat(WorkloadInventory projected)
     {
         // Only the shared scheduler may request a batch pause from heat; games have no pause path.
-        var scheduler = new GreedyHeatScheduler(0);
+        var scheduler = new HeatFirstScheduler(0);
         var sitesById = projected.Sites.ToDictionary(s => s.Id, StringComparer.Ordinal);
         foreach (var row in coordinator.Attempts().Where(a => a.Phase == "running" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
         {

@@ -16,7 +16,7 @@ public sealed class ResultBundleTests
         var result = YearSimulation.Run(
             HeatDemand.Build(Enumerable.Range(0, (int)p.HoursPerDay.Value)
                 .Select(hour => new WeatherHour($"2025-01-01T{hour:00}:00", 0)).ToArray(), p),
-            p, new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), scenario);
+            p, new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), scenario);
         string output = Path.Combine(Path.GetTempPath(), "digitalheat-export-" + Guid.NewGuid());
         try
         {
@@ -71,7 +71,7 @@ public sealed class ResultBundleTests
         var weather = Enumerable.Range(0, 24)
             .Select(hour => new WeatherHour($"2025-01-01T{hour:00}:00", 0)).ToArray();
         var result = YearSimulation.Run(HeatDemand.Build(weather, p), p,
-            new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), scenario);
+            new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor(), scenario);
         string output = Path.Combine(Path.GetTempPath(), "digitalheat-mixed-export-" + Guid.NewGuid());
         try
         {

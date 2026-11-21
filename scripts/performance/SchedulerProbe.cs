@@ -54,7 +54,7 @@ WorkloadInventory Inventory(int count, bool sharedDomain)
     { ResourceObservedAtUtc = now, ResourceValidUntilUtc = now.AddMinutes(1) };
 }
 
-var greedy = new GreedyHeatScheduler(0);
+var greedy = new HeatFirstScheduler(0);
 var signals = Enumerable.Range(0, 16).Select(i => new HeatSignal(i, 5, 35, 4, .8)).ToArray();
 int signalIndex = 0;
 Measure("core_greedy_decide", 1, 0, "single-site", () => consumed += greedy.Decide(signals[signalIndex++ % signals.Length]).TargetLoadPerServer, batch: CoreBatch);

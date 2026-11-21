@@ -93,3 +93,7 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-57](T-57-scheduler-cleanup.md) | Clean scheduler code and measure owner runtime | Nikita / Codex | PR #46 in review; 61 orchestration + 46 Core tests; runtime evidence shared |
 | [T-58](T-58-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | done |
 | [T-59](T-59-swiss-building-mix.md) | Swiss building and ownership weights for simulation nodes | Nikita / Codex; coordinate T-58 | PR #49 in review; composition prepared; mixed thermal inputs pending T-58 |
+| [T-62](T-62-origin-owned-mesh.md) | Shared heat-first policy and deterministic peer mesh | Nikita / Codex; coordinate Jona T-60/T-61 | in progress; simulation first, origin ownership retained |
+| [T-64](T-64-linux-mesh-batch-lab.md) | Private Linux mesh and real batch executors | Nikita / Codex | in progress; ADR 0050; separate inner engines approved |
+
+| [T-65](T-65-one-heat-first-policy.md) | Retire competing scheduler policies; one heat-first policy | Nikita / Codex | in progress; ADR 0051; explicit user request |

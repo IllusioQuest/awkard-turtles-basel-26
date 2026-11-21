@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using DigitalHeat.Core;
+using DigitalHeat.Network;
 using DigitalHeat.YearRun;
 
 var positional = new List<string>();
@@ -22,8 +23,13 @@ var jobScenario = JobScenario.Load(scenarioPath);
 var weather = WeatherCsv.Read(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
 VerifyElectricitySnapshot(Path.Combine(root, "data", "raw", "elcom", "iwb-basel-h4-2026.json"), parameters);
 var demand = HeatDemand.Build(weather, parameters);
-var result = YearSimulation.Run(demand, parameters,
-    new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor(), jobScenario);
+IScheduler scheduler = jobScenario.Mode == "unlimited"
+    ? new SingleSiteUnlimitedNetworkScheduler(
+        NetworkScenarioLoader.Load(Path.Combine(root, "config", "network", "reference-only.json"), root)
+            .NetworkSites.Single(),
+        new HeatFirstNetworkScheduler())
+    : new HeatFirstScheduler(parameters.MinimumLoadShare.Value);
+var result = YearSimulation.Run(demand, parameters, scheduler, new SimulatedExecutor(), jobScenario);
 string output = Path.Combine(root, "results", "reference-house");
 if (bundlePath is not null)
 {
@@ -44,6 +50,7 @@ File.WriteAllText(Path.Combine(output, "summary.json"), JsonSerializer.Serialize
         Weather = "data/raw/open-meteo/basel-2025-hourly.csv",
         Electricity = "data/raw/elcom/iwb-basel-h4-2026.json",
         Config = "config/reference-house.json",
+        NetworkConfig = jobScenario.Mode == "unlimited" ? "config/network/reference-only.json" : null,
         JobScenario = Path.GetRelativePath(root, scenarioPath)
     }
 }, new JsonSerializerOptions { WriteIndented = true }));
@@ -69,4 +76,3 @@ static void VerifyElectricitySnapshot(string path, ReferenceParameters p)
     if (Math.Abs(publishedChfPerKwh - p.ElectricityPriceChfPerKwh.Value) > 1e-9)
         throw new InvalidDataException("Config electricity price differs from ElCom snapshot.");
 }
-

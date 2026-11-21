@@ -12,7 +12,7 @@ public static class HeatCapacity
             || signal.ServerCount == 0 || signal.RecoverableKwhPerServerAtFullLoad == 0
             || signal.TankStoredKwh > signal.TankCapacityKwh)
             throw new ArgumentOutOfRangeException(nameof(signal));
-        // Same numerator as GreedyHeatScheduler; case's lossless hourly storage model.
+        // Same numerator as HeatFirstScheduler; case's lossless hourly storage model.
         double capacity = signal.DemandKwh + signal.TankCapacityKwh - signal.TankStoredKwh;
         if (!double.IsFinite(capacity)) throw new ArgumentOutOfRangeException(nameof(signal));
         return Math.Max(0, capacity - committedRecoverableHeatKwh);

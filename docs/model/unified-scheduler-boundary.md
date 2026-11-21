@@ -1,0 +1,13 @@
+# Scheduler paths and the migration boundary (T-60)
+
+The target architecture uses one `INetworkScheduler.Decide(NetworkState)` result for cross-site job allocation and per-site heat load. B2 is the operational baseline; LP is a comparison. The resulting site load passes through `SchedulerController.Apply` and `IExecutor`. A real start passes the selected site, planning heat signal, inventory revision and UTC hour to `WorkloadCoordinator.TryStartAtSite`. Orchestration chooses a safe physical node **inside that site** or rejects the start. It does not reroute to another site.
+
+| Path today | Heat/work decision | Real admission and actuation | Status |
+|---|---|---|---|
+| Reference YearRun, unlimited | Network B2 through `SingleSiteUnlimitedNetworkScheduler` and Core `YearSimulation` | simulated `IExecutor` | The default unlimited run now calls B2 each hour; its complete hourly rows and summary are exactly equal to the previous Core run. |
+| Reference YearRun, finite/mixed | Core `GreedyHeatScheduler` + job queue | simulated `IExecutor` | Existing scored path remains unchanged. One-site B2 is regression-checked for a finite Type 1 test case; mixed equivalence is unproved. |
+| NetworkRun and the T-54 live demo branch | Network B2 (LP/B1 selectable) | `SchedulerController` + simulated or Docker executor | Network-driven; T-54 two-laptop physical test remains open. |
+| WorkloadRun / feedback owner | Orchestration heat ranking + Core `GreedyHeatScheduler` | `WorkloadCoordinator` + Docker runtime | Autonomous compatibility path; **does not yet consume** B2 allocations. |
+| New selected-site API | Receives a Network-selected site | Validates snapshot, locality, resources, heat, deadline and ownership; rejects instead of rerouting | Boundary implemented; the caller that maps B2 cohorts to concrete workload IDs still needs integration. |
+
+The one-house checks compare full hourly load/heat balance for the unlimited case and hourly achieved load, missed jobs and case break-even for a synthetic finite fixture. Both use the fixed reference-house inputs. The default unlimited command wrote 8,760 hours with 58.0% coverage, 22,661 server-hours and CHF 0.226 per server-hour case break-even, with inputs from `config/reference-house.json`, `config/network/reference-only.json`, the Basel 2025 weather file and ElCom snapshot. These checks do **not** prove that the mixed scored run or every real runtime calls B2. A Type 1/Type 2 live bridge must provide concrete job IDs, work size, deadlines and achieved load; persistent interactive jobs require a separate compatible representation. Report these limits in any pitch or paper statement about “one scheduler.”

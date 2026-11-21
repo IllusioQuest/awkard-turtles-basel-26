@@ -26,7 +26,8 @@ public static class ResultBundle
             throw new IOException("Export directory must be empty; choose a new run directory.");
         string scenarioRelative = RelativeInput(root, scenarioPath);
         string[] inputPaths = ["config/reference-house.json", scenarioRelative,
-            "data/raw/open-meteo/basel-2025-hourly.csv", "data/raw/elcom/iwb-basel-h4-2026.json"];
+            "data/raw/open-meteo/basel-2025-hourly.csv", "data/raw/elcom/iwb-basel-h4-2026.json",
+            ..(scenario.Mode == "unlimited" ? new[] { "config/network/reference-only.json" } : Array.Empty<string>())];
         var inputs = inputPaths.Distinct(StringComparer.Ordinal).Select(path => new
         {
             Path = path,

@@ -5,17 +5,11 @@ Can computing power heat a home while doing useful work? We build a demonstrator
 interruptible computing jobs on distributed servers so that their heat arrives where and when homes
 need it, over a full year, with transparent and reproducible numbers.
 
-> Status: C# .NET 8 core proposed for the reference-house draft; see
-> [decision 0005](docs/decisions/0005-csharp-core.md). The team has not accepted
-> the broader architecture yet.
-
 ## Start here
 
 - [Case description (verbatim)](docs/case/challenge.md)
 - [Key figures and must-have checklist](docs/case/key-figures.md)
 - [External references and data sources](docs/case/references.md)
-- [Deep-dive notes with the case owner](docs/deep-dive/notes-structured.md) ([raw](docs/deep-dive/notes-verbatim.md))
-- [Data and how to fetch it](data/README.md) · [Assumptions](docs/assumptions.md) · [Decisions](docs/decisions/README.md)
 - [Instructions for AI agents](AGENTS.md)
 
 ## Demo in four steps
@@ -96,6 +90,10 @@ case values fixed for scored comparisons.
 `DigitalHeat.Core` exposes `IScheduler.Decide(HeatSignal)`, `IExecutor` and
 `SchedulerController.Apply`. `DigitalHeat.YearRun` supplies the simulated executor;
 `DigitalHeat.JobRuntime` supplies a Docker executor behind that same interface.
+The default unlimited YearRun now calls Network B2 through a one-site adapter each hour;
+`config/network/reference-only.json` is recorded as an input. Finite and mixed YearRun still
+use the Core queue path. The exact regression checks and remaining integration work are in
+[`docs/model/unified-scheduler-boundary.md`](docs/model/unified-scheduler-boundary.md).
 The default output marks missed deadlines as `not modelled yet` because unlimited
 work has no finite job count. A finite scenario reports arrivals, completed jobs,
 backlog, processed work and the percentage of jobs due within the simulated year
