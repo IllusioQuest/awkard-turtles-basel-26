@@ -111,8 +111,8 @@ ADR 0036 fresh limited-context verdict: **go with changes**. Applied explicit lo
 guards, unknown-vs-stopped observation semantics, fixed observation cache, bounded process/request
 execution and no unbounded request queue. User chose `/admin` and keeping logic files in place.
 
-Checked other work: Jona / Codex's T-45 branch has a pure federated offer/claim model and paper
-proposal, not live Docker dispatch; open work also includes T-14 economics and T-18 household
+Checked other work: Jona / Codex's T-45 pure federated offer/claim model and paper proposal landed
+on main in f629865 during this task; live Docker dispatch remains unimplemented. Open work includes T-14 economics and T-18 household
 dashboard. Only a component import/render was added to `AdminPage`; their model/map/chart logic
 and household files were preserved. Shared status/branches are evidence of reported work, not a
 claim about agents actively running. No external messages sent.

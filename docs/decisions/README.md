@@ -43,3 +43,4 @@ later.
 | [0033](0033-universal-workload-admission.md) | Universal resource-aware workload admission | proposed; reviewed with changes; user choices pending, T-43 |
 
 | [0034](0034-minecraft-measured-workload.md) | Official Vanilla Minecraft and measured-power startup gate | proposed; T-44; review pending |
+| [0035](0035-federated-job-ownership.md) | Federated job ownership and node-local heat control | proposed; reviewed with changes; T-45 |
