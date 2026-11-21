@@ -1,0 +1,34 @@
+{
+  "source_commit": "b1b78034c8d74bc63b0a295c3c52383dccd4916f",
+  "generated_utc": "2026-11-21T17:26:20.5773184+01:00",
+  "samples": 5,
+  "warmups": 1,
+  "source": "Deterministic Basel-region fixture, first January day; existing house generator/seed, job profiles and physical/economic inputs. Counts 100/1000 and proportional demand scaling are performance scenarios, not measured market demand. Callback timings include wrapper clock overhead; complete runs include input loading and job generation. No Docker/network. Non-dedicated laptop.",
+  "cases": [
+    {
+      "houses": 100,
+      "simulated_hours": 24,
+      "jobs": 2358,
+      "events": 4946,
+      "callback_count": 24025,
+      "callback_median_ms": 0.0023,
+      "callback_p95_ms": 0.0067,
+      "callback_total_per_run_ms": 25.19556000000057,
+      "complete_run_median_ms": 610.8537
+    },
+    {
+      "houses": 1000,
+      "simulated_hours": 24,
+      "jobs": 23862,
+      "events": 49163,
+      "callback_count": 240980,
+      "callback_median_ms": 0.0044,
+      "callback_p95_ms": 0.0177,
+      "callback_total_per_run_ms": 507.78470000000345,
+      "complete_run_median_ms": 2812.7063
+    }
+  ],
+  "machine_cpu_name": "12th Gen Intel(R) Core(TM) i5-1240P",
+  "probe_source_sha256": "2f242c88391841dacdd124b9b7bdd3fe8424564ea0e1c06f6ddd94bb9f610d0f",
+  "tiered_compilation": "Disabled explicitly (DOTNET_TieredCompilation=0); optimized steady-state, not default startup behavior"
+}
