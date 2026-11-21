@@ -1,6 +1,6 @@
 # 0007: Whole-container pause recovery for the local lab
 
-- **Status:** proposed; user approved trusted-lab implementation on 2026-11-21; team acceptance pending
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; user approved trusted-lab implementation on 2026-11-21; team acceptance pending
 - **Date:** 2026-11-20
 - **Decided by:** user (local lab scope)
 

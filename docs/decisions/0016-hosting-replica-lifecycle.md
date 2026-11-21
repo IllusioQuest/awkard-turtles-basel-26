@@ -1,6 +1,6 @@
 # 0016: Six-node hosting replica lifecycle
 
-- **Status:** proposed; user approved six nodes, automatic move/pause, common job catalog
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; user approved six nodes, automatic move/pause, common job catalog
 - **Date:** 2026-11-21
 - **Decided by:** Nikita; team confirmation pending
 - **Extends:** 0015 (routing adapter, superseded scope; implementation now includes lifecycle)

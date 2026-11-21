@@ -10,7 +10,7 @@ Settle the open choices that several tickets depend on, so nobody builds on a gu
 
 ## Tasks
 
-- [ ] Confirm the services for the draft: confidential transcription + document AI (OCR/indexing) as in `docs/research/service-brainstorm.md` ("Current main plan"), or change it.
+- [ ] Confirm the services for the draft: confidential transcription + document AI (OCR/indexing) as in `docs/research/ideas.md` ("Current main plan"), or change it.
 - [ ] Confirm the vision draft `docs/vision.md` (actors, ownership models, tiers) or list changes.
 - [ ] Hardware for the draft: keep the case's abstract 1 kW server for scored figures (recommended); CPU vs GPU profiles come in T-15.
 - [ ] Decide what the draft submission at 15:00 must contain (ask organisers if unclear) and record it in AGENTS.md §2/§12 (feeds T-07).
@@ -24,7 +24,7 @@ Settle the open choices that several tickets depend on, so nobody builds on a gu
 ## Read first
 
 - `docs/vision.md`
-- `docs/research/service-brainstorm.md`
+- `docs/research/ideas.md`
 - `docs/status.md`
 
 ## Rules

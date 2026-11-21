@@ -4,7 +4,7 @@
 
 - **Tier:** 2 Pitch · **Area:** Webhosting privacy prototype
 - **Depends on:** existing hosting gateway and nested-engine lab
-- **Owner:** Nikita / Codex · **Status:** in progress (verified; PR #12 ready for review)
+- **Owner:** Nikita / Codex · **Status:** retired by user request (T-40)
 
 User approved component isolation first, with node-operator access limits documented.
 Build a separate opt-in four-engine Linux lab: two frontend replicas and two API replicas.

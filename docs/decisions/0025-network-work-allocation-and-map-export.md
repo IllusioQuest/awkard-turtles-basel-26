@@ -28,7 +28,7 @@ filler, so it cannot express this. It stays unchanged for the scored YearRun pat
      (decision 0013) against each site's id and country **before** any strategy may use that site.
    - **Type 2 filler:** research simulation (decision 0020), unlimited by default (case-permitted),
      no deadline. An optional availability factor φ per site-hour (sensitivity 0.35,
-     `filler-demand.md`) caps it.
+     `demand.md`) caps it.
 2. **Decision extension:** `NetworkDecision` gains allocations (cohort, site, server-hours this hour)
    and filler server-hours per site. A site's target load = (allocated Type 1 + filler) ÷ servers.
    **The actuation path is unchanged** (`SchedulerController.Apply` → `IExecutor`, decision 0024).

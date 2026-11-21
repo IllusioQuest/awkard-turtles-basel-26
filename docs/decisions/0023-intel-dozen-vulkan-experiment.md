@@ -9,7 +9,7 @@ Success gates: actual Intel physical device enumerates (not llvmpipe); requested
 
 Resource limit: inspect free disk before build; parallel compilation limited to two jobs. Do not remove unrelated Docker caches/images. No simulated fleet or GPU-capacity claim. Multi-site placement code remains separate, using existing shared heat helper; this experiment adds a replaceable runtime driver only.
 
-Review: pending fresh limited-context review. Sources: https://archive.mesa3d.org/mesa-26.0.8.tar.xz, Mesa 26.0.8 meson.options and src/microsoft/vulkan/meson.build, https://docs.mesa3d.org/meson.html. Existing instructions docs/gaming-lab.md.
+Review: pending fresh limited-context review. Sources: https://archive.mesa3d.org/mesa-26.0.8.tar.xz, Mesa 26.0.8 meson.options and src/microsoft/vulkan/meson.build, https://docs.mesa3d.org/meson.html. Existing instructions docs/gaming.md.
 
 ## Review outcome
 Fresh-context verdict go with changes. Applied a 12 GiB free-disk admission threshold and 1200-second compile timeout (lab safety configuration, not a performance estimate). Probe records exact image ID, device summary/vendor/API/driver data and timeout/exit status. A separate 60-frame vkcube X11 test is required after enumeration. Do NOT apply intel-wsl.override.yaml or restart A/B during this experiment: transient probes and optional node C use separate configuration. Official CS2 Linux requirements list Vulkan-capable graphics and strongly recommend VK_EXT_graphics_pipeline_library; this is checked/reported, never inferred from a cube pass. Exact game compatibility still requires an original-game test. Steam lists 85 GB storage required; current C: free space is about 22 GB, so no game download can be promised on this drive.

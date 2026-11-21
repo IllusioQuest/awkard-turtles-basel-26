@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Data / model inputs
 - **Depends on:** T-02 (measured throughput), T-05 (finite job queue)
-- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (two research subagents)
+- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude  ·  **Status:** research done (merged); price 0.66 decided; demand model: waiting for Ennio
 
 ## Goal
 
@@ -18,7 +18,7 @@ T-02 measured about 436 audio hours per 1 kW server-hour. Demand, not capacity, 
 
 - [x] Research a sourced transcription demand scenario: job size (audio minutes per job), deadline
       (turnaround), arrivals per day for a realistic customer base; low/high range.
-      → `config/job-scenarios/transcription-basel.json`, `docs/research/job-demand.md` (branch `data/job-demand-scenario`).
+      → `config/job-scenarios/transcription-basel.json`, `docs/research/demand.md` (branch `data/job-demand-scenario`).
 - [x] Research and recommend how to price computing income (per server-hour vs. per audio hour with demand cap),
       with value and sensitivity range → `docs/research/computing-price.md` (branch `data/computing-price`).
 - [ ] Team lead decides; then hand the values to T-06 (Jona) for the scored figures and update `config/reference-house.json` via T-06.
@@ -33,7 +33,7 @@ T-02 measured about 436 audio hours per 1 kW server-hour. Demand, not capacity, 
 
 ## Results (2026-11-21, merged to main)
 
-- **Demand** (`docs/research/job-demand.md`, `config/job-scenarios/transcription-basel.json`): all
+- **Demand** (`docs/research/demand.md`, `config/job-scenarios/transcription-basel.json`): all
   1,269 practising doctors in Basel-Stadt dictating into one house = 428 jobs/day (6.5 audio min,
   24 h deadline). Result: 0 % missed deadlines, but 39 server-hours/year, utilisation 0.11 %,
   heat coverage 0.1 % (vs. 58.0 % with unlimited jobs). Throughput ≈ 436 audio h per 1 kW

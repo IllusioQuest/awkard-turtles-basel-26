@@ -10,7 +10,7 @@
 
 Goal ([`vision.md`](../vision.md), building block 3): a site is **a list of parameters plus,
 optionally, time series**, so that any location and building type can be simulated with the same
-code. The list below is a proposal for the team; the file format is not decided (`AGENTS.md` §12).
+code. The list below is a proposal for the team; the file format is now JSON in `config/` (`AGENTS.md` §12).
 
 Rules behind the list:
 - **Demand is a model choice, not a fixed formula.** Each heat use (space heating, hot water,
