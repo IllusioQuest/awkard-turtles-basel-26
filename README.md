@@ -87,6 +87,21 @@ host-visible progress file. Missing measurements are `null` with a visible
 freeze; throttle is optional. Checkpoint is descriptive until its owner provides
 a protocol.
 
+Every descriptor also needs a sourced `placementPolicy`:
+`{"mode":"anywhere","source":"customer authorization reference"}`,
+`{"mode":"origin-site","source":"customer contract reference"}`, or
+`{"mode":"country-allowlist","allowedCountryCodes":["CH"],"source":"customer contract reference"}`.
+The customer or their contract determines this rule; the job provider only records it.
+The source must identify the actual authorization or contract clause. These strings are
+examples, not claims about an existing customer. For `origin-site`, supply
+`--data-origin-site-id <id> --execution-site-id <id>` at run time. For a country
+allowlist, supply `--execution-country-code <two-uppercase-letter-code>`.
+Missing or mismatched location data blocks a restricted job **before Docker control**.
+These CLI values are self-reported demo inputs; production routing needs trusted site
+identity and must call `JobPlacement.IsEligible` before assigning work. The current
+single-site year simulation does not enforce geographic routing. See
+[`docs/decisions/0013-job-data-locality.md`](docs/decisions/0013-job-data-locality.md).
+
 From the repository root, after the owner has started a dedicated container that
 the replay may exclusively control:
 
@@ -108,4 +123,3 @@ not a sensor reading. A forced pause does not modify later reference snapshots.
 `docker stats` CPU use divided by the allowed CPU cores is shown as observed
 CPU load; it does not establish electrical power or recovered heat. See
 [`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
-

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "timezone": "Europe/Zurich",
+  "time_convention": "24 nominal local hours per day; timestamps have no UTC offset",
+  "step_hours": 1,
+  "git_commit": "8651786d863a10c99e73421c63a42b90b93f4258",
+  "git_dirty": false,
+  "code_provenance": "clean_commit",
+  "seed": null,
+  "randomness": "none",
+  "command": [
+    "dotnet",
+    "run",
+    "--project",
+    "src/DigitalHeat.YearRun",
+    "--",
+    ".",
+    "config/job-scenarios/unlimited.json",
+    "--output",
+    "results/replay"
+  ],
+  "command_working_directory": "repository_root",
+  "inputs": [
+    {
+      "path": "config/reference-house.json",
+      "sha256": "28d9179e73ad2928c91c4f3586a20113e48b872391c1035ba85581733216e8fb"
+    },
+    {
+      "path": "config/job-scenarios/unlimited.json",
+      "sha256": "0dbf3f64fdea648de01b56b7e34c36b23387bd401a63ff8e4ea013c52373fcef"
+    },
+    {
+      "path": "data/raw/open-meteo/basel-2025-hourly.csv",
+      "sha256": "c4d4ea72af2d40ab2f07c28d640f989eeb9b82a108622c66fc62863b8bb42c15"
+    },
+    {
+      "path": "data/raw/elcom/iwb-basel-h4-2026.json",
+      "sha256": "823829d966381283752416a6795d126c2fb3b402f185aee12584d70824ce7b07"
+    }
+  ],
+  "flows_status": "not_modelled"
+}
