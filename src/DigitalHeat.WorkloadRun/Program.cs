@@ -4,6 +4,14 @@ using DigitalHeat.Orchestration;
 
 try
 {
+    if (args.Length == 3 && args[0] == "publish-feedback")
+    {
+        var report = JsonSerializer.Deserialize<NodeFeedback>(File.ReadAllText(args[2]), WorkloadJson.Options)
+            ?? throw new InvalidDataException("Empty node report.");
+        NodeFeedbackInbox.Publish(args[1], report);
+        Console.WriteLine("Published atomic node update; this does not itself authorize a workload start.");
+        return 0;
+    }
     if (args.Length >= 3 && args[0] == "example")
     {
         string localHour = args.Length >= 4 ? args[3] : "2025-07-15T18:00";
@@ -14,7 +22,7 @@ try
         Console.WriteLine($"Wrote historical PLAN example. UTC plan time: {example.Inventory.IntervalStartUtc:O}. This is not fresh runtime inventory.");
         return 0;
     }
-    if (args.Length < 2) throw new ArgumentException("Usage: WorkloadRun plan <config> [UTC-time] | status/start/pause/resume/heat/stop <config> <state-dir> [workload-id] | backup/restore-empty <config> <state-dir> <id> <storage-id> <backup-volume> <archive.tar.gz> <local-tool-image> [new-volume]");
+    if (args.Length < 2) throw new ArgumentException("Usage: WorkloadRun plan <config> [UTC-time] | status/start/pause/resume/heat/stop <config> <state-dir> [workload-id] | watch-feedback <config> <state-dir> <inbox-dir> <policy.json> | publish-feedback <inbox-dir> <report.json> | backup/restore-empty <config> <state-dir> <id> <storage-id> <backup-volume> <archive.tar.gz> <local-tool-image> [new-volume]");
     string command = args[0];
     var config = WorkloadConfiguration.Load(args[1]);
     if (command == "set-deadline")
@@ -42,9 +50,54 @@ try
         return 0;
     }
     if (args.Length < 3) throw new ArgumentException("A persistent state directory is required.");
-    if (command is not ("status" or "start" or "pause" or "resume" or "heat" or "stop" or "backup" or "restore-empty" or "watch-deadlines")) throw new ArgumentException("Unknown command.");
+    if (command is not ("status" or "start" or "pause" or "resume" or "heat" or "stop" or "backup" or "restore-empty" or "watch-deadlines" or "watch-feedback")) throw new ArgumentException("Unknown command.");
     var docker = new DockerCommands();
-    using var coordinator = new WorkloadCoordinator(config.FleetId, args[2], new DockerWorkloadRuntime(docker));
+    bool retainedHeat = command == "watch-feedback";
+    string journalPath = Path.Combine(args[2], "journal.json");
+    if (File.Exists(journalPath)) retainedHeat |= JsonSerializer.Deserialize<CoordinatorState>(File.ReadAllText(journalPath), WorkloadJson.Options)?.RetainHourlyHeat == true;
+    if (retainedHeat && command is "start" or "resume" or "heat" or "watch-deadlines")
+        throw new InvalidOperationException("This fleet uses node feedback. Use watch-feedback for admission/resume; status, pause, stop and cold backup remain available after stopping its owner.");
+    using var coordinator = new WorkloadCoordinator(config.FleetId, args[2], new DockerWorkloadRuntime(docker), retainHourlyHeat: retainedHeat);
+    if (command == "watch-feedback")
+    {
+        if (args.Length != 5) throw new ArgumentException("watch-feedback <config> <state-dir> <inbox-dir> <feedback-policy.json>");
+        var policy = NodeFeedbackPolicy.Load(args[4]);
+        var policyIdentity = WorkloadJson.Identity(policy);
+        var inbox = new NodeFeedbackInbox(args[3], args[2], config.FleetId, policy, config.Inventory);
+        var owner = new NodeFeedbackOwner(coordinator, config, inbox, policy);
+        using var wake = new NodeFeedbackWake(args[3]);
+        using var configWatch = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(args[1]))!, Path.GetFileName(args[1]));
+        configWatch.Changed += (_, _) => wake.Notify(); configWatch.Created += (_, _) => wake.Notify();
+        configWatch.Renamed += (_, _) => wake.Notify(); configWatch.Error += (_, _) => wake.Notify();
+        configWatch.EnableRaisingEvents = true;
+        using var cancelled = new CancellationTokenSource();
+        ConsoleCancelEventHandler cancel = (_, e) => { e.Cancel = true; cancelled.Cancel(); };
+        Console.CancelKeyPress += cancel;
+        string? previous = null;
+        try
+        {
+            while (!cancelled.IsCancellationRequested)
+            {
+                var errors = owner.Tick(() =>
+                {
+                    if (WorkloadJson.Identity(NodeFeedbackPolicy.Load(args[4])) != policyIdentity)
+                        throw new InvalidDataException("Feedback policy changed; restart explicitly to change authority/limits.");
+                    return WorkloadConfiguration.Load(args[1]);
+                });
+                string json = JsonSerializer.Serialize(new { mode = "event_driven_node_feedback", errors,
+                    attempts = coordinator.Attempts() }, WorkloadJson.Options);
+                if (json != previous)
+                {
+                    Console.WriteLine(json); previous = json;
+                }
+                await wake.WaitAsync(TimeSpan.FromSeconds(policy.FallbackIntervalSeconds), cancelled.Token);
+            }
+        }
+        catch (OperationCanceledException) when (cancelled.IsCancellationRequested) { }
+        finally { Console.CancelKeyPress -= cancel; }
+        Console.Error.WriteLine("Feedback owner stopped; jobs remain owned. Feedback/deadline enforcement requires this owner running.");
+        return 130;
+    }
     if (command == "watch-deadlines")
     {
         if (config.Workloads.Length == 0 || config.Workloads.Any(w => w.Request.Kind != "batch" || w.Request.Deadline is null))
