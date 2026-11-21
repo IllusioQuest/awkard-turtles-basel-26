@@ -119,3 +119,12 @@ are unchanged. Retained hourly commitments remain conservative for short jobs.
 Sources, accessed 2026-11-21: https://download.blender.org/release/Blender5.3/ .
 All timings, GPU identity and lifecycle evidence above are own local runs; see
 `docs/performance/native-renderer-2026-11-21.json` for the recorded result.
+
+Final checks: 98 orchestration tests and 51 Core tests passed. The shared scene
+builder also rendered successfully in the existing Linux Docker CPU image.
+Stopped native app recovery retains all four frames and freezes 94.1465 s active,
+81.5245 s confirmed pause and 175.6710 s total render workflow wall time.
+These are this interrupted run only, not an animation ETA or GPU speedup.
+The native adapter currently permits one GPU peer per physical host; explicit
+multi-adapter selection is not implemented. More physical GPU hosts can join
+through configured peers/shared artifacts after their own verification.
