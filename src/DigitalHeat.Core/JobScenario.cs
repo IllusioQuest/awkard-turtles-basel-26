@@ -19,7 +19,9 @@ public sealed record JobScenario(string Mode, string ExcessHeatPolicy, string So
     {
         if (Mode is not ("unlimited" or "finite")
             || ExcessHeatPolicy is not ("wait" or "run-and-dump")
-            || string.IsNullOrWhiteSpace(Source) || JobTypes is null)
+            || string.IsNullOrWhiteSpace(Source)
+            || Source.Contains("TODO(source)", StringComparison.OrdinalIgnoreCase)
+            || JobTypes is null)
             throw new InvalidDataException("Invalid job scenario mode, policy or source.");
         if (Mode == "unlimited" && JobTypes.Count != 0)
             throw new InvalidDataException("Unlimited supply cannot also list finite job types.");
@@ -33,7 +35,9 @@ public sealed record JobScenario(string Mode, string ExcessHeatPolicy, string So
                 || !Valid(type.ArrivalsPerDay, "jobs/day", allowZero: true, integer: true)
                 || !Valid(type.WorkUnitsPerJob, "work units/job")
                 || !Valid(type.WorkUnitsPerServerHour, "work units/server-hour")
-                || !Valid(type.DeadlineHours, "hours"))
+                || !Valid(type.DeadlineHours, "hours")
+                || type.ArrivalsPerDay.Value > int.MaxValue
+                || !double.IsFinite(type.WorkUnitsPerJob.Value / type.WorkUnitsPerServerHour.Value))
                 throw new InvalidDataException($"Invalid or unsupported finite job type: {type.Id}.");
         }
     }

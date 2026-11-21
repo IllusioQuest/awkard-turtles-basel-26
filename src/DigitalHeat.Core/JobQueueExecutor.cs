@@ -3,6 +3,7 @@ namespace DigitalHeat.Core;
 /// <summary>Finite interruptible work, served earliest deadline first; lower availability reduces achieved load.</summary>
 public sealed class JobQueueExecutor : IExecutor
 {
+    private const double LoadTolerance = 1e-9; // Floating-point comparison only, not a scenario parameter.
     private sealed class PendingJob(int typeIndex, int dueStep, double remainingServerHours)
     {
         public int TypeIndex { get; } = typeIndex;
@@ -76,7 +77,7 @@ public sealed class JobQueueExecutor : IExecutor
         double availableServerHours = pending.Sum(x => x.RemainingServerHours);
         double cappedTarget = Math.Min(targetLoadPerServer, availableServerHours / capacityServerHours);
         double achieved = inner.ApplyTargetLoad(cappedTarget);
-        if (!double.IsFinite(achieved) || achieved < 0 || achieved > cappedTarget + 1e-9)
+        if (!double.IsFinite(achieved) || achieved < 0 || achieved > cappedTarget + LoadTolerance)
             throw new InvalidOperationException("Executor achieved more load than available job work.");
         double remainingToApply = achieved * capacityServerHours;
         foreach (var job in pending.OrderBy(x => x.DueStep))
@@ -119,10 +120,14 @@ public sealed class JobQueueExecutor : IExecutor
 /// <summary>Optional alternative to heat-led waiting: execute available work and dump surplus heat.</summary>
 public sealed class ExcessHeatPolicyScheduler(IScheduler heatLed, string policy) : IScheduler
 {
-    public SchedulerDecision Decide(HeatSignal signal) => policy switch
+    public SchedulerDecision Decide(HeatSignal signal)
     {
-        "wait" => heatLed.Decide(signal),
-        "run-and-dump" => new SchedulerDecision(1),
-        _ => throw new InvalidDataException("Unknown excess-heat policy.")
-    };
+        var heatLedDecision = heatLed.Decide(signal);
+        return policy switch
+        {
+            "wait" => heatLedDecision,
+            "run-and-dump" => new SchedulerDecision(1),
+            _ => throw new InvalidDataException("Unknown excess-heat policy.")
+        };
+    }
 }
