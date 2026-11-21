@@ -68,8 +68,19 @@ Fresh-context review (decision-reviewer subagent, 2026-11-21): **go with changes
 
 - Toy test: with daily Type 1 work above the hot-water drain, the reserve saves one cohort, then the
   tank is full of Type 1 heat and the shortfall returns. Local timing only delays it.
-- Full year on `switzerland-test` (Type 1 share 0.3, φ = 1): **B1-reserve = B1** (83.42 % coverage,
-  0 kWh dumped, 15.69 % missed) and **B2-reserve = B2** (0 % missed, 102,754 moved server-hours).
-- Conclusion: in this model, B2's gain over B1 is entirely a network effect. The LP's 0 % without moves
-  in a 72-hour July window came from the empty starting tank (window artefact), not from planning.
-  LP-persist would only improve such transients and is not built.
+- Full year on `switzerland-test` (Type 1 share 0.3, φ = 1; `python3 scripts/network_experiments.py`,
+  `data/derived/network/experiments/`):
+
+  | Strategy | Coverage | Dumped | Missed Type 1 | Moved Type 1 server-h |
+  |---|---|---|---|---|
+  | B1 | 83.42 % | 0 kWh | 15.69 % | 0 |
+  | B1-reserve | 83.42 % | 0 kWh | 15.62 % | 0 |
+  | B2 | 83.42 % | 0 kWh | 0 % | 102,754 |
+  | B2-reserve | 83.40 % | 0 kWh | 0 % | 64,230 |
+
+- Conclusion: local timing barely reduces missed deadlines (−0.07 points): the shortfall is a network
+  problem. Combined with moves it saves **37 % of the moved server-hours** at −0.02 points of coverage,
+  because origins keep tank room and need to send less work away. The LP's 0 % without moves in a
+  72-hour July window came from the empty starting tank (window artefact). LP-persist is not built.
+- Correction: an earlier note (commit 1b98866) said B1-reserve and B2-reserve were *identical* to
+  B1/B2. That run used a stale binary; the table above is from a fresh build (Debug and Release agree).
