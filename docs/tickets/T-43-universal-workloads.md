@@ -1,6 +1,6 @@
 # T-43: Universal resource-aware workload placement
 
-Owner: Nikita / Codex. Status: implementation complete; final integration checks/PR in progress.
+Owner: Nikita / Codex. Status: in review, [PR #33](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/33).
 Code branch: `feat/T-43-universal-workloads`. Design: ADR 0033.
 
 ## Approved scope
@@ -55,3 +55,5 @@ outside this approved first milestone. No new package, scored house formula or e
 
 Setup, commands, calculation path, architecture graph and code map:
 [universal workloads](../universal-workloads.md).
+
+Code committed/pushed as d973f57 (shared admission) and 791216d (runtime/CLI/backup), integrated with main docs on feat/T-43-universal-workloads. Final smoke result: gaming/TestResults/dhw-smoke-93af862f10284d3881b12edc3d2808d8/result.json (ignored local evidence). All 131 relevant tests pass; solution builds with zero warnings/errors. Original game remained PID 403 and only A/B/C desktops remain running. Code merge awaits review; no team ADR acceptance is implied.

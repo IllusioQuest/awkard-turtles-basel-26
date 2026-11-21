@@ -76,4 +76,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-42](T-42-gaming-monitor-review.md) | Review and clarify gaming heat monitor | Nikita / Codex | in review (PR #32) |
 
-| [T-43](T-43-universal-workloads.md) | Universal resource-aware workload placement | Nikita / Codex | implementation complete; PR preparation |
+| [T-43](T-43-universal-workloads.md) | Universal resource-aware workload placement | Nikita / Codex | in review (PR #33) |
