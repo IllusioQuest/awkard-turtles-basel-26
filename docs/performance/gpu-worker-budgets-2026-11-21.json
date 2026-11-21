@@ -1,0 +1,62 @@
+{
+  "phase": "complete",
+  "error": null,
+  "frames": 48,
+  "active_seconds": 133.7016684,
+  "frames_by_worker": {
+    "demo-gpu-1": 17,
+    "demo-gpu-2": 15,
+    "demo-gpu-3": 16
+  },
+  "budgets": [
+    {
+      "peer_id": "demo-gpu-2",
+      "work_weight": 1,
+      "heat_demand_kwh": 100
+    },
+    {
+      "peer_id": "demo-cpu-video",
+      "work_weight": 1,
+      "heat_demand_kwh": 100
+    },
+    {
+      "peer_id": "demo-gpu-1",
+      "work_weight": 1.5,
+      "heat_demand_kwh": 150
+    },
+    {
+      "peer_id": "demo-gpu-3",
+      "work_weight": 0.5,
+      "heat_demand_kwh": 50
+    },
+    {
+      "peer_id": "demo-cpu-prepare",
+      "work_weight": 1,
+      "heat_demand_kwh": 100
+    }
+  ],
+  "video": {
+    "job_id": "demo-cpu-prepare.cd23c656b4fb-assemble",
+    "peer_id": "demo-cpu-video",
+    "metadata": {
+      "blender": "5.3.0",
+      "build_hash": "02f0899d78e3",
+      "device": "CPU video encoding",
+      "encode_seconds": 0.6660687000257894,
+      "encoded_frames": 48,
+      "ffmpeg_available": true,
+      "fps": 12,
+      "frames": 48,
+      "height": 360,
+      "manifest_sha256": "6f02ae2ed80875525f96b01deeeaef0c2f9220fcf39412f3063742bb9088b084",
+      "recipe_id": "50739f3764c8f1867040e60867f5d17bce54b30c0982550786e51721aa1831ff",
+      "samples": 32,
+      "scene_sha256": "fb5cf41fbda43a991e9324136deff6dcd675fe1fa38e4c5140fe770572832c9d",
+      "seed": 66,
+      "stage": "assemble",
+      "width": 640
+    }
+  },
+  "method": "Poll actual /ui/status until completion, inspect worker quotas and encoded MP4 frame count; workflow time is not a scheduler microbenchmark.",
+  "limitations": "One physical Iris Xe, three logical GPU workers; synthetic heat quotas, not power percentages; no guaranteed weighted frame split."
+}

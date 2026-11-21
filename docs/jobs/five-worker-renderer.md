@@ -52,3 +52,17 @@ Six-frame checks passed pause/resume and restart both after completion and durin
 GPU work, preserving prior results. No performance or reliability SLA is claimed.
 See `docs/performance/five-worker-renderer-2026-11-21.json` for method and evidence.
 Browser layout still needs user confirmation; API and actual rendering were verified.
+
+## T-76 budget and identity update
+
+PR #68 / 21b0769 uses user-approved GPU weights 1.5 / 1.0 / 0.5.
+CPU weights remain 1 / 1; total weight is still 5. The same synthetic
+500 kWh total now partitions CPU100/100 and GPU150/100/50 kWh.
+These supersede the original profile values above for new launcher runs;
+original validation figures remain historical. No heat-policy code changed.
+Weights do not guarantee unequal completed-frame counts or GPU percentages.
+Three shades derived from the existing accent colour identify GPU1/2/3 in
+both the graph and cards, separately from activity-state indicators.
+Prior complete output retained when renderer hosts were restarted. Minecraft
+was not changed. Browser visual access is unavailable; live HTML/JavaScript
+and real pipeline validation are the available checks.
