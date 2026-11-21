@@ -80,9 +80,8 @@ public sealed class WorkloadPlacement
             foreach (var candidate in Candidates(request))
             {
                 if (selectedSiteId is not null && candidate.SiteId != selectedSiteId) continue;
-                if (best is null || candidate.AvailableHeatKwhBeforeReservation > best.AvailableHeatKwhBeforeReservation
-                    || candidate.AvailableHeatKwhBeforeReservation == best.AvailableHeatKwhBeforeReservation
-                    && (string.CompareOrdinal(candidate.SiteId, best.SiteId) < 0 || candidate.SiteId == best.SiteId && string.CompareOrdinal(candidate.NodeId, best.NodeId) < 0))
+                if (best is null || new HeatPlacementRank(candidate.AvailableHeatKwhBeforeReservation, candidate.SiteId, candidate.NodeId)
+                    .CompareTo(new(best.AvailableHeatKwhBeforeReservation, best.SiteId, best.NodeId)) > 0)
                     best = candidate;
             }
             if (best is not null) held.Add(request.Id, new(request, best, false));

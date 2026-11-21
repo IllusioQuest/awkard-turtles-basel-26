@@ -1,4 +1,4 @@
-param([string]$OutputPath,[string]$SourceRoot,[ValidateSet('Placement','NodeFeedback')][string]$Probe='Placement')
+param([string]$OutputPath,[string]$SourceRoot,[ValidateSet('Placement','NodeFeedback','PeerMesh')][string]$Probe='Placement')
 $ErrorActionPreference='Stop'
 $harnessRoot=Split-Path -Parent $PSScriptRoot
 $root=if($SourceRoot){[IO.Path]::GetFullPath($SourceRoot)}else{$harnessRoot}
@@ -9,7 +9,7 @@ function Xml([string]$s){[Security.SecurityElement]::Escape($s)}
 $core=Xml (Join-Path $root 'src/DigitalHeat.Core/DigitalHeat.Core.csproj')
 $network=Xml (Join-Path $root 'src/DigitalHeat.Network/DigitalHeat.Network.csproj')
 $orchestration=Xml (Join-Path $root 'src/DigitalHeat.Orchestration/DigitalHeat.Orchestration.csproj')
-$probeFile=if($Probe -eq 'NodeFeedback'){'NodeFeedbackProbe.cs'}else{'SchedulerProbe.cs'}
+$probeFile=switch($Probe){'NodeFeedback'{'NodeFeedbackProbe.cs'} 'PeerMesh'{'PeerMeshProbe.cs'} default{'SchedulerProbe.cs'}}
 $probePath=Join-Path $harnessRoot "scripts/performance/$probeFile"
 $source=Xml $probePath
 @"
@@ -26,7 +26,7 @@ if($LASTEXITCODE -ne 0){throw 'Diagnostic build failed'}
 $previousTiering=$env:DOTNET_TieredCompilation
 try {
     $env:DOTNET_TieredCompilation='0'
-    & dotnet (Join-Path $project 'bin/Release/net8.0/Probe.dll') ([IO.Path]::GetFullPath($OutputPath)) $commit
+    & dotnet (Join-Path $project 'bin/Release/net8.0/Probe.dll') ([IO.Path]::GetFullPath($OutputPath)) $commit $root
     if($LASTEXITCODE -ne 0){throw 'Scheduler probe failed'}
 } finally {$env:DOTNET_TieredCompilation=$previousTiering}
 $report=Get-Content $OutputPath -Raw | ConvertFrom-Json

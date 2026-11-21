@@ -4,6 +4,11 @@ using DigitalHeat.Orchestration;
 
 try
 {
+    if (args.Length == 3 && args[0] == "mesh-demo")
+    {
+        Console.WriteLine(JsonSerializer.Serialize(PeerMeshDemo.Run(args[1], args[2]), WorkloadJson.Options));
+        return 0;
+    }
     if (args.Length == 3 && args[0] == "publish-feedback")
     {
         var report = JsonSerializer.Deserialize<NodeFeedback>(File.ReadAllText(args[2]), WorkloadJson.Options)

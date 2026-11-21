@@ -1,0 +1,266 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using DigitalHeat.Core;
+
+namespace DigitalHeat.Orchestration;
+
+public abstract record PeerMessage;
+public sealed record PeerOffer(string PeerId, long Sequence, DateTimeOffset ExpiresAtUtc,
+    WorkloadInventory Inventory, string[] Profiles) : PeerMessage;
+public sealed record PeerProposal(string Origin, long Generation, string Identity, WorkloadRequest Request,
+    string ProfileId, long InventoryRevision, DateTimeOffset HourStartUtc, HeatSignal Heat) : PeerMessage;
+public sealed record PeerReply(string JobId, long Generation, string Identity, string Status) : PeerMessage;
+
+/// <summary>Simulation transport boundary. Senders are trusted configured peers; no live authentication claim.</summary>
+public interface IPeerMeshTransport { void Send(string from, string to, PeerMessage message); }
+
+public sealed record OriginJob(WorkloadRequest Request, string ProfileId, long Generation = 0,
+    string? Target = null, string Status = "waiting", long InventoryRevision = 0,
+    DateTimeOffset HourStartUtc = default, HeatSignal? Heat = null);
+public sealed record ProposalOutcome(string Origin, string JobId, long Generation, string Identity, string Status);
+public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes);
+
+/// <summary>
+/// Origin-owned peer protocol, not a global scheduler or consensus service. Uses the existing placement
+/// and durable executor boundary. Peers exchange snapshots; an offer never authorizes execution.
+/// </summary>
+public sealed class MeshPeer : IDisposable
+{
+    private readonly WorkloadCoordinator coordinator;
+    private readonly RuntimeNode[] runtimeNodes;
+    private readonly IReadOnlyDictionary<string, ContainerProfile> profiles;
+    private readonly IPeerMeshTransport transport;
+    private readonly TimeProvider clock;
+    private readonly TimeSpan offerLifetime;
+    private readonly string journalPath;
+    private readonly HashSet<string> peers;
+    private readonly Dictionary<string, PeerOffer> offers = new(StringComparer.Ordinal);
+    private WorkloadInventory inventory;
+    private PeerJournal journal;
+    public string Id { get; }
+
+    public MeshPeer(string meshId, string id, string stateDirectory, WorkloadInventory inventory,
+        RuntimeNode[] runtimeNodes, IReadOnlyDictionary<string, ContainerProfile> profiles,
+        IEnumerable<string> peers, IPeerMeshTransport transport, IWorkloadRuntime runtime,
+        TimeProvider clock, TimeSpan offerLifetime)
+    {
+        if (inventory.Sites.Length != 1 || inventory.Sites[0].Id != id || inventory.Domains.Length != 1
+            || offerLifetime <= TimeSpan.Zero) throw new ArgumentException("One physical domain/site per peer and a positive offer lifetime are required.");
+        Id = id; this.runtimeNodes = runtimeNodes; this.profiles = profiles; this.transport = transport;
+        this.clock = clock; this.offerLifetime = offerLifetime; this.peers = peers.ToHashSet(StringComparer.Ordinal);
+        this.peers.Add(id);
+        this.inventory = WorkloadJson.Copy(inventory);
+        coordinator = new(meshId + "." + id, stateDirectory, runtime, clock, retainHourlyHeat: true);
+        try
+        {
+            journalPath = Path.Combine(stateDirectory, "mesh-origin.json");
+            journal = File.Exists(journalPath)
+                ? JsonSerializer.Deserialize<PeerJournal>(File.ReadAllText(journalPath), WorkloadJson.Options)
+                    ?? throw new InvalidDataException("Empty peer journal.")
+                : new(id, 0, [], []);
+            if (journal.PeerId != id) throw new InvalidDataException("Peer journal belongs to another origin.");
+            coordinator.Update(this.inventory, clock.GetUtcNow());
+            coordinator.Reconcile(runtimeNodes);
+        }
+        catch { coordinator.Dispose(); throw; }
+    }
+
+    public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
+    public AttemptRecord[] Attempts() => coordinator.Attempts();
+
+    public string Submit(WorkloadRequest request, string profileId)
+    {
+        if (request.OriginSiteId != Id) throw new InvalidDataException("Only an origin may submit its own job.");
+        var global = request with { Id = Id + "." + request.Id };
+        WorkloadPlacement.ValidateRequest(global);
+        var prior = journal.Jobs.SingleOrDefault(j => j.Request.Id == global.Id);
+        if (prior is not null)
+        {
+            if (Identity(prior.Request, prior.ProfileId) != Identity(global, profileId))
+                throw new InvalidDataException("Origin job identity is immutable.");
+            return global.Id;
+        }
+        journal = journal with { Jobs = [.. journal.Jobs, new(WorkloadJson.Copy(global), profileId)] };
+        Save();
+        return global.Id;
+    }
+
+    public void Update(WorkloadInventory next)
+    {
+        coordinator.Update(next, clock.GetUtcNow());
+        inventory = WorkloadJson.Copy(next);
+        ApplyLocalHeat();
+        Publish();
+    }
+
+    public void Publish()
+    {
+        var now = clock.GetUtcNow();
+        var claims = coordinator.Allocations();
+        // Remote planners have no local ownership ledger: advertise all retained hourly heat,
+        // plus actual held resources. Pausing frees CPU, never GPU/RAM/slots or committed heat.
+        double committed = coordinator.Attempts().Where(a => a.CommittedHeatIntervalsUtc?.Contains(inventory.IntervalStartUtc) == true)
+            .Sum(a => a.Attempt.Reservation.RecoverableHeatKwhPerHour);
+        var snapshot = inventory with
+        {
+            Sites = [inventory.Sites[0] with { ExternalCommittedHeatKwh = inventory.Sites[0].ExternalCommittedHeatKwh + committed }],
+            ExternalAllocations = [.. inventory.ExternalAllocations, .. claims.Select(a => new ExternalAllocation(a.Request.Id,
+                a.Reservation.NodeId, a.Request.Resources with { CpuCores = a.Paused ? 0 : a.Request.Resources.CpuCores }, a.Reservation.GpuDeviceId))]
+        };
+        var expiry = now + offerLifetime;
+        if (inventory.ResourceValidUntilUtc is {} resourcesUntil && resourcesUntil < expiry) expiry = resourcesUntil;
+        if (inventory.IntervalEndUtc < expiry) expiry = inventory.IntervalEndUtc;
+        journal = journal with { OfferSequence = checked(journal.OfferSequence + 1) };
+        Save();
+        var offer = new PeerOffer(Id, journal.OfferSequence, expiry, snapshot, profiles.Keys.Order(StringComparer.Ordinal).ToArray());
+        offers[Id] = offer;
+        foreach (string peer in peers.Where(p => p != Id).Order(StringComparer.Ordinal)) transport.Send(Id, peer, offer);
+    }
+
+    public void Tick()
+    {
+        coordinator.Reconcile(runtimeNodes);
+        coordinator.EnforceDeadlines();
+        bool changed = ApplyLocalHeat();
+        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "terminal" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowStop))
+        {
+            coordinator.StopAndRelease(row.Attempt.Request.Id);
+            changed = true;
+        }
+        if (changed) Publish();
+        foreach (var job in journal.Jobs.OrderBy(j => j.Request.Kind == "interactive" ? 0 : 1)
+            .ThenBy(j => j.Request.Deadline?.DueAtUtc ?? DateTimeOffset.MaxValue).ThenBy(j => j.Request.Id, StringComparer.Ordinal).ToArray())
+        {
+            if (job.Status == "accepted") continue;
+            if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
+            if (!WorkloadPlacement.DeadlineOpen(job.Request, clock.GetUtcNow())) continue;
+            var now = clock.GetUtcNow();
+            var available = offers.Values.Where(o => now < o.ExpiresAtUtc && o.Profiles.Contains(job.ProfileId)
+                && o.Inventory.ResourceObservedAtUtc is {} observed && observed <= now
+                && o.Inventory.ResourceValidUntilUtc is {} resourcesUntil && now < resourcesUntil
+                && now >= o.Inventory.IntervalStartUtc && now < o.Inventory.IntervalEndUtc)
+                .OrderBy(o => o.PeerId, StringComparer.Ordinal).ToArray();
+            if (available.Length == 0) continue;
+            var first = available[0].Inventory;
+            var planning = first with { Revision = 1,
+                Sites = available.SelectMany(o => o.Inventory.Sites).ToArray(),
+                Domains = available.SelectMany(o => o.Inventory.Domains).ToArray(),
+                Nodes = available.SelectMany(o => o.Inventory.Nodes).ToArray(),
+                ExternalAllocations = available.SelectMany(o => o.Inventory.ExternalAllocations).ToArray(),
+                ResourceObservedAtUtc = available.Max(o => o.Inventory.ResourceObservedAtUtc),
+                ResourceValidUntilUtc = available.Min(o => o.ExpiresAtUtc) };
+            var placement = new WorkloadPlacement();
+            placement.Update(planning, clock.GetUtcNow());
+            var chosen = placement.TryReserve(job.Request, clock.GetUtcNow());
+            if (chosen is null) continue;
+            var selected = available.Single(o => o.PeerId == chosen.SiteId);
+            var intent = job with { Target = chosen.SiteId, Generation = checked(job.Generation + 1), Status = "proposed",
+                InventoryRevision = selected.Inventory.Revision, HourStartUtc = selected.Inventory.IntervalStartUtc,
+                Heat = selected.Inventory.Sites[0].Heat };
+            Put(intent); // Durable intent MUST precede send; the transport may lose its reply.
+            Propose(intent);
+        }
+        coordinator.EnforceDeadlines();
+    }
+
+    private bool ApplyLocalHeat()
+    {
+        var scheduler = new GreedyHeatScheduler(0);
+        var heat = inventory.Sites[0].Heat;
+        bool noHeat = scheduler.Decide(heat).TargetLoadPerServer == 0;
+        bool changed = false;
+        foreach (var row in coordinator.Attempts().Where(a => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
+        {
+            if (row.Phase == "running" && noHeat || row.Phase == "paused" && !noHeat)
+                changed |= coordinator.ApplyBatchHeat(row.Attempt.Request.Id, heat, scheduler, clock.GetUtcNow());
+        }
+        return changed;
+    }
+
+    private void Propose(OriginJob job) => transport.Send(Id, job.Target!, new PeerProposal(Id, job.Generation,
+        Identity(job.Request, job.ProfileId), job.Request, job.ProfileId, job.InventoryRevision, job.HourStartUtc, job.Heat!));
+
+    public void Receive(string from, PeerMessage message)
+    {
+        if (!peers.Contains(from)) throw new InvalidDataException("Unknown peer.");
+        switch (message)
+        {
+            case PeerOffer offer when offer.PeerId == from:
+                if (!offers.TryGetValue(from, out var old) || offer.Sequence > old.Sequence)
+                    offers[from] = WorkloadJson.Copy(offer);
+                break;
+            case PeerProposal proposal when proposal.Origin == from:
+                Accept(from, proposal);
+                break;
+            case PeerReply reply:
+                var job = journal.Jobs.SingleOrDefault(j => j.Request.Id == reply.JobId);
+                if (job is null || job.Target != from || job.Generation != reply.Generation
+                    || Identity(job.Request, job.ProfileId) != reply.Identity) break;
+                if (reply.Status == "rejected") Put(job with { Target = null, Status = "waiting" });
+                else if (reply.Status == "accepted") Put(job with { Status = "accepted" });
+                break;
+        }
+    }
+
+    private void Accept(string origin, PeerProposal proposal)
+    {
+        if (proposal.Generation <= 0 || proposal.Request.OriginSiteId != origin
+            || proposal.Identity != Identity(proposal.Request, proposal.ProfileId)) throw new InvalidDataException("Invalid proposal identity.");
+        var old = journal.Outcomes.SingleOrDefault(o => o.Origin == origin && o.JobId == proposal.Request.Id && o.Generation == proposal.Generation);
+        if (old is not null)
+        {
+            if (old.Identity != proposal.Identity) throw new InvalidDataException("Conflicting proposal replay.");
+            Reply(origin, old); return;
+        }
+        string status;
+        try
+        {
+            coordinator.Reconcile(runtimeNodes);
+            coordinator.EnforceDeadlines();
+            var prior = coordinator.Attempts().SingleOrDefault(a => a.Attempt.Request.Id == proposal.Request.Id);
+            if (prior is not null)
+            {
+                if (Identity(prior.Attempt.Request, prior.Attempt.Profile.Id) != proposal.Identity)
+                    throw new InvalidDataException("Existing execution has different requirements.");
+                status = "accepted"; // Expired old offer does not erase an existing/uncertain attempt.
+            }
+            else if (!profiles.TryGetValue(proposal.ProfileId, out var profile)) status = "rejected";
+            else
+            {
+                var result = coordinator.TryStartAtSite(proposal.Request, runtimeNodes, profile, clock.GetUtcNow(),
+                    Id, proposal.Heat, proposal.InventoryRevision, proposal.HourStartUtc);
+                status = result is null ? "rejected" : "accepted";
+            }
+        }
+        catch (Exception e) when (e is IOException or InvalidOperationException or TimeoutException or InvalidDataException)
+        {
+            // An uncertain call cannot authorize replanning elsewhere. Retry/reconcile this target.
+            transport.Send(Id, origin, new PeerReply(proposal.Request.Id, proposal.Generation, proposal.Identity, "unknown"));
+            return;
+        }
+        var outcome = new ProposalOutcome(origin, proposal.Request.Id, proposal.Generation, proposal.Identity, status);
+        journal = journal with { Outcomes = [.. journal.Outcomes, outcome] };
+        Save(); // Rejection tombstones precede replies: delayed duplicates cannot start later.
+        Reply(origin, outcome);
+        Publish();
+    }
+
+    private void Reply(string origin, ProposalOutcome result) => transport.Send(Id, origin,
+        new PeerReply(result.JobId, result.Generation, result.Identity, result.Status));
+    private static string Identity(WorkloadRequest request, string profile) => Convert.ToHexString(
+        SHA256.HashData(Encoding.UTF8.GetBytes(profile + "\n" + WorkloadJson.Identity(request))));
+    private void Put(OriginJob job)
+    {
+        journal = journal with { Jobs = journal.Jobs.Select(j => j.Request.Id == job.Request.Id ? job : j).ToArray() };
+        Save();
+    }
+    private void Save()
+    {
+        string temporary = journalPath + ".tmp";
+        using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
+        { JsonSerializer.Serialize(stream, journal, WorkloadJson.Options); stream.Flush(true); }
+        File.Move(temporary, journalPath, true);
+    }
+    public void Dispose() => coordinator.Dispose();
+}

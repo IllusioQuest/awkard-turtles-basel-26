@@ -218,7 +218,17 @@ public sealed class WorkloadCoordinator : IDisposable
         {
             RequireReconciled();
             WorkloadPlacement.ValidateRequest(request);
-            if (expectedInventoryRevision is not null && !placement.MatchesSnapshot(selectedSiteId!, expectedHeatSignal!, expectedInventoryRevision.Value, expectedHourStartUtc!.Value, nowUtc)) return null;
+            // Plans bind the externally supplied inventory. Retained-heat accounting installs a
+            // private budget revision; admit against that current budget without confusing the two.
+            long? admissionRevision = expectedInventoryRevision;
+            if (expectedInventoryRevision is not null)
+            {
+                if (currentInventory is not {} raw || raw.Revision != expectedInventoryRevision
+                    || raw.IntervalStartUtc != expectedHourStartUtc || nowUtc < raw.IntervalStartUtc || nowUtc >= raw.IntervalEndUtc
+                    || raw.Sites.SingleOrDefault(s => s.Id == selectedSiteId)?.Heat != expectedHeatSignal) return null;
+                admissionRevision = retainHourlyHeat ? budgetRevision : expectedInventoryRevision;
+                if (!placement.MatchesSnapshot(selectedSiteId!, expectedHeatSignal!, admissionRevision.Value, expectedHourStartUtc!.Value, DecisionTime(request, nowUtc))) return null;
+            }
             var prior = records.SingleOrDefault(r => r.Attempt.Request.Id == request.Id);
             if (prior is not null)
             {
@@ -252,7 +262,7 @@ public sealed class WorkloadCoordinator : IDisposable
             if (!CanDispatch(request)) return null;
             var reservation = selectedSiteId is null
                 ? placement.TryReserve(request, DecisionTime(request, nowUtc))
-                : placement.TryReserveAtSite(request, selectedSiteId, expectedHeatSignal!, expectedInventoryRevision!.Value,
+                : placement.TryReserveAtSite(request, selectedSiteId, expectedHeatSignal!, admissionRevision!.Value,
                     expectedHourStartUtc!.Value, DecisionTime(request, nowUtc));
             if (reservation is null && request.Kind == "interactive" && pauseBatchFirst && CanAdmitAfterBatchPause(request, DecisionTime(request, nowUtc)))
             {
