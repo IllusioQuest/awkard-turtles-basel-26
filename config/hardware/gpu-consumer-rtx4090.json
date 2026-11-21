@@ -1,7 +1,7 @@
 {
   "Id": "gpu-consumer-rtx4090",
   "Label": "Consumer GPU desktops (RTX 4090), scaled to 1 kW",
-  "Status": "NOT PERMITTED (licence, decision 0027): NVIDIA GeForce driver licence excludes datacenter deployment; kept only as a documented, rejected comparison and excluded from the economics defaults. Variant: not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+  "Status": "variant, NOT PERMITTED (licence, decision 0027): NVIDIA GeForce driver licence excludes datacenter deployment; kept only as a documented, rejected comparison and excluded from the economics defaults. Not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
   "Description": "One 'server' = 1 kW of electric load = two complete RTX 4090 desktops (450 W GPU each, about 100 W for the rest of both systems), the GPU variant A5 of docs/research/computing-price.md. Consumer hardware, sold on home-host GPU marketplaces.",
   "TranscriptionModel": "faster-whisper large-v2 (GPU), proxy benchmark on a slower RTX 3070 Ti",
   "UnitsPerServer": { "value": 2, "unit": "units/server", "source": "docs/research/computing-price.md A5: 2 x RTX 4090 (450 W TGP each) = about 1 kW (assumption)" },
