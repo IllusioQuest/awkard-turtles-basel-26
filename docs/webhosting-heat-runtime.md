@@ -49,3 +49,8 @@ selected by this ticket.
 Request to T-01/T-03 owners: confirm the boundary above and provide the agreed always-on catalog
 representation. Keep T-23 open until that agreement and the valid catalog entry exist. The neutral
 control probe does not complete those acceptance criteria or measure energy for the draft.
+
+## Verified result and handoff
+
+2026-11-21: Test-HeatControl.ps1 completed all 24 July 15 hourly steps, forced a pause at step 12, resumed afterward, verified the replica was unpaused after executor cleanup, and removed the dedicated container. Exit code 0. Rounded target was 16% outside the forced pause; observed CPU was 0–1%, reflecting an idle sample rather than delivered heat. Draft PR #7: https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/7. T-23 remains in progress pending catalog representation and owner agreement; it is not marked done.
+

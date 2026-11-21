@@ -26,3 +26,6 @@ Use the existing webhosting work where it helps the case: as executor platform a
 ## Rules
 
 - Follow AGENTS.md: agree the approach with your human first (§10), build on the shared C# core and data (§9a), every number with a source (§5), update `docs/status.md`.
+
+Progress: shared-runtime experiment passed; draft PR #7. See docs/webhosting-heat-runtime.md for commands, measured observations and T-01 handoff. Current schema mandates interruptible=true and freeze support; an always-on hosting descriptor cannot be added honestly without owner agreement. No second scheduler/executor added.
+
