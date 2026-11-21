@@ -39,4 +39,3 @@ checks that a source exists, but it cannot verify the authority or terms of a co
 Fresh-context verdict: **go with changes**. The reviewer required matching schema and loader
 validation, a guard before Docker control, and a Core-only shared policy type. We implemented
 those checks and kept location attestation and multi-site routing outside this draft change.
-

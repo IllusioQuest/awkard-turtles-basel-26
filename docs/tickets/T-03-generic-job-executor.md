@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Runtime
 - **Depends on:** T-02 (job image)
-- **Suggested owner:** Nikita or Codex (prompt prepared in chat)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Nikita or Codex (prompt prepared in chat)  ·  **Owner:** Jona / Codex  ·  **Status:** done (PR #3, decision 0009)
 
 ## Goal
 

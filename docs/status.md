@@ -12,10 +12,12 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | PR #6 open; 13 .NET tests and data check pass; T-01 sourced job catalog data pending |
 | Nikita | `feat/T-23-webhosting-integration` | Linux gateway crash experiment, three nested Docker engines, sample, placement/contracts; ADRs 0003 and 0006 proposed | no shared heat interface changed; future integration must use existing IExecutor | merged networking milestone (0e7115a); T-09 merged in PR #5; T-23 isolated shared-runtime probe in progress; always-on catalog boundary awaits T-01 agreement; plan photo still missing; whole-container pause recovery tested with either manager absent; controller/etcd/node orchestration and heat integration pending; see webhosting-runtime.md |
 | Jona (IllusioQuest) / Codex | `feat/job-runtime` | Generic Docker control of a running job through the shared scheduler; day replay and decision 0009 (was 0006). Does not implement example jobs. | Adds `IContainerControl` and `DockerJobExecutor : IExecutor`; consumes core interfaces without changing them. | merged to main (PR #3); 9 .NET tests pass and a Busybox Docker smoke replay paused, resumed and throttled as requested |
-| Jona (IllusioQuest) / Codex | `feat/T-24-job-data-locality` | T-24 sourced job location policy and pre-execution eligibility guard; coordinate with T-01 catalog owner | `config/jobs/job.schema.json`, `JobDescriptorLoader`, Core `JobPlacement.IsEligible`, `DigitalHeat.LiveRun` preflight | draft PR #9; 31 .NET tests pass, mismatched-site LiveRun smoke denied before Docker; T-01/T-02 descriptors need the new field, T-10/T-12 must reuse guard with trusted site metadata |
+| Jona (IllusioQuest) / Codex | `feat/T-24-job-data-locality` | T-24 customer/contract-sourced job location policy and pre-execution eligibility guard; coordinate with T-01 catalog owner | `config/jobs/job.schema.json`, `JobDescriptorLoader`, Core `JobPlacement.IsEligible`, `DigitalHeat.LiveRun` preflight | draft PR #9; 31 .NET tests pass, mismatched-site LiveRun smoke denied before Docker; T-01/T-02 descriptors need the new field, T-10/T-12 must reuse guard with trusted site metadata |
 | Ennio / Claude | `feat/T-02-transcription-job` | T-02: whisper.cpp (base) transcription container, laptop runtime and energy measurement (RAPL + battery), scaling to 1 kW | Supplies `config/jobs/transcription-whisper.json` (schema from decision 0009) and a running container for `DigitalHeat.LiveRun` | in progress |
 | team lead / Claude | `exp/year-explorer-transparency` | Browser year explorer prototype for the reference house, `METHOD.md`, `verify.py` | own JavaScript model (must match the C# core) | prototype; review findings pending: example computing price drives the surplus headline, verdict ignores hardware, offline demo, heatmap legend |
 | team lead / Claude | `feat/T-01-job-catalog` | T-01: schema change for always-on services (webhosting) once Nikita has decided the representation; transcription descriptor comes from T-02 | `config/jobs/job.schema.json`, `JobDescriptorLoader` (decision 0009) | blocked: waiting for Nikita's decision (options in T-01) |
+| team lead / Claude | `docs/T-07-draft-submission` | T-07: fresh-clone check and must-have checklist (`docs/submission/draft-checklist.md`); README demo section once T-02 is merged | none | in progress |
+| team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Shared interfaces
@@ -55,3 +57,10 @@ then the tier-1 tickets T-01 to T-07 for the draft at 15:00.
 
 - Nikita and Ennio: publish job descriptors, measured work-unit data and the runnable container
   IDs/commands; test each with the shared heat signal (`feat/job-runtime` is now on main).
+
+## Nikita handoff: T-13 and hosting privacy (2026-11-21)
+T-13 claimed on feat/T-13-result-export: opt-in snake_case result bundles from the existing model.
+No shared scheduler or scored formula changes. Export design uses decision 0011.
+Hosting component isolation requested separately; threat model awaiting user choice.
+Jona owns T-24 data-locality checks: hosting must reuse that rule when dynamic placement exists,
+not invent a competing country/site policy. T-01 always-on catalog decision remains pending.
