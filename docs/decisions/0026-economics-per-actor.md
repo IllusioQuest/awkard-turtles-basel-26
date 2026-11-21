@@ -1,6 +1,6 @@
-# 0025: Economics per actor: system surplus, split, levers and win-win grid
+# 0026: Economics per actor: system surplus, split, levers and win-win grid
 
-- **Status:** proposed (renumbered from 0017, which main took for the always-on catalog)
+- **Status:** proposed (renumbered from 0017 and 0025, which main took meanwhile)
 - **Date:** 2026-11-21
 - **Decided by:** team lead / Claude (subagent), ticket T-14; team confirms later
 

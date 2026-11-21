@@ -4,7 +4,7 @@ using Xunit;
 
 namespace DigitalHeat.Core.Tests;
 
-/// <summary>Economics per actor (T-14, decision 0025): hand-checkable cases and case cross-checks.</summary>
+/// <summary>Economics per actor (T-14, decision 0026): hand-checkable cases and case cross-checks.</summary>
 public sealed class EconomicsTests
 {
     private static string Root()

@@ -72,7 +72,7 @@ Break-even excludes hardware/integration/operations; retain profitability_note i
 A separate opt-in export, `YearRun . --economics config/economics/reference-house.json --output DIR`,
 writes run.json (same provenance fields plus kind=economics), parameters.json, levers.csv,
 required-premium.csv and win-win.csv in the conventions above. It does not change summary.json or
-the hourly files. Columns and formulas: docs/model/economics.md (decision 0025).
+the hourly files. Columns and formulas: docs/model/economics.md (decision 0026).
 
 ## Compatibility and privacy
 Renaming/removing fields or changing units/meaning requires a schema_version bump.

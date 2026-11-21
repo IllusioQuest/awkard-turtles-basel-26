@@ -76,7 +76,7 @@ public sealed class EconomicsGrid
     }
 }
 
-/// <summary>Economic scenario parameters, <c>config/economics/*.json</c> (T-14, decision 0025).</summary>
+/// <summary>Economic scenario parameters, <c>config/economics/*.json</c> (T-14, decision 0026).</summary>
 public sealed class EconomicsParameters
 {
     public required string Description { get; init; }
@@ -201,7 +201,7 @@ public sealed class EconomicsVariants
 
 /// <summary>
 /// Executor for the year simulation that can only deliver as much load as there is sold work:
-/// achieved load = min(target, available share). Demand-side cap, decision 0025.
+/// achieved load = min(target, available share). Demand-side cap, decision 0026.
 /// </summary>
 public sealed class DemandLimitedExecutor : IExecutor
 {
@@ -298,7 +298,7 @@ public sealed record EconomicResult(double PremiumIncomeChf, double FillerIncome
 public static class Economics
 {
     /// <summary>
-    /// System surplus per year and its split (decision 0025, docs/model/economics.md):
+    /// System surplus per year and its split (decision 0026, docs/model/economics.md):
     /// surplus = premium + filler income + heat value (+ CO₂ credits) − electricity − depreciation
     /// − wear − operations − installation ÷ lifetime.
     /// Operator model: host = heat value − heat fee; DigitalHeat = the rest (it owns hardware and

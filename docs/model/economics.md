@@ -1,7 +1,7 @@
 # Economics per actor (T-14)
 
 **Status: model implemented and tested; all results are variants, not scored figures.** Decision
-[0025](../decisions/0025-economics-per-actor.md) (reviewed: go with changes, applied). The scored
+[0026](../decisions/0026-economics-per-actor.md) (reviewed: go with changes, applied). The scored
 reference-house figures (case break-even CHF 0.226 per server-hour etc.) are unchanged and still come
 from `YearSimulation` with `config/reference-house.json`.
 
