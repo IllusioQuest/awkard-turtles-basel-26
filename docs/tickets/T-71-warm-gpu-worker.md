@@ -17,3 +17,6 @@ physical GPU, simulated speedup or extra logical workers in this ticket.
 
 
 Implemented in PR #62 / `180de77`, built on PR #59. 106 orchestration tests pass; real scheduled warm frames/pause, owner recovery, stop/rerun, idle loop and native Linux packaging checked. Tested app at localhost:18920/ui, old 14-frame paused run preserved at 18910. Five-frame warm portion: 7.5053s active, mean render 1.0577s; no full-animation/SLA claim. See `docs/jobs/warm-renderer.md` and evidence JSON. No extra workers; keep the heat-first path and activation/active-frame fencing. Remains in review until merge.
+
+
+Journal error follow-up (9b43089): pulled main, reproduced failure at frame 11, captured full traces locating Windows File.Move replacement failures in WorkloadCoordinator.Save and MeshPeer.Save. Added bounded Windows-only replacement retry (500ms, errors 5/32/33), retains flushed temp journal and propagates persistent errors. 106 tests pass. A full real 48-frame run now completes without error in 109.8757s active workflow at localhost:18950/ui. One separate startup probe crashed in the Intel driver; retry startup passed. No reliability SLA or three-worker rollout claim. Previous runs preserved. Evidence: docs/performance/journal-replacement-fix-2026-11-21.json.

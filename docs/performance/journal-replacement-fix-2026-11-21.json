@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-21",
+  "code_commit": "9b43089",
+  "failure_reproduced_before_fix": "Frame 11: UnauthorizedAccessException at File.Move overwrite in WorkloadCoordinator.Save and MeshPeer.Save",
+  "fix": "Bounded 500ms Windows-only retry of replacement for native errors 5,32,33; flushed temporary journal preserved; persistent errors propagate",
+  "tests_passed": 106,
+  "full_run": {
+    "id": "4230cff93c8b",
+    "phase": "complete",
+    "frames": 48,
+    "active_seconds": 109.8756938,
+    "error": null
+  },
+  "verified_url": "http://localhost:18950/ui",
+  "limitations": [
+    "One complete run, not a reliability SLA",
+    "Initial separate startup probe crashed in Intel igxelpicd64.dll; subsequent startup succeeded",
+    "Three GPU workers remain pending; current verified run uses CPU preparation plus one GPU worker",
+    "Which external reader or scanner prevented journal replacement was not identified"
+  ]
+}
