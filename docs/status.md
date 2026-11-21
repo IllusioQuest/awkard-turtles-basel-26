@@ -9,7 +9,6 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Codex | `feat/T-72-live-household-demo` | T-72 real local workload controlled by Fleet replay with live household view | live adapter and dashboard telemetry | winter/summer and busy queues ran; transcription and live cancellation/error checks pending; decision 0064 reviewed |
 | Nikita / Codex | feat/T-60-unified-scheduler | T-62/T-64/T-65 unified heat-first adapters and real Linux mesh | shared Core load/rank/EDF, selected-site admission, origin journals; retired old modes | PR #52 draft; 47 Core/44 Network/74 orchestration/99 Fleet/57 gaming pass; Linux batch/pause/recovery pass; 1024-node speed guard remains open; wider T-61 equivalence not claimed |
 | Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | PR #49 in review; 125 source rows + deterministic 1000-building composition; ADR 0045 reviewed; Ennio/T-58 notified on PR #48; mixed thermal integration awaits category heat/spatial inputs |
 | Nikita / Codex | fix/T-57-scheduler-cleanup | Remove redundant validation/indexing and clarify event loop | no public interface/model changes | PR #46 in review; 61 orchestration + 46 Core tests; queued owner about half median runtime in both run orders, allocations down 83%; mixed idle timings documented; live games untouched |
@@ -100,3 +99,6 @@ T-69 expanded by user: PR #59 / `757a56b`, ADR 0061 reviewed go with changes. Ad
 
 
 T-71, Nikita/Codex, `feat/T-71-warm-gpu-worker`: user chose existing-renderer speed before extra workers. Isolated same-process diagnostic: 8.257s first / 1.015s second frame on Iris Xe, 640x360/32 samples; only two camera frames, not SLA. Warm per-frame execution under ADR 0063 review; preserve current run/results, heat-first policy and frame-boundary pause. No new workers. Depends PR #59 for current UI; evidence in `docs/performance/warm-frame-probe-2026-11-21.json`.
+
+
+T-71 verified/in review: PR #62 / `180de77`, depends PR #59; ADR 0063 go with changes applied. Owned warm GPU process, per-frame completion/active-stop fencing, event wakeups, same heat commitments and MeshPeer. 106 orchestration tests, actual scheduled pause/reuse, owner restart, stop/rerun, idle loop and Linux native package pass. Warm app 18920, original paused 14 frames at 18910 preserved. Five warm frames 7.5053s active, mean render 1.0577s (short local portion, not SLA). No extra workers. Method/limitations: `docs/jobs/warm-renderer.md`; preserve this work when integrating the household live demo, whose code/formulas were not changed.

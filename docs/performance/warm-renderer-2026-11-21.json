@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-21",
+  "ticket": "T-71",
+  "decision": "0063",
+  "code_commit": "180de77",
+  "pull_request": 62,
+  "hardware": "One Intel Iris Xe laptop; native Blender 5.3.0/OpenGL; 640x360,32 samples,12fps scene",
+  "sources": "Own /ui/status, per-attempt result/ownership artifacts and render-verify; time.monotonic around Blender render call. No activation/token/path data exported.",
+  "pause_verification": {
+    "pause_verified": true,
+    "timing": {
+      "run_id": "32dace1a2443",
+      "phase": "complete",
+      "completed_frames": 2,
+      "active_workflow_seconds": 14.180385500000002,
+      "preparation_workflow_seconds": 2.0457202,
+      "render_seconds": [
+        9.511225300026126,
+        1.0023864000104368
+      ],
+      "sum_render_seconds": 10.513611700036563,
+      "mean_render_seconds": 5.2568058500182815,
+      "scene_reused": [
+        false,
+        true
+      ]
+    }
+  },
+  "four_frame_ui": {
+    "run_id": "5f4b3df7df38",
+    "phase": "complete",
+    "completed_frames": 4,
+    "active_workflow_seconds": 11.1763315,
+    "preparation_workflow_seconds": 2.0397907,
+    "render_seconds": [
+      0.9811566000571474,
+      1.1312689998885617,
+      0.9970972998999059,
+      0.9937627000035718
+    ],
+    "sum_render_seconds": 4.103285599849187,
+    "mean_render_seconds": 1.0258213999622967,
+    "scene_reused": [
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "later_warm_portion": {
+    "run_id": "c524b9e151a6",
+    "phase": "cancelled",
+    "completed_frames": 5,
+    "active_workflow_seconds": 7.5053181,
+    "preparation_workflow_seconds": 2.0262121,
+    "render_seconds": [
+      0.9098188999341801,
+      1.015261200023815,
+      1.0065722999861464,
+      0.972390600014478,
+      1.3843816000735387
+    ],
+    "sum_render_seconds": 5.288424600032158,
+    "mean_render_seconds": 1.0576849200064316,
+    "scene_reused": [
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "one_shared_blender_pid_for_all_final_frames": true,
+  "owner_restart_and_stop": {
+    "owner_restart_preserved_four_frame_run": true,
+    "stop_finished_frame_and_released_attempts": true,
+    "stopped_run": "ce9574e025b1",
+    "stopped_completed_frames": 1,
+    "original_run_preserved": 14
+  },
+  "followup_rerun": {
+    "failed_before_stop": false,
+    "states": [
+      [
+        "preparing",
+        0,
+        null
+      ],
+      [
+        "rendering",
+        0,
+        null
+      ],
+      [
+        "rendering",
+        2,
+        null
+      ],
+      [
+        "cancelled",
+        5,
+        "Stopped. Completed images/logs retained; ready for a new run."
+      ]
+    ]
+  },
+  "idle_loop_probe": {
+    "test": "Trusted idle loop only, no frame rendering or C# ownership claim",
+    "idle_timeout_seconds": 0.25,
+    "exit_code": 0,
+    "retiring": true
+  },
+  "checks": {
+    "orchestration_tests_passed": 106,
+    "native_linux_bundle_built": true,
+    "bundle_contains_warm_worker": true,
+    "bundle_contains_no_live_token_state_config": true,
+    "archive_sha256": "ce2ee0a531f9ec909af0f998980f345937109ee9af3e029cd59b672eb710ca26",
+    "browser_visual_check": true,
+    "original_18910_run_preserved_frames": 14,
+    "new_app": "http://localhost:18920/ui",
+    "extra_presentation_workers_added": false
+  },
+  "limitations": [
+    "Short local interrupted runs, not a full 48-frame benchmark, SLA or controlled total-speedup comparison.",
+    "First render after cold start/idle retirement can still take about 8\u201310s; later frames reuse state.",
+    "One early diagnostic assertion observed failed during an in-progress stop; final stop settled cancelled with owned attempts released. A bounded rerun had no failure before stop.",
+    "Windows warm execution verified; Linux bundle built, remote GPU/locking path not exercised; macOS warm mode explicitly unsupported.",
+    "No GPU utilization sensor, measured recovered heat, extra physical GPU or multi-host speedup claim."
+  ]
+}

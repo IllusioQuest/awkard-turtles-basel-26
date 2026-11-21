@@ -40,3 +40,6 @@ file-lock gate for dispatch, idle retirement and stop; fence stop by active
 activation as well as PID identity; accept activation-matching completion before
 process-death handling and durably clear active assignment before slot release.
 The implementation and real verification must cover these conditions.
+
+
+Implementation verification: PR #62 / 180de77; 106 tests, real scheduled warm frames and pause/resume, owner restart, frame-boundary stop/rerun, isolated idle-loop exit and Linux bundle build. File completion wakes the existing timer-backed loop. Scope remains existing CPU/GPU roles only; extra workers deferred. Windows measured, Linux GPU unverified, macOS warm locking unsupported. Full method and the transient diagnostic stop observation are in `docs/jobs/warm-renderer.md`.

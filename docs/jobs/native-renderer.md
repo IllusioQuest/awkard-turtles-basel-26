@@ -134,3 +134,6 @@ Presentation cleanup: user keeps Minecraft and retires other game labs. PR #54 /
 
 
 PR #54 is now merged. See [node visualization and measured timing](render-node-visualization.md) for T-69 / PR #59; its UI change does not alter this renderer lifecycle or placement.
+
+
+Speed-first follow-up: [warm renderer](warm-renderer.md), T-71 / PR #62. Tested opt-in version at localhost:18920/ui; old paused run at 18910 retained. Per-frame heat-first scheduling and pause boundaries unchanged; extra workers deferred.
