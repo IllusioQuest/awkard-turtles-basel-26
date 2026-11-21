@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Team
 - **Depends on:** –
-- **Suggested owner:** whole team (15 min)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** whole team (15 min)  ·  **Owner:** Nikita / Codex (coordination; team decides) · **Status:** in progress
 
 ## Goal
 

@@ -11,7 +11,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 
 | ID | Title | Tier | Depends on | Suggested owner | Owner | Status |
 |---|---|---|---|---|---|---|
-| [T-00](T-00-team-decisions.md) | Team decisions that unblock the tickets | 1 Draft | – | whole team (15 min) | | open |
+| [T-00](T-00-team-decisions.md) | Team decisions that unblock the tickets | 1 Draft | – | whole team (15 min) | Nikita / Codex (coordination) | in progress |
 | [T-01](T-01-job-catalog.md) | Job model and job catalog (must-have 1) | 1 Draft | T-00 | Codex or anyone | | open |
 | [T-02](T-02-measure-laptop-job.md) | Measure one real job on a laptop (must-have 1) | 1 Draft | T-00 | anyone with a laptop | | open |
 | [T-03](T-03-generic-job-executor.md) | Generic real-job executor behind IExecutor (must-have 2) | 1 Draft | T-02 (job image) | Nikita or Codex (prompt prepared in chat) | | open |
