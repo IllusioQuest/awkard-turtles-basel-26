@@ -109,3 +109,6 @@ against main empty). Nikita now implements the narrow approved serviceMode loade
 and frontend/API catalog descriptors to finish the requested integration; Claude retains broader
 catalog/research ownership. No new economic or measurement values are invented.
 T-36/T-23: six-node real Docker lifecycle and failover checks pass; 45 hosting + 51 core/catalog tests pass. Narrow common catalog extension implemented, T-01 notified; always-on is blocked from LiveRun batch freeze. Final startup recovery check and PR publication next.
+
+## Nikita: hybrid service review (T-38)
+Reviewed the user-supplied GPU/CPU engineering manual against shared scheduler and vendor docs. Findings and proposed scope: research/hybrid-gpu-cpu-review.md. No code or interface changes; implementation awaits user choice. T-36 remains in PR #19. T-37 was already occupied by profitability research, hence T-38.
