@@ -1,0 +1,4 @@
+*
+!TcpRelay.Dockerfile
+!tcp-relay.py
+!tcp-relay-policy.json

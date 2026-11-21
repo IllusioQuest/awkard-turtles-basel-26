@@ -1,0 +1,64 @@
+name: digitalheat-cs16
+services:
+  session-d:
+    image: ${CS16_IMAGE:?Run Start-Cs16Lab.ps1}
+    user: ubuntu
+    volumes: [cs16-d-home:/home/ubuntu]
+    networks: [cs16-lab]
+    cpus: ${CS16_CPUS}
+    mem_limit: ${CS16_MEMORY_MIB}m
+    pids_limit: ${CS16_PIDS}
+    shm_size: 1gb
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: "no"
+    environment: &desktop
+      WINEDEBUG: "-all"
+      WINEPREFIX: /home/ubuntu/.wine-cs16
+      LIBGL_ALWAYS_SOFTWARE: "true"
+      SELKIES_ENABLE_HTTPS: "false"
+      SELKIES_ENABLE_BASIC_AUTH: "false"
+      SELKIES_USE_CPU: "true"
+      SELKIES_ENCODER: h264enc
+      SELKIES_FRAMERATE: "20-20"
+      SELKIES_MANUAL_WIDTH: "1280"
+      SELKIES_MANUAL_HEIGHT: "720"
+      SELKIES_ENABLE_CLIPBOARD: "false"
+      SELKIES_ENABLE_BINARY_CLIPBOARD: "false"
+      SELKIES_FILE_TRANSFERS: none
+      SELKIES_MICROPHONE_ENABLED: "false"
+      SELKIES_WEBCAM_ENABLED: "false"
+      SELKIES_PRINTING_ENABLED: "false"
+  session-e:
+    image: ${CS16_IMAGE:?Run Start-Cs16Lab.ps1}
+    user: ubuntu
+    volumes: [cs16-e-home:/home/ubuntu]
+    networks: [cs16-lab]
+    cpus: ${CS16_CPUS}
+    mem_limit: ${CS16_MEMORY_MIB}m
+    pids_limit: ${CS16_PIDS}
+    shm_size: 1gb
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: "no"
+    environment: *desktop
+  browser-relay:
+    image: ${CS16_RELAY_IMAGE:?Build the reusable relay}
+    ports: ["127.0.0.1:${CS16_PORT_D}:${CS16_PORT_D}", "127.0.0.1:${CS16_PORT_E}:${CS16_PORT_E}"]
+    networks: [browser-access, cs16-lab]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: ${CS16_RELAY_CPUS}
+    mem_limit: ${CS16_RELAY_MEMORY_MIB}m
+    pids_limit: ${CS16_RELAY_PIDS}
+    restart: "no"
+    environment:
+      TCP_RELAY_ROUTES: ${CS16_RELAY_ROUTES}
+networks:
+  browser-access: {}
+  cs16-lab:
+    internal: true
+volumes:
+  cs16-d-home:
+  cs16-e-home:

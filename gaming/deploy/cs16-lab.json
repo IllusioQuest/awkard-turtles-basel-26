@@ -1,0 +1,22 @@
+{
+  "image": "digitalheat-cs16-wine:experiment",
+  "compose_project": "digitalheat-cs16",
+  "docker_context": "desktop-linux",
+  "online_network": "digitalheat-cs16_browser-access",
+  "installer_sha256": "a8cba24594c80a8919167cf096eb0dab9246c34d9d4d52c50c367a2b8f356512",
+  "cpu_limit_per_node": 2,
+  "memory_limit_mib_per_node": 2048,
+  "pids_limit_per_node": 512,
+  "installer_timeout_seconds": 600,
+  "max_installer_log_bytes": 1048576,
+  "relay_image": "digitalheat-tcp-relay:lab",
+  "relay_cpu_limit": 0.25,
+  "relay_memory_limit_mib": 128,
+  "relay_pids_limit": 32,
+  "desktop_port": 8080,
+  "nodes": [
+    { "id": "session-d", "browser_port": 18884 },
+    { "id": "session-e", "browser_port": 18885 }
+  ],
+  "source": "User-approved two-node CS 1.6 compatibility lab, 2026-11-21. CPU/RAM/PID/timeout/port choices are operator test limits, not measured capacity, heat or guaranteed performance. Installer hash is from the supplied file; publisher authenticity is unverified."
+}

@@ -1,0 +1,7 @@
+{
+  "buffer_bytes": 65536,
+  "connect_timeout_seconds": 3,
+  "idle_timeout_seconds": 300,
+  "max_connections_per_route": 16,
+  "source": "Local TCP relay operator limits, 2026-11-21; bounded buffering/connections, not measured capacity or a service-level guarantee."
+}
