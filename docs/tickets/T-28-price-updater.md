@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data
 - **Depends on:** T-26 (price method), T-06 (config)
-- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** PR #11 open (branch `feat/T-28-price-updater`)
+- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** done (PR #11 merged; 0.66 pinned, 0.687 live cross-check)
 
 ## Goal
 
