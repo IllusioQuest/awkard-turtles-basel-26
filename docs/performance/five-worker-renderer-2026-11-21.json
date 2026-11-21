@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-21",
+  "method": "Poll real five-peer /ui/status during 48-frame render; count simultaneous GPU assignments; validate encoded frame count from Blender movie clip and download MP4. Timings are workflow wall clock excluding holds, not scheduler latency.",
+  "source_commit": "d43be26",
+  "phase": "complete",
+  "frames": 48,
+  "active_seconds": 114.1642033,
+  "preparation_seconds": 2.0250465,
+  "peak_concurrent_gpu_workers": 3,
+  "frames_by_worker": {
+    "demo-gpu-1": 16,
+    "demo-gpu-2": 16,
+    "demo-gpu-3": 16
+  },
+  "video_metadata": {
+    "blender": "5.3.0",
+    "build_hash": "02f0899d78e3",
+    "device": "CPU video encoding",
+    "encode_seconds": 0.6565938999410719,
+    "encoded_frames": 48,
+    "ffmpeg_available": true,
+    "fps": 12,
+    "frames": 48,
+    "height": 360,
+    "manifest_sha256": "6faf4f9c006f3a0e6b7494e15383fa803f293f5f35ecac6cab1ecc286feff47f",
+    "recipe_id": "50739f3764c8f1867040e60867f5d17bce54b30c0982550786e51721aa1831ff",
+    "samples": 32,
+    "scene_sha256": "7d70fb832aba6aa03b1bd2fb69760e8126e9c019ab797d73eb5667e70f9f160a",
+    "seed": 66,
+    "stage": "assemble",
+    "width": 640
+  },
+  "gpu_work_weights": [
+    1.1,
+    1.0,
+    0.9
+  ],
+  "synthetic_heat_quotas_kwh": [
+    100,
+    100,
+    110,
+    100,
+    90
+  ],
+  "physical_gpu_count": 1,
+  "blender_threads_per_worker": 4,
+  "pause_restart_checks": "Six-frame validation passed pause/resume, restart after completion, restart during GPU execution, preserved old output.",
+  "limitations": "One laptop/Iris Xe, three logical GPU processes; unmeasured heat quotas; weights are not GPU percentages or guaranteed frame shares; one run is not an SLA."
+}

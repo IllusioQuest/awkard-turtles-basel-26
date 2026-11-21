@@ -110,3 +110,17 @@ Journal error follow-up (9b43089): pulled main, reproduced failure at frame 11, 
 
 
 T-73 Nikita/Codex, feat/T-73-five-worker-render: user approved 3 concurrent shared-Iris GPU workers + CPU scene preparation + CPU MP4 assembly, Restart, GPU work weights1.1/1/.9. ADR0065 reviewed with changes; native role/manifest/shared-group checks implemented, isolated five-process verification next. Same heat-first mesh; one synthetic500kWh total partitioned, no extra physical GPU or utilization claim. Depends PR64 journal replacement fix; old outputs preserved.
+
+
+T-73 verified, PR #65 / d43be26: five real worker processes live at localhost:18950/ui, replacing older renderer services (outputs retained). CPU prepare + three shared-Iris GPU workers + CPU MP4 assembly. 114 tests; full48 complete in114.1642 active workflow seconds, GPU counts16/16/16, peak3 concurrent, valid48-frame video. Six-frame pause/restart checks pass. Weights1.1/1/.9 are admission work budgets, not GPU percentages; heat-first policy unchanged, synthetic500kWh partitioned once. Preserve role/manifest/shared-identity checks and journal fix. Minecraft untouched. See docs/jobs/five-worker-renderer.md. Earlier two-node-only status entries are historical.
+
+
+T-74 Nikita/Codex, fix/T-74-render-labels, 7a3551a: requested presentation-only removals live at localhost:18950/ui. Worker details panel, physical-host heading, role/work-budget text and link explanation removed; map/stats/controls and all five-worker runtime/heat settings preserved. Served HTML and JS syntax verified; browser preview unavailable.
+
+
+T-75 Nikita/Codex, fix/T-75-compact-render-map: bottom Physical hosts footer removed, actual origin peer labelled Initial job provider in graphic, compact cards for five-worker desktop row (responsive wrapping). Live HTML and JS syntax verified; visual browser access unavailable. No runtime/heat changes.
+
+
+T-76 Nikita/Codex, fix/T-76-gpu-worker-shades: user-approved related GPU shades and weights1.5/1/.5. Preserves synthetic total500kWh, heat-first policy, CPU roles and prior outputs. Renderer-only restart/validation underway; Minecraft untouched. Depends PR67.
+
+T-76 verified PR68 /21b0769: 48-frame pipeline and MP4 complete in133.7017 active seconds, GPU counts17/15/16. Approved work budgets1.5/1/.5 live (GPU150/100/50 of total500kWh). Accent shades and GPU identity labels served; no visual preview access. Docs/evidence on main.

@@ -13,6 +13,11 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     double FrameHeatKwh, int Frames, double DeadlineSeconds, string Source)
 {
     // Display-only deployment intent. Never used by MeshPeer or counted as live capacity.
+    public double WorkWeight { get; init; } = 1;
+    public string WorkerRole { get; init; } = "general";
+    public string? SharedGpuGroup { get; init; }
+    public int SharedGpuLimit { get; init; } = 1;
+    public bool AssembleVideo { get; init; }
     public string[] PlannedGpuPeers { get; init; } = [];
     public NativeRenderOptions? Native { get; init; }
     public bool PreparedSceneMode { get; init; }
@@ -31,6 +36,10 @@ internal sealed record RenderPeerStatus(string PeerId, string PhysicalHostId, st
     double HeatDemandKwh, string Device, string? Error, OriginJob[] Jobs, AttemptRecord[] Attempts,
     RenderArtifact[] Results, JsonElement? ResourceStats)
 {
+    public double WorkWeight { get; init; } = 1;
+    public string WorkerRole { get; init; } = "general";
+    public string? SharedGpuGroup { get; init; }
+    public int SharedGpuLimit { get; init; } = 1;
     public string? RecipeId { get; init; }
     public string? RendererBuildHash { get; init; }
     public bool FrameBoundaryPause { get; init; }
@@ -94,7 +103,7 @@ internal static class RenderNodeHost
             return new(++revision,hour,hour.AddHours(1),cfg.Source,
                 [new(cfg.Id,"CH",new(cfg.HeatDemandKwh,0,0,1,.8),0)],
                 [new(cfg.PhysicalHostId+"-"+cfg.Id,res,gpuBackend is null?[]:[new(cfg.Gpu!.DeviceId,gpuBackend)])],
-                [new(cfg.Id+"-worker",cfg.Id,cfg.PhysicalHostId+"-"+cfg.Id,true,true,res,cfg.PreparedSceneMode?["scene_prepare"]:[],gpuBackend is null?[]:[cfg.Gpu!.DeviceId],[],[])],[])
+                [new(cfg.Id+"-worker",cfg.Id,cfg.PhysicalHostId+"-"+cfg.Id,true,true,res,cfg.PreparedSceneMode?(cfg.WorkerRole=="prepare"?["scene_prepare"]:cfg.WorkerRole=="assemble"?["video_assemble"]:cfg.WorkerRole=="render"?[]:["scene_prepare"]):[],gpuBackend is null?[]:[cfg.Gpu!.DeviceId],[],[])],[])
                 {ResourceObservedAtUtc=now,ResourceValidUntilUtc=now.AddSeconds(30)};
         }
         using var peer=new MeshPeer("landscape",cfg.Id,Path.Combine(cfg.StateDirectory,"owner"),Inventory(),
@@ -105,7 +114,7 @@ internal static class RenderNodeHost
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
         RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
             gpuBackend is null?(cfg.PreparedSceneMode?gpuDiagnostic:"CPU fallback: "+gpuDiagnostic):gpuBackend+" verified GPU; "+(cfg.Native is {EnableGpu:true,KeepGpuWarm:true}?"warm frame process":"CPU available"),error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
-            {RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
+            {WorkWeight=cfg.WorkWeight,WorkerRole=cfg.WorkerRole,SharedGpuGroup=cfg.SharedGpuGroup,SharedGpuLimit=cfg.SharedGpuLimit,RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
         var published=CaptureStatus();
         RenderPeerStatus Status()=>Volatile.Read(ref published);
         var builder=WebApplication.CreateBuilder();builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -114,13 +123,14 @@ internal static class RenderNodeHost
         app.Lifetime.ApplicationStopped.Register(()=>native?.Dispose());var stop=app.Lifetime.ApplicationStopping;
         app.Use(async(ctx,next)=>{
             // Browser UI is reachable only through the local-only published home peer.
-            bool browser=ctx.Request.Path.StartsWithSegments("/ui");
+            bool browser=ctx.Request.Path.StartsWithSegments("/ui")||ctx.Request.Path=="/";
             if(browser && !cfg.ServeUi){ctx.Response.StatusCode=404;return;}
             if(!browser && ctx.Request.Headers["X-Mesh-Token"]!=token){ctx.Response.StatusCode=401;return;}
             if(browser && ctx.Request.Method=="POST" && ctx.Request.Headers["X-Render-Request"]!="local")
             {ctx.Response.StatusCode=403;return;}
             await next(ctx);
         });
+        app.MapGet("/",()=>Results.Redirect("/ui"));
         app.MapGet("/status",()=>Results.Json(Status(),Json));
         app.MapPost("/messages",(MeshEnvelope packet)=>{
             if(!cfg.Peers.ContainsKey(packet.Sender))return Results.BadRequest();
@@ -170,6 +180,30 @@ internal static class RenderNodeHost
             }
             return Results.Ok(scene);
         });
+        app.MapPost("/assembly-manifest",(AssemblyManifest manifest)=>{
+            if(native is null)return Results.BadRequest();
+            lock(gate){
+                native.ValidateAssembly(manifest.ManifestSha256);
+                string id="assemble-"+manifest.ManifestSha256;
+                profiles[id]=new(id,cfg.Image,"65534",["assemble",manifest.ManifestSha256],null,[],[],[]);
+                peer.Publish();
+            }
+            return Results.Ok();
+        });
+        app.MapPost("/assemble",(AssemblySubmit task)=>{
+            return inbox.Writer.TryWrite(()=>{
+                if(peer.Held)return;
+                var now=DateTimeOffset.UtcNow;
+                var request=new WorkloadRequest(task.JobId,"batch",cfg.Id,new("anywhere",cfg.Source,null),
+                    new(cfg.CpuCores,cfg.RamMib,1),cfg.Source,cfg.FrameHeatKwh,cfg.Source,["video_assemble"],null,null,null,[],new(false,true,false))
+                    {Deadline=new(now,now.AddSeconds(cfg.DeadlineSeconds),cfg.Source,true)};
+                if(!peer.Jobs().Any(j=>j.Request.Id==cfg.Id+"."+task.JobId))peer.Submit(request,"assemble-"+task.ManifestSha256);
+            })?Results.Accepted():Results.StatusCode(503);
+        });
+        app.MapGet("/video/{job}",(string job)=>{
+            if(!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
+            string? file=native?.VideoPath(job);return file is not null&&File.Exists(file)?Results.File(file,"video/mp4",enableRangeProcessing:true):Results.NotFound();
+        });
         app.MapGet("/image/{job}",(string job)=>{
             if(!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
             string file=native?.ImagePath(job)??Path.Combine(output,job,"frame.png");return File.Exists(file)?Results.File(file,"image/png"):Results.NotFound();
@@ -178,13 +212,18 @@ internal static class RenderNodeHost
         app.MapGet("/ui/theme.css",()=>Results.Content(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"dashboard.css")),"text/css"));
         app.MapGet("/ui",()=>Results.Content(File.ReadAllText(Path.Combine(cfg.Native?.ScriptsDirectory??AppContext.BaseDirectory,"render.html")),"text/html"));
         app.MapGet("/ui/status",async()=>Results.Json(await session.LiveSnapshot(),Json));
-        app.MapPost("/ui/render",async()=>{await session.Start();return Results.Accepted();});
+        app.MapPost("/ui/render",()=>{session.RequestStart();return Results.Accepted();});
         app.MapPost("/ui/pause",()=>{session.RequestHold(true);return Results.Accepted();});
         app.MapPost("/ui/resume",()=>{session.RequestHold(false);return Results.Accepted();});
         app.MapPost("/ui/stop",()=>{session.RequestStop();return Results.Accepted();});
+        app.MapPost("/ui/restart",()=>{session.RequestRestart();return Results.Accepted();});
         app.MapGet("/ui/image/{node}/{job}",async(string node,string job)=>{
             if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
             var bytes=await http.GetByteArrayAsync(url+"/image/"+job);return Results.File(bytes,"image/png");
+        });
+        app.MapGet("/ui/video/{node}/{job}",async(string node,string job)=>{
+            if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
+            var bytes=await http.GetByteArrayAsync(url+"/video/"+job);return Results.File(bytes,"video/mp4");
         });
         _=Task.Run(async()=>{
             await foreach(var p in outgoing.Reader.ReadAllAsync(stop))try{

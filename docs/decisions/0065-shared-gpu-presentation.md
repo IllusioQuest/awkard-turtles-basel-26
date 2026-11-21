@@ -36,3 +36,9 @@ hardware or speedup claim; Intel driver concurrency remains experimental.
 
 ## Review
 Fresh limited-context verdict: go with changes. Applied explicit shared-group/host/device/concurrency agreement, independent state directories, strict role capabilities and runtime preflight, ordered hashed frame manifests with build/recipe checks and successful MP4 validation, and assembly-aware cancellation/restart serialization. Implementation/hardware verification follows; design review is not proof of runtime behavior.
+
+## Implementation verification
+PR #65 implements the reviewed checks. All 114 orchestration tests pass; real
+48-frame run completed with all five roles, three concurrent GPU workers and
+valid MP4 assembly. Six-frame pause/restart tests passed. One physical GPU; no
+physical scaling claim. Method and limits: docs/jobs/five-worker-renderer.md.

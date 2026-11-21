@@ -22,7 +22,7 @@ def execute(spec,keep_scene=False,publish_completion=True):
         if (out/'activate').read_text()!=spec['activation']: raise RuntimeError('Activation identity mismatch')
     settings=json.loads(Path(spec['settings_file']).read_text())
     mode=spec['mode'];started=time.monotonic()
-    meta={'stage':mode,'blender':bpy.app.version_string,'build_hash':bpy.app.build_hash.decode(),'recipe_id':spec['recipe_id'],**settings}
+    meta={'ffmpeg_available':getattr(bpy.app.build_options,'codec_ffmpeg',False),'stage':mode,'blender':bpy.app.version_string,'build_hash':bpy.app.build_hash.decode(),'recipe_id':spec['recipe_id'],**settings}
     if mode=='info':
         save(out,'result.json',meta)
     elif mode=='prepare':
@@ -34,6 +34,31 @@ def execute(spec,keep_scene=False,publish_completion=True):
             raise RuntimeError('External scene dependencies are not permitted')
         target=out/'scene.blend';bpy.ops.wm.save_as_mainfile(filepath=str(target),compress=True)
         meta.update(scene_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),prepare_seconds=time.monotonic()-started,external_assets='none; packed procedural scene')
+        save(out,'result.json',meta)
+    elif mode=='assemble':
+        path=Path(spec['manifest_path']);raw=path.read_bytes();manifest=json.loads(raw)
+        if hashlib.sha256(raw).hexdigest()!=path.name.split('.')[0]:raise RuntimeError('Assembly manifest hash mismatch')
+        if manifest['recipe_id']!=spec['recipe_id'] or manifest['build_hash']!=bpy.app.build_hash.decode():raise RuntimeError('Assembly recipe/build mismatch')
+        frames=manifest['frames']
+        if len(frames)!=spec['expected_frames']:raise RuntimeError('Incomplete assembly frame set')
+        for index,f in enumerate(frames,1):
+            target=(path.parent/f['file']).resolve()
+            if target.parent!=path.parent.resolve() or f['frame']!=index or hashlib.sha256(target.read_bytes()).hexdigest()!=f['sha256']:raise RuntimeError('Assembly frame identity mismatch')
+        scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.device='CPU'
+        editor=scene.sequence_editor_create()
+        strip=editor.strips.new_image('Rendered frames',filepath=str(path.parent/frames[0]['file']),channel=1,frame_start=1)
+        for f in frames[1:]:strip.elements.append(f['file'])
+        strip.frame_final_duration=len(frames)
+        scene.render.use_sequencer=True;scene.frame_start=1;scene.frame_end=len(frames)
+        scene.render.fps=manifest['fps'];scene.render.resolution_x=settings['width'];scene.render.resolution_y=settings['height'];scene.render.resolution_percentage=100
+        scene.render.image_settings.media_type='VIDEO';scene.render.image_settings.file_format='FFMPEG';scene.render.ffmpeg.format='MPEG4';scene.render.ffmpeg.codec='H264';scene.render.ffmpeg.audio_codec='NONE'
+        scene.render.filepath=str(out/'video.mp4');begin=time.monotonic();bpy.ops.render.render(animation=True)
+        candidates=list(out.glob('video*.mp4'))
+        if len(candidates)!=1:raise RuntimeError('Expected exactly one encoded video')
+        if candidates[0]!=out/'video.mp4':os.replace(candidates[0],out/'video.mp4')
+        clip=bpy.data.movieclips.load(str(out/'video.mp4'))
+        if clip.frame_duration!=len(frames):raise RuntimeError('Encoded video frame count mismatch')
+        meta.update(stage='assemble',frames=len(frames),fps=manifest['fps'],encode_seconds=time.monotonic()-begin,manifest_sha256=hashlib.sha256(raw).hexdigest(),scene_sha256=manifest['scene_sha256'],encoded_frames=clip.frame_duration,device='CPU video encoding')
         save(out,'result.json',meta)
     elif mode in ('frame','probe'):
         if mode=='frame':
