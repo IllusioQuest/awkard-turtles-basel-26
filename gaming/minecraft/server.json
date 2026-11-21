@@ -32,7 +32,7 @@
     "world_seed": "20251121",
     "startup_timeout_seconds": 240,
     "stop_timeout_seconds": 60,
-    "source": "Chosen local test limits, reproducible seed and timeouts, not performance/heat measurements. No GPU needed; protect existing Xonotic. World settings are initial defaults only."
+    "source": "Chosen local test limits, reproducible seed and timeouts, not performance/heat measurements. No GPU needed; preserve other active workloads. World settings are initial defaults only."
   },
   "measurement": {
     "sample_interval_seconds": 1,

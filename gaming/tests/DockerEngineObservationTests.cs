@@ -77,7 +77,7 @@ public class DockerEngineObservationTests
             {
                 if (FailList) throw new HttpRequestException("SECRET_RAW_DIAGNOSTIC");
                 var data = new[] { 'a', 'b', 'c' }.Select(c => new { Id = new string(c, 64), State = c == 'a' && PauseA ? "paused" : "running",
-                    Labels = new Dictionary<string, string> { ["com.docker.compose.project"] = c == 'c' ? "digitalheat-dozen" : "digitalheat-gaming", ["com.docker.compose.service"] = "session-" + c } });
+                    Labels = new Dictionary<string, string> { ["com.docker.compose.project"] = c == 'c' ? "digitalheat-test-monitor" : "digitalheat-gaming", ["com.docker.compose.service"] = "session-" + c } });
                 return Response(JsonSerializer.Serialize(data));
             }
             if (path.EndsWith("/top")) return Response("{\"Titles\":[\"COMMAND\"],\"Processes\":[[\"SECRET_PROCESS_ARGUMENT /opt/test-app/application\"]]}");

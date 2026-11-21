@@ -40,7 +40,7 @@
     {
       "id": "session-c",
       "docker_context": "desktop-linux",
-      "compose_project": "digitalheat-dozen",
+      "compose_project": "digitalheat-test-monitor",
       "compose_service": "session-c",
       "browser_url": "http://localhost:18883",
       "hardware_profile_id": "intel-test-workload"
