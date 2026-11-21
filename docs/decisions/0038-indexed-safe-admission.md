@@ -22,5 +22,7 @@ measurement. No journal flush removal, physical resource sharding or scored heat
 
 ## Review
 
-Pending one fresh limited-context review. Depends on T-48 for the additive deadline metadata;
-code will be implemented after that boundary is settled, avoiding parallel shared-file edits.
+Fresh limited-context verdict: go with changes. Preserve per-group floating arithmetic order and
+separate owned/external subtotals; copy before validating the owned snapshot; preserve nested
+array isolation; compute effective claims after ignoreId/pause changes rather than subtracting
+rounded totals. Keep generic journal/coordinator copying initially. T-48 settles first.

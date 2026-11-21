@@ -33,4 +33,7 @@ profile application validates declared input bounds; it does not inspect/validat
 
 ## Review
 
-Pending fresh limited-context review of timing, crash safety, compatibility and bounded scope.
+Fresh limited-context verdict: go with changes. Applied independent durable outcomes/stop intent,
+post-blocking clock checks, immutable manifest validation before mutation, polling/clock limits,
+and a pre-change journal/hash compatibility fixture. Tests cover restart, paused/late work and
+uncertain stops. Successful early completion is persisted before cleanup; stop never implies success.

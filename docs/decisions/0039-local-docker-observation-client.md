@@ -22,4 +22,8 @@ against T-47. No Docker create/start/stop/exec endpoints in the new adapter and 
 
 ## Review
 
-Pending fresh limited-context review of transport security, privacy and observation semantics.
+Fresh limited-context verdict: go with changes. Disable proxies/redirects; bind caches to context
+and resolved endpoint; restrict fixed GET routes/validated IDs; refresh failed connections; require
+consecutive counters for CPU or return null; label sampling/memory accounting; propagate cancellation
+and sanitize diagnostics. Match process listings transiently, including CLI top fallback, without
+retaining arguments/raw errors. No public daemon port or container exec mutation.
