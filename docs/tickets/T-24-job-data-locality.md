@@ -11,14 +11,14 @@ privacy, security or legal reasons. A heat surplus must never override this rest
 
 ## Tasks
 
-- [ ] Add a sourced placement policy to the job descriptor and JSON schema. Keep unrestricted,
+- [x] Add a sourced placement policy to the job descriptor and JSON schema. Keep unrestricted,
       data-origin-site and country-allowlist jobs distinguishable; reject unknown or incomplete
       policies rather than treating them as unrestricted.
-- [ ] Add a reusable eligibility check with explicit job origin and execution-site identity.
+- [x] Add a reusable eligibility check with explicit job origin and execution-site identity.
       Unknown location data must fail closed for restricted jobs.
-- [ ] Gate `DigitalHeat.LiveRun` before any Docker control action; test matching, mismatching and
+- [x] Gate `DigitalHeat.LiveRun` before any Docker control action; test matching, mismatching and
       missing locations. Do not claim that a self-reported location is a security attestation.
-- [ ] Record the interface decision and coordinate the schema field with T-01's owner; require
+- [x] Record the interface decision and coordinate the schema field with T-01's owner; require
       T-10/T-12 routing to use the same eligibility rule when those tickets are implemented.
 
 ## Done when

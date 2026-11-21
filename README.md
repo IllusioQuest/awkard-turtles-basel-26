@@ -87,6 +87,20 @@ host-visible progress file. Missing measurements are `null` with a visible
 freeze; throttle is optional. Checkpoint is descriptive until its owner provides
 a protocol.
 
+Every descriptor also needs a sourced `placementPolicy`:
+`{"mode":"anywhere","source":"job owner declaration"}`,
+`{"mode":"origin-site","source":"customer data agreement"}`, or
+`{"mode":"country-allowlist","allowedCountryCodes":["CH"],"source":"customer data agreement"}`.
+The source text must identify the actual owner rule; these strings are examples, not
+claims about an existing customer. For `origin-site`, supply
+`--data-origin-site-id <id> --execution-site-id <id>` at run time. For a country
+allowlist, supply `--execution-country-code <two-uppercase-letter-code>`.
+Missing or mismatched location data blocks a restricted job **before Docker control**.
+These CLI values are self-reported demo inputs; production routing needs trusted site
+identity and must call `JobPlacement.IsEligible` before assigning work. The current
+single-site year simulation does not enforce geographic routing. See
+[`docs/decisions/0011-job-data-locality.md`](docs/decisions/0011-job-data-locality.md).
+
 From the repository root, after the owner has started a dedicated container that
 the replay may exclusively control:
 

@@ -8,6 +8,12 @@ try
     string root = FindRepositoryRoot();
     var parameters = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
     var job = JobDescriptorLoader.Load(options["--job"]);
+    var placement = new JobPlacementContext(
+        options.GetValueOrDefault("--data-origin-site-id"),
+        options.GetValueOrDefault("--execution-site-id"),
+        options.GetValueOrDefault("--execution-country-code"));
+    if (!JobPlacement.IsEligible(job.PlacementPolicy, placement))
+        throw new InvalidOperationException("Job placement policy denies this execution site or required location is unknown.");
     double cpuCores = double.Parse(options["--cpu-cores"], CultureInfo.InvariantCulture);
     double stepSeconds = double.Parse(options["--step-seconds"], CultureInfo.InvariantCulture);
     if (!double.IsFinite(stepSeconds) || stepSeconds <= 0) throw new ArgumentOutOfRangeException("--step-seconds");
@@ -79,13 +85,15 @@ static Dictionary<string, string> ParseOptions(string[] args)
     foreach (string required in new[] { "--date", "--job", "--container", "--cpu-cores", "--step-seconds" })
         if (!options.ContainsKey(required)) throw new ArgumentException(Usage());
     if (options.Keys.Any(x => x is not ("--date" or "--job" or "--container" or "--cpu-cores"
-        or "--step-seconds" or "--force-pause-step"))) throw new ArgumentException(Usage());
+        or "--step-seconds" or "--force-pause-step" or "--data-origin-site-id"
+        or "--execution-site-id" or "--execution-country-code"))) throw new ArgumentException(Usage());
     return options;
 }
 
 static string Usage() => "Usage: dotnet run --project src/DigitalHeat.LiveRun -- " +
     "--date yyyy-MM-dd --job config/jobs/<job>.json --container <running-linux-container> " +
-    "--cpu-cores <allowed-cores> --step-seconds <seconds> [--force-pause-step 0..23]";
+    "--cpu-cores <allowed-cores> --step-seconds <seconds> [--force-pause-step 0..23] " +
+    "[--data-origin-site-id <id> --execution-site-id <id> | --execution-country-code <CC>]";
 
 static string FindRepositoryRoot()
 {

@@ -12,6 +12,8 @@ Simulate several sites (house, hotel/spa, farm, office) connected in a network, 
 
 - [ ] Config schema `config/scenarios/*.json`: sites (from the WP3 parameter list in `docs/research/sites-and-profiles.md`), servers per site, hardware profile, storage, eligible jobs/data rules, location.
 - [ ] Network graph: links with distance/latency and allowed data flows (data sovereignty).
+- [ ] Give execution sites verified site IDs and country codes for T-24 job-placement checks;
+      treat unknown identity as ineligible for restricted jobs.
 - [ ] Heat demand per site type: case formula for the reference house, profiles (When2Heat, BDEW) for others.
 - [ ] Scenario `basel-neighbourhood`: reference house ×N + one year-round site (hotel/spa).
 - [ ] Reference house stays exactly as in the case (scored figures unchanged).
