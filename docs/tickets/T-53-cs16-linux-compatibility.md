@@ -39,6 +39,12 @@ The user handles installer/license UI after stopping browser control. Installati
 public-server compatibility, CPU split and game-loaded scheduler timing are not verified.
 See `docs/jobs/cs16-linux-lab.md`; do not mark this ticket done.
 
+Follow-up log fix: Windows CRLF in the here-string appended CR to the installer filename.
+Normalize the shell payload before Linux dispatch. Forced-CRLF argv check and actual retry passed
+the launch-path check; no failed-to-open error remained at inspection. Earlier status-file values
+could be stale/corrupt and did not prove that the installer itself was stuck. Game completion is
+still pending; no Minecraft or scheduler code changed.
+
 Done criteria: verified client test and real multiplayer connection, repeatable config/commands,
 documented runtime/latency measurements and limitations, tests passing, code PR and shared docs.
 If setup is declined or prerequisites are unavailable, record the actual outcome without claiming

@@ -56,6 +56,19 @@ The original CS checkout was externally switched to an old local `main`; it was 
 Continue from `C:\Users\nikit\AppData\Local\Temp\digitalheat-cs16-runtime`, which reattaches the
 saved feature branch. Browser ports and Docker-managed game data are unchanged.
 
+### Follow-up: CRLF command-transfer failure
+
+The next reported failure had the concrete log message `failed to open
+"/home/ubuntu/cs16-installer.exe\r": c0000135`. A CR from a Windows here-string became part of
+the Linux command argument. This is a launcher transport error, not evidence that a game DLL is
+missing. It can also corrupt status-file/cleanup paths; earlier timeout-file values alone did not
+establish that this retry actually waited for manual completion. The launcher now removes CRs
+from its controlled shell payload before dispatch. A forced-CRLF PowerShell-to-Linux argv probe
+verified the exact expected installer filename. A subsequent real launch cleared the expected
+status record and produced an installer process, without the failed-to-open error at the check.
+GUI completion, successful installation and multiplayer remain unverified. No node restart,
+Minecraft change, scheduler change or authentication bypass was needed for this fix.
+
 ## Commands
 
 Run from the feature checkout in PowerShell:
