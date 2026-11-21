@@ -3,7 +3,7 @@
   "kind": "economics",
   "timezone": "Europe/Zurich",
   "step_hours": 1,
-  "git_commit": "1a56dfe67d7908552b8704a327a3c1c234767888",
+  "git_commit": "097db6897193080ee960929e0569e8fa0b02027e",
   "git_dirty": false,
   "code_provenance": "clean_commit",
   "seed": null,
@@ -28,7 +28,7 @@
     },
     {
       "path": "config/economics/reference-house.json",
-      "sha256": "69cd386dc7e83f946f538bc82abd95b790bf743d4e067347c93c2c1186f0360c"
+      "sha256": "bb0551cebf45f635cc4aef02552ad0722656f2a7511207d85732033913f45e1d"
     },
     {
       "path": "data/raw/open-meteo/basel-2025-hourly.csv",
@@ -39,24 +39,42 @@
       "sha256": "66b4b1205c0f2472dbe009d2dd44a612be4f96145a127997dca0f66c2201b252"
     },
     {
+      "path": "config/hardware/cpu-server-refurbished.json",
+      "sha256": "1611d39b60b56ae7518e0dabbc08b76c933b36748593fe1c98bcf3be388c026c"
+    },
+    {
       "path": "config/hardware/cpu-server.json",
       "sha256": "cd1862c455e7c16083b18e954d225a22e4a499751e78f5120edb3ffc4f10ea62"
     },
     {
       "path": "config/hardware/gpu-consumer-rtx4090.json",
-      "sha256": "1c9eede3f576f941a86673957dc0eb6a5b0003ed7c46c70cc7e9ec111299074f"
+      "sha256": "e1f23473d376d90b80b3a539b71cc71a6418d606ef44cb4089ba2017ff91affe"
+    },
+    {
+      "path": "config/hardware/gpu-inference-l4-refurbished.json",
+      "sha256": "4e1ccbb281afbc4103f20c26b06c1320782fe1a8133c88cc143746f112a9e333"
     },
     {
       "path": "config/hardware/gpu-inference-l4.json",
       "sha256": "df19fe0127ca170c97504028c62d445c29a1779632b17324a5803936678fe35c"
+    },
+    {
+      "path": "config/hardware/gpu-inference-t4-refurbished.json",
+      "sha256": "255dd9688cd4869c03eae1f8c5675e17b988ede088bb72eabee48398b0bd2393"
     }
   ],
   "files": [
     "levers.csv",
-    "required-premium.csv",
+    "required-type1.csv",
     "win-win.csv",
     "parameters.json"
   ],
   "hardware_profiles_without_price_set": [],
-  "note": "Variant economics (decision 0026). Scored case figures are unchanged; case_break_even uses the case formula. Premium demand is TODO(source): premium shares are a sweep, not a forecast."
+  "hardware_profiles_not_permitted": [
+    {
+      "hardware_profile_id": "gpu-consumer-rtx4090",
+      "reason": "not permitted (licence): NVIDIA GeForce driver licence v. 25 Feb 2025 section 2.8, \u0027not licensed for datacenter deployment\u0027 (https://www.nvidia.com/en-us/drivers/geforce-license, opened 2026-11-21, data/raw/market pc-licence-geforce-no-datacenter); a DigitalHeat-operated fleet counts as such (decision 0027)"
+    }
+  ],
+  "note": "Variant economics (decision 0028). Scored case figures are unchanged; case_break_even uses the case formula. Job model of decision 0020 on datacenter-licensed hardware (decision 0027). Type 1 demand is TODO(source): Type 1 shares are a sweep, not a forecast. Type 1 L4 throughput is a proxy (RTX 4090 energy per token, T-37), TODO(source)."
 }

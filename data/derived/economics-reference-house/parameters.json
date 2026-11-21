@@ -78,18 +78,23 @@
     }
   },
   "economics": {
-    "description": "Economics per actor for the reference house (T-14, decision 0026). Variant economics: the scored case figures (case break-even) are unchanged and come from config/reference-house.json. Prices are per 1 kW server-hour (one server-hour = 1 kWh electricity), see docs/model/economics.md.",
+    "description": "Economics per actor for the reference house (T-14, decision 0028), job model of decision 0020 (Type 1 = batch LLM priced per token, served first; Type 2 = research simulations as filler, per server-hour) on datacenter-licensed hardware only (decision 0027). Variant economics: the scored case figures (case break-even) are unchanged and come from config/reference-house.json. Prices are per 1 kW server-hour (one server-hour = 1 kWh electricity), see docs/model/economics.md.",
     "hardware_directory": "config/hardware",
     "default_hardware_profile": "gpu-inference-l4",
-    "fill_rate": {
-      "value": 0.35,
+    "type2_fill_rate": {
+      "value": 1,
       "unit": "fraction",
-      "source": "docs/research/filler-demand.md section 6: base fill rate of offered filler server-hours (Akash GPU 34 %, vast third-party 30 %); assumption, range 0.2-0.6"
+      "source": "decision 0020 (must-have 1 table): Type 2 arrivals are \u0027unlimited jobs\u0027 (case-permitted), i.e. every leftover heat-led hour is sold; the sourced fill rate 0.35 (range 0.2-0.6, docs/research/filler-demand.md section 6) is the sensitivity in Levers.Type2FillRates and Grid.Type2FillRates"
     },
-    "premium_share_of_offered_hours": {
+    "type1_share_of_offered_hours": {
       "value": 0,
       "unit": "fraction",
-      "source": "TODO(source): no sourced demand for premium sovereign AI per house (docs/research/job-demand.md: transcription alone fills about 0.1 % of capacity); 0 in the base case, swept in the lever table and reported as the required premium share"
+      "source": "TODO(source): no sourced Type 1 (batch LLM) volume per house (decision 0020: \u0027unlimited jobs\u0027, no sourced volume yet); 0 in the base case, swept in the lever table and reported as the required Type 1 share"
+    },
+    "type1_price_chf_per_million_tokens": {
+      "value": 0.126,
+      "unit": "CHF/1M tokens",
+      "source": "docs/research/profitability-inputs.md section 2 and docs/jobs/llm-summary.md: Mistral Ministral 3 8B list price USD 0.15 per 1M input and output tokens x 0.8402 CHF/USD (ai-llm-mistral-ministral3-8b, high); decision 0020 expects the batch-API level (-50 %, CHF 0.063) unless fixed contracts, swept in Levers.Type1PricesChfPerMillionTokens"
     },
     "wear_replacement_share_per_year": {
       "value": 0,
@@ -166,48 +171,54 @@
     "price_sets": [
       {
         "hardware_profile_prefix": "gpu-inference-l4",
-        "filler_price_chf_per_server_hour": {
-          "value": 1.42,
+        "type2_price_chf_per_server_hour": {
+          "value": 0.66,
           "unit": "CHF/server-hour",
-          "source": "docs/research/filler-demand.md section 6: central L4 filler price paid to the operator (AWS Zurich spot x RunPod community/secure ratio 0.64); range 0.85-2.20",
+          "source": "decisions 0018/0020: Type 2 research simulations at the pinned CHF 0.66 per server-hour (docs/research/computing-price.md section 5); the Grid sweeps 0-3",
           "is_known": true
         },
-        "premium_price_chf_per_server_hour": {
-          "value": 3.55,
+        "type1_million_tokens_per_server_hour": {
+          "value": 14.3563,
+          "unit": "M tokens/server-hour",
+          "source": "derived, PROXY: L4 board power per 1 kW server 11.6313 x 0.072 kW = 0.83745 kW (config/hardware/gpu-inference-l4.json) x 3.6 MJ / 0.21 J per token = batched vLLM 8B on RTX 4090, conservative reading (450 W / 2,148 tok/s, pe-rtx4090-vllm-iog-qps8, docs/research/profitability-inputs.md section 3); RTX 4090 energy per token reused for the L4 (same Ada Lovelace generation, decision 0027); TODO(source): measured L4 throughput and power (vllm bench serve \u002B nvidia-smi)",
+          "is_known": true
+        }
+      },
+      {
+        "hardware_profile_prefix": "gpu-inference-t4",
+        "type2_price_chf_per_server_hour": {
+          "value": 0.66,
           "unit": "CHF/server-hour",
-          "source": "derived: 11.6313 L4 per server (config/hardware/gpu-inference-l4.json) x CHF 0.305278/h Infomaniak L4 on-demand from-price, Swiss provider in Swiss data centres (data/raw/market/compute-prices.csv cp-ch-infomaniak-l4, medium); premium priced at the Swiss sovereign on-demand price, not above it; hyperscaler Zurich on-demand 10.60 is the upper bound",
+          "source": "decisions 0018/0020: pinned Type 2 price, same for every profile",
+          "is_known": true
+        },
+        "type1_million_tokens_per_server_hour": {
+          "value": 5.7425,
+          "unit": "M tokens/server-hour",
+          "source": "derived: L4 value 14.3563 (same 0.8375 kW board power per server) x 0.4 T4/L4 work per kWh (NVIDIA: L4 2.5x T4 generative AI, docs/research/refurbished-hardware.md section 3, medium); not measured on a T4, TODO(source)",
           "is_known": true
         }
       },
       {
         "hardware_profile_prefix": "cpu-server",
-        "filler_price_chf_per_server_hour": {
+        "type2_price_chf_per_server_hour": {
           "value": 0.66,
           "unit": "CHF/server-hour",
-          "source": "docs/research/computing-price.md section 5: adopted CPU price CHF 0.66 per server-hour (Hetzner AX162-S equivalent); filler-demand.md range 0.25-1.20",
+          "source": "decisions 0018/0020 and docs/research/computing-price.md section 5: pinned CHF 0.66 per server-hour",
           "is_known": true
         },
-        "premium_price_chf_per_server_hour": {
-          "value": null,
-          "unit": "CHF/server-hour",
-          "source": "TODO(source): no premium sovereign-AI price for the CPU profile; premium is a GPU product in business model v2",
-          "is_known": false
+        "type1_million_tokens_per_server_hour": {
+          "value": 3.937,
+          "unit": "M tokens/server-hour",
+          "source": "docs/jobs/llm-summary.md (T-33, own measurement, laptop CPU package): 1 kWh / 0.254 kWh per 1M tokens at the measured 91 % input mix; comparison profile only (decision 0019: no CPU-only servers)",
+          "is_known": true
         }
-      },
+      }
+    ],
+    "not_permitted_hardware": [
       {
-        "hardware_profile_prefix": "gpu-consumer-rtx4090",
-        "filler_price_chf_per_server_hour": {
-          "value": 0.57,
-          "unit": "CHF/server-hour",
-          "source": "docs/research/hardware.md section 2: income at home-host marketplace price (2 x RunPod community RTX 4090)",
-          "is_known": true
-        },
-        "premium_price_chf_per_server_hour": {
-          "value": null,
-          "unit": "CHF/server-hour",
-          "source": "TODO(source): consumer GPUs in homes do not meet the data rules for premium sovereign work (docs/research/filler-demand.md section 5)",
-          "is_known": false
-        }
+        "hardware_profile_prefix": "gpu-consumer",
+        "reason": "not permitted (licence): NVIDIA GeForce driver licence v. 25 Feb 2025 section 2.8, \u0027not licensed for datacenter deployment\u0027 (https://www.nvidia.com/en-us/drivers/geforce-license, opened 2026-11-21, data/raw/market pc-licence-geforce-no-datacenter); a DigitalHeat-operated fleet counts as such (decision 0027)"
       }
     ],
     "levers": {
@@ -216,11 +227,21 @@
         2,
         4
       ],
-      "premium_shares": [
+      "type1_shares": [
         0,
         0.1,
         0.25,
-        0.5
+        0.5,
+        0.75,
+        1
+      ],
+      "type1_prices_chf_per_million_tokens": [
+        0.063,
+        0.126
+      ],
+      "type2_fill_rates": [
+        1,
+        0.35
       ],
       "policies": [
         "heat-led",
@@ -231,7 +252,7 @@
         "gas",
         "oil"
       ],
-      "source": "lever axes for the comparison table (not measured values): 4 servers = draft presentation scenario (T-06), 1 server = sized for the hot-water base load (competitors.md lesson 1); premium shares are a sweep because premium demand is TODO(source)"
+      "source": "lever axes for the comparison table (not measured values): 4 servers = draft presentation scenario (T-06), 1 server = sized for the hot-water base load (competitors.md lesson 1); Type 1 shares are a sweep because Type 1 demand is TODO(source); Type 1 token prices = batch-API level 0.063 and list 0.126 CHF per 1M tokens (Ministral 3 8B); Type 2 fill rates = unlimited jobs (decision 0020) and the sourced 0.35 (filler-demand.md section 6)"
     },
     "grid": {
       "hardware_profile": "gpu-inference-l4",
@@ -239,32 +260,137 @@
         1,
         4
       ],
-      "premium_shares": [
+      "type1_shares": [
         0,
-        0.25
+        0.5
       ],
-      "fill_rates": [
+      "type2_fill_rates": [
         0.2,
         0.35,
-        0.6
+        0.6,
+        1
       ],
-      "filler_price_min_chf_per_server_hour": 0,
-      "filler_price_max_chf_per_server_hour": 3,
-      "filler_price_step_chf_per_server_hour": 0.2,
+      "type2_price_min_chf_per_server_hour": 0,
+      "type2_price_max_chf_per_server_hour": 3,
+      "type2_price_step_chf_per_server_hour": 0.2,
       "electricity_price_min_chf_per_kwh": 0.1,
       "electricity_price_max_chf_per_kwh": 0.5,
       "electricity_price_step_chf_per_kwh": 0.05,
       "heat_alternative": "heat-pump",
       "policy": "heat-led",
-      "source": "chart axes (not measured values): filler price 0-3 CHF covers the L4 range 0.85-2.20 (filler-demand.md); electricity 0.10-0.50 covers Swiss spot 0.10 to retail 0.33 (energy-prices.csv); fill rates = filler-demand.md low/base/high"
+      "source": "chart axes (not measured values): Type 2 price 0-3 CHF covers the pinned 0.66 and the L4 market range 0.85-2.20 (filler-demand.md); electricity 0.10-0.50 covers Swiss spot 0.10 to retail 0.33 (energy-prices.csv); Type 2 fill rates = filler-demand.md low/base/high and unlimited jobs; Type 1 at the base token price Type1PriceChfPerMillionTokens"
     },
-    "required_premium_share_step": {
+    "required_type1_share_step": {
       "value": 0.01,
       "unit": "fraction",
-      "source": "numerical resolution of the required-premium-share search (not a measured value)"
+      "source": "numerical resolution of the required Type 1 share search (not a measured value)"
     }
   },
   "hardware_profiles": [
+    {
+      "id": "cpu-server-refurbished",
+      "label": "Refurbished CPU rack server (Dell PowerEdge R740, 2 x Xeon Gold 6246R, 2019/2020 generation), scaled to 1 kW",
+      "status": "variant: refurbished hardware (lever D, T-35); not the case\u0027s reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+      "description": "One \u0027server\u0027 = 1 kW of electric load = 1.96 refurbished dual-socket R740 boxes (Cascade Lake Refresh, 32 cores / 64 threads, 256 GB each). Wall power is a TDP estimate like cpu-server. Wear and failure cost are not in this file: see config/hardware/wear/refurbished-wear.json and docs/research/refurbished-hardware.md.",
+      "transcription_model": "whisper.cpp base (CPU), own laptop measurement scaled per kWh, times an older-generation efficiency factor",
+      "units_per_server": {
+        "value": 1.9594,
+        "unit": "units/server",
+        "source": "derived: ServerElectricKw / UnitElectricKw = 1 / 0.51035",
+        "is_known": true
+      },
+      "unit_electric_kw": {
+        "value": 0.51035,
+        "unit": "kW/unit",
+        "source": "estimate: 2 x Xeon Gold 6246R TDP 205 W (Intel ARK SKU 199353 via search snippets of intel.com, wikichip.org and itcreations.com, accessed 2026-11-21, medium) \u002B 256 GB x 0.392 W/GB (Cloud Carbon Footprint memory coefficient, docs/research/computing-price.md \u00A72) = 510.4 W; fans, disks and PSU losses missing, TODO(source): measured wall power",
+        "is_known": true
+      },
+      "unit_purchase_price_chf": {
+        "value": 5688.15,
+        "unit": "CHF/unit",
+        "source": "derived: USD 6,770 x 0.8402 CHF/USD (docs/research/ai-services.md); refurbished Dell PowerEdge R740, 2 x Gold 6246R, 256 GB, Newegg marketplace listing https://www.newegg.com/dell-poweredge-rack-mount/p/2NS-0008-71SB5 (search snippet, accessed 2026-11-21, low: listing, seller warranty not shown). Cheaper EU example: used T640 tower 2 x Gold 6248 256 GB EUR 2,910.05 (https://www.ebay.de/itm/187727590188, snippet, low)",
+        "is_known": true
+      },
+      "host_electric_kw": {
+        "value": 0,
+        "unit": "kW/server",
+        "source": "no separate host: the units are complete servers",
+        "is_known": true
+      },
+      "host_purchase_price_chf": {
+        "value": 0,
+        "unit": "CHF/server",
+        "source": "no separate host: the units are complete servers",
+        "is_known": true
+      },
+      "server_electric_kw": {
+        "value": 1,
+        "unit": "kW/server",
+        "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation",
+        "is_known": true
+      },
+      "idle_electric_kw": {
+        "value": 0.205,
+        "unit": "kW/server",
+        "source": "derived: same idle/max ratio as config/hardware/cpu-server.json (Cloud Carbon Footprint SPECpower coefficients, medium); not measured on this server; older generations usually idle relatively higher, TODO(source)",
+        "is_known": true
+      },
+      "heat_recovery_share": {
+        "value": 0.8,
+        "unit": "fraction",
+        "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; the R740 is air-cooled, retrofit cold plates TODO(source))",
+        "is_known": true
+      },
+      "purchase_price_chf_per_server": {
+        "value": 11145.55,
+        "unit": "CHF/server",
+        "source": "derived: UnitsPerServer x UnitPurchasePriceChf = 1.9594 x 5688.15",
+        "is_known": true
+      },
+      "lifetime_years": {
+        "value": 3,
+        "unit": "years",
+        "source": "assumption: remaining economic life of 2019/2020 hardware bought in 2026 = typical refurbisher warranty (Bargain Hardware 3-year return-to-base, servermall.com 5-year EU warranty; search snippets accessed 2026-11-21, medium); see docs/research/refurbished-hardware.md \u00A74",
+        "is_known": true
+      },
+      "ops_chf_per_server_year": {
+        "value": 1387.28,
+        "unit": "CHF/server-year",
+        "source": "derived: 1.9594 boxes x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic); expected failure cost is NOT included, see config/hardware/wear/refurbished-wear.json",
+        "is_known": true
+      },
+      "transcription_audio_hours_per_server_hour": {
+        "value": 128.3,
+        "unit": "audio hours/server-hour",
+        "source": "derived: 436 audio h per kWh (config/hardware/cpu-server.json, own measurement) x 0.294 older-generation efficiency factor = SPECpower_ssj2008 overall ssj_ops/W 6,006 (2 x Gold 6226R, Cascade Lake Refresh, spec.org res2022q2) / 20,408 (2 x Platinum 8592\u002B, 2024, spec.org res2024q2); search snippets, configurations not matched, low",
+        "is_known": true
+      },
+      "webhosting_sites_per_server": {
+        "value": null,
+        "unit": "sites/server",
+        "source": "TODO(source): no sourced webhosting throughput per kW yet (T-23)",
+        "is_known": false
+      },
+      "spot_price_chf_per_server_hour": {
+        "value": 1.2,
+        "unit": "CHF/server-hour",
+        "source": "derived: 125.4 vCPU per kW (1.9594 boxes x 64 threads) / 32 = 3.919 D32as-equivalents x CHF 0.3056 Azure D32as v5 spot Switzerland North (data/raw/market/compute-prices.csv cp-cpu-azure-d32as-v5-chn-spot, high); assumes buyers pay per vCPU regardless of generation",
+        "is_known": true
+      },
+      "on_demand_price_chf_per_server_hour": {
+        "value": 4.72,
+        "unit": "CHF/server-hour",
+        "source": "derived: 3.919 32-vCPU equivalents x CHF 1.2054 per instance-hour (lowest Swiss on-demand, docs/research/computing-price.md A1: 7.10 / 5.89)",
+        "is_known": true
+      },
+      "home_host_price_chf_per_server_hour": {
+        "value": 0.46,
+        "unit": "CHF/server-hour",
+        "source": "derived: spot 1.198 x RunPod community/datacentre ratio 0.38 (docs/research/computing-price.md C1 method, GPU ratio applied to CPU: assumption)",
+        "is_known": true
+      },
+      "depreciation_chf_per_server_year": 3715.183333333333
+    },
     {
       "id": "cpu-server",
       "label": "CPU rack server (Dell PowerEdge R570 class), scaled to 1 kW",
@@ -370,39 +496,39 @@
       "depreciation_chf_per_server_year": 8457.228333333334
     },
     {
-      "id": "gpu-consumer-rtx4090",
-      "label": "Consumer GPU desktops (RTX 4090), scaled to 1 kW",
-      "status": "variant: not the case\u0027s reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
-      "description": "One \u0027server\u0027 = 1 kW of electric load = two complete RTX 4090 desktops (450 W GPU each, about 100 W for the rest of both systems), the GPU variant A5 of docs/research/computing-price.md. Consumer hardware, sold on home-host GPU marketplaces.",
-      "transcription_model": "faster-whisper large-v2 (GPU), proxy benchmark on a slower RTX 3070 Ti",
+      "id": "gpu-inference-l4-refurbished",
+      "label": "GPU inference server with used NVIDIA L4 cards (new host), scaled to 1 kW",
+      "status": "variant: refurbished hardware (lever D, T-35); not the case\u0027s reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+      "description": "Same build as gpu-inference-l4 (one R570-class host \u002B 11.6 L4 cards), but the cards are bought used. The L4 is the current generation (2023), so used prices are thin and close to new; this profile isolates the GPU-price effect. Wear and failure cost: config/hardware/wear/refurbished-wear.json.",
+      "transcription_model": "whisper-large-v3-turbo (GPU), third-party benchmark, batch 4 (same chip as gpu-inference-l4)",
       "units_per_server": {
-        "value": 2,
+        "value": 11.6313,
         "unit": "units/server",
-        "source": "docs/research/computing-price.md A5: 2 x RTX 4090 (450 W TGP each) = about 1 kW (assumption)",
+        "source": "derived: (ServerElectricKw - HostElectricKw) / UnitElectricKw = (1 - 0.1625) / 0.072",
         "is_known": true
       },
       "unit_electric_kw": {
-        "value": 0.45,
+        "value": 0.072,
         "unit": "kW/unit",
-        "source": "data/raw/market/costs.csv power-gpu-nvidia-rtx4090-tgp: 450 W total graphics power (GPU only, not system draw)",
+        "source": "data/raw/market/hardware.csv hw-power-nvidia-l4-tdp: max TDP 72 W (high)",
         "is_known": true
       },
       "unit_purchase_price_chf": {
-        "value": 8150,
+        "value": 1176.28,
         "unit": "CHF/unit",
-        "source": "data/raw/market/costs.csv cost-gpu-pccom-rtx4090-system: complete desktop i9-13900K, RTX 4090, 64 GB (high; VAT not explicit)",
+        "source": "derived: USD 1,400 x 0.8402 CHF/USD; one completed eBay.de sale of a used L4 24 GB (\u0027tested good\u0027, scratched; https://www.ebay.de/itm/157127945920, search snippet, accessed 2026-11-21, low: single sale, date unclear). Used asking price seen: USD 2,898 (https://www.ebay.com/itm/236238919558), i.e. above the new Bechtle price CHF 2,235",
         "is_known": true
       },
       "host_electric_kw": {
-        "value": 0.1,
+        "value": 0.1625,
         "unit": "kW/server",
-        "source": "assumption: remainder of the 1 kW not covered by 2 x 450 W GPU TGP (CPU, RAM, PSU losses of both desktops), as implied by docs/research/computing-price.md A5; TODO(source) measured system draw",
+        "source": "same estimate as config/hardware/cpu-server.json UnitElectricKw (Xeon 6507P TDP \u002B memory)",
         "is_known": true
       },
       "host_purchase_price_chf": {
-        "value": 0,
+        "value": 8248.03,
         "unit": "CHF/server",
-        "source": "no separate host: the units are complete desktops",
+        "source": "data/raw/market/costs.csv cost-server-dell-r570 (new host kept on purpose, to isolate the GPU effect)",
         "is_known": true
       },
       "server_electric_kw": {
@@ -414,64 +540,64 @@
       "idle_electric_kw": {
         "value": null,
         "unit": "kW/server",
-        "source": "TODO(source): idle draw of the desktops not sourced",
+        "source": "TODO(source): idle draw of L4 cards and host not sourced (as gpu-inference-l4)",
         "is_known": false
       },
       "heat_recovery_share": {
         "value": 0.8,
         "unit": "fraction",
-        "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling: GPU water block about CHF 420 per card, data/raw/market/costs.csv cost-install-alphacool-gpu-block, compatibility with the RTX 4090 not established)",
+        "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; L4 cards are passively air-cooled)",
         "is_known": true
       },
       "purchase_price_chf_per_server": {
-        "value": 16300,
+        "value": 21930.45,
         "unit": "CHF/server",
-        "source": "derived: 2 x CHF 8150; water cooling excluded",
+        "source": "derived: 11.6313 x CHF 1176.28 \u002B CHF 8248.03 (host)",
         "is_known": true
       },
       "lifetime_years": {
-        "value": 6,
+        "value": 3.695,
         "unit": "years",
-        "source": "data/raw/market/costs.csv lifetime-coreweave-technology-accounting (datacentre accounting life; consumer GPU life TODO(source), likely shorter)",
+        "source": "derived: value-weighted life so that purchase / life = cards / 3 years \u002B host / 6 years = 13682.42 / 3 \u002B 8248.03 / 6 = CHF 5935.48 per year; 3 years remaining for used cards (assumption, docs/research/refurbished-hardware.md \u00A74), 6 years for the new host (data/raw/market/costs.csv lifetime-coreweave-technology-accounting)",
         "is_known": true
       },
       "ops_chf_per_server_year": {
-        "value": 1416,
+        "value": 708,
         "unit": "CHF/server-year",
-        "source": "derived: 2 boxes x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic)",
+        "source": "derived: 1 host x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic); expected failure cost NOT included, see config/hardware/wear/refurbished-wear.json",
         "is_known": true
       },
       "transcription_audio_hours_per_server_hour": {
-        "value": 91.8,
+        "value": 469.9,
         "unit": "audio hours/server-hour",
-        "source": "derived: 2 GPUs x 45.88 audio h per GPU-hour, faster-whisper large-v2 fp16 batch 8 on an RTX 3070 Ti (data/raw/market/hardware.csv hw-perf-fasterwhisper-3070ti-largev2-b8, medium); conservative proxy, RTX 4090 not measured, TODO(source)",
+        "source": "derived: as gpu-inference-l4 (11.6313 x 40.4, low); same chip, no throughput loss with age assumed (assumption: silicon ageing is not a measurable throughput loss for a cooled card, TODO(source))",
         "is_known": true
       },
       "webhosting_sites_per_server": {
         "value": null,
         "unit": "sites/server",
-        "source": "TODO(source): no sourced webhosting throughput per kW yet (T-23)",
+        "source": "TODO(source): GPUs add nothing to webhosting; host CPU only",
         "is_known": false
       },
       "spot_price_chf_per_server_hour": {
-        "value": null,
+        "value": 2.23,
         "unit": "CHF/server-hour",
-        "source": "TODO(source): no datacentre spot product with an RTX 4090; see HomeHostPriceChfPerServerHour",
-        "is_known": false
+        "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.1914 AWS g6.xlarge spot eu-central-2 (cp-gpu-aws-g6-xlarge-euc2-spot, medium); buyers do not see the card\u0027s age",
+        "is_known": true
       },
       "on_demand_price_chf_per_server_hour": {
-        "value": 1.5,
+        "value": 10.6,
         "unit": "CHF/server-hour",
-        "source": "derived: 2 x CHF 0.7478 per GPU-hour RunPod RTX 4090 secure cloud (data/raw/market/compute-prices.csv cp-mkt-runpod-4090-secure, high); docs/research/computing-price.md A5",
+        "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.9116 (cp-gpu-aws-g6-xlarge-euc2-od, high)",
         "is_known": true
       },
       "home_host_price_chf_per_server_hour": {
-        "value": 0.57,
+        "value": 4.3,
         "unit": "CHF/server-hour",
-        "source": "derived: 2 x CHF 0.2857 per GPU-hour RunPod RTX 4090 community cloud (cp-mkt-runpod-4090-community, high); vast.ai median 2 x 0.4201 = 0.84 (low); docs/research/computing-price.md A5",
+        "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.3697 RunPod L4 community (cp-mkt-runpod-l4-community, high)",
         "is_known": true
       },
-      "depreciation_chf_per_server_year": 2716.6666666666665
+      "depreciation_chf_per_server_year": 5935.169147496617
     },
     {
       "id": "gpu-inference-l4",
@@ -576,6 +702,110 @@
         "is_known": true
       },
       "depreciation_chf_per_server_year": 5707.343333333333
+    },
+    {
+      "id": "gpu-inference-t4-refurbished",
+      "label": "GPU inference server with used NVIDIA T4 cards (2018 generation, new host), scaled to 1 kW",
+      "status": "variant: refurbished hardware (lever D, T-35); not the case\u0027s reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+      "description": "One host (R570 class, new, as gpu-inference-l4) plus 12.0 used 70 W T4 cards. The T4 is the L4\u0027s predecessor (same power, about 2.5x less inference work per kWh) and has a deep used market. Wear and failure cost: config/hardware/wear/refurbished-wear.json.",
+      "transcription_model": "whisper-large-v3-turbo (GPU), L4 benchmark scaled by the T4/L4 throughput ratio",
+      "units_per_server": {
+        "value": 11.9643,
+        "unit": "units/server",
+        "source": "derived: (ServerElectricKw - HostElectricKw) / UnitElectricKw = (1 - 0.1625) / 0.070",
+        "is_known": true
+      },
+      "unit_electric_kw": {
+        "value": 0.07,
+        "unit": "kW/unit",
+        "source": "NVIDIA T4 board power 70 W (stated in https://forums.developer.nvidia.com/t/tesla-t4-consumes-more-than-70watt/127304 and comparison pages such as https://www.clarifai.com/blog/t4-vs-l4; https://servethehome.com/nvidia-tesla-t4-ai-inferencing-gpu-review/5 measured 74 W at full load, 36 W idle; search snippets, accessed 2026-11-21, medium; TODO(source): NVIDIA T4 datasheet)",
+        "is_known": true
+      },
+      "unit_purchase_price_chf": {
+        "value": 457.91,
+        "unit": "CHF/unit",
+        "source": "derived: USD 545 x 0.8402 CHF/USD; USD 545 = midpoint of the AMCompute appraisal of realised used sales USD 510-580 over 12 months to Aug 2026 (https://www.amcompute.com/appraisals/tesla-t4, search snippet, accessed 2026-11-21, medium); eBay asks USD 430-700 (https://www.ebay.com/shop/nvidia-t4)",
+        "is_known": true
+      },
+      "host_electric_kw": {
+        "value": 0.1625,
+        "unit": "kW/server",
+        "source": "same estimate as config/hardware/cpu-server.json UnitElectricKw (Xeon 6507P TDP \u002B memory)",
+        "is_known": true
+      },
+      "host_purchase_price_chf": {
+        "value": 8248.03,
+        "unit": "CHF/server",
+        "source": "data/raw/market/costs.csv cost-server-dell-r570 (new host kept; a refurbished host would cut this, see docs/research/refurbished-hardware.md \u00A75)",
+        "is_known": true
+      },
+      "server_electric_kw": {
+        "value": 1,
+        "unit": "kW/server",
+        "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation",
+        "is_known": true
+      },
+      "idle_electric_kw": {
+        "value": 0.464,
+        "unit": "kW/server",
+        "source": "derived: 11.9643 cards x 36 W idle (servethehome.com T4 review, snippet, medium, one card) \u002B host 0.1625 kW x 0.205 idle ratio (config/hardware/cpu-server.json) = 0.431 \u002B 0.033; nearly half of full load, so non-heating hours need hard power-off",
+        "is_known": true
+      },
+      "heat_recovery_share": {
+        "value": 0.8,
+        "unit": "fraction",
+        "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; T4 cards are passively air-cooled)",
+        "is_known": true
+      },
+      "purchase_price_chf_per_server": {
+        "value": 13726.58,
+        "unit": "CHF/server",
+        "source": "derived: 11.9643 x CHF 457.91 \u002B CHF 8248.03 (host)",
+        "is_known": true
+      },
+      "lifetime_years": {
+        "value": 4.288,
+        "unit": "years",
+        "source": "derived: value-weighted life so that purchase / life = cards / 3 years \u002B host / 6 years = 5478.55 / 3 \u002B 8248.03 / 6 = CHF 3200.86 per year; 3 years remaining for used cards (assumption, docs/research/refurbished-hardware.md \u00A74), 6 years for the new host (lifetime-coreweave-technology-accounting)",
+        "is_known": true
+      },
+      "ops_chf_per_server_year": {
+        "value": 708,
+        "unit": "CHF/server-year",
+        "source": "derived: 1 host x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic); expected failure cost NOT included, see config/hardware/wear/refurbished-wear.json",
+        "is_known": true
+      },
+      "transcription_audio_hours_per_server_hour": {
+        "value": 193.3,
+        "unit": "audio hours/server-hour",
+        "source": "derived: 11.9643 cards x 40.4 audio h per L4-hour (hw-perf-e2e-l4-whisper-turbo-b4, low) x 0.4 T4/L4 throughput ratio (NVIDIA: L4 2.5x T4 generative AI, nvidia.com/l4; arXiv 2604.14552 ResNet FP16 about 2.3x; snippets, medium); not measured on a T4, TODO(source)",
+        "is_known": true
+      },
+      "webhosting_sites_per_server": {
+        "value": null,
+        "unit": "sites/server",
+        "source": "TODO(source): GPUs add nothing to webhosting; host CPU only",
+        "is_known": false
+      },
+      "spot_price_chf_per_server_hour": {
+        "value": 3.19,
+        "unit": "CHF/server-hour",
+        "source": "derived: 11.9643 x CHF 0.2663 AWS g4dn.xlarge (1 T4 \u002B 4 vCPU) spot eu-central-1 (data/raw/market/compute-prices.csv cp-gpu-aws-g4dn-xlarge-euc1-spot, medium); rental price per GPU-hour, NOT per unit of work: per unit of work a T4 is worth about 0.4 L4, see docs/research/refurbished-hardware.md \u00A75",
+        "is_known": true
+      },
+      "on_demand_price_chf_per_server_hour": {
+        "value": 6.62,
+        "unit": "CHF/server-hour",
+        "source": "derived: 11.9643 x CHF 0.5529 AWS g4dn.xlarge on-demand eu-central-1 (cp-gpu-aws-g4dn-xlarge-euc1-od, medium)",
+        "is_known": true
+      },
+      "home_host_price_chf_per_server_hour": {
+        "value": 2.04,
+        "unit": "CHF/server-hour",
+        "source": "derived: spot 3.186 x RunPod L4 community/datacentre ratio 0.64 (docs/research/computing-price.md C1 method; no T4 marketplace row sourced, assumption)",
+        "is_known": true
+      },
+      "depreciation_chf_per_server_year": 3201.1613805970146
     }
   ]
 }
