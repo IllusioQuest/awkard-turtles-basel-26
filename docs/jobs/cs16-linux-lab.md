@@ -164,3 +164,15 @@ query path at test time, **not** client authentication or a playable joined matc
 is empty. No Steam/authentication/anti-cheat files or master-server configuration were patched.
 The scheduler code and measured preflight are unchanged; two-client play and loaded timing remain
 pending. The latest controls/network work is in commit `8b38550` of draft PR #42.
+
+User follow-up: Internet servers now work, and clicks work. Vertical aiming remains problematic
+with both ordinary one-finger movement and two-finger scrolling. Saved config already contains
+`+mlook`, `m_pitch 0.022`, no spring/strafe look and standard wheel bindings. Therefore do not claim
+the saved mouse-look setting was missing or disable wheel bindings against the user's preference.
+A live-console reset (`+mlook; m_pitch 0.022; cl_pitchup 89; cl_pitchdown 89`) was proposed for a
+first-person/alive test; its result is pending. Values/behavior are from the
+[Valve input implementation](https://github.com/ValveSoftware/halflife/blob/master/cl_dll/input.cpp)
+and [mouse implementation](https://github.com/ValveSoftware/halflife/blob/master/cl_dll/inputw32.cpp),
+accessed 2026-11-21. The supplied old client binaries do not contain the `m_rawinput` command string;
+do not assume modern client raw-input options are available. No persistent input change or active
+game restart was performed for this diagnostic step.
