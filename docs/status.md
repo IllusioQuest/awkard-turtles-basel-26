@@ -113,3 +113,6 @@ T-73 Nikita/Codex, feat/T-73-five-worker-render: user approved 3 concurrent shar
 
 
 T-73 verified, PR #65 / d43be26: five real worker processes live at localhost:18950/ui, replacing older renderer services (outputs retained). CPU prepare + three shared-Iris GPU workers + CPU MP4 assembly. 114 tests; full48 complete in114.1642 active workflow seconds, GPU counts16/16/16, peak3 concurrent, valid48-frame video. Six-frame pause/restart checks pass. Weights1.1/1/.9 are admission work budgets, not GPU percentages; heat-first policy unchanged, synthetic500kWh partitioned once. Preserve role/manifest/shared-identity checks and journal fix. Minecraft untouched. See docs/jobs/five-worker-renderer.md. Earlier two-node-only status entries are historical.
+
+
+T-74 Nikita/Codex, fix/T-74-render-labels, 7a3551a: requested presentation-only removals live at localhost:18950/ui. Worker details panel, physical-host heading, role/work-budget text and link explanation removed; map/stats/controls and all five-worker runtime/heat settings preserved. Served HTML and JS syntax verified; browser preview unavailable.
