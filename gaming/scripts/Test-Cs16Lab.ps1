@@ -1,6 +1,7 @@
 $ErrorActionPreference='Stop'
 $lab=Split-Path -Parent $PSScriptRoot
 $policy=Get-Content (Join-Path $lab 'deploy/cs16-lab.json') -Raw | ConvertFrom-Json
+New-Item -ItemType Directory -Path (Join-Path $lab 'TestResults') -Force | Out-Null
 . (Join-Path $PSScriptRoot 'GamingLab.Common.ps1')
 $records=@()
 foreach($node in $policy.nodes){
