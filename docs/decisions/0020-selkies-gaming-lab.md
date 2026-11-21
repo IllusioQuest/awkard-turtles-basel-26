@@ -14,3 +14,6 @@ Real separate-engine deployment needs authenticated per-node agent/API and coord
 Intel WSL access via /dev/dxg and /usr/lib/wsl/lib is experimental; /dev/dri alone need not work. Probe actual OpenGL/Vulkan/VAAPI and report software fallback. Never change Windows driver/WSL install silently. CS2 graphics and licensing feasibility remain separate gates.
 
 Review: pending fresh-context review. References: https://docs.selkies.io/latest/start/ and /settings/, shared Scheduling.cs and JobPlacement.cs. Reproduction/docs on main; code on featur-gaming.
+
+## Review outcome
+Fresh limited-context reviewer: go with changes. Apply explicit ready/locality/capacity filtering, finite signal checks, stable ranking through the shared scheduler, and atomic admission claims. Keep claims distinct from active sessions; observe batch pause/resource release before launch and reject on timeout. Test final-slot concurrency and session pinning under changed heat. Record renderer/encoder independently and gate CS2 on actual capability. Zero-heat admission policy remains a user decision before coordinator implementation. The current phase is the two-container compatibility lab, not a completed scheduler/coordinator.
