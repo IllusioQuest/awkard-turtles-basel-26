@@ -158,7 +158,7 @@ Fleet's heat-first scheduler controls a dedicated real Monte Carlo container. Th
 modelled heat, tank and accelerated time from observed process state and computed task results. The
 request ends when the replay asks it to finish its current task; simulated and real task counts are
 not equated. Busy mode adds an illustrative simulated queue beside the single real request.
-Configuration, sources, limitations and details: [`T-71`](docs/tickets/T-71-live-household-demo.md).
+Configuration, sources, limitations and details: [`T-72`](docs/tickets/T-72-live-household-demo.md).
 
 ## Live control of a containerized job
 

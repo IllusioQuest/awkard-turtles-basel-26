@@ -105,4 +105,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-70](T-70-server-sizing.md) | Optimise servers per household (reference house, marginal-value sizing) | Ennio / Claude | done; ADR 0062 |
 
 | [T-70](T-70-warm-gpu-worker.md) | Keep native GPU renderer warm across frame jobs | Nikita / Codex | in progress; user chose speed first; ADR 0062 review |
-| [T-71](T-71-live-household-demo.md) | Live one-house request and dashboard | Codex | in progress |
+| [T-72](T-72-live-household-demo.md) | Live one-house request and dashboard | Codex | in progress |

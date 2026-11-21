@@ -1,4 +1,4 @@
-# 0063: Paced Fleet decisions for a real household demo job
+# 0064: Paced Fleet decisions for a real household demo job
 
 - **Status:** proposed
 - **Date:** 2026-11-21

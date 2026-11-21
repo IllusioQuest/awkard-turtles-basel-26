@@ -69,7 +69,7 @@ later.
 
 | [0060](0060-fleet-job-event-log.md) | Optional fleet job event log for the household view | proposed; reviewed with changes |
 
-| [0063](0063-live-fleet-household-demo.md) | Paced Fleet decisions for a real household demo job | proposed; reviewed with changes |
+| [0064](0064-live-fleet-household-demo.md) | Paced Fleet decisions for a real household demo job | proposed; reviewed with changes |
 
 - [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
 
