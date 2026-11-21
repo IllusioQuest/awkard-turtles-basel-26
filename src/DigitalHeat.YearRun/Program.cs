@@ -2,13 +2,17 @@ using System.Globalization;
 using System.Text.Json;
 using DigitalHeat.Core;
 
+if (args.Length > 2) throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json]");
 string root = args.Length > 0 ? Path.GetFullPath(args[0]) : FindRepositoryRoot();
+string scenarioPath = args.Length > 1 ? Path.GetFullPath(args[1], root)
+    : Path.Combine(root, "config", "job-scenarios", "unlimited.json");
 var parameters = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
+var jobScenario = JobScenario.Load(scenarioPath);
 var weather = ReadWeather(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
 VerifyElectricitySnapshot(Path.Combine(root, "data", "raw", "elcom", "iwb-basel-h4-2026.json"), parameters);
 var demand = HeatDemand.Build(weather, parameters);
 var result = YearSimulation.Run(demand, parameters,
-    new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor());
+    new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor(), jobScenario);
 string output = Path.Combine(root, "results", "reference-house");
 Directory.CreateDirectory(output);
 WriteHourly(Path.Combine(output, "hourly.csv"), result.Hours);
@@ -16,11 +20,13 @@ File.WriteAllText(Path.Combine(output, "summary.json"), JsonSerializer.Serialize
 {
     result.Summary,
     Parameters = parameters,
+    JobScenario = jobScenario,
     Inputs = new
     {
         Weather = "data/raw/open-meteo/basel-2025-hourly.csv",
         Electricity = "data/raw/elcom/iwb-basel-h4-2026.json",
-        Config = "config/reference-house.json"
+        Config = "config/reference-house.json",
+        JobScenario = Path.GetRelativePath(root, scenarioPath)
     }
 }, new JsonSerializerOptions { WriteIndented = true }));
 Console.WriteLine($"Wrote {result.Hours.Count} hours to {output}");
