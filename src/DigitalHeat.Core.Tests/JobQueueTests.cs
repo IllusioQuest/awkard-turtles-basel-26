@@ -28,7 +28,7 @@ public sealed class JobQueueTests
     {
         var p = Parameters();
         var scenario = new JobScenario("finite", "wait", "synthetic test fixture",
-            [Type("batch", 10, 4, 1, 24)]);
+            [Type("batch", 10, 4, 1, 12)]);
         var demand = Enumerable.Range(0, 48).Select(hour => new DemandHour(
             $"2025-07-{hour / 24 + 1:00}T{hour % 24:00}:00", 25, false, 0, 0)).ToArray();
         var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),
@@ -57,7 +57,7 @@ public sealed class JobQueueTests
     {
         var p = Parameters();
         var scenario = new JobScenario("finite", "run-and-dump", "synthetic test fixture",
-            [Type("batch", 10, 4, 1, 24)]);
+            [Type("batch", 10, 4, 1, 12)]);
         var demand = Enumerable.Range(0, 48).Select(hour => new DemandHour(
             $"2025-07-{hour / 24 + 1:00}T{hour % 24:00}:00", 25, false, 0, 0)).ToArray();
         var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(0),

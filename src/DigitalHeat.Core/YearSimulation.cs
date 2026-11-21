@@ -75,11 +75,13 @@ public static class YearSimulation
         string jobDemandAssumption = jobScenario is null
             ? "Unlimited immediately available compute work is assumed for the load target; no job arrivals or deadlines are modelled."
             : $"{jobScenario.Mode} jobs; excess heat policy: {jobScenario.ExcessHeatPolicy}; source: {jobScenario.Source}";
+        string profitabilityNote = "Case break-even covers electricity minus used-heat value only. Hardware, integration and operations are excluded; this is not a full-cost profitability claim."
+            + (jobs is null ? "" : " Finite-job computing income assumes all achieved server-hours are billable, including work on jobs that later miss deadlines; penalties are not modelled.");
         var summary = new YearSummary((int)count, demand.Count(x => x.HeatingDay) / (int)p.HoursPerDay.Value,
             rows.Count, space, hot, total, used, backupTotal, rows.Sum(x => x.DumpedHeatKwh),
             serverHours, serverHours / (count * rows.Count * p.HoursPerStep.Value), used / total,
             electricCost, heatValue, income, breakEven, missedDeadlines, jobDemandAssumption,
-            "Case break-even covers electricity minus used-heat value only. Hardware, integration and operations are excluded; this is not a full-cost profitability claim.",
+            profitabilityNote,
             jobs);
         return new YearResult(rows, summary);
     }

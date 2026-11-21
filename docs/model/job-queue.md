@@ -40,9 +40,12 @@ deadline falls within the run, including jobs completed before that deadline. Jo
 deadlines remain completed or backlog counts but are excluded from this percentage. If no jobs
 are due, the percentage is `null`. `summary.json` gives totals and per-type completed, missed,
 backlog, processed work units and remaining work units. Work units are not summed across types.
+The existing computing income still prices all achieved server-hours, including partial work on
+jobs that later miss deadlines. Whether those hours are billable and any deadline penalties
+require a service contract; this finite scenario does not claim that revenue is verified.
 
 The synthetic two-day regression test uses 10 jobs/day, 4 work units/job, 1 work unit/server-hour
-and a 24-hour deadline. Day one supplies 40 server-hours of work; day two starts with the tank
+and a 12-hour deadline. Day one supplies 40 server-hours of work; day two starts with the tank
 almost full, then has insufficient heat-led runtime. Ten of the 20 due jobs miss their deadline,
 so the fixture reports 50%. These values are **test inputs**, not a demand forecast or scored
 reference-house figures.
