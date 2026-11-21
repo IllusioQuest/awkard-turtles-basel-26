@@ -12,6 +12,7 @@
 | [WP1](#wp1-priced-ai-services-and-compute-prices) | Priced AI services and compute prices | 2 (market) + 1 (income) | Claude subagent (first version) | `docs/research/ai-services.md`, `data/raw/market/ai-services.csv`, `data/raw/market/compute-prices.csv` |
 | [WP2](#wp2-costs-and-energy-prices) | Costs and energy prices | 1 (financial) | Codex (GPT-6 Astra); status: first version | `docs/research/costs-and-energy.md`, `data/raw/market/costs.csv`, `data/raw/market/energy-prices.csv` |
 | [WP3](#wp3-sites-and-heat-demand-profiles) | Sites and heat-demand profiles | 2 (customers) + 3 (physics input) | Claude subagent (**first version**, 2026-11-20) | `docs/research/sites-and-profiles.md`, `data/raw/sites/site-types.csv`, `data/raw/sites/when2heat/` |
+| T-37 | Profitability inputs: R1 power, R2 purchase cost, R3 household capacity (Basel-Stadt → CH), R4 compute demand, R5 trends to 2030 | 1 + 2 | Ennio / Claude subagents (first version, 2026-11-21) | `power-efficiency.md`, `purchase-cost.md`, `household-capacity.md`, `compute-demand.md`, `trends-2030.md`, synthesis [`profitability-inputs.md`](profitability-inputs.md); one CSV each in `data/raw/market/` |
 
 Service brainstorm and current main plan (audio to text, document AI): [`service-brainstorm.md`](service-brainstorm.md).
 

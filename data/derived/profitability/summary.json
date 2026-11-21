@@ -1,0 +1,179 @@
+{
+  "reference_house": {
+    "servers": 4,
+    "sold_server_hours": 22661.025390625,
+    "case_break_even": 0.22609999999999608
+  },
+  "profiles": {
+    "cpu-dense (R6615, EPYC 9354P)": {
+      "price": 25671.42857142857,
+      "ops": 2528.5714285714284,
+      "basis": "3.57 boxes x CHF 7,188 (pc-cpu-brack-r6615-9354p, TDP pc-cpu-dell-epyc9354p-tdp)",
+      "fixed_per_year": 6807.142857142857,
+      "full_be": 1.4276595481321848
+    },
+    "gpu-l4 (11.6 L4 + host, Bechtle price)": {
+      "price": 44179.1063888889,
+      "ops": 708.0,
+      "basis": "11.63 x CHF 3,089 (pc-gpu-bechtle-l4) + host CHF 8,248",
+      "fixed_per_year": 8071.18439814815,
+      "full_be": 1.6507812329131806
+    },
+    "gpu-rtx4090 (2 desktops)": {
+      "price": 16300,
+      "ops": 1416,
+      "basis": "config/hardware/gpu-consumer-rtx4090.json",
+      "fixed_per_year": 4132.666666666666,
+      "full_be": 0.9555756694242711
+    }
+  },
+  "options": [
+    {
+      "option": "Type 2 CPU, pinned price",
+      "profile": "cpu-dense (R6615, EPYC 9354P)",
+      "price_year1": 0.66,
+      "price_lifetime_avg": 0.36536283583160184,
+      "lifetime_avg_factor": 0.5535800542903058,
+      "full_be": 1.4276595481321848,
+      "surplus_fill_1": -17395.95251157915,
+      "surplus_fill_base": -23787.15480762413,
+      "fill_needed_year1": 2.7692084538653554,
+      "fill_needed_lifetime": 8.627998568010591
+    },
+    {
+      "option": "Type 2 CPU, Swiss spot ceiling",
+      "profile": "cpu-dense (R6615, EPYC 9354P)",
+      "price_year1": 1.8,
+      "price_lifetime_avg": 0.9964440977225504,
+      "lifetime_avg_factor": 0.5535800542903058,
+      "full_be": 1.4276595481321848,
+      "surplus_fill_1": 8437.616433733354,
+      "surplus_fill_base": -14745.405676764756,
+      "fill_needed_year1": 0.7634281391017126,
+      "fill_needed_lifetime": 1.5597699153981706
+    },
+    {
+      "option": "L4 sold at AWS spot equivalent",
+      "profile": "gpu-l4 (11.6 L4 + host, Bechtle price)",
+      "price_year1": 2.23,
+      "price_lifetime_avg": 1.234483521067382,
+      "lifetime_avg_factor": 0.5535800542903058,
+      "full_be": 1.6507812329131806,
+      "surplus_fill_1": 13125.69118768092,
+      "surplus_fill_base": -16391.08751949687,
+      "fill_needed_year1": 0.7109542556580577,
+      "fill_needed_lifetime": 1.4128366867847486
+    },
+    {
+      "option": "RTX 4090 at home-host marketplace",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 0.57,
+      "price_lifetime_avg": 0.31554063094547424,
+      "lifetime_avg_factor": 0.5535800542903058,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": -8737.54003483064,
+      "surplus_fill_base": -13803.072345524055,
+      "fill_needed_year1": 2.1211854301374435,
+      "fill_needed_lifetime": 8.155976335508566
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batch 1, list price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 1.721623670051628,
+      "price_lifetime_avg": 0.8571942038442706,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": 17359.433192654054,
+      "surplus_fill_base": -4669.131715904416,
+      "fill_needed_year1": 0.48777273408122673,
+      "fill_needed_lifetime": 1.1558903012905448
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batch 1, batch-API price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 0.860811835025814,
+      "price_lifetime_avg": 0.4285971019221353,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": -2147.445657416418,
+      "surplus_fill_base": -11496.539313429079,
+      "fill_needed_year1": 1.1493021386541538,
+      "fill_needed_lifetime": 3.6024005405507515
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batched (conservative), list price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 1.9486656,
+      "price_lifetime_avg": 0.970238087805,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": 22504.436131950606,
+      "surplus_fill_base": -2868.3806871506204,
+      "fill_needed_year1": 0.42348208359918105,
+      "fill_needed_lifetime": 0.980296105493029
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batched (conservative), batch-API price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 0.9743328,
+      "price_lifetime_avg": 0.4851190439025,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": 425.05581223186164,
+      "surplus_fill_base": -10596.163799052181,
+      "fill_needed_year1": 0.9749314243164309,
+      "fill_needed_lifetime": 2.816301297517156
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batched (optimistic), list price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 8.835740838227352,
+      "price_lifetime_avg": 4.399303962271543,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": 178572.62297256538,
+      "surplus_fill_base": 51755.48470706454,
+      "fill_needed_year1": 0.08472777008134373,
+      "fill_needed_lifetime": 0.1747999081806701
+    },
+    {
+      "option": "Type 1 LLM on RTX 4090, batched (optimistic), batch-API price",
+      "profile": "gpu-rtx4090 (2 desktops)",
+      "price_year1": 4.417870419113676,
+      "price_lifetime_avg": 2.1996519811357715,
+      "lifetime_avg_factor": 0.4978987096631664,
+      "full_be": 0.9555756694242711,
+      "surplus_fill_1": 78459.14923253923,
+      "surplus_fill_base": 16715.768898055394,
+      "fill_needed_year1": 0.17402567328067492,
+      "fill_needed_lifetime": 0.3696257693726735
+    }
+  ],
+  "basel_capacity": {
+    "0.01": 4825195.0,
+    "0.05": 24125973.0,
+    "0.1": 48251945.0
+  },
+  "demand": {
+    "Basel physician dictation, large-v3 (CPU)": 546.0,
+    "sciCORE Basel research, energy basis": 79920.0,
+    "sciCORE Basel research, node basis (upper bound)": 460490.0,
+    "OpenRouter token volume on RTX 4090, batched (conservative)": 652286364.5768673,
+    "OpenRouter token volume on RTX 4090, batch 1": 738307692.9709514
+  },
+  "tokens_per_server_hour": {
+    "batch1": 13663679.921044666,
+    "batched_conservative": 15465600.0,
+    "batched_optimistic": 70124927.28751867
+  },
+  "yearly_price_factor": {
+    "compute": 0.754449340198601,
+    "tokens": 0.7071
+  },
+  "lifetime_years": 6,
+  "fill_rate": {
+    "base": 0.35,
+    "low": 0.2,
+    "high": 0.6
+  }
+}
