@@ -19,6 +19,12 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
+## Open coordination
+
+- **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
+- **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
+- **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).
+
 ## Shared interfaces
 
 - `IScheduler.Decide(HeatSignal)` and `IExecutor.ApplyTargetLoad`, wired by
