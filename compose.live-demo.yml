@@ -1,5 +1,6 @@
 # Live demo (decision 0042, ticket T-54): four node workers, each with its own queue under
 # data/external/research-sim/live-demo-work/queue/<node>/. Start: docker compose -f compose.live-demo.yml up -d --build
+name: digitalheat-live-demo
 services:
   node-1:
     image: digitalheat/research-sim:live-demo

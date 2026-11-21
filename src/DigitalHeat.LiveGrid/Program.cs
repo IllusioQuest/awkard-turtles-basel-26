@@ -9,7 +9,14 @@ using DigitalHeat.Network;
 // Options: --config config/live-demo-four-node.json  --port 5087  --no-browser
 var root = FindRoot();
 bool up = args.Contains("--up");
-if (up) Compose("up", "-d", "--build");
+string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
+if (up)
+{
+    // Containers with the demo's names left over from another checkout would block `compose up`.
+    RemoveStale(JsonDocument.Parse(File.ReadAllText(configPath)).RootElement.GetProperty("nodes")
+        .EnumerateArray().Select(n => n.GetProperty("container").GetString()!).ToArray());
+    Compose("up", "-d", "--build");
+}
 int port = int.Parse(Arg("--port") ?? "5087");
 if (Arg("--replay") is { } replayArgument)
 {
@@ -39,7 +46,6 @@ if (Arg("--replay") is { } replayArgument)
     await replayApp.RunAsync();
     return;
 }
-string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
 var reference = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
 var config = JsonSerializer.Deserialize<DemoConfig>(File.ReadAllText(configPath),
     new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
@@ -125,6 +131,14 @@ void Compose(params string[] verb)
     using var p = System.Diagnostics.Process.Start(psi) ?? throw new InvalidOperationException("docker not found");
     p.WaitForExit();
     if (p.ExitCode != 0) throw new InvalidOperationException($"docker compose {string.Join(' ', verb)} failed (is Docker running?)");
+}
+
+void RemoveStale(string[] names)
+{
+    var psi = new System.Diagnostics.ProcessStartInfo("docker") { RedirectStandardError = true, RedirectStandardOutput = true };
+    foreach (var a in new[] { "rm", "-f" }.Concat(names)) psi.ArgumentList.Add(a);
+    using var p = System.Diagnostics.Process.Start(psi);
+    p?.WaitForExit();   // "No such container" is fine
 }
 
 static void OpenBrowser(string url)
