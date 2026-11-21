@@ -61,6 +61,18 @@ ELCOM = {
     "target": RAW / "elcom" / "iwb-basel-h4-2026.json",
 }
 
+# Cantonal median of the standard product, category H4, all 26 cantons (canton = BFS canton number).
+# Used by the web calculator to prefill the heat price per canton (price / heat pump efficiency).
+ELCOM_CANTONS = {
+    "url": ELCOM["url"],
+    "query": """{ cantonMedianObservations(locale: "de",
+      filters: {period: ["2026"], category: ["H4"], product: ["standard"]}) {
+        period category canton cantonLabel
+        total: value(priceComponent: total)
+      } }""",
+    "target": RAW / "elcom" / "canton-median-h4-2026.json",
+}
+
 # --- Reference-house rules and expected values (from docs/case/challenge.md) -------
 
 HEATING = {
@@ -94,23 +106,23 @@ def fetch_open_meteo() -> None:
     print(f"[fetch] Open-Meteo -> {OPEN_METEO['target'].relative_to(REPO_ROOT)} ({len(body)} bytes)")
 
 
-def fetch_elcom() -> None:
-    payload = json.dumps({"query": ELCOM["query"]}).encode()
-    body = _download(ELCOM["url"], data=payload, headers={"content-type": "application/json"})
+def fetch_elcom(cfg: dict = ELCOM) -> None:
+    payload = json.dumps({"query": cfg["query"]}).encode()
+    body = _download(cfg["url"], data=payload, headers={"content-type": "application/json"})
     result = json.loads(body)
     if "errors" in result:
         raise RuntimeError(f"ElCom API error: {result['errors']}")
     snapshot = {
-        "source": ELCOM["url"],
-        "query": " ".join(ELCOM["query"].split()),
+        "source": cfg["url"],
+        "query": " ".join(cfg["query"].split()),
         "retrieved_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "unit": "Rp./kWh (CHF cents per kWh); 'total' price component as published by ElCom "
                 "(VAT treatment: verify on strompreis.elcom.admin.ch)",
         "response": result,
     }
-    ELCOM["target"].parent.mkdir(parents=True, exist_ok=True)
-    ELCOM["target"].write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
-    print(f"[fetch] ElCom -> {ELCOM['target'].relative_to(REPO_ROOT)}")
+    cfg["target"].parent.mkdir(parents=True, exist_ok=True)
+    cfg["target"].write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
+    print(f"[fetch] ElCom -> {cfg['target'].relative_to(REPO_ROOT)}")
 
 
 def read_open_meteo(path: Path) -> list[tuple[str, float]]:
@@ -169,6 +181,19 @@ def check_elcom() -> bool:
     return passed
 
 
+def check_elcom_cantons() -> bool:
+    snapshot = json.loads(ELCOM_CANTONS["target"].read_text())
+    obs = snapshot["response"]["data"]["cantonMedianObservations"]
+    cantons = {o["canton"] for o in obs}
+    basel = [o["total"] for o in obs if o["canton"] == "12"]
+    passed = len(obs) == 26 and len(cantons) == 26 and basel == [33.25]
+    if passed:
+        print("[check] OK   ElCom canton medians H4 2026: 26 cantons, Basel-Stadt 33.25 Rp./kWh")
+    else:
+        print(f"[check] FAIL ElCom canton medians: {len(obs)} rows, {len(cantons)} cantons, Basel-Stadt {basel}")
+    return passed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group()
@@ -183,7 +208,8 @@ def main() -> int:
     if not args.check:
         fetch_open_meteo()
         fetch_elcom()
-    ok = check_open_meteo() & check_elcom() & fetch_prices.check_derived()
+        fetch_elcom(ELCOM_CANTONS)
+    ok = check_open_meteo() & check_elcom() & check_elcom_cantons() & fetch_prices.check_derived()
     official = sorted((RAW / "official").glob("*.csv"))
     if official:
         print(f"[info]  official profile present: {[p.name for p in official]} "

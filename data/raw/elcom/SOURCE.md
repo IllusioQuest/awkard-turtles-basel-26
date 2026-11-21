@@ -33,3 +33,21 @@ Derived for the reference house:
 - VAT treatment: verify on the website whether the published totals include VAT before quoting
   prices in the pitch.
 - To check by hand: open the website, search "IWB", choose 2026 and category H4.
+
+---
+
+# Source: ElCom cantonal median electricity price 2026, H4, standard product
+
+| Field | Value |
+|---|---|
+| File | `canton-median-h4-2026.json` (API response wrapped with query and retrieval time) |
+| Endpoint | same GraphQL API, field `cantonMedianObservations` |
+| Query | period `2026`, category `H4`, product `standard`; full query stored in the file |
+| Retrieved | 2026-11-21 by `scripts/fetch_data.py` (`ELCOM_CANTONS`) |
+| Used by | web calculator (`web/src/params.ts`): heat price per canton = total ÷ 2.5 |
+
+- `canton` is the BFS canton number (1 = Zürich … 26 = Jura).
+- Without the `product` filter the API returns two rows per canton; the second is a cheaper
+  product. We use the standard product. Check: Basel-Stadt median = 33.25 Rp./kWh, identical to
+  the IWB value above.
+- Same caveats as above (H4 profile, VAT treatment to verify).
