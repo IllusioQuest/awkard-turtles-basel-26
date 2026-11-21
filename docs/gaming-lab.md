@@ -1,3 +1,7 @@
+# Current architecture
+
+See [How the browser gaming prototype works](gaming-architecture.md) for the current implementation and integration boundary. The following sections retain the experiment log and reproduction commands.
+
 # Browser gaming lab (T-39)
 
 Status 2026-11-21: compatibility experiment, two healthy Linux Selkies desktops. Code branch
