@@ -12,6 +12,7 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     Dictionary<string,string> Peers, double HeatDemandKwh, double CpuCores, long RamMib,
     double FrameHeatKwh, int Frames, double DeadlineSeconds, string Source)
 {
+    public bool ServeUi { get; init; } = true; // Remote workers expose token-protected peer APIs only.
     public GpuBinding? Gpu { get; init; }
     public string? GpuBackend { get; init; }
     public double GpuFrameShare { get; init; } = .8; // User-approved workload mix; not a utilization promise.
@@ -50,40 +51,10 @@ internal static class RenderNodeHost
         string enginePath=Path.Combine(cfg.StateDirectory,"engine-id");
         if(File.Exists(enginePath)&&File.ReadAllText(enginePath)!=engine)throw new InvalidDataException("Engine changed; inspect before recovery");
         File.WriteAllText(enginePath,engine);
-        // Enumerate with the SAME bindings used for frame execution. A host OpenGL device is
-        // not proof of Cycles compute support; the selected backend must render successfully.
-        List<string> ProbeArguments()
-        {
-            var args=new List<string>{"run","--rm","--network","none"};
-            if(cfg.Gpu is {} binding){
-                if(binding.NvidiaDeviceId is {} nvidia)args.AddRange(["--gpus","device="+nvidia]);
-                foreach(var d in binding.LinuxDevices)args.AddRange(["--device",d]);
-                foreach(var bind in binding.ReadOnlyBinds)args.AddRange(["--volume",bind+":ro"]);
-            }
-            args.Add(cfg.Image);
-            return args;
-        }
-        var probeArgs=ProbeArguments();probeArgs.Add("--probe");
-        string probe=docker.Run(probeArgs);
-        string device=probe.Split('\n').FirstOrDefault(l=>l.StartsWith("RENDER_DEVICES=")) ?? throw new InvalidDataException("No Blender device report");
-        File.WriteAllText(Path.Combine(cfg.StateDirectory,"devices.json"),device["RENDER_DEVICES=".Length..]);
-        using var report=JsonDocument.Parse(device["RENDER_DEVICES=".Length..]);
-        string compiled=report.RootElement.TryGetProperty("compiled_backends",out var compiledElement)
-            ?string.Join(", ",compiledElement.EnumerateArray().Select(x=>x.GetString())):"not reported by image";
-        string? gpuBackend=null;
-        string gpuDiagnostic=$"GPU binding/backend not configured. Image Cycles backends: {compiled}.";
-        if(cfg.Gpu is not null && cfg.GpuBackend is {} backend){
-            try{
-                var args=ProbeArguments();args.AddRange(["--verify-gpu",backend]);
-                string verification=docker.Run(args);
-                if(!verification.Contains("RENDER_GPU_VERIFIED="+backend,StringComparison.Ordinal))
-                    throw new InvalidOperationException("GPU probe did not confirm a completed render");
-                gpuBackend=backend;gpuDiagnostic=backend+" passed an actual Cycles render.";
-            }catch(Exception e){
-                gpuDiagnostic=$"{backend} verification failed: {e.Message}. Image Cycles backends: {compiled}.";
-                Console.Error.WriteLine(gpuDiagnostic);
-            }
-        }
+        var gpuProbe=RenderDeviceProbe.Run(cfg,docker);
+        File.WriteAllText(Path.Combine(cfg.StateDirectory,"devices.json"),gpuProbe.Devices.GetRawText());
+        string? gpuBackend=gpuProbe.VerifiedBackend;
+        string gpuDiagnostic=gpuProbe.Diagnostic;
         string output=Path.Combine(cfg.StateDirectory,"frames");Directory.CreateDirectory(output);
         var runtime=new ArtifactRuntime(docker,output,cfg.Id);
         var outgoing=Channel.CreateBounded<(string From,string To,PeerMessage Message)>(256);
@@ -121,6 +92,7 @@ internal static class RenderNodeHost
         app.Use(async(ctx,next)=>{
             // Browser UI is reachable only through the local-only published home peer.
             bool browser=ctx.Request.Path.StartsWithSegments("/ui");
+            if(browser && !cfg.ServeUi){ctx.Response.StatusCode=404;return;}
             if(!browser && ctx.Request.Headers["X-Mesh-Token"]!=token){ctx.Response.StatusCode=401;return;}
             if(browser && ctx.Request.Method=="POST" && ctx.Request.Headers["X-Render-Request"]!="local")
             {ctx.Response.StatusCode=403;return;}

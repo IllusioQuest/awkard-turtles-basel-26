@@ -20,17 +20,21 @@ if '--probe' in args:
     print('RENDER_DEVICES='+json.dumps(device_report()))
     sys.exit(0)
 if '--verify-gpu' in args:
-    backend=args[1]
-    prefs=bpy.context.preferences.addons['cycles'].preferences
-    prefs.compute_device_type=backend;prefs.get_devices()
-    gpu=[d for d in prefs.devices if d.type==backend]
-    if not gpu:raise RuntimeError('No compatible GPU')
-    for d in prefs.devices:d.use=d.type==backend
-    s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.device='GPU';s.cycles.samples=1;s.cycles.use_denoising=False
-    s.render.resolution_x=8;s.render.resolution_y=8;s.render.resolution_percentage=100
-    bpy.ops.render.render()
-    print('RENDER_GPU_VERIFIED='+backend)
-    sys.exit(0)
+    try:
+        backend=args[1]
+        prefs=bpy.context.preferences.addons['cycles'].preferences
+        prefs.compute_device_type=backend;prefs.get_devices()
+        gpu=[d for d in prefs.devices if d.type==backend]
+        if not gpu:raise RuntimeError('No compatible GPU')
+        for d in prefs.devices:d.use=d.type==backend
+        s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.device='GPU';s.cycles.samples=1;s.cycles.use_denoising=False
+        s.render.resolution_x=8;s.render.resolution_y=8;s.render.resolution_percentage=100
+        bpy.ops.render.render()
+        print('RENDER_GPU_VERIFIED='+backend)
+        sys.exit(0)
+    except Exception as error:
+        print("RENDER_GPU_ERROR="+str(error),flush=True)
+        raise
 frame=int(args[0]); backend=args[1] if len(args)>1 else 'CPU'
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=32;scene.cycles.use_denoising=False
