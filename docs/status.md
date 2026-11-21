@@ -119,3 +119,6 @@ T-74 Nikita/Codex, fix/T-74-render-labels, 7a3551a: requested presentation-only 
 
 
 T-75 Nikita/Codex, fix/T-75-compact-render-map: bottom Physical hosts footer removed, actual origin peer labelled Initial job provider in graphic, compact cards for five-worker desktop row (responsive wrapping). Live HTML and JS syntax verified; visual browser access unavailable. No runtime/heat changes.
+
+
+T-76 Nikita/Codex, fix/T-76-gpu-worker-shades: user-approved related GPU shades and weights1.5/1/.5. Preserves synthetic total500kWh, heat-first policy, CPU roles and prior outputs. Renderer-only restart/validation underway; Minecraft untouched. Depends PR67.
