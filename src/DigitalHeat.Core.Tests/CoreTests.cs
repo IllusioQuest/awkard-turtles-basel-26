@@ -48,7 +48,7 @@ public sealed class CoreTests
     public void HourlyStorageAndHeatBalancesClose()
     {
         var p = Parameters();
-        var result = YearSimulation.Run(Demand(), p, new GreedyHeatScheduler(p.MinimumLoadShare.Value),
+        var result = YearSimulation.Run(Demand(), p, new HeatFirstScheduler(p.MinimumLoadShare.Value),
             new SimulatedExecutor());
         double previousTank = 0;
         foreach (var h in result.Hours)
@@ -65,7 +65,7 @@ public sealed class CoreTests
     public void FourServerReferenceMatchesExistingYearExplorer()
     {
         var p = Parameters();
-        var result = YearSimulation.Run(Demand(), p, new GreedyHeatScheduler(p.MinimumLoadShare.Value),
+        var result = YearSimulation.Run(Demand(), p, new HeatFirstScheduler(p.MinimumLoadShare.Value),
             new SimulatedExecutor());
         var s = result.Summary;
         Assert.Equal(4, s.ServerCount);
@@ -78,7 +78,7 @@ public sealed class CoreTests
     [Fact]
     public void SchedulerHonoursMinimumLoadAndExecutorCanReportActualLoad()
     {
-        var scheduler = new GreedyHeatScheduler(0.25);
+        var scheduler = new HeatFirstScheduler(0.25);
         var signal = new HeatSignal(0, 35, 35, 4, 0.8);
         Assert.Equal(0.25, scheduler.Decide(signal).TargetLoadPerServer);
         var applied = SchedulerController.Apply(signal, scheduler, new LimitedExecutor());
@@ -90,7 +90,7 @@ public sealed class CoreTests
     public void CaseEconomicsUseElectricityAndActuallyUsedHeat()
     {
         var p = Parameters();
-        var result = YearSimulation.Run(Demand(), p, new GreedyHeatScheduler(p.MinimumLoadShare.Value),
+        var result = YearSimulation.Run(Demand(), p, new HeatFirstScheduler(p.MinimumLoadShare.Value),
             new SimulatedExecutor());
         var s = result.Summary;
         Assert.Equal(s.ServerHours * p.ServerElectricKw.Value * p.ElectricityPriceChfPerKwh.Value,

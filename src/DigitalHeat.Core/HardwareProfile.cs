@@ -37,6 +37,8 @@ public sealed class HardwareProfile
     public required ProfileValue LifetimeYears { get; init; }
     public required ProfileValue OpsChfPerServerYear { get; init; }
     public required ProfileValue TranscriptionAudioHoursPerServerHour { get; init; }
+    /// <summary>LLM inference (7–8B model, batched), input and output tokens counted alike, per 1 kW server-hour.</summary>
+    public required ProfileValue LlmTokensPerServerHour { get; init; }
     public required ProfileValue WebhostingSitesPerServer { get; init; }
     public required ProfileValue SpotPriceChfPerServerHour { get; init; }
     public required ProfileValue OnDemandPriceChfPerServerHour { get; init; }
@@ -51,6 +53,7 @@ public sealed class HardwareProfile
         [nameof(PurchasePriceChfPerServer)] = "CHF/server", [nameof(LifetimeYears)] = "years",
         [nameof(OpsChfPerServerYear)] = "CHF/server-year",
         [nameof(TranscriptionAudioHoursPerServerHour)] = "audio hours/server-hour",
+        [nameof(LlmTokensPerServerHour)] = "tokens/server-hour",
         [nameof(WebhostingSitesPerServer)] = "sites/server",
         [nameof(SpotPriceChfPerServerHour)] = "CHF/server-hour",
         [nameof(OnDemandPriceChfPerServerHour)] = "CHF/server-hour",

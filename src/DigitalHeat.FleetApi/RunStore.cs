@@ -242,7 +242,8 @@ public sealed class RunStore
     private static readonly string[] Fields =
     [
         "heat_demand_kwh", "heat_produced_kwh", "heat_used_kwh", "heat_dumped_kwh", "heat_backup_kwh", "electric_kwh",
-        "tank_end_kwh", "income_t1_chf", "income_t2_chf", "electricity_chf", "late_work_kwh"
+        "tank_end_kwh", "income_t1_chf", "income_t2_chf", "electricity_chf", "late_work_kwh",
+        "heat_value_chf", "jobs_on_time", "deadlines_missed" // older runs lack these: stay 0
     ];
 
     private sealed class RunSeries(int houses, int periods, int periodHours, double[][] data, double[] temp, double[] servers, double maxKw)
@@ -351,7 +352,7 @@ public sealed class RunStore
         double electric = d[5][i];
         double capacity = s.Servers[house] * s.MaxKw * s.PeriodHours;
         return new HousePeriod(period * s.PeriodHours, capacity > 0 ? electric / capacity : 0, s.Temp[i], d[0][i], d[1][i], d[2][i],
-            d[3][i], d[4][i], electric, d[6][i], d[7][i] + d[8][i], d[9][i], d[10][i]);
+            d[3][i], d[4][i], electric, d[6][i], d[7][i] + d[8][i], d[9][i], d[10][i], d[11][i], d[12][i], d[13][i]);
     }
 
     public IReadOnlyList<HousePeriod> HouseSeries(string runId, string houseId)

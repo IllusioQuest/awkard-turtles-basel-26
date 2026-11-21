@@ -38,3 +38,8 @@ data/derived/network/experiments/runs/
 # Fleet simulation runs (T-58); small reference runs are force-added
 data/derived/fleet/*
 !data/derived/fleet/README.md
+# Pinned composition inputs for T-59, distinct from ordinary simulation run output.
+!data/derived/fleet/populations/
+data/derived/fleet/populations/*
+!data/derived/fleet/populations/bfs-residential-2020-covered-1000.nodes.json
+!data/derived/fleet/populations/bfs-residential-2020-covered-1000.summary.csv

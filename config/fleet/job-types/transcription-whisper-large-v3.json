@@ -6,7 +6,7 @@
   "energy_kwh_per_work_unit": {
     "value": 3.546853940554728e-05,
     "unit": "kWh/audio minute",
-    "source": "derived: 1 kWh per 1 kW server-hour / (469.9 audio hours per server-hour x 60 min/h) = 3.5469e-5 kWh per audio minute; TranscriptionAudioHoursPerServerHour in config/hardware/gpu-inference-l4.json (whisper-large-v3-turbo on L4, data/raw/market/hardware.csv hw-perf-e2e-l4-whisper-turbo-b4, low: vendor blog via snippet)"
+    "source": "derived: 1 kWh per 1 kW server-hour / (469.9 audio hours per server-hour x 60 min/h) = 3.5469e-5 kWh per audio minute; TranscriptionAudioHoursPerServerHour in config/hardware/gpu-inference-l4.json (whisper-large-v3-turbo on L4, data/raw/market/hardware.csv hw-perf-e2e-l4-whisper-turbo-b4, low: vendor blog via snippet); same hardware profile as the LLM throughput and the full-cost step; checked by the fleet test suite"
   },
   "size": {
     "dist": "lognormal",

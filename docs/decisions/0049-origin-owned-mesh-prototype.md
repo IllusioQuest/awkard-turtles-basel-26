@@ -49,4 +49,5 @@ full-mesh offer traffic is O(n²), not free scalability. Synthetic fixture value
 
 ## Review
 
-Pending one fresh limited-context review.
+Fresh limited-context review: go with changes. Added durable rejected-proposal tombstones before replanning, mapped raw offer revisions to retained-heat admission revisions, and labelled the heat-first policy separately from origin-first B2. Covered lost replies, delayed duplicates after restart, competing offers and retained hourly heat. The subsequent user request retires old policies only after replacement checks; see the follow-up unification record.
+

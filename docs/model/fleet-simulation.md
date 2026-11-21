@@ -140,7 +140,7 @@ Every number is `{value, unit, source}`. A distribution is
 | | T1 `transcription-whisper-large-v3` | T1 `llm-inference-apertus-8b` | T2 `research-sim-montecarlo` |
 |---|---|---|---|
 | work unit | audio minute | token | simulation task |
-| energy per unit (GPU) | 1 kWh ÷ (469.9 audio h × 60) = 3.55e-5 kWh per audio min (`config/hardware/gpu-inference-l4.json` `TranscriptionAudioHoursPerServerHour`, whisper-large-v3-turbo on L4, low confidence) | 0.21 J per token = 5.83e-8 kWh (RTX 4090, vLLM batched, `pe-rtx4090-vllm-iog-qps8`, conservative reading, `docs/research/profitability-inputs.md`) | `TODO(source)`: no GPU measurement; the CPU laptop value 4.09e-6 kWh per task (`config/jobs/research-sim-montecarlo.json`) is the labelled placeholder |
+| energy per unit (GPU) | 1 kWh ÷ (469.9 audio h × 60) = 3.55e-5 kWh per audio min (`config/hardware/gpu-inference-l4.json` `TranscriptionAudioHoursPerServerHour`, whisper-large-v3-turbo on L4, low confidence) | 1 kWh ÷ 25 M tokens = 4.0e-8 kWh per token (`gpu-inference-l4.json` `LlmTokensPerServerHour`, `docs/research/l4-throughput.md` §2, all tokens counted, range 17–120 M) | `TODO(source)`: no GPU measurement; the CPU laptop value 4.09e-6 kWh per task (`config/jobs/research-sim-montecarlo.json`) is the labelled placeholder |
 | size | lognormal, median 6.5 audio min (Bax 2011); spread `TODO(source)` | empirical tokens per request, `data/derived/demand/llm-token-quantiles.csv` (Azure `conv`) | empirical runtime, `job-durations.csv` (Alibaba 2020), converted to tasks at load 1 |
 | batch size | distribution, configurable | distribution, configurable | 1 |
 | deadline | uniform 2 h–3 d (team range) | uniform 2 h–3 d | uniform 2 h–3 d |
@@ -296,7 +296,8 @@ Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `ch
   server-hour.
 - **Missed deadlines:** recorded, never netted into income. Per job: `deadline_missed`,
   `lateness_s`, units done after the deadline. Per house: units done for late jobs.
-- **Post-run only** (`FleetRun post <run-dir> --hardware config/hardware/gpu-inference-l4.json`):
+- **Post-run only** (`FleetRun post <run-dir>`; hardware = the scenario's `servers.hardware_profile`, the same
+  profile the job-type throughputs come from (test `JobTypeEnergyMatchesTheScenarioHardwareProfile`); `--hardware <file>` overrides):
   `houses-fullcost.csv` with `hardware_chf_per_year` (purchase ÷ lifetime + ops),
   `net_after_hardware_chf`, `payback_years`. Never used during the run.
 
@@ -318,7 +319,7 @@ Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `ch
 {
   "run":       { "start_local": "2025-01-01T00:00", "end_local": "2026-01-01T00:00",
                  "mode": "event", "tick_ms": 1000, "seed": 20261121 },
-  "houses":    { "file": "config/fleet/houses/ch-1000.csv" },        // or "generate": { §4.2 spec }
+  "houses":    { "file": "config/fleet/houses/ch-100.csv" },         // or "generate": { §4.2 spec }
   "servers":   { "policy": "fixed", "n": 4 },                         // or share_of_peak / from_file
   "jobTypes":  ["config/fleet/job-types/transcription-whisper-large-v3.json",
                 "config/fleet/job-types/llm-inference-apertus-8b.json",
@@ -334,12 +335,12 @@ Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `ch
 ```
 
 CLI (`dotnet run --project src/DigitalHeat.FleetRun --`): `generate-houses <spec> -o <file>`,
-`run <scenario>`, `post <run-dir> --hardware <file>`.
+`run <scenario>`, `post <run-dir> [--hardware <file>]`.
 
 Scenarios to ship:
 - `reference.json`: the case house, 4 servers, cross-check.
 - `basel-region-100.json`: BS+BL, 100 houses, tick-vs-event test.
-- `ch-1000.json`: Switzerland, 1,000 houses.
+- `ch-100.json`: Switzerland, 100 houses, volume ×10 (map visualisation). (`ch-1000.json` was removed 2026-11-21.)
 
 ## 13. Tests (`DigitalHeat.Fleet.Tests`)
 
@@ -362,7 +363,7 @@ Scenarios to ship:
 6. **Action validation:** every invalid action type throws.
 7. **Determinism:** the same scenario gives byte-identical output files (except wall time in
    `run.json`).
-8. **Performance (reported, not asserted):** wall time and events per second for `ch-1000.json` in
+8. **Performance (reported, not asserted):** wall time and events per second for `ch-100.json` in
    `run.json`.
 
 ## 14. Data sources used
@@ -416,7 +417,7 @@ Choices the spec left open, made during the build:
 - **Mock scheduler.** An urgent Type 1 job is evaluated once, then stays urgent (load 1, sorted
   first in the queue); preemption victims come from a set of houses with checkpointable Type 2
   chunks. A job that can neither pause nor has a `min_load` is floored at load 1e-3.
-- **Inputs.** LLM work unit = input + output token at 0.21 J each (conservative reading); token
+- **Inputs.** LLM work unit = input + output token at 4.0e-8 kWh each (L4, 25 M tokens per server-hour, pessimistic reading); token
   sizes sum the input and output quantile tables with the same draw (comonotonic, mean 1,769 vs
   1,738 tokens in the trace). Research job sizes: Alibaba duration histogram, log-uniform within a
   bin, open ends 1 s and 7 d (`TODO(source)`). Resolved volumes at scale 1: transcription 428,
@@ -437,7 +438,6 @@ First results (event mode, 2025, Release build, laptop; mock scheduler and mock 
 |---|---|---|---|---|---|---|
 | reference (volume 0.1) | 0.9 s | 77,231 / 1,734 | 9,863 / 31,231 kWh | CHF 14,585 | CHF 11,750 | 0.227 CHF/server-h |
 | basel-region-100 | 4.2 s | 778,526 / 148 | 112,744 / 1,889,291 kWh | CHF 115,831 | CHF 85,988 | 0.212 |
-| ch-1000 | 15.5 s (+ ≈ 12 s job generation) | 778,526 / 149 | 112,744 / 18,958,182 kWh | CHF 114,920 | CHF 89,276 | 0.182 |
 
 How to read it: the sourced job volumes (Basel physicians, 1 % × 1 % of OpenRouter, sciCORE) need
 ≈ 140 MWh of electricity a year, so a fleet of 100 or 1,000 houses with 4 servers each is mostly

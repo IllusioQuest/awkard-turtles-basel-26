@@ -19,7 +19,7 @@
   "required": ["Id", "Label", "Status", "Description", "TranscriptionModel",
     "UnitsPerServer", "UnitElectricKw", "UnitPurchasePriceChf", "HostElectricKw", "HostPurchasePriceChf",
     "ServerElectricKw", "IdleElectricKw", "HeatRecoveryShare", "PurchasePriceChfPerServer", "LifetimeYears",
-    "OpsChfPerServerYear", "TranscriptionAudioHoursPerServerHour", "WebhostingSitesPerServer",
+    "OpsChfPerServerYear", "TranscriptionAudioHoursPerServerHour", "LlmTokensPerServerHour", "WebhostingSitesPerServer",
     "SpotPriceChfPerServerHour", "OnDemandPriceChfPerServerHour", "HomeHostPriceChfPerServerHour"],
   "properties": {
     "Id": { "type": "string" },
@@ -39,6 +39,7 @@
     "LifetimeYears": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "years" } } },
     "OpsChfPerServerYear": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-year" } } },
     "TranscriptionAudioHoursPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "audio hours/server-hour" } } },
+    "LlmTokensPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "tokens/server-hour" } } },
     "WebhostingSitesPerServer": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "sites/server" } } },
     "SpotPriceChfPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-hour" } } },
     "OnDemandPriceChfPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-hour" } } },

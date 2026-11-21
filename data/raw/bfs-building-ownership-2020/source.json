@@ -1,0 +1,19 @@
+{
+  "publisher": "Swiss Federal Statistical Office (BFS)",
+  "title": "Allgemeine Übersicht: Gebäude nach Eigentümertyp, 2020",
+  "release_url": "https://statistik.admin.ch/de/news/2022-0305",
+  "asset_url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/22444710/master",
+  "press_release_url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/22224304/master",
+  "methodology_url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/22707037/master",
+  "published_date": "2022-05-19",
+  "reference_date": "2020-12-31",
+  "accessed_date": "2026-11-21",
+  "coverage": "Residential buildings in Switzerland excluding Zurich (ZH) and Valais (VS)",
+  "excluded_cantons": ["ZH", "VS"],
+  "local_file": "overview-22444710.xlsx",
+  "sha256": "13817704ea5cab9e71ce620f5dc93ed79f36249aea0e25e42018161a33439f72",
+  "licence": "BFS open data; source attribution required; original workbook retained unchanged",
+  "percentage_precision": "0.1",
+  "category_rows": {"total": 6, "single_family": 7, "multi_family": 8, "residential_with_secondary_use": 9, "partly_residential": 10},
+  "owner_columns": {"natural_person": "C", "legal_person": "D", "community": "E", "mixed": "F", "unknown": "G"}
+}

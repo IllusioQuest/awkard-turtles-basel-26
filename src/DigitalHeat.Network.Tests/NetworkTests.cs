@@ -27,14 +27,37 @@ public class NetworkTests
             demandKwh.Select((d, i) => new DemandHour($"2025-01-01T{i:00}:00", 0, true, d, 0)).ToArray());
 
     [Fact]
-    public void LocalGreedyOnOneSiteReproducesYearSimulationExactly()
+    public void UnifiedLoadOnOneSiteReproducesYearSimulationExactly()
     {
         var (p, demand, site) = Reference();
-        var year = YearSimulation.Run(demand, p, new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor());
-        var network = NetworkSimulation.Run([site], new LocalGreedyScheduler(), new PerfectForesightForecasts(), 1);
+        var year = YearSimulation.Run(demand, p, new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor());
+        var network = NetworkSimulation.Run([site], new HeatFirstNetworkScheduler(), new PerfectForesightForecasts(), 1);
         Assert.Equal(year.Hours, network.Sites[0].Hours);
         Assert.Equal(year.Summary.ServerHours, network.Sites[0].Summary.ServerHours);
         Assert.Equal(year.Summary.Coverage, network.Sites[0].Summary.Coverage);
+    }
+
+    [Fact]
+    public void UnifiedPolicyOnOneSiteReproducesUnlimitedReferenceYearHourByHour()
+    {
+        var (p, demand, site) = Reference();
+        var year = YearSimulation.Run(demand, p, new HeatFirstScheduler(p.MinimumLoadShare.Value),
+            new SimulatedExecutor());
+        var work = new WorkLedger([site], [null], [1.0], demand.Count, (int)p.HoursPerDay.Value);
+        var network = NetworkSimulation.Run([site], new HeatFirstNetworkScheduler(),
+            new PerfectForesightForecasts(), 1, work: work);
+        Assert.Equal(year.Hours, network.Sites[0].Hours);
+        Assert.Equal(year.Summary.ServerHours, network.Sites[0].Summary.ServerHours);
+        Assert.Equal(year.Summary.Coverage, network.Sites[0].Summary.Coverage);
+        Assert.Equal(year.Summary.DumpedHeatKwh, network.Sites[0].Summary.DumpedHeatKwh);
+        Assert.Equal(year.Summary.BreakEvenChfPerServerHour,
+            network.Sites[0].Summary.CaseBreakEvenChfPerServerHour);
+
+        var routedYear = YearSimulation.Run(demand, p,
+            new SingleSiteUnlimitedNetworkScheduler(site, new HeatFirstNetworkScheduler()),
+            new SimulatedExecutor());
+        Assert.Equal(year.Hours, routedYear.Hours);
+        Assert.Equal(year.Summary, routedYear.Summary);
     }
 
     [Fact]
@@ -42,7 +65,7 @@ public class NetworkTests
     {
         // Decision 0024: with minimum load 0, a lossless tank and unlimited work, greedy is optimal.
         var (_, _, site) = Reference();
-        var greedy = NetworkSimulation.Run([site], new LocalGreedyScheduler(), new PerfectForesightForecasts(), 1)
+        var greedy = NetworkSimulation.Run([site], new HeatFirstNetworkScheduler(), new PerfectForesightForecasts(), 1)
             .Sites[0].Summary;
         var ub = FullYearUpperBound.Solve([site])[0];
         Assert.Equal(greedy.ServerHeatUsedKwh, ub.UsedHeatKwh, 1e-3);

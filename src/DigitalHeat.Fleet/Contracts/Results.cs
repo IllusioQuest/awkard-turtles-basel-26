@@ -48,6 +48,12 @@ public sealed class EnergyAccount
     /// <summary>Units / kWh of work done after the job's deadline (mixed units summed as reported).</summary>
     public double UnitsLate, LateWorkKwh;
     public int Pauses;
+    /// <summary>
+    /// Jobs attributed to this account's house: a job belongs to the house that last ran a chunk of it.
+    /// On time: counted at completion (finish ≤ deadline) at the completing house. Missed: counted when the
+    /// deadline passes with the job not done, at the last house that ran it; jobs never started count nowhere.
+    /// </summary>
+    public int JobsOnTime, DeadlinesMissed;
 
     public double ElectricKwh => ElectricOverheadKwh + ElectricT1Kwh + ElectricT2Kwh;
     /// <summary>heat_used = demand − backup (case, §10): includes tank discharge.</summary>
@@ -63,6 +69,7 @@ public sealed class EnergyAccount
         InstalledServerHours += o.InstalledServerHours;
         IncomeT1Chf += o.IncomeT1Chf; IncomeT2Chf += o.IncomeT2Chf; ElectricityChf += o.ElectricityChf;
         UnitsLate += o.UnitsLate; LateWorkKwh += o.LateWorkKwh; Pauses += o.Pauses;
+        JobsOnTime += o.JobsOnTime; DeadlinesMissed += o.DeadlinesMissed;
     }
 }
 

@@ -84,6 +84,11 @@ public sealed class ServersSection
     [JsonPropertyName("max_electric_kw")] public double? MaxElectricKw { get; set; }
     /// <summary>Default: config/reference-house.json HeatRecoveryShare (case, 0.8).</summary>
     [JsonPropertyName("heat_recovery_share")] public double? HeatRecoveryShare { get; set; }
+    /// <summary>
+    /// Hardware profile (config/hardware/*.json) the job types' energy per work unit is derived from;
+    /// the full-cost step (<c>FleetRun post</c>) uses the same profile for capex and ops. Not read by the engine.
+    /// </summary>
+    [JsonPropertyName("hardware_profile")] public string? HardwareProfile { get; set; }
 }
 
 public sealed class DemandSection
@@ -114,10 +119,7 @@ public sealed class ForecastSection
 
 public sealed class SchedulerSection
 {
-    [JsonPropertyName("id")] public string Id { get; set; } = "mock-heat-led";
-    [JsonPropertyName("low_share")] public double LowShare { get; set; } = 0.3;
-    [JsonPropertyName("high_share")] public double HighShare { get; set; } = 0.9;
-    [JsonPropertyName("urgent_margin_s")] public double UrgentMarginS { get; set; } = 3600;
+    [JsonPropertyName("id")] public string Id { get; set; } = "mesh-heat-first";
     [JsonPropertyName("chunk_target_s")] public double ChunkTargetS { get; set; } = 3600;
 }
 

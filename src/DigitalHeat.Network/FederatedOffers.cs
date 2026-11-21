@@ -47,8 +47,15 @@ public static class FederatedOfferSelection
             }
             catch (ArgumentOutOfRangeException) { /* Untrusted or invalid inventory fails closed. */ }
         }
-        return candidates.OrderByDescending(c => c.HeadroomKwh)
-            .ThenBy(c => c.Offer.SiteId, StringComparer.Ordinal)
-            .Select(c => c.Offer).FirstOrDefault();
+        FederatedCapacityOffer? best = null;
+        HeatPlacementRank bestRank = default;
+        foreach (var candidate in candidates)
+        {
+            var rank = new HeatPlacementRank(candidate.HeadroomKwh, candidate.Offer.SiteId);
+            if (best is not null && rank.CompareTo(bestRank) <= 0) continue;
+            best = candidate.Offer;
+            bestRank = rank;
+        }
+        return best;
     }
 }

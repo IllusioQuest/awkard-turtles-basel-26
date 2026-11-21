@@ -288,6 +288,12 @@ public sealed partial class FleetEngine
                 var job = e.Job!;
                 foreach (var id in job.ActiveIds) Settle(_chunks[id.Value].ServerState.House, t);
                 _hMisses[NetHour(t)]++;
+                if (job.LastHouse >= 0)
+                {
+                    var lh = _houses[job.LastHouse];
+                    Settle(lh, t);
+                    lh.Run.DeadlinesMissed++; lh.Period.DeadlinesMissed++;
+                }
                 _events.Add(new FleetEvent(FleetEventKind.DeadlinePassed, t, Job: job.Id));
                 break;
             }
@@ -413,6 +419,7 @@ public sealed partial class FleetEngine
         _open.Set.Remove(job.Index);
         _openCount[(int)job.TypeValue.Class]--;
         _hCompletions[NetHour(_nowMs)]++;
+        if (_nowMs <= job.RequestValue.DeadlineMs) { h.Run.JobsOnTime++; h.Period.JobsOnTime++; }
         if (_inApply) _events.Add(new FleetEvent(FleetEventKind.JobCompleted, _nowMs, Job: job.Id, House: h.Id));
         else Push(_nowMs, EngineEventKind.EmitJobCompleted, 0, 0, h, null, job);
     }
@@ -543,6 +550,7 @@ public sealed partial class FleetEngine
         a.IncomeT1Chf = a.IncomeT2Chf = a.ElectricityChf = 0;
         a.UnitsLate = a.LateWorkKwh = 0;
         a.Pauses = 0;
+        a.JobsOnTime = a.DeadlinesMissed = 0;
     }
 
     // ------------------------------------------------------------------ crossings
@@ -665,7 +673,8 @@ public sealed partial class FleetEngine
         }
     }
 
-    private static bool HasPending(EnergyAccount a) => a.Pauses != 0 || a.IncomeT1Chf != 0 || a.IncomeT2Chf != 0;
+    private static bool HasPending(EnergyAccount a) => a.Pauses != 0 || a.IncomeT1Chf != 0 || a.IncomeT2Chf != 0
+        || a.JobsOnTime != 0 || a.DeadlinesMissed != 0;
 
     private FleetRunResult BuildResult(double wallS)
     {

@@ -86,6 +86,10 @@ export interface HousePeriod {
   incomeChf: number
   electricityCostChf: number
   lateWorkKwh: number
+  heatValueChf: number // heat used × house electricity price ÷ heat-pump efficiency (case §10)
+  // Jobs attributed to this house (the house that last ran a chunk of the job; never-started jobs count nowhere):
+  jobsOnTime: number // completed by their deadline, counted in the period of completion
+  deadlinesMissed: number // deadline passed while not done, counted in the period of the deadline
 }
 
 /** Map snapshot: every house's period containing hour h. houses[i] belongs to HouseInfo[i] of /houses. */

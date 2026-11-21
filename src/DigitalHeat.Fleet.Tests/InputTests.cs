@@ -163,6 +163,37 @@ public class InputTests(ITestOutputHelper output)
         for (int i = 2; i <= 200; i++) { direct += Math.Log(i); if (i is 21 or 50 or 200) Assert.Equal(direct, Poisson.LogFactorial(i), 9); }
     }
 
+    /// <summary>
+    /// Throughput and capex come from one hardware profile: every shipped scenario names one, and the
+    /// energy per work unit of its GPU job types equals 1 kWh per server-hour ÷ that profile's throughput.
+    /// </summary>
+    [Fact]
+    public void JobTypeEnergyMatchesTheScenarioHardwareProfile()
+    {
+        var scenarios = Directory.GetFiles(P("config/fleet/scenarios"), "*.json");
+        Assert.NotEmpty(scenarios);
+        foreach (var path in scenarios)
+        {
+            var sc = Scenario.Load(path);
+            Assert.False(string.IsNullOrEmpty(sc.Servers.HardwareProfile), $"{sc.Name}: servers.hardware_profile missing");
+            var hw = DigitalHeat.Core.HardwareProfile.Load(sc.Resolve(sc.Servers.HardwareProfile!));
+            double serverKwh = hw.ServerElectricKw.Value!.Value; // energy of one server-hour
+            for (int i = 0; i < sc.JobTypes.Count; i++)
+            {
+                var t = JobTypeLoader.Load(sc.Resolve(sc.JobTypes[i]), i, Root);
+                double? expected = t.WorkUnit switch
+                {
+                    "audio_minute" => serverKwh / (hw.TranscriptionAudioHoursPerServerHour.Value!.Value * 60),
+                    "token" => serverKwh / hw.LlmTokensPerServerHour.Value!.Value,
+                    _ => null // research job: CPU placeholder, no GPU value in any profile (l4-throughput.md section 4)
+                };
+                if (expected is { } e)
+                    Assert.True(Math.Abs(t.EnergyKwhPerWorkUnit.Value - e) <= 1e-9 * e + e * 1e-6,
+                        $"{sc.Name}/{t.Id}: {t.EnergyKwhPerWorkUnit.Value} kWh per {t.WorkUnit} vs {e} from {hw.Id}");
+            }
+        }
+    }
+
     [Fact]
     public void QuantileSamplerHitsMedianAndMean()
     {

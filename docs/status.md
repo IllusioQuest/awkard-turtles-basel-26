@@ -9,8 +9,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Jona / Codex | `docs/T-64-pitch-film-treatment` | T-64: proposed 5-minute film treatment and two narrative voices for T-21 owner | `docs/pitch/` only; no scored model or UI changes | draft for team lead / Claude review |
-| Nikita / Codex | feat/T-60-unified-scheduler | T-62 mesh prototype on Jona T-60 boundary; heat-first shared selection | Core ranking, peer offers/origin intents, retained-heat selected-site binding | in progress; ADR 0049; user selected deterministic mesh first, no reassignment while origin is down; T-61 equivalence remains open |
+| Jona / Codex | `docs/T-67-pitch-film-treatment` | T-67: proposed 5-minute film treatment and two narrative voices for T-21 owner | `docs/pitch/` only; no scored model or UI changes | draft for team lead / Claude review |
+| Nikita / Codex | feat/T-60-unified-scheduler | T-62/T-64/T-65 unified heat-first adapters and real Linux mesh | shared Core load/rank/EDF, selected-site admission, origin journals; retired old modes | PR #52 draft; 47 Core/44 Network/74 orchestration/99 Fleet/57 gaming pass; Linux batch/pause/recovery pass; 1024-node speed guard remains open; wider T-61 equivalence not claimed |
 | Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | PR #49 in review; 125 source rows + deterministic 1000-building composition; ADR 0045 reviewed; Ennio/T-58 notified on PR #48; mixed thermal integration awaits category heat/spatial inputs |
 | Nikita / Codex | fix/T-57-scheduler-cleanup | Remove redundant validation/indexing and clarify event loop | no public interface/model changes | PR #46 in review; 61 orchestration + 46 Core tests; queued owner about half median runtime in both run orders, allocations down 83%; mixed idle timings documented; live games untouched |
 | Nikita / Codex | feat/T-53-cs16-linux | CS on D recovered in OpenGL local test; aiming works; low-FPS investigation | existing C# profile launcher + indexed admission reused | draft PR #42; user confirms map/aiming and prior Internet access; 2-CPU quota saturated/throttled, 20-FPS software stream; CPU increase superseded by user-approved GPU direction; E accelerated GL verified in T-55; actual CS GPU/FPS pending; Minecraft unchanged |
@@ -33,7 +33,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 ## Open coordination
 
-- **T-64 pitch ↔ Ennio / T-17 map:** Can the existing map expose a Basel-only 2025 export with real hourly site states and origin→destination job-flow rows, and a stable camera/viewport handoff for the film? The documented Swiss mock is not suitable as factual Basel footage. Please point T-64 to the actual export command, scenario ID and map framing if available; no map code change is requested by this pitch ticket.
+- **T-67 pitch ↔ Ennio / T-17 map:** Can the existing map expose a Basel-only 2025 export with real hourly site states and origin→destination job-flow rows, and a stable camera/viewport handoff for the film? The documented Swiss mock is not suitable as factual Basel footage. Please point T-67 to the actual export command, scenario ID and map framing if available; no map code change is requested by this pitch ticket.
 
 - **T-59 / T-58 (Nikita -> Ennio):** user approved a separate BFS 2020 covered-residential composition profile. PR #49 supplies counts, conditional owner shares and synthetic composition only. Preserve SFH-only scenarios as labelled segments; source excludes ZH/VS. Do not infer private-SFH or hotel/spa shares from ownership totals. See docs/research/swiss-residential-node-mix.md for mapping, source precision and missing mixed-category heat/spatial inputs.
 
@@ -77,3 +77,6 @@ coordination between people, shared interfaces and integration risks. Keep your 
    which one the pitch uses.
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
+
+
+Renderer work: Nikita/Codex, feat/T-66-landscape-render; depends PR #52. Reuses MeshPeer, no separate placement policy. CPU/GPU probe, browser timing comparison and pause/resume. Games untouched; ADR 0052.

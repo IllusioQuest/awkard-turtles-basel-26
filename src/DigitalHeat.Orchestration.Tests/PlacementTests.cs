@@ -1,5 +1,6 @@
 using DigitalHeat.Core;
 using DigitalHeat.Orchestration;
+using DigitalHeat.Network;
 using Xunit;
 
 namespace DigitalHeat.Orchestration.Tests;
@@ -24,6 +25,51 @@ public class PlacementTests
         var p = Start(); Assert.Equal("b", p.TryReserve(Request(), Now)!.NodeId);
         Assert.Equal(14 - 0.8, p.TryReserve(Request("two"), Now)!.AvailableHeatKwhBeforeReservation, 8);
         Assert.Null(p.TryReserve(Request("three"), Now)); // shared physical CPU is full, despite two logical nodes
+    }
+
+    [Fact] public void NetworkSelectedSiteIsBindingAndInventoryVersionMustMatch()
+    {
+        var p = Start();
+        var request = Request();
+        var homeSignal = Inventory().Sites[0].Heat;
+        Assert.Null(p.TryReserveAtSite(request, "missing", homeSignal, 1, Now, Now));
+        Assert.Null(p.TryReserveAtSite(request, "home", homeSignal, 2, Now, Now));
+        Assert.Null(p.TryReserveAtSite(request, "home", homeSignal, 1, Now.AddHours(-1), Now));
+        Assert.Null(p.TryReserveAtSite(request, "home", homeSignal with { DemandKwh = 9 }, 1, Now, Now));
+        var home = p.TryReserveAtSite(request, "home", homeSignal, 1, Now, Now);
+        Assert.Equal("a", home!.NodeId);
+        Assert.Throws<InvalidOperationException>(() => p.TryReserveAtSite(request, "spa", Inventory().Sites[1].Heat, 1, Now, Now));
+        Assert.Single(p.Allocations());
+
+        var busy = Start(Inventory() with { ExternalAllocations = [new("occupied", "a", new(2, 64, 1), null)] });
+        Assert.Null(busy.TryReserveAtSite(Request("new"), "home", homeSignal, 1, Now, Now));
+        Assert.Empty(busy.Allocations()); // The eligible spa is not a fallback.
+    }
+
+    [Fact] public void SelectedSiteCanBeAdmittedWithoutAnIndependentCrossSiteChoice()
+    {
+        NetworkSite Site(string id, double heatKwh) => new(id, id, 0, 0, "CH", 1, 1, 1, 0, 0, 1, 0.3, 0.1,
+            [new("2025-07-15T18:00", 0, false, heatKwh, 0), new("2025-07-15T19:00", 0, false, heatKwh, 0)]);
+        var sites = new[] { Site("home", 0), Site("spa", 1) };
+        var ledger = new WorkLedger(sites, [new Type1Spec(1, 1, 1,
+            new JobPlacementPolicy("anywhere", "Synthetic test authorization", null)), null], [0, 0], 2, 24);
+        ledger.BeginHour(0);
+        var states = sites.Select((s, i) => new SiteHeatState(s.Id,
+            new HeatSignal(s.Demand[0].TotalHeatKwh, 0, 0, 1, 1),
+            HeatForecast.Build(s.Demand, s.Id, 0, 1))).ToArray();
+        var decision = new HeatFirstNetworkScheduler().Decide(new NetworkState(0, sites[0].Demand[0].LocalTime,
+            sites, states, ledger.View()));
+        var chosenSite = sites[decision.Allocations!.Single().SiteIndex];
+        Assert.Equal("spa", chosenSite.Id);
+
+        var fixture = Inventory();
+        var inventory = fixture with { Sites = fixture.Sites.Select(s => s with
+            { Heat = states[Array.FindIndex(sites, x => x.Id == s.Id)].Signal }).ToArray() };
+        var placement = Start(inventory);
+        var reservation = placement.TryReserveAtSite(Request("job", "batch"), chosenSite.Id,
+            states[1].Signal, inventory.Revision, inventory.IntervalStartUtc, Now);
+        Assert.Equal("spa", reservation!.SiteId);
+        Assert.Equal("b", reservation.NodeId);
     }
 
     [Fact] public async Task LastPhysicalCpuAndGpuCanOnlyBeReservedOnce()

@@ -1,4 +1,4 @@
-# T-64 visual direction v2 — real Basel street, selective reveal
+# T-67 visual direction v2 — real Basel street, selective reveal
 
 Status: proposed after the first procedural dollhouse frame was rejected by the team lead. This is a production brief, not a rendered final style frame.
 

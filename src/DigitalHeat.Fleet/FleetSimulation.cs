@@ -79,8 +79,8 @@ public static class FleetSimulation
         else jobs = DemandGenerator.Generate(types, calendar, scenario.Run.Seed, root);
         Lap("jobs");
 
-        var sched = scheduler ?? (scenario.Scheduler.Id == "mock-heat-led"
-            ? new MockHeatLedScheduler(scenario.Scheduler)
+        var sched = scheduler ?? (scenario.Scheduler.Id == "mesh-heat-first"
+            ? new HeatFirstFleetScheduler(scenario.Scheduler)
             : throw new InvalidDataException($"Unknown scheduler.id '{scenario.Scheduler.Id}'."));
         var price = pricing ?? PricingFactory.FromConfig(scenario.Pricing, scenario.Run.Seed);
         var inputs = new EngineInputs

@@ -1,0 +1,16 @@
+{
+  "generated_utc": "2026-11-21T16:43:18.0844044+01:00",
+  "source_commit": "91a96ef8e1103529efd652af767c416169ae7eb5",
+  "samples": 21,
+  "warmups": 2,
+  "peers": 3,
+  "jobs": 3,
+  "messages": 18,
+  "median_ms": 126.4346,
+  "p95_ms": 149.0549,
+  "method": "Fresh peer journals per round; includes three peer constructors, direct offer delivery, three proposals, durable intent/outcome/execution journal writes, fake start/ack and disposal. Excludes build, scenario output serialization and temp cleanup. Fixed synthetic config/mesh/demo.json, two warmups, nearest-rank p95.",
+  "caveat": "In-process deterministic transport and fake executors, not Linux networking or Docker latency. Existing games stay running on a non-dedicated laptop. Per-round disk flushes included; no response SLA or field result. Full mesh initial offers require n*(n-1) deliveries.",
+  "machine_cpu_name": "12th Gen Intel(R) Core(TM) i5-1240P",
+  "probe_source_sha256": "65f9a78067fe0eba6618df9d2ebc851753e8c7b6da14e1c06b467c5480f953d5",
+  "tiered_compilation": "Disabled explicitly (DOTNET_TieredCompilation=0); optimized steady-state, not default startup behavior"
+}

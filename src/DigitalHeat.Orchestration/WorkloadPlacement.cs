@@ -34,15 +34,41 @@ public sealed class WorkloadPlacement
     }
 
     public WorkloadReservation? TryReserve(WorkloadRequest request, DateTimeOffset nowUtc)
+        => TryReserveCore(request, nowUtc, null);
+
+    /// <summary>
+    /// Admit only at the site selected by the network scheduler. The admission layer may choose
+    /// an eligible node within that site, but never redirects work to another site.
+    /// </summary>
+    public WorkloadReservation? TryReserveAtSite(WorkloadRequest request, string selectedSiteId,
+        HeatSignal expectedHeatSignal, long expectedInventoryRevision, DateTimeOffset expectedHourStartUtc, DateTimeOffset nowUtc)
+    {
+        if (string.IsNullOrWhiteSpace(selectedSiteId)) throw new ArgumentException("A selected site is required.", nameof(selectedSiteId));
+        ArgumentNullException.ThrowIfNull(expectedHeatSignal);
+        return TryReserveCore(request, nowUtc, selectedSiteId, expectedInventoryRevision, expectedHourStartUtc, expectedHeatSignal);
+    }
+
+    public bool MatchesSnapshot(string siteId, HeatSignal signal, long revision, DateTimeOffset hourStartUtc, DateTimeOffset nowUtc)
+    { lock (gate) return MatchesSnapshotUnsafe(siteId, signal, revision, hourStartUtc, nowUtc); }
+
+    private bool MatchesSnapshotUnsafe(string siteId, HeatSignal signal, long revision, DateTimeOffset hourStartUtc, DateTimeOffset nowUtc)
+        => inventory is { } i && i.Revision == revision && i.IntervalStartUtc == hourStartUtc && Fresh(nowUtc)
+            && i.Sites.Any(s => s.Id == siteId && s.Heat == signal);
+
+    private WorkloadReservation? TryReserveCore(WorkloadRequest request, DateTimeOffset nowUtc, string? selectedSiteId,
+        long? expectedRevision = null, DateTimeOffset? expectedHourStartUtc = null, HeatSignal? expectedHeatSignal = null)
     {
         request = WorkloadJson.Copy(request);
         ValidateRequest(request);
         lock (gate)
         {
+            if (expectedRevision is not null && !MatchesSnapshotUnsafe(selectedSiteId!, expectedHeatSignal!, expectedRevision.Value, expectedHourStartUtc!.Value, nowUtc)) return null;
             if (held.TryGetValue(request.Id, out var existing))
             {
                 if (WorkloadJson.Identity(existing.Request) != WorkloadJson.Identity(request))
                     throw new InvalidDataException("Workload ID reused with changed parameters.");
+                if (selectedSiteId is not null && existing.Reservation.SiteId != selectedSiteId)
+                    throw new InvalidOperationException("Existing workload claim is at a different site than the network decision.");
                 return existing.Reservation;
             }
             if (!DeadlineOpen(request, nowUtc) || !Fresh(nowUtc) || request.Kind != "legacy" && !ResourcesFresh(nowUtc)) return null;
@@ -52,10 +78,12 @@ public sealed class WorkloadPlacement
             // Heat is the ranking priority. Latency is only a configured eligibility limit in
             // Candidates; a faster eligible node must not outrank one with more useful heat.
             foreach (var candidate in Candidates(request))
-                if (best is null || candidate.AvailableHeatKwhBeforeReservation > best.AvailableHeatKwhBeforeReservation
-                    || candidate.AvailableHeatKwhBeforeReservation == best.AvailableHeatKwhBeforeReservation
-                    && (string.CompareOrdinal(candidate.SiteId, best.SiteId) < 0 || candidate.SiteId == best.SiteId && string.CompareOrdinal(candidate.NodeId, best.NodeId) < 0))
+            {
+                if (selectedSiteId is not null && candidate.SiteId != selectedSiteId) continue;
+                if (best is null || new HeatPlacementRank(candidate.AvailableHeatKwhBeforeReservation, candidate.SiteId, candidate.NodeId)
+                    .CompareTo(new(best.AvailableHeatKwhBeforeReservation, best.SiteId, best.NodeId)) > 0)
                     best = candidate;
+            }
             if (best is not null) held.Add(request.Id, new(request, best, false));
             return best;
         }

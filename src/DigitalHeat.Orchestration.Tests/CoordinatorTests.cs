@@ -47,6 +47,21 @@ public class CoordinatorTests : IDisposable
         Assert.Contains(first.Attempt.AttemptId, File.ReadAllText(Path.Combine(directory, "journal.json")));
     }
 
+    [Fact] public void NetworkSelectedSiteCannotBeChangedOrStartedWithStaleInventory()
+    {
+        var runtime = new Runtime(); using var c = Start(runtime);
+        var request = PlacementTests.Request();
+        var homeSignal = PlacementTests.Inventory().Sites[0].Heat;
+        Assert.Null(c.TryStartAtSite(request, Nodes, Profile, PlacementTests.Now, "home", homeSignal, 2, PlacementTests.Now));
+        Assert.Equal(0, runtime.Creates);
+        var started = c.TryStartAtSite(request, Nodes, Profile, PlacementTests.Now, "home", homeSignal, 1, PlacementTests.Now);
+        Assert.Equal("home", started!.Attempt.Reservation.SiteId);
+        Assert.Equal("a", started.Attempt.Reservation.NodeId);
+        Assert.Throws<InvalidOperationException>(() => c.TryStartAtSite(request, Nodes, Profile,
+            PlacementTests.Now, "spa", PlacementTests.Inventory().Sites[1].Heat, 1, PlacementTests.Now));
+        Assert.Equal(1, runtime.Creates);
+    }
+
     [Fact] public void LockIsPerFleetEvenWithDifferentStatePaths()
     {
         using var c = Start(new Runtime());
@@ -94,9 +109,9 @@ public class CoordinatorTests : IDisposable
     {
         var runtime = new Runtime(); using var c = Start(runtime);
         c.TryStart(PlacementTests.Request("batch", "batch"), Nodes, Profile, PlacementTests.Now);
-        Assert.True(c.ApplyBatchHeat("batch", new(0, 0, 0, 1, 0.8), new GreedyHeatScheduler(0), PlacementTests.Now));
+        Assert.True(c.ApplyBatchHeat("batch", new(0, 0, 0, 1, 0.8), new HeatFirstScheduler(0), PlacementTests.Now));
         Assert.True(c.Allocations().Single().Paused);
-        Assert.True(c.ApplyBatchHeat("batch", new(1, 0, 0, 1, 0.8), new GreedyHeatScheduler(0), PlacementTests.Now));
+        Assert.True(c.ApplyBatchHeat("batch", new(1, 0, 0, 1, 0.8), new HeatFirstScheduler(0), PlacementTests.Now));
         Assert.False(c.Allocations().Single().Paused);
     }
 

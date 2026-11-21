@@ -1,0 +1,43 @@
+{
+  "source": "Real Linux nested-Docker lab; synthetic heat/quota signals, not measured recovered heat",
+  "tested_at_utc": "2026-11-21T16:33:53.7624362+00:00",
+  "engines": [
+    {
+      "peer_id": "home",
+      "engine_id": "2eb10617-f833-4b2c-82e8-ae3743699bc7"
+    },
+    {
+      "peer_id": "hotel",
+      "engine_id": "e9bd207c-ddf1-4d9f-a09f-0137c35c5d4b"
+    },
+    {
+      "peer_id": "spa",
+      "engine_id": "53558111-c212-4054-9634-d2086e949840"
+    }
+  ],
+  "job_id": "home.verify-95fbc5e8",
+  "target": "hotel",
+  "attempt_id": "d18ae2f24bf540bdbba1af663d0dea57",
+  "container_id": "7fbf268dc4ab",
+  "cpu_sample": "26.02%",
+  "results_volume": "628ad7e7400eeeb540790ab9635e2eaa2ea6d2104097c7148367a3edca486e2f",
+  "paused": true,
+  "origin_restarted": true,
+  "completion": {
+    "status": "on_time",
+    "observed_at_utc": "2026-11-21T17:33:47.0617616+01:00",
+    "reason": "Successful terminal state observed before deadline.",
+    "stop_intent_persisted": false
+  },
+  "results": {
+    "result_files": 2,
+    "progress": {
+      "work_unit": "simulation task",
+      "units_done": 2,
+      "pass": 1,
+      "tasks_done": 1,
+      "tasks_total": 1
+    }
+  },
+  "other_running_containers_unchanged": true
+}

@@ -16,3 +16,5 @@ all schedulers are unified from a shared comparator or a synthetic transport alo
 
 Done: reviewed design; executable deterministic peer simulation; existing/new behavioral and
 performance checks; code push/PR; docs and co-builder handoff directly on main.
+
+Verification: implementation pushed in PR #52; tests and real Linux recovery checks pass. See docs/performance/unified-scheduler-verification-2026-11-21.md. Large-scale placement speed guard remains open; not marked done before merge. Old policy-retention text is superseded by explicit user-approved ADR 0051.

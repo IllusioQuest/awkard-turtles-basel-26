@@ -5,7 +5,7 @@ using System.Text.Json;
 using DigitalHeat.Core;
 using DigitalHeat.Fleet;
 
-const string Usage = "usage: FleetRun generate-houses <spec.json> -o <file> | run <scenario.json> [--run-id <id>] [--out <dir>] | post <run-dir> --hardware <file>";
+const string Usage = "usage: FleetRun generate-houses <spec.json> -o <file> | run <scenario.json> [--run-id <id>] [--out <dir>] | post <run-dir> [--hardware <file>]";
 var inv = CultureInfo.InvariantCulture;
 
 try
@@ -19,7 +19,7 @@ try
         case "run" when args.Length >= 2:
             return RunScenario(args[1], Opt("--run-id"), Opt("--out"));
         case "post" when args.Length >= 2:
-            return Post(args[1], Opt("--hardware") ?? throw new ArgumentException("--hardware <file> is required."));
+            return Post(args[1], Opt("--hardware"));
         default:
             Console.Error.WriteLine(Usage); return 2;
     }
@@ -68,8 +68,10 @@ int RunScenario(string scenarioPath, string? runId, string? outDir)
     return 0;
 }
 
-int Post(string runDir, string hardwarePath)
+int Post(string runDir, string? hardwarePath)
 {
+    hardwarePath ??= ScenarioHardwareProfile(runDir)
+        ?? throw new ArgumentException("--hardware <file> is required: the run's scenario names no servers.hardware_profile.");
     var hw = HardwareProfile.Load(hardwarePath);
     double purchase = hw.PurchasePriceChfPerServer.Value!.Value;
     double deprec = hw.DepreciationChfPerServerYear;
@@ -95,4 +97,13 @@ int Post(string runDir, string hardwarePath)
     File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));
     Console.WriteLine($"{t.Rows.Count} houses -> {path}");
     return 0;
+}
+
+// The profile the run's job types were derived from (resolved scenario in run.json), repo-relative.
+static string? ScenarioHardwareProfile(string runDir)
+{
+    using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(runDir, "run.json")));
+    if (!doc.RootElement.TryGetProperty("scenario", out var sc) || !sc.TryGetProperty("servers", out var sv)
+        || !sv.TryGetProperty("hardware_profile", out var hp) || hp.GetString() is not { } rel) return null;
+    return Path.IsPathRooted(rel) ? rel : Path.Combine(Scenario.FindRepoRoot(Path.GetFullPath(runDir)), rel);
 }

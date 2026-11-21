@@ -68,6 +68,7 @@ public static class FleetOutput
         ("tank_charge_kwh", a => a.ChargeKwh), ("tank_discharge_kwh", a => a.DischargeKwh),
         ("heat_used_kwh", a => a.UsedKwh), ("heat_dumped_kwh", a => a.DumpedKwh), ("heat_backup_kwh", a => a.BackupKwh),
         ("units_late", a => a.UnitsLate), ("late_work_kwh", a => a.LateWorkKwh), ("pauses", a => a.Pauses),
+        ("jobs_on_time", a => a.JobsOnTime), ("deadlines_missed", a => a.DeadlinesMissed),
         ("income_t1_chf", a => a.IncomeT1Chf), ("income_t2_chf", a => a.IncomeT2Chf),
         ("electricity_chf", a => a.ElectricityChf),
     ];
@@ -122,10 +123,16 @@ public static class FleetOutput
     private static IEnumerable<string> TimeseriesCsv(FleetRun run)
     {
         yield return string.Join(',', new[] { "house_id", "period_start_ms", "period_end_ms" }
-            .Concat(AccountColumns.Select(c => c.Name)).Concat(["tank_end_kwh"]));
+            .Concat(AccountColumns.Select(c => c.Name)).Concat(["tank_end_kwh", "heat_value_chf"]));
+        var sp = run.ServerParams;
         foreach (var r in run.Result.HouseTimeseries)
-            yield return string.Join(',', new[] { run.Houses[r.HouseIndex].Spec.HouseId, I(r.StartMs), I(r.EndMs) }
-                .Concat(AccountValues(r.Account)).Concat([R(r.TankEndKwh)]));
+        {
+            var spec = run.Houses[r.HouseIndex].Spec;
+            // Same formula as HouseResult.HeatValueChf: used heat × house price ÷ heat-pump efficiency (case §10).
+            double heatValue = r.Account.UsedKwh * spec.ElectricityPriceChfPerKwh / sp.HeatPumpEfficiency;
+            yield return string.Join(',', new[] { spec.HouseId, I(r.StartMs), I(r.EndMs) }
+                .Concat(AccountValues(r.Account)).Concat([R(r.TankEndKwh), R(heatValue)]));
+        }
     }
 
     // ---------------------------------------------------------------- network

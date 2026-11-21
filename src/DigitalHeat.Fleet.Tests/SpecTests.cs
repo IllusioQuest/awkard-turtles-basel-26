@@ -86,7 +86,7 @@ public class SpecTests(ITestOutputHelper output)
             double fleetUsed = acc.UsedKwh;
 
             var p = ReferenceParameters.Load(Path.Combine(Root, "config", "reference-house.json"));
-            var core = YearSimulation.Run(CoreDemand(p), p, new GreedyHeatScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor()).Summary;
+            var core = YearSimulation.Run(CoreDemand(p), p, new HeatFirstScheduler(p.MinimumLoadShare.Value), new SimulatedExecutor()).Summary;
             Assert.InRange(core.ServerHours, 22660.5, 22661.5);
             Assert.InRange(core.ServerHeatUsedKwh, 18128.5, 18129.5);
 
@@ -161,7 +161,7 @@ public class SpecTests(ITestOutputHelper output)
             var tk = Make("tick"); tk.Demand = new DemandSection { FromFile = jobsPath };
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            var counter = new CountingScheduler(new MockHeatLedScheduler(ev.Scheduler), houseCount);
+            var counter = new CountingScheduler(new HeatFirstFleetScheduler(ev.Scheduler), houseCount);
             var evRun = FleetSimulation.Run(ev, scheduler: counter);
             double evS = sw.Elapsed.TotalSeconds; sw.Restart();
             var tkRun = FleetSimulation.Run(tk);

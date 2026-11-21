@@ -4,9 +4,9 @@
   "work_unit": "token",
   "description": "LLM inference of an 8B open-weight model (Apertus 8B class) on a GPU server (docs/model/fleet-simulation.md section 5.2). Work unit = one token, input and output counted alike. Type 1: fixed price, served first.",
   "energy_kwh_per_work_unit": {
-    "value": 5.833333333333333e-08,
+    "value": 4e-08,
     "unit": "kWh/token",
-    "source": "0.21 J per token / 3.6e6 J per kWh = 5.83e-8 kWh: RTX 4090, vLLM batched, 450 W / 2,148 tok/s (data/raw/market/hardware.csv pe-rtx4090-vllm-iog-qps8, opened, medium); conservative reading: every token, input and output, costs 0.21 J (docs/research/profitability-inputs.md, 'Conservative (a floor)')"
+    "source": "derived: 1 kWh per 1 kW server-hour / 25,000,000 tokens per server-hour = 4.0e-8 kWh per token; LlmTokensPerServerHour in config/hardware/gpu-inference-l4.json (docs/research/l4-throughput.md section 2, range 17-120 M, i.e. 5.9e-8 to 8.3e-9 kWh per token). Same hardware profile as the transcription throughput and the full-cost step (decision 0027 L4 basis); checked by the fleet test suite. Replaces the earlier RTX 4090 proxy 5.83e-8 (0.21 J per token)"
   },
   "size": {
     "dist": "empirical",

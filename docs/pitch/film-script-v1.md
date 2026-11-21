@@ -1,6 +1,6 @@
 # Pitch script v1 — two opening voices, one evidence spine
 
-Status: working script for T-64; no recording or rendered film yet. Spoken language: English. The six annual figures and Basel flows have publication gates below. Bracketed text is a production cue, not spoken copy.
+Status: working script for T-67; no recording or rendered film yet. Spoken language: English. The six annual figures and Basel flows have publication gates below. Bracketed text is a production cue, not spoken copy.
 
 ## Opening A — character-led (recommended)
 

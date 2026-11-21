@@ -168,7 +168,7 @@ function addLayers(map: MlMap) {
     },
       firstLabel,
     )
-  heatmap('heat-load', 'loadServers', '#c40000')
+  heatmap('heat-load', 'loadServers', '#ff1818')
   heatmap('heat-capacity', 'freeServers', '#199e70')
 }
 
