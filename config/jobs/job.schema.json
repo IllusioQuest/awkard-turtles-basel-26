@@ -3,7 +3,7 @@
   "title": "DigitalHeat job descriptor",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "interruptible", "supportedControlLevels", "workUnit"],
+  "required": ["id", "interruptible", "supportedControlLevels", "workUnit", "placementPolicy"],
   "properties": {
     "id": { "type": "string", "minLength": 1 },
     "containerImage": { "type": ["string", "null"] },
@@ -18,13 +18,29 @@
     "workUnit": { "type": "string", "minLength": 1 },
     "runtimeSecondsPerWorkUnit": { "$ref": "#/$defs/secondsOrMissing" },
     "energyKwhPerWorkUnit": { "$ref": "#/$defs/energyOrMissing" },
-    "progressFile": { "type": ["string", "null"] }
+    "progressFile": { "type": ["string", "null"] },
+    "placementPolicy": { "$ref": "#/$defs/placementPolicy" }
   },
   "anyOf": [
     { "required": ["containerImage"], "properties": { "containerImage": { "type": "string", "minLength": 1 } } },
     { "required": ["command"], "properties": { "command": { "type": "array", "minItems": 1 } } }
   ],
   "$defs": {
+    "placementPolicy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "source"],
+      "properties": {
+        "mode": { "enum": ["anywhere", "origin-site", "country-allowlist"] },
+        "source": { "type": "string", "minLength": 1, "not": { "pattern": "TODO\\(source\\)" } },
+        "allowedCountryCodes": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+        }
+      },
+      "if": { "properties": { "mode": { "const": "country-allowlist" } } },
+      "then": { "required": ["allowedCountryCodes"] },
+      "else": { "not": { "required": ["allowedCountryCodes"] } }
+    },
     "hoursOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantityHours" }] },
     "secondsOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantitySeconds" }] },
     "energyOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantityEnergy" }] },

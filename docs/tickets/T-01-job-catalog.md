@@ -33,6 +33,8 @@ Describe job types as data, so the scheduler and the year simulation can use any
 ## Notes
 
 Runtime/energy of the laptop job come from T-02; leave TODO(source) until then.
+T-24 owns the separate job data-locality field and validation; coordinate its shape before
+changing `config/jobs/job.schema.json` or `JobDescriptorLoader` for the broader catalog.
 
 ## Decision needed from Nikita (2026-11-21, team lead's instruction)
 

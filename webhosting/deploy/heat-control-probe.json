@@ -7,5 +7,9 @@
   "deadlineHours": null,
   "runtimeSecondsPerWorkUnit": null,
   "energyKwhPerWorkUnit": null,
-  "progressFile": null
+  "progressFile": null,
+  "placementPolicy": {
+    "mode": "anywhere",
+    "source": "Internal disposable control probe with no customer data; docs/webhosting-heat-runtime.md"
+  }
 }
