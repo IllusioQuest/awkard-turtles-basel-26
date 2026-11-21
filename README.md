@@ -25,6 +25,16 @@ python3 scripts/fetch_data.py --check   # validate the data against the case's e
 scripts/deadline-reminder.sh            # time left until our deadlines
 ```
 
+## Homeowner view (T-18 prototype)
+
+From the repository root, run `python -m http.server 8000`, then open
+<http://localhost:8000/prototypes/owner-dashboard/>. The page works offline,
+starts with the committed reference-house result bundle, and can open another
+T-13 run folder. Use the January/July buttons and the hour slider. This is a
+simulation replay, not live telemetry or a private account. Its CHF heat value
+is a modelled heat-pump cost equivalent, not a homeowner bill saving. See the
+[view guide](prototypes/owner-dashboard/README.md) for its calculation path.
+
 ## C# reference-house core (proposed)
 
 Requires the .NET 8 SDK. From the repository root:
