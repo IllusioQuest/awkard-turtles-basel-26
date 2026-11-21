@@ -201,7 +201,7 @@ deadlines return to B1's level.
     jobs'' = B1's missed jobs minus the strategy's missed jobs (\num{65352} at every $\delta$).
     Reproduce with \texttt{python3 scripts/network\_experiments.py} (LP column:
     \texttt{-{}-lp -{}-jobs 4}); output \texttt{data/derived/network/experiments/E\_transfer\_delay.csv};
-    values from \texttt{docs/model/network-scheduler.md}. The LP at $\delta = 0$ is the
+    values from \texttt{docs/model/network-scheduler.md}. The LP keeps \qty{0}{\percent} missed deadlines at $\delta = 4$ and \qty{12}{h} and moves almost the same work as without delay. The LP at $\delta = 0$ is the
     \qty{30}{\percent} row of Table~\ref{tab:exp-a}; $\delta = 1$~h was not run with the LP.}
   \label{tab:exp-e}
   \small
@@ -213,8 +213,8 @@ deadlines return to B1's level.
     \midrule
     \qty{0}{h} & \qty{0}{\percent} & \num{102754} & 1.57 & \num{64230} & 0.98 & Table~\ref{tab:exp-a} \\
     \qty{1}{h} & \qty{0}{\percent} & \num{102771} & 1.57 & \num{64230} & 0.98 & -- \\
-    \qty{4}{h} & \qty{0}{\percent} & \num{76680} & 1.17 & \num{60527} & 0.93 & \pending{} \\
-    \qty{12}{h} & \qty{0}{\percent} & \num{61727} & 0.95 & \num{58775} & 0.90 & \pending{} \\
+    \qty{4}{h} & \qty{0}{\percent} & \num{76680} & 1.17 & \num{60527} & 0.93 & \qty{0}{\percent} / \num{49793} \\
+    \qty{12}{h} & \qty{0}{\percent} & \num{61727} & 0.95 & \num{58775} & 0.90 & \qty{0}{\percent} / \num{49847} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -251,8 +251,10 @@ runs where heat is needed and filler would otherwise be missing.
   \end{tabular}
 \end{table}
 
-\paragraph{Forecast error in the network.} Table~\ref{tab:exp-c} will show the full-year LP on the
-test network with synthetic forecast errors. On the single house the effect is small
+\paragraph{Forecast error in the network.} With synthetic forecast errors up to
+$\sigma_{24} = \qty{20}{\percent}$ the full-year LP on the test network still misses no deadline and dumps
+no heat; coverage falls by only 0.19 points (\qty{83.42}{\percent} to \qty{83.23}{\percent}) and the
+moved work changes by less than \qty{0.2}{\percent} (Table~\ref{tab:exp-c}). On the single house the effect is small
 (Table~\ref{tab:house-strategies}).
 
 \begin{table}[ht]
@@ -261,16 +263,16 @@ test network with synthetic forecast errors. On the single house the effect is s
     33 synthetic sites (scenario data). Synthetic AR(1) error with $\rho = 0.8$, seed 20251121;
     $\sigma_{24}$ and $\rho$ are \texttt{TODO(source)} and shown as a sweep. Reproduce with
     \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}; output
-    \texttt{data/derived/network/experiments/C\_forecast\_error-lp.csv}; the perfect-foresight row is the LP run of experiment~A at \qty{30}{\percent}. Rows with $\sigma_{24} > 0$ are still running.}
+    \texttt{data/derived/network/experiments/C\_forecast\_error-lp.csv}; the perfect-foresight row is the LP run of experiment~A at \qty{30}{\percent}. Each full-year run took 1.7 to 1.9~h.}
   \label{tab:exp-c}
   \begin{tabular}{lrrrr}
     \toprule
     Forecast & Coverage & Dumped [kWh] & Missed Type 1 & Moved [server-h] \\
     \midrule
     perfect foresight & \qty{83.42}{\percent} & \num{0} & \qty{0}{\percent} & \num{49884} \\
-    $\sigma_{24} = 0.05$ & \pending{} & \pending{} & \pending{} & \pending{} \\
-    $\sigma_{24} = 0.10$ & \pending{} & \pending{} & \pending{} & \pending{} \\
-    $\sigma_{24} = 0.20$ & \pending{} & \pending{} & \pending{} & \pending{} \\
+    $\sigma_{24} = 0.05$ & \qty{83.39}{\percent} & \num{0} & \qty{0}{\percent} & \num{49882} \\
+    $\sigma_{24} = 0.10$ & \qty{83.35}{\percent} & \num{0} & \qty{0}{\percent} & \num{49929} \\
+    $\sigma_{24} = 0.20$ & \qty{83.23}{\percent} & \num{0} & \qty{0}{\percent} & \num{49967} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -292,7 +294,7 @@ research or dictation demand; figure F7}
   \item[(ii)] Value arises in the network: paid work with deadlines moves to year-round heat sinks;
     without them deadlines are missed because every house is short at the same time.
   \item[(iii)] Forecast errors cost little on one house (coverage \qty{58.05}{\percent} to
-    \qty{57.82}{\percent} at $\sigma_{24} = \qty{20}{\percent}$); the network case is
-    \pending{(Table~\ref{tab:exp-c})}.
+    \qty{57.82}{\percent} at $\sigma_{24} = \qty{20}{\percent}$); in the network the LP keeps
+    \qty{0}{\percent} missed deadlines and loses 0.19 points of coverage (Table~\ref{tab:exp-c}).
   \item[(iv)] The limits of these statements are listed in Section~\ref{sec:limits}.
 \end{enumerate}
