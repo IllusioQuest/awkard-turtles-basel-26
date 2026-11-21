@@ -28,6 +28,8 @@ public sealed record ContainerObservation(string State, string? ContainerId, boo
 
 public interface IWorkloadRuntime
 {
+    // The coordinator must use this adapter hook: a verified native GPU has no Docker /dev mapping.
+    // Keep the default strict for existing Docker runtimes; never invent paths to satisfy it.
     void ValidateAttempt(RuntimeAttempt attempt) => DockerWorkloadRuntime.Validate(attempt);
     void Preflight(RuntimeAttempt attempt) => ValidateAttempt(attempt);
     IReadOnlyList<string> Discover(string fleetId, IReadOnlyList<RuntimeNode> nodes);
