@@ -1,0 +1,63 @@
+{
+  "Description": "Economics per actor for the reference house (T-14, decision 0017). Variant economics: the scored case figures (case break-even) are unchanged and come from config/reference-house.json. Prices are per 1 kW server-hour (one server-hour = 1 kWh electricity), see docs/model/economics.md.",
+  "HardwareDirectory": "config/hardware",
+  "DefaultHardwareProfile": "gpu-inference-l4",
+  "FillRate": { "value": 0.35, "unit": "fraction", "source": "docs/research/filler-demand.md section 6: base fill rate of offered filler server-hours (Akash GPU 34 %, vast third-party 30 %); assumption, range 0.2-0.6" },
+  "PremiumShareOfOfferedHours": { "value": 0, "unit": "fraction", "source": "TODO(source): no sourced demand for premium sovereign AI per house (docs/research/job-demand.md: transcription alone fills about 0.1 % of capacity); 0 in the base case, swept in the lever table and reported as the required premium share" },
+  "WearReplacementSharePerYear": { "value": 0, "unit": "fraction/year", "source": "TODO(source): failure and replacement cost as a share of the purchase price per year comes from T-35 (refurbished hardware); 0 is an optimistic placeholder" },
+  "HeatFeeChfPerKwh": { "value": 0, "unit": "CHF/kWh", "source": "docs/research/competitors.md section 4 lesson 2: operators own the hardware, pay electricity and give the host free heat (Qarnot, Heata, Deep Green, Leafcloud)" },
+  "PlatformCommissionShare": { "value": 0.15, "unit": "fraction", "source": "docs/research/filler-demand.md section 2: vast.ai hosts keep about 85 % of the buyer price (third-party, low); used for the host-owned model" },
+  "GasPriceChfPerKwhFuel": { "value": 0.1398, "unit": "CHF/kWh", "source": "data/raw/market/energy-prices.csv fuel-bazg-natural-gas-sep-2026: Swiss household gas average September 2026, 13.98 Rp./kWh" },
+  "GasBoilerEfficiency": { "value": 0.9, "unit": "kWh heat/kWh fuel", "source": "KTBL Heizoel datasheet https://www.ktbl.de/fileadmin/user_upload/Artikel/Gartenbau/Energietraeger/Heizoel.pdf (modern boilers 90-95 %, lower bound; read via search summary, accessed 2026-11-21, low); oil value borrowed for gas, gas-specific annual efficiency TODO(source)" },
+  "OilPriceChfPerLitre": { "value": 1.5394, "unit": "CHF/litre", "source": "data/raw/market/energy-prices.csv fuel-bazg-heating-oil-sep-2026: Swiss average CHF 153.94 per 100 litres, September 2026" },
+  "OilEnergyKwhPerLitre": { "value": 10.08, "unit": "kWh/litre", "source": "KTBL Heizoel datasheet https://www.ktbl.de/fileadmin/user_upload/Artikel/Gartenbau/Energietraeger/Heizoel.pdf: net calorific value of heating oil EL 10.08 kWh/l (read via search summary, accessed 2026-11-21, medium)" },
+  "OilBoilerEfficiency": { "value": 0.9, "unit": "kWh heat/kWh fuel", "source": "KTBL Heizoel datasheet (modern boilers 90-95 %, lower bound; read via search summary, accessed 2026-11-21, low)" },
+  "InstallationChfPerSite": { "value": 0, "unit": "CHF/site", "source": "TODO(source): complete installation (liquid cooling, hydraulic integration, electrical work, connectivity) has no sourced bill of materials (docs/research/costs-and-energy.md, Installation); 0 is an optimistic placeholder, the bundle reports the affordable installation budget instead" },
+  "OilCo2KgPerKwhFuel": { "value": 0.2653, "unit": "kg CO2/kWh fuel", "source": "BAFU Faktenblatt CO2-Emissionsfaktoren 01-2026 (FR) https://www.bafu.admin.ch/dam/fr/sd-web/NlGIhzJ8OW0t/Faktenblatt_CO2-Emissionsfaktoren_01-2026_FR.pdf: heating oil EL 73.7 t CO2/TJ x 0.0036 TJ/MWh (read via search summary, accessed 2026-11-21, medium)" },
+  "GasCo2KgPerKwhFuel": { "value": 0.2034, "unit": "kg CO2/kWh fuel", "source": "BAFU CO2 emission factors greenhouse-gas inventory https://www.bafu.admin.ch/dam/it/sd-web/NlGIhzJ8OW0t/CO2_Emissionsfaktoren_THG_Inventar.pdf: natural gas 56.5 t CO2/TJ (2014 value, updated yearly; current value TODO(source)) x 0.0036 TJ/MWh (search summary, accessed 2026-11-21, low)" },
+  "Variants": {
+    "Co2CreditChfPerTonne": { "value": 100, "unit": "CHF/t CO2", "source": "variant only, docs/research/creative-ideas.md section 3.6: KliK foundation pays about CHF 100 per certified t CO2 for waste-heat programmes until 2030 (search snippet, low); eligibility of a single house TODO(source)" },
+    "PvSurplusHoursPerServerYear": { "value": 750, "unit": "hours/server-year", "source": "variant only, TODO(source): assumption 5 h x 150 days of PV surplus from docs/research/creative-ideas.md section 3.2 [A]; the reference house has no PV" },
+    "PvSurplusElectricityPriceChfPerKwh": { "value": 0.06, "unit": "CHF/kWh", "source": "variant only: forgone feed-in, data/raw/market/energy-prices.csv feed-in-iwb-post-entitlement-minimum-small (6 Rp./kWh); creative-ideas.md section 3.2 national minimum 6 Rp./kWh" }
+  },
+  "PriceSets": [
+    {
+      "HardwareProfilePrefix": "gpu-inference-l4",
+      "FillerPriceChfPerServerHour": { "value": 1.42, "unit": "CHF/server-hour", "source": "docs/research/filler-demand.md section 6: central L4 filler price paid to the operator (AWS Zurich spot x RunPod community/secure ratio 0.64); range 0.85-2.20" },
+      "PremiumPriceChfPerServerHour": { "value": 3.55, "unit": "CHF/server-hour", "source": "derived: 11.6313 L4 per server (config/hardware/gpu-inference-l4.json) x CHF 0.305278/h Infomaniak L4 on-demand from-price, Swiss provider in Swiss data centres (data/raw/market/compute-prices.csv cp-ch-infomaniak-l4, medium); premium priced at the Swiss sovereign on-demand price, not above it; hyperscaler Zurich on-demand 10.60 is the upper bound" }
+    },
+    {
+      "HardwareProfilePrefix": "cpu-server",
+      "FillerPriceChfPerServerHour": { "value": 0.66, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md section 5: adopted CPU price CHF 0.66 per server-hour (Hetzner AX162-S equivalent); filler-demand.md range 0.25-1.20" },
+      "PremiumPriceChfPerServerHour": { "value": null, "unit": "CHF/server-hour", "source": "TODO(source): no premium sovereign-AI price for the CPU profile; premium is a GPU product in business model v2" }
+    },
+    {
+      "HardwareProfilePrefix": "gpu-consumer-rtx4090",
+      "FillerPriceChfPerServerHour": { "value": 0.57, "unit": "CHF/server-hour", "source": "docs/research/hardware.md section 2: income at home-host marketplace price (2 x RunPod community RTX 4090)" },
+      "PremiumPriceChfPerServerHour": { "value": null, "unit": "CHF/server-hour", "source": "TODO(source): consumer GPUs in homes do not meet the data rules for premium sovereign work (docs/research/filler-demand.md section 5)" }
+    }
+  ],
+  "Levers": {
+    "ServerCounts": [1, 2, 4],
+    "PremiumShares": [0, 0.1, 0.25, 0.5],
+    "Policies": ["heat-led", "always-on"],
+    "HeatAlternatives": ["heat-pump", "gas", "oil"],
+    "Source": "lever axes for the comparison table (not measured values): 4 servers = draft presentation scenario (T-06), 1 server = sized for the hot-water base load (competitors.md lesson 1); premium shares are a sweep because premium demand is TODO(source)"
+  },
+  "Grid": {
+    "HardwareProfile": "gpu-inference-l4",
+    "ServerCounts": [1, 4],
+    "PremiumShares": [0, 0.25],
+    "FillRates": [0.2, 0.35, 0.6],
+    "FillerPriceMinChfPerServerHour": 0,
+    "FillerPriceMaxChfPerServerHour": 3,
+    "FillerPriceStepChfPerServerHour": 0.2,
+    "ElectricityPriceMinChfPerKwh": 0.1,
+    "ElectricityPriceMaxChfPerKwh": 0.5,
+    "ElectricityPriceStepChfPerKwh": 0.05,
+    "HeatAlternative": "heat-pump",
+    "Policy": "heat-led",
+    "Source": "chart axes (not measured values): filler price 0-3 CHF covers the L4 range 0.85-2.20 (filler-demand.md); electricity 0.10-0.50 covers Swiss spot 0.10 to retail 0.33 (energy-prices.csv); fill rates = filler-demand.md low/base/high"
+  },
+  "RequiredPremiumShareStep": { "value": 0.01, "unit": "fraction", "source": "numerical resolution of the required-premium-share search (not a measured value)" }
+}

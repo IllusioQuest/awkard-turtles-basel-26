@@ -12,7 +12,7 @@ public static class ResultBundle
 {
     public const int SchemaVersion = 1;
     public const string SiteId = "reference-house";
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    internal static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -78,7 +78,7 @@ public static class ResultBundle
         }
     }
 
-    private static string Csv(string value) => value.IndexOfAny([',', '"', '\r', '\n']) >= 0
+    internal static string Csv(string value) => value.IndexOfAny([',', '"', '\r', '\n']) >= 0
         ? "\"" + value.Replace("\"", "\"\"") + "\"" : value;
 
     // Explicit v1 projection prevents new core metrics silently changing the export contract.
@@ -99,10 +99,10 @@ public static class ResultBundle
         }
     };
 
-    private static void WriteJson(string path, object value) => File.WriteAllText(path,
+    internal static void WriteJson(string path, object value) => File.WriteAllText(path,
         JsonSerializer.Serialize(value, JsonOptions) + "\n", new UTF8Encoding(false));
 
-    private static string RelativeInput(string root, string path)
+    internal static string RelativeInput(string root, string path)
     {
         string relative = Path.GetRelativePath(root, path).Replace('\\', '/');
         if (Path.IsPathRooted(relative) || relative == ".." || relative.StartsWith("../", StringComparison.Ordinal))
@@ -110,7 +110,7 @@ public static class ResultBundle
         return relative;
     }
 
-    private static string? Git(string root, params string[] args)
+    internal static string? Git(string root, params string[] args)
     {
         try
         {

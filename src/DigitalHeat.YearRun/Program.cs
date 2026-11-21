@@ -5,12 +5,15 @@ using DigitalHeat.YearRun;
 
 var positional = new List<string>();
 string? bundlePath = null;
+string? economicsArgument = null;
 for (int i = 0; i < args.Length; i++)
 {
     if (args[i] == "--output" && bundlePath is null && i + 1 < args.Length)
         bundlePath = Path.GetFullPath(args[++i]);
+    else if (args[i] == "--economics" && economicsArgument is null && i + 1 < args.Length)
+        economicsArgument = args[++i];
     else if (args[i].StartsWith("--", StringComparison.Ordinal))
-        throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json] [--output DIRECTORY]");
+        throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json] [--output DIRECTORY] | YearRun [repository-root] --economics ECONOMICS.json --output DIRECTORY");
     else positional.Add(args[i]);
 }
 if (positional.Count > 2) throw new ArgumentException("Too many positional arguments.");
@@ -22,6 +25,13 @@ var jobScenario = JobScenario.Load(scenarioPath);
 var weather = ReadWeather(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
 VerifyElectricitySnapshot(Path.Combine(root, "data", "raw", "elcom", "iwb-basel-h4-2026.json"), parameters);
 var demand = HeatDemand.Build(weather, parameters);
+if (economicsArgument is not null)
+{
+    if (bundlePath is null) throw new ArgumentException("--economics requires --output DIRECTORY.");
+    EconomicsBundle.Write(bundlePath, root, Path.GetFullPath(economicsArgument, root), demand, parameters);
+    Console.WriteLine($"Wrote economics bundle to {bundlePath}");
+    return;
+}
 var result = YearSimulation.Run(demand, parameters,
     new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor(), jobScenario);
 string output = Path.Combine(root, "results", "reference-house");
