@@ -46,14 +46,17 @@ while True:
     out=Path(directory);job=json.loads((out/'spec.json').read_text(encoding='utf-8-sig'))
     if job['activation']!=activation or job['recipe_id']!=spec['recipe_id']:raise RuntimeError('Warm frame activation/recipe mismatch')
     failed=False
-    try:execute(job,keep_scene=True)
+    try:execute(job,keep_scene=True,publish_completion=False)
     except BaseException as error:
-        save(out,'exit.json',{'code':1,'activation':activation,'recipe_id':spec['recipe_id'],'error':str(error)})
+        failure_message=str(error)
         traceback.print_exc();failed=True
     # Completion is atomic before assignment release. Dispatch/idle/stop share this gate.
     with gate():
         state=json.loads(state_path.read_text(encoding='utf-8-sig'))
         if state.get('active_activation')!=activation:raise RuntimeError('Active frame ownership changed')
+        marker={'code':1 if failed else 0,'activation':activation,'recipe_id':spec['recipe_id']}
+        if failed:marker['error']=failure_message
+        save(out,'exit.json',marker)
         state['active_activation']=None;state['active_directory']=None
         if failed:state['retiring']=True
         save(root,'owned.json',state)

@@ -11,7 +11,7 @@ def context():
 loaded_scene=None
 rendered_scene=None
 
-def execute(spec,keep_scene=False):
+def execute(spec,keep_scene=False,publish_completion=True):
     global loaded_scene,rendered_scene
     out=Path(spec['directory']);out.mkdir(parents=True,exist_ok=True)
     if spec.get('activation'):
@@ -59,7 +59,7 @@ def execute(spec,keep_scene=False):
         rendered_scene=loaded_scene
         save(out,'result.json',meta)
     else:raise RuntimeError('Unknown trusted job stage')
-    save(out,'exit.json',{'code':0,'activation':spec.get('activation'),'recipe_id':spec['recipe_id']})
+    if publish_completion:save(out,'exit.json',{'code':0,'activation':spec.get('activation'),'recipe_id':spec['recipe_id']})
 
 if __name__=='__main__':
     spec=json.loads(Path(sys.argv[sys.argv.index('--')+1]).read_text(encoding='utf-8-sig'))

@@ -159,8 +159,9 @@ internal static class RenderNodeHost
         });
         app.MapPost("/prepared-scene",(PreparedScene scene)=>{
             if(native is null)return Results.BadRequest();
-            native.RegisterScene(scene);
             lock(gate){
+                // Serialize registration with native ownership/artifact writes.
+                native.RegisterScene(scene);
                 for(int frame=1;frame<=cfg.Frames;frame++){
                     string id=PreparedProfile(scene.SceneSha256,frame);
                     profiles[id]=new(id,cfg.Image,"65534",[frame.ToString(),"EEVEE",scene.SceneSha256],null,[],[],[]);
@@ -207,7 +208,7 @@ internal static class RenderNodeHost
                     // rather than invalidating every outstanding offer on every 2s control tick.
                     if(now>=refreshAt||observedHour!=hour){peer.Update(Inventory());refreshAt=now.AddSeconds(10);observedHour=hour;}
                     peer.Tick();error=null;
-                }catch(Exception e){error=e.Message;}
+                }catch(Exception e){error=e.Message;Console.Error.WriteLine(e);}
                 lock(gate)Volatile.Write(ref published,CaptureStatus());
             }
         },stop);

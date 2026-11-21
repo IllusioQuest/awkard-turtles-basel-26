@@ -73,6 +73,8 @@ internal sealed partial class NativeRenderRuntime
         if(WarmCompleted(a,owned,out int code))return new("exited",a.AttemptId,false){ExitCode=owned.ExitCode??code};
         if(owned.ExitCode is {} stopped)return new("exited",a.AttemptId,false){ExitCode=stopped};
         using var gate=WarmGate();var pool=ReadWarm(a.FleetId);
+        // Completion may have committed while waiting for the shared gate.
+        if(WarmCompleted(a,owned,out code))return new("exited",a.AttemptId,false){ExitCode=owned.ExitCode??code};
         if(pool.ActiveActivation!=owned.Activation)throw new IOException("Warm frame assignment differs; retain ownership");
         using var p=OwnedProcess(owned);
         return p is null?new("exited",a.AttemptId,false){ExitCode=1}:new("running",a.AttemptId,true);
