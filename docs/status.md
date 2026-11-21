@@ -115,3 +115,10 @@ T-36/T-23: six-node real Docker lifecycle and failover checks pass; 45 hosting +
 Reviewed the user-supplied GPU/CPU engineering manual against shared scheduler and vendor docs. Findings and proposed scope: research/hybrid-gpu-cpu-review.md. No code or interface changes; implementation awaits user choice. T-36 remains in PR #19. T-37 was already occupied by profitability research, hence T-38.
 
 Nikita / Codex: T-39 on featur-gaming, Intel browser gaming discovery. Script pushed; host graphics paths exist but ordinary containers lack access. No Vulkan/encoding/CS2 support proven. Awaiting streaming-stack choice; see tickets/T-39-intel-browser-gaming.md. Shared scheduler interfaces unchanged.
+
+## Business model provisionally fixed (2026-11-21, Jona / Claude)
+Branch `docs/T-34-business-model-fixed`: decision 0020 (operator model; Type 1 = batch LLM on non-personal
+documents, Type 2 = research simulations; transcription and webhosting out of the business model) and
+`docs/business-model.md`. Reviewed (go with changes, applied). Docs only; no code, interface or scored
+figure changed. Affects: T-30 (now a Monte Carlo research kernel), T-31 (Type 1 = LLM), T-14 (operator
+model as main case), T-21 storyboard money scene. Ennio: 0018/0019 status lines updated, please check.

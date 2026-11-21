@@ -45,6 +45,13 @@ electricity, heat fee, commission). Things that must be visible in that calculat
 - Show the **case break-even** (scored: electricity cost only) and **our full-cost break-even**
   side by side, clearly labelled.
 
+## Business model (provisionally fixed, 2026-11-21)
+
+Operator model, two job types: Type 1 = batch LLM service on non-personal documents, Type 2 =
+research simulations. Transcription and webhosting are out of the business model. See
+[`business-model.md`](business-model.md) and decision
+[0020](decisions/0020-business-model-operator-two-job-types.md). The sections below are background.
+
 ## Ownership models (both are allowed, as a parameter)
 
 - **Operator model:** DigitalHeat owns and operates the servers, sells the computing and gives the

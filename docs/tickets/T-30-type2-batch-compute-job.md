@@ -6,8 +6,9 @@
 
 ## Goal
 
-A runnable Type 2 job (decisions 0018, 0019): a container that processes many short, independent tasks
-(e.g. a Monte Carlo option-pricing kernel with a GPU path (CUDA/CuPy) and a CPU fallback for the host CPU), paused and resumed by the shared
+A runnable Type 2 job (decisions 0018, 0019, 0020): a container that processes many short, independent tasks.
+Decision 0020 makes Type 2 **research simulations**, so the kernel should be a Monte Carlo *research*
+simulation (e.g. a physics model), not option pricing. It should have a GPU path (CUDA/CuPy) and a CPU fallback for the host CPU), paused and resumed by the shared
 scheduler, with measured runtime and energy per task, scaled to the 1 kW server like T-02.
 
 ## Tasks

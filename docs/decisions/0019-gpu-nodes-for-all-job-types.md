@@ -1,6 +1,7 @@
 # 0019: Type 2 rides on Type 1 hardware; GPU nodes, no CPU-only servers
 
-- **Status:** proposed
+- **Status:** proposed; still valid under 0020. Exception: Type 1 premiums from medical or legal
+  secrecy (Decision 4) are excluded on home sites by 0020.
 - **Date:** 2026-11-21
 - **Decided by:** Ennio; team confirmation pending. Partly supersedes decision 0018 (the line "Type 2
   on CPU") and refines the team lead's hardware decision in `docs/vision.md` (GPU main scenario).
