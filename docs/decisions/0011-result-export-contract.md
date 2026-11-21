@@ -31,4 +31,5 @@ Input loader schemas are unchanged; snake_case applies to the new exports.
 No private workload payloads, credentials, environment variables or absolute host paths are exported.
 
 ## Review
-Pending fresh-context review.
+Verdict: go with changes. Added an explicit v1 summary projection and field/unit/null contract; dirty runs are labelled not reproducible from commit; commands use repository-relative paths. Free-text configuration/source strings are public and must be reviewed. Showcase will be generated from a clean identified code commit.
+

@@ -1,10 +1,21 @@
 using System.Globalization;
 using System.Text.Json;
 using DigitalHeat.Core;
+using DigitalHeat.YearRun;
 
-if (args.Length > 2) throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json]");
-string root = args.Length > 0 ? Path.GetFullPath(args[0]) : FindRepositoryRoot();
-string scenarioPath = args.Length > 1 ? Path.GetFullPath(args[1], root)
+var positional = new List<string>();
+string? bundlePath = null;
+for (int i = 0; i < args.Length; i++)
+{
+    if (args[i] == "--output" && bundlePath is null && i + 1 < args.Length)
+        bundlePath = Path.GetFullPath(args[++i]);
+    else if (args[i].StartsWith("--", StringComparison.Ordinal))
+        throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json] [--output DIRECTORY]");
+    else positional.Add(args[i]);
+}
+if (positional.Count > 2) throw new ArgumentException("Too many positional arguments.");
+string root = positional.Count > 0 ? Path.GetFullPath(positional[0]) : FindRepositoryRoot();
+string scenarioPath = positional.Count > 1 ? Path.GetFullPath(positional[1], root)
     : Path.Combine(root, "config", "job-scenarios", "unlimited.json");
 var parameters = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
 var jobScenario = JobScenario.Load(scenarioPath);
@@ -14,8 +25,15 @@ var demand = HeatDemand.Build(weather, parameters);
 var result = YearSimulation.Run(demand, parameters,
     new GreedyHeatScheduler(parameters.MinimumLoadShare.Value), new SimulatedExecutor(), jobScenario);
 string output = Path.Combine(root, "results", "reference-house");
+if (bundlePath is not null)
+{
+    output = bundlePath;
+    ResultBundle.Write(output, root, scenarioPath, result, parameters, jobScenario);
+}
+else
+{
 Directory.CreateDirectory(output);
-WriteHourly(Path.Combine(output, "hourly.csv"), result.Hours);
+ResultBundle.WriteHourly(Path.Combine(output, "hourly.csv"), result.Hours);
 File.WriteAllText(Path.Combine(output, "summary.json"), JsonSerializer.Serialize(new
 {
     result.Summary,
@@ -29,6 +47,7 @@ File.WriteAllText(Path.Combine(output, "summary.json"), JsonSerializer.Serialize
         JobScenario = Path.GetRelativePath(root, scenarioPath)
     }
 }, new JsonSerializerOptions { WriteIndented = true }));
+}
 Console.WriteLine($"Wrote {result.Hours.Count} hours to {output}");
 Console.WriteLine($"Coverage {result.Summary.Coverage:P1}; server-hours {result.Summary.ServerHours:F0}; " +
     $"case break-even {result.Summary.BreakEvenChfPerServerHour?.ToString("F3") ?? "undefined"} CHF/server-hour");
@@ -72,15 +91,3 @@ static void VerifyElectricitySnapshot(string path, ReferenceParameters p)
         throw new InvalidDataException("Config electricity price differs from ElCom snapshot.");
 }
 
-static void WriteHourly(string path, IReadOnlyList<HourResult> hours)
-{
-    using var writer = new StreamWriter(path);
-    writer.WriteLine("local_time,heat_demand_kwh,space_heat_kwh,hot_water_kwh,target_load_per_server,actual_load_per_server,produced_heat_kwh,direct_used_kwh,tank_charge_kwh,tank_discharge_kwh,tank_stored_kwh,dumped_heat_kwh,backup_heat_kwh,server_electric_kwh");
-    foreach (var h in hours)
-    {
-        var values = new[] { h.DemandKwh, h.SpaceHeatKwh, h.HotWaterKwh, h.TargetLoadPerServer,
-            h.ActualLoadPerServer, h.ProducedHeatKwh, h.DirectUsedKwh, h.TankChargeKwh,
-            h.TankDischargeKwh, h.TankStoredKwh, h.DumpedHeatKwh, h.BackupHeatKwh, h.ServerElectricKwh };
-        writer.WriteLine(h.LocalTime + "," + string.Join(",", values.Select(x => x.ToString("R", CultureInfo.InvariantCulture))));
-    }
-}

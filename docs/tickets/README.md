@@ -17,7 +17,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-03](T-03-generic-job-executor.md) | Generic real-job executor behind IExecutor (must-have 2) | 1 Draft | T-02 (job image) | Nikita or Codex (prompt prepared in chat) | Jona / Codex | done (PR #3, decision 0009) |
 | [T-04](T-04-live-demo-run.md) | LiveRun: one day replayed with the real job (demo for must-have 2) | 1 Draft | T-03 | same person as T-03 | Jona / Codex | done (PR #3: DigitalHeat.LiveRun day replay) |
 | [T-05](T-05-jobs-in-year-simulation.md) | Jobs, queue and deadlines in the year simulation (must-have 3) | 1 Draft | T-01 | Codex | Jona / Codex | done (PR #6, decision 0010); sourced finite scenario: T-26 |
-| [T-06](T-06-reference-house-results.md) | Reference-house key figures and assumptions for the draft | 1 Draft | T-05 | anyone | Jona / Codex | in progress (branch docs/T-06-reference-results) |
+| [T-06](T-06-reference-house-results.md) | Reference-house key figures and assumptions for the draft | 1 Draft | T-05 | anyone | Jona / Codex | in progress (first version ready; T-26 finite inputs pending) |
 | [T-07](T-07-draft-submission.md) | Draft submission package (due 2026-11-21 15:00) | 1 Draft | T-00, T-06 | one owner | Team lead / Claude | in progress (fresh-clone check + must-have checklist; contents of the submission depend on T-00) |
 | [T-08](T-08-explorer-fixes.md) | Year explorer: fixes from the review | 2 Pitch | – | Claude (team lead's session) | | open |
 | [T-09](T-09-site-heat-state-forecast.md) | Per-site heat state and forecast | 2 Pitch | T-00 | Codex | Nikita / Codex | done (PR #5 merged) |
@@ -37,7 +37,8 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | in progress |
 | [T-24](T-24-job-data-locality.md) | Enforce job data locality before execution | 1 Draft | T-01; T-10/T-12 for routing | Codex | Jona / Codex | in progress |
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
-| [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | in progress (two research subagents) |
+| [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
+| [T-27](T-27-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | | proposed (waiting for go) |
 
 ## Dependency sketch
 
@@ -48,3 +49,9 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
       ├─ T-15 ─ T-14 ─ T-16, T-19               T-11 + T-13 ─ T-22
       └─ T-21 (pitch)
 ```
+
+
+## Hosting follow-up
+| ID | Title | Owner | Status |
+|---|---|---|---|
+| [T-27](T-27-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | in progress |

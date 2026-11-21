@@ -1,6 +1,6 @@
 # Status: work map
 
-Last updated: 2026-11-21 02:17 Europe/Zurich. Every agent updates its row when it starts, when it
+Last updated: 2026-11-21 02:29 Europe/Zurich. Every agent updates its row when it starts, when it
 changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Who works on what
@@ -9,7 +9,8 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 |---|---|---|---|---|
 | team | `main` | Case context; data (Open-Meteo Basel 2025, ElCom 2026 IWB H4, WP1 AI service and compute prices, WP2 costs and energy prices, WP3 sites and profiles incl. When2Heat extract); vision draft (`docs/vision.md`); research plan; AGENTS rules | `data/raw/` and its `SOURCE` files | merged |
 | Jona (IllusioQuest) / Codex | `feat/core-csharp` | .NET 8 `DigitalHeat.Core` (heat demand, tank, `IScheduler.Decide(HeatSignal)`, `IExecutor.ApplyTargetLoad`, `SchedulerController.Apply`, `GreedyHeatScheduler`, year simulation, economics), `DigitalHeat.YearRun`, xUnit tests, `config/reference-house.json`, decision 0005 (accepted) | defines `IScheduler`, `IExecutor`, `HeatSignal`, `config/reference-house.json` | merged to main (PR #2); real Docker executor added by PR #3 |
-| Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | PR #6 open; 13 .NET tests and data check pass; T-01 sourced job catalog data pending |
+| Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | merged to main (PR #6); T-01 sourced job catalog data pending |
+| Jona (IllusioQuest) / Codex | `docs/T-06-reference-results` | T-06 reproducible reference-house result variants and cost caveats | reads YearRun outputs and WP2 costs; no core or runtime interface changes | first version ready in PR #8; 4-server draft presentation baseline selected after user delegation; sourced finite job inputs pending |
 | Nikita | `feat/T-23-webhosting-integration` | Linux gateway crash experiment, three nested Docker engines, sample, placement/contracts; ADRs 0003 and 0006 proposed | no shared heat interface changed; future integration must use existing IExecutor | merged networking milestone (0e7115a); T-09 merged in PR #5; T-23 isolated shared-runtime probe in progress; always-on catalog boundary awaits T-01 agreement; plan photo still missing; whole-container pause recovery tested with either manager absent; controller/etcd/node orchestration and heat integration pending; see webhosting-runtime.md |
 | Jona (IllusioQuest) / Codex | `feat/job-runtime` | Generic Docker control of a running job through the shared scheduler; day replay and decision 0009 (was 0006). Does not implement example jobs. | Adds `IContainerControl` and `DockerJobExecutor : IExecutor`; consumes core interfaces without changing them. | merged to main (PR #3); 9 .NET tests pass and a Busybox Docker smoke replay paused, resumed and throttled as requested |
 | Jona (IllusioQuest) / Codex | `feat/T-24-job-data-locality` | T-24 customer/contract-sourced job location policy and pre-execution eligibility guard; coordinate with T-01 catalog owner | `config/jobs/job.schema.json`, `JobDescriptorLoader`, Core `JobPlacement.IsEligible`, `DigitalHeat.LiveRun` preflight | draft PR #9; 31 .NET tests pass, mismatched-site LiveRun smoke denied before Docker; T-01/T-02 descriptors need the new field, T-10/T-12 must reuse guard with trusted site metadata |
@@ -19,6 +20,12 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude | `docs/T-07-draft-submission` | T-07: fresh-clone check and must-have checklist (`docs/submission/draft-checklist.md`); README demo section once T-02 is merged | none | in progress |
 | team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
+
+## Open coordination
+
+- **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
+- **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
+- **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).
 
 ## Shared interfaces
 
@@ -64,3 +71,6 @@ No shared scheduler or scored formula changes. Export design uses decision 0011.
 Hosting component isolation requested separately; threat model awaiting user choice.
 Jona owns T-24 data-locality checks: hosting must reuse that rule when dynamic placement exists,
 not invent a competing country/site policy. T-01 always-on catalog decision remains pending.
+T-27: user approved frontend/API component isolation with documented operator limits; four-engine opt-in lab, decision 0012. T-13 exporter implementation underway; no shared input schema changes.
+
+T-13: 29 tests pass; 8,760-row showcase generated from clean 8651786, legacy hourly/coverage comparison exact. T-27 renumbered from T-25 after concurrent team animated-house ticket collision; no files from that task changed.
