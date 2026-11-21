@@ -1,0 +1,3404 @@
+{
+  "ticket": "T-70",
+  "method": "docs/results/server-sizing.md",
+  "note": "Variant analysis. Unlimited sellable, pausable work (upper bound on sold hours); fixed cost = purchase / lifetime \u002B ops per server-year; idle draw charged at the electricity price when sourced, idle heat not credited. Not a full-cost claim: installation, heating integration and the host/operator split are excluded.",
+  "inputs": {
+    "weather": "data/raw/open-meteo/basel-2025-hourly.csv",
+    "config": "config/reference-house.json",
+    "hardware": "config/hardware/*.json",
+    "scheduler": "Core HeatFirstScheduler, minimum load 0"
+  },
+  "diminishing_returns": true,
+  "rows": [
+    {
+      "server_count": 0,
+      "hours": 8760,
+      "server_hours": 0,
+      "marginal_server_hours": 0,
+      "used_heat_kwh": 0,
+      "dumped_heat_kwh": 0,
+      "coverage": 0,
+      "utilisation": 0,
+      "electricity_cost_chf": 0,
+      "heat_value_chf": 0
+    },
+    {
+      "server_count": 1,
+      "hours": 8760,
+      "server_hours": 7631.25,
+      "marginal_server_hours": 7631.25,
+      "used_heat_kwh": 6104.999999997566,
+      "dumped_heat_kwh": 0,
+      "coverage": 0.19548168735029767,
+      "utilisation": 0.8711472602739726,
+      "electricity_cost_chf": 2537.390625,
+      "heat_value_chf": 811.9649999996764
+    },
+    {
+      "server_count": 2,
+      "hours": 8760,
+      "server_hours": 12788,
+      "marginal_server_hours": 5156.75,
+      "used_heat_kwh": 10230.399999999823,
+      "dumped_heat_kwh": 0,
+      "coverage": 0.3275767165060193,
+      "utilisation": 0.7299086757990868,
+      "electricity_cost_chf": 4252.01,
+      "heat_value_chf": 1360.6431999999766
+    },
+    {
+      "server_count": 3,
+      "hours": 8760,
+      "server_hours": 17778.84765625,
+      "marginal_server_hours": 4990.84765625,
+      "used_heat_kwh": 14223.078124998898,
+      "dumped_heat_kwh": 0,
+      "coverage": 0.45542200019508616,
+      "utilisation": 0.6765162730688736,
+      "electricity_cost_chf": 5911.466845703126,
+      "heat_value_chf": 1891.6693906248536
+    },
+    {
+      "server_count": 4,
+      "hours": 8760,
+      "server_hours": 22661.025390625,
+      "marginal_server_hours": 4882.177734375,
+      "used_heat_kwh": 18128.82031250067,
+      "dumped_heat_kwh": 0,
+      "coverage": 0.5804836010416698,
+      "utilisation": 0.6467187611479738,
+      "electricity_cost_chf": 7534.790942382813,
+      "heat_value_chf": 2411.133101562589
+    },
+    {
+      "server_count": 5,
+      "hours": 8760,
+      "server_hours": 27275.1171875,
+      "marginal_server_hours": 4614.091796875,
+      "used_heat_kwh": 21820.09375,
+      "dumped_heat_kwh": 1.5543122344752192E-15,
+      "coverage": 0.6986779270095634,
+      "utilisation": 0.6227195704908676,
+      "electricity_cost_chf": 9068.97646484375,
+      "heat_value_chf": 2902.07246875
+    },
+    {
+      "server_count": 6,
+      "hours": 8760,
+      "server_hours": 31070.939453125,
+      "marginal_server_hours": 3795.822265625,
+      "used_heat_kwh": 24856.751562500292,
+      "dumped_heat_kwh": 1.687538997430238E-14,
+      "coverage": 0.795911504911817,
+      "utilisation": 0.5911518160792427,
+      "electricity_cost_chf": 10331.087368164062,
+      "heat_value_chf": 3305.9479578125392
+    },
+    {
+      "server_count": 7,
+      "hours": 8760,
+      "server_hours": 34002.78515625,
+      "marginal_server_hours": 2931.845703125,
+      "used_heat_kwh": 27202.228124999878,
+      "dumped_heat_kwh": 3.907985046680551E-14,
+      "coverage": 0.8710135059074234,
+      "utilisation": 0.5545137827177103,
+      "electricity_cost_chf": 11305.926064453126,
+      "heat_value_chf": 3617.8963406249836
+    },
+    {
+      "server_count": 8,
+      "hours": 8760,
+      "server_hours": 36284.318359375,
+      "marginal_server_hours": 2281.533203125,
+      "used_heat_kwh": 29027.454687500056,
+      "dumped_heat_kwh": 3.4638958368304884E-14,
+      "coverage": 0.9294571370678265,
+      "utilisation": 0.5177556843518122,
+      "electricity_cost_chf": 12064.535854492187,
+      "heat_value_chf": 3860.651473437508
+    },
+    {
+      "server_count": 9,
+      "hours": 8760,
+      "server_hours": 37838.919921875,
+      "marginal_server_hours": 1554.6015625,
+      "used_heat_kwh": 30271.13593750001,
+      "dumped_heat_kwh": 3.552713678800501E-14,
+      "coverage": 0.9692797266298274,
+      "utilisation": 0.4799457118451928,
+      "electricity_cost_chf": 12581.440874023438,
+      "heat_value_chf": 4026.0610796875017
+    },
+    {
+      "server_count": 10,
+      "hours": 8760,
+      "server_hours": 38750.390625,
+      "marginal_server_hours": 911.470703125,
+      "used_heat_kwh": 31000.3125,
+      "dumped_heat_kwh": 3.597122599785507E-14,
+      "coverage": 0.9926279108745194,
+      "utilisation": 0.4423560573630137,
+      "electricity_cost_chf": 12884.5048828125,
+      "heat_value_chf": 4123.0415625000005
+    },
+    {
+      "server_count": 11,
+      "hours": 8760,
+      "server_hours": 39044.46875,
+      "marginal_server_hours": 294.078125,
+      "used_heat_kwh": 31222.04375,
+      "dumped_heat_kwh": 1.957323192414151E-13,
+      "coverage": 0.999727730512244,
+      "utilisation": 0.4051937396222499,
+      "electricity_cost_chf": 12982.285859375,
+      "heat_value_chf": 4152.53181875
+    },
+    {
+      "server_count": 12,
+      "hours": 8760,
+      "server_hours": 39076.392578125,
+      "marginal_server_hours": 31.923828125,
+      "used_heat_kwh": 31228.4265625,
+      "dumped_heat_kwh": 3.597122599785507E-14,
+      "coverage": 0.9999321077370663,
+      "utilisation": 0.3717312840384798,
+      "electricity_cost_chf": 12992.900532226564,
+      "heat_value_chf": 4153.3807328125
+    },
+    {
+      "server_count": 13,
+      "hours": 8760,
+      "server_hours": 39081.80859375,
+      "marginal_server_hours": 5.416015625,
+      "used_heat_kwh": 31230.546875,
+      "dumped_heat_kwh": 1.724176357242868E-13,
+      "coverage": 1,
+      "utilisation": 0.34318412885273974,
+      "electricity_cost_chf": 12994.701357421876,
+      "heat_value_chf": 4153.662734375001
+    }
+  ],
+  "scenarios": [
+    {
+      "hardware_profile": "cpu-server-refurbished",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 5102.463333333333,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -11421.01627315258,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 5102.463333333333,
+          "variable_contribution_chf": 3234.2609531246762,
+          "contribution_chf": -1868.202380208657,
+          "marginal_variable_contribution_chf": 3234.2609531246762
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 10204.926666666666,
+          "variable_contribution_chf": 5226.168249999977,
+          "contribution_chf": -4978.758416666689,
+          "marginal_variable_contribution_chf": 1991.9072968753007
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 15307.39,
+          "variable_contribution_chf": 7134.782201415868,
+          "contribution_chf": -8172.607798584131,
+          "marginal_variable_contribution_chf": 1908.6139514158913
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 20409.853333333333,
+          "variable_contribution_chf": 8988.837060180753,
+          "contribution_chf": -11421.01627315258,
+          "marginal_variable_contribution_chf": 1854.0548587648846
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 25512.316666666666,
+          "variable_contribution_chf": 10708.296022949218,
+          "contribution_chf": -14804.020643717447,
+          "marginal_variable_contribution_chf": 1719.4589627684654
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 30614.78,
+          "variable_contribution_chf": 12016.932539184612,
+          "contribution_chf": -18597.847460815385,
+          "marginal_variable_contribution_chf": 1308.636516235394
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 35717.24333333333,
+          "variable_contribution_chf": 12891.798822509747,
+          "contribution_chf": -22825.444510823585,
+          "marginal_variable_contribution_chf": 874.8662833251346
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 40819.706666666665,
+          "variable_contribution_chf": 13440.167586303722,
+          "contribution_chf": -27379.53908036294,
+          "marginal_variable_contribution_chf": 548.3687637939747
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 45922.17,
+          "variable_contribution_chf": 13623.571233276367,
+          "contribution_chf": -32298.598766723633,
+          "marginal_variable_contribution_chf": 183.40364697264522
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 51024.63333333333,
+          "variable_contribution_chf": 13484.082993164066,
+          "contribution_chf": -37540.55034016927,
+          "marginal_variable_contribution_chf": -139.48824011230136
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 56127.096666666665,
+          "variable_contribution_chf": 13032.825435546876,
+          "contribution_chf": -43094.27123111979,
+          "marginal_variable_contribution_chf": -451.2575576171894
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 61229.56,
+          "variable_contribution_chf": 12449.20191125488,
+          "contribution_chf": -48780.35808874512,
+          "marginal_variable_contribution_chf": -583.6235242919956
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 66332.02333333333,
+          "variable_contribution_chf": 11854.523327099607,
+          "contribution_chf": -54477.50000623372,
+          "marginal_variable_contribution_chf": -594.6785841552737
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server-refurbished",
+      "price_label": "spot",
+      "price_chf_per_server_hour": 1.2,
+      "price_source": "derived: 125.4 vCPU per kW (1.9594 boxes x 64 threads) / 32 = 3.919 D32as-equivalents x CHF 0.3056 Azure D32as v5 spot Switzerland North (data/raw/market/compute-prices.csv cp-cpu-azure-d32as-v5-chn-spot, high); assumes buyers pay per vCPU regardless of generation",
+      "fixed_chf_per_server_year": 5102.463333333333,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": 5469.505747815831,
+      "optimal_server_count": 1,
+      "contribution_at_optimum_chf": 2252.672619791343,
+      "contribution_at_4_servers_chf": 815.9374377849235,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 9157.5,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 5102.463333333333,
+          "variable_contribution_chf": 7355.135953124676,
+          "contribution_chf": 2252.672619791343,
+          "marginal_variable_contribution_chf": 7355.135953124676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 15345.599999999999,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 10204.926666666666,
+          "variable_contribution_chf": 12131.688249999976,
+          "contribution_chf": 1926.7615833333093,
+          "marginal_variable_contribution_chf": 4776.552296875299
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 21334.6171875,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 15307.39,
+          "variable_contribution_chf": 16735.359935790868,
+          "contribution_chf": 1427.9699357908685,
+          "marginal_variable_contribution_chf": 4603.671685790892
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 27193.23046875,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 20409.853333333333,
+          "variable_contribution_chf": 21225.790771118256,
+          "contribution_chf": 815.9374377849235,
+          "marginal_variable_contribution_chf": 4490.430835327388
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 32730.140625,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 25512.316666666666,
+          "variable_contribution_chf": 25436.859304199217,
+          "contribution_chf": -75.45736246744855,
+          "marginal_variable_contribution_chf": 4211.068533080961
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 37285.12734375,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 30614.78,
+          "variable_contribution_chf": 28795.239843872107,
+          "contribution_chf": -1819.5401561278923,
+          "marginal_variable_contribution_chf": 3358.3805396728894
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 40803.3421875,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 35717.24333333333,
+          "variable_contribution_chf": 31253.30280688475,
+          "contribution_chf": -4463.940526448583,
+          "marginal_variable_contribution_chf": 2458.0629630126423
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 43541.18203125,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 40819.706666666665,
+          "variable_contribution_chf": 33033.69950036622,
+          "contribution_chf": -7786.007166300442,
+          "marginal_variable_contribution_chf": 1780.3966934814744
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 45406.70390625,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 45922.17,
+          "variable_contribution_chf": 34056.58799108887,
+          "contribution_chf": -11865.58200891113,
+          "marginal_variable_contribution_chf": 1022.8884907226457
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 46500.46875,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 51024.63333333333,
+          "variable_contribution_chf": 34409.29393066406,
+          "contribution_chf": -16615.33940266927,
+          "marginal_variable_contribution_chf": 352.70593957519304
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 46853.362499999996,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 56127.096666666665,
+          "variable_contribution_chf": 34116.83856054687,
+          "contribution_chf": -22010.258106119793,
+          "marginal_variable_contribution_chf": -292.4553701171899
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 46891.671093749996,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 61229.56,
+          "variable_contribution_chf": 33550.45390344238,
+          "contribution_chf": -27679.106096557618,
+          "marginal_variable_contribution_chf": -566.3846571044924
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 46898.1703125,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 66332.02333333333,
+          "variable_contribution_chf": 32958.699967724606,
+          "contribution_chf": -33373.323365608725,
+          "marginal_variable_contribution_chf": -591.7539357177739
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server-refurbished",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 0.46,
+      "price_source": "derived: spot 1.198 x RunPod community/datacentre ratio 0.38 (docs/research/computing-price.md C1 method, GPU ratio applied to CPU: assumption)",
+      "fixed_chf_per_server_year": 5102.463333333333,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -15953.22135127758,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 3510.375,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 5102.463333333333,
+          "variable_contribution_chf": 1708.0109531246765,
+          "contribution_chf": -3394.452380208657,
+          "marginal_variable_contribution_chf": 1708.0109531246765
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 5882.4800000000005,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 10204.926666666666,
+          "variable_contribution_chf": 2668.568249999977,
+          "contribution_chf": -7536.35841666669,
+          "marginal_variable_contribution_chf": 960.5572968753006
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 8178.269921875,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 15307.39,
+          "variable_contribution_chf": 3579.0126701658683,
+          "contribution_chf": -11728.377329834131,
+          "marginal_variable_contribution_chf": 910.4444201658912
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 10424.0716796875,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 20409.853333333333,
+          "variable_contribution_chf": 4456.631982055753,
+          "contribution_chf": -15953.22135127758,
+          "marginal_variable_contribution_chf": 877.6193118898846
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 12546.553906250001,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 25512.316666666666,
+          "variable_contribution_chf": 5253.27258544922,
+          "contribution_chf": -20259.044081217446,
+          "marginal_variable_contribution_chf": 796.6406033934672
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 14292.6321484375,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 30614.78,
+          "variable_contribution_chf": 5802.74464855961,
+          "contribution_chf": -24812.03535144039,
+          "marginal_variable_contribution_chf": 549.4720631103901
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 15641.281171875,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 35717.24333333333,
+          "variable_contribution_chf": 6091.241791259748,
+          "contribution_chf": -29626.001542073584,
+          "marginal_variable_contribution_chf": 288.4971427001383
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 16690.7864453125,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 40819.706666666665,
+          "variable_contribution_chf": 6183.3039144287195,
+          "contribution_chf": -34636.40275223795,
+          "marginal_variable_contribution_chf": 92.06212316897108
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 17405.9031640625,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 45922.17,
+          "variable_contribution_chf": 6055.787248901368,
+          "contribution_chf": -39866.38275109863,
+          "marginal_variable_contribution_chf": -127.5166655273515
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 17825.1796875,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 51024.63333333333,
+          "variable_contribution_chf": 5734.004868164065,
+          "contribution_chf": -45290.62846516927,
+          "marginal_variable_contribution_chf": -321.78238073730336
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 17960.455625000002,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 56127.096666666665,
+          "variable_contribution_chf": 5223.931685546879,
+          "contribution_chf": -50903.164981119786,
+          "marginal_variable_contribution_chf": -510.0731826171859
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 17975.1405859375,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 61229.56,
+          "variable_contribution_chf": 4633.923395629883,
+          "contribution_chf": -56595.63660437011,
+          "marginal_variable_contribution_chf": -590.0082899169956
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 17977.631953125,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 66332.02333333333,
+          "variable_contribution_chf": 4038.161608349609,
+          "contribution_chf": -62293.86172498372,
+          "marginal_variable_contribution_chf": -595.7617872802739
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server-refurbished",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 4.72,
+      "price_source": "derived: 3.919 32-vCPU equivalents x CHF 1.2054 per instance-hour (lowest Swiss on-demand, docs/research/computing-price.md A1: 7.10 / 5.89)",
+      "fixed_chf_per_server_year": 5102.463333333333,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": 1249.339927572964,
+      "optimal_server_count": 9,
+      "contribution_at_optimum_chf": 121327.41611608885,
+      "contribution_at_4_servers_chf": 80582.74681278493,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 36019.5,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 5102.463333333333,
+          "variable_contribution_chf": 34217.13595312468,
+          "contribution_chf": 29114.672619791345,
+          "marginal_variable_contribution_chf": 34217.13595312468
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 60359.35999999999,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 10204.926666666666,
+          "variable_contribution_chf": 57145.448249999965,
+          "contribution_chf": 46940.5215833333,
+          "marginal_variable_contribution_chf": 22928.312296875287
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 83916.1609375,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 15307.39,
+          "variable_contribution_chf": 79316.90368579086,
+          "contribution_chf": 64009.513685790866,
+          "marginal_variable_contribution_chf": 22171.4554357909
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 106960.03984375,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 20409.853333333333,
+          "variable_contribution_chf": 100992.60014611826,
+          "contribution_chf": 80582.74681278493,
+          "marginal_variable_contribution_chf": 21675.696460327395
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 128738.55312499999,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 25512.316666666666,
+          "variable_contribution_chf": 121445.27180419919,
+          "contribution_chf": 95932.95513753252,
+          "marginal_variable_contribution_chf": 20452.67165808093
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 146654.83421874998,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 30614.78,
+          "variable_contribution_chf": 138164.9467188721,
+          "contribution_chf": 107550.16671887209,
+          "marginal_variable_contribution_chf": 16719.674914672898
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 160493.1459375,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 35717.24333333333,
+          "variable_contribution_chf": 150943.10655688474,
+          "contribution_chf": 115225.86322355141,
+          "marginal_variable_contribution_chf": 12778.159838012652
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 171261.98265624998,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 40819.706666666665,
+          "variable_contribution_chf": 160754.50012536618,
+          "contribution_chf": 119934.79345869951,
+          "marginal_variable_contribution_chf": 9811.393568481435
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 178599.70203125,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 45922.17,
+          "variable_contribution_chf": 167249.58611608885,
+          "contribution_chf": 121327.41611608885,
+          "marginal_variable_contribution_chf": 6495.0859907226695
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 182901.84375,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 51024.63333333333,
+          "variable_contribution_chf": 170810.66893066408,
+          "contribution_chf": 119786.03559733075,
+          "marginal_variable_contribution_chf": 3561.082814575231
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 184289.8925,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 56127.096666666665,
+          "variable_contribution_chf": 171553.36856054686,
+          "contribution_chf": 115426.2718938802,
+          "marginal_variable_contribution_chf": 742.6996298827871
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 184440.57296875,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 61229.56,
+          "variable_contribution_chf": 171099.35577844238,
+          "contribution_chf": 109869.79577844238,
+          "marginal_variable_contribution_chf": -454.012782104488
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 184466.1365625,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 66332.02333333333,
+          "variable_contribution_chf": 170526.66621772462,
+          "contribution_chf": 104194.64288439129,
+          "marginal_variable_contribution_chf": -572.6895607177576
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 12812.968333333334,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -42263.03627315258,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 12812.968333333334,
+          "variable_contribution_chf": 3234.2609531246762,
+          "contribution_chf": -9578.707380208658,
+          "marginal_variable_contribution_chf": 3234.2609531246762
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 25625.93666666667,
+          "variable_contribution_chf": 5226.168249999977,
+          "contribution_chf": -20399.76841666669,
+          "marginal_variable_contribution_chf": 1991.9072968753007
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 38438.905,
+          "variable_contribution_chf": 7134.782201415868,
+          "contribution_chf": -31304.122798584132,
+          "marginal_variable_contribution_chf": 1908.6139514158913
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 51251.87333333334,
+          "variable_contribution_chf": 8988.837060180753,
+          "contribution_chf": -42263.03627315258,
+          "marginal_variable_contribution_chf": 1854.0548587648846
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 64064.84166666668,
+          "variable_contribution_chf": 10708.296022949218,
+          "contribution_chf": -53356.545643717465,
+          "marginal_variable_contribution_chf": 1719.4589627684654
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 76877.81,
+          "variable_contribution_chf": 12016.932539184612,
+          "contribution_chf": -64860.87746081538,
+          "marginal_variable_contribution_chf": 1308.636516235394
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 89690.77833333334,
+          "variable_contribution_chf": 12891.798822509747,
+          "contribution_chf": -76798.97951082358,
+          "marginal_variable_contribution_chf": 874.8662833251346
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 102503.74666666667,
+          "variable_contribution_chf": 13440.167586303722,
+          "contribution_chf": -89063.57908036295,
+          "marginal_variable_contribution_chf": 548.3687637939747
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 115316.71500000001,
+          "variable_contribution_chf": 13623.571233276367,
+          "contribution_chf": -101693.14376672365,
+          "marginal_variable_contribution_chf": 183.40364697264522
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 128129.68333333336,
+          "variable_contribution_chf": 13484.082993164066,
+          "contribution_chf": -114645.6003401693,
+          "marginal_variable_contribution_chf": -139.48824011230136
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 140942.65166666667,
+          "variable_contribution_chf": 13032.825435546876,
+          "contribution_chf": -127909.82623111979,
+          "marginal_variable_contribution_chf": -451.2575576171894
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 153755.62,
+          "variable_contribution_chf": 12449.20191125488,
+          "contribution_chf": -141306.41808874512,
+          "marginal_variable_contribution_chf": -583.6235242919956
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 166568.58833333335,
+          "variable_contribution_chf": 11854.523327099607,
+          "contribution_chf": -154714.06500623375,
+          "marginal_variable_contribution_chf": -594.6785841552737
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server",
+      "price_label": "spot",
+      "price_chf_per_server_hour": 1.8,
+      "price_source": "docs/research/computing-price.md A2: Azure D32as v5 spot Switzerland North (cp-cpu-azure-d32as-v5-chn-spot) x 5.89 instances per kW; range 1.80-3.44",
+      "fixed_chf_per_server_year": 12812.968333333334,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": 8166.602570446213,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -16429.46732784008,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 13736.25,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 12812.968333333334,
+          "variable_contribution_chf": 11933.885953124676,
+          "contribution_chf": -879.0823802086579,
+          "marginal_variable_contribution_chf": 11933.885953124676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 23018.4,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 25625.93666666667,
+          "variable_contribution_chf": 19804.488249999977,
+          "contribution_chf": -5821.448416666692,
+          "marginal_variable_contribution_chf": 7870.6022968753
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 32001.92578125,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 38438.905,
+          "variable_contribution_chf": 27402.668529540868,
+          "contribution_chf": -11036.236470459131,
+          "marginal_variable_contribution_chf": 7598.180279540891
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 40789.845703125,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 51251.87333333334,
+          "variable_contribution_chf": 34822.406005493256,
+          "contribution_chf": -16429.46732784008,
+          "marginal_variable_contribution_chf": 7419.737475952388
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 49095.2109375,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 64064.84166666668,
+          "variable_contribution_chf": 41801.92961669921,
+          "contribution_chf": -22262.91204996747,
+          "marginal_variable_contribution_chf": 6979.523611205957
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 55927.691015625,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 76877.81,
+          "variable_contribution_chf": 47437.80351574711,
+          "contribution_chf": -29440.00648425289,
+          "marginal_variable_contribution_chf": 5635.873899047896
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 61205.01328125,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 89690.77833333334,
+          "variable_contribution_chf": 51654.97390063475,
+          "contribution_chf": -38035.804432698584,
+          "marginal_variable_contribution_chf": 4217.170384887642
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 65311.773046875,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 102503.74666666667,
+          "variable_contribution_chf": 54804.29051599121,
+          "contribution_chf": -47699.45615067546,
+          "marginal_variable_contribution_chf": 3149.31661535646
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 68110.055859375,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 115316.71500000001,
+          "variable_contribution_chf": 56759.93994421387,
+          "contribution_chf": -58556.775055786144,
+          "marginal_variable_contribution_chf": 1955.6494282226558
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 69750.703125,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 128129.68333333336,
+          "variable_contribution_chf": 57659.52830566406,
+          "contribution_chf": -70470.1550276693,
+          "marginal_variable_contribution_chf": 899.5883614501945
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 70280.04375,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 140942.65166666667,
+          "variable_contribution_chf": 57543.519810546866,
+          "contribution_chf": -83399.13185611981,
+          "marginal_variable_contribution_chf": -116.00849511719571
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 70337.506640625,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 153755.62,
+          "variable_contribution_chf": 56996.289450317374,
+          "contribution_chf": -96759.33054968262,
+          "marginal_variable_contribution_chf": -547.2303602294924
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 70347.25546875001,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 166568.58833333335,
+          "variable_contribution_chf": 56407.78512397462,
+          "contribution_chf": -110160.80320935872,
+          "marginal_variable_contribution_chf": -588.5043263427506
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 0.68,
+      "price_source": "docs/research/computing-price.md C1 (lower end): cheapest Swiss spot x RunPod community/datacentre ratio 0.38; range 0.68-1.15 (GPU ratio applied to CPU: assumption)",
+      "fixed_chf_per_server_year": 12812.968333333334,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -41809.815765340085,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5189.25,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 12812.968333333334,
+          "variable_contribution_chf": 3386.8859531246762,
+          "contribution_chf": -9426.082380208658,
+          "marginal_variable_contribution_chf": 3386.8859531246762
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8695.84,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 25625.93666666667,
+          "variable_contribution_chf": 5481.928249999977,
+          "contribution_chf": -20144.008416666693,
+          "marginal_variable_contribution_chf": 2095.042296875301
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 12089.616406250001,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 38438.905,
+          "variable_contribution_chf": 7490.359154540869,
+          "contribution_chf": -30948.545845459128,
+          "marginal_variable_contribution_chf": 2008.4309045408918
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 15409.497265625001,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 51251.87333333334,
+          "variable_contribution_chf": 9442.057567993254,
+          "contribution_chf": -41809.815765340085,
+          "marginal_variable_contribution_chf": 1951.6984134523846
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18547.0796875,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 64064.84166666668,
+          "variable_contribution_chf": 11253.79836669922,
+          "contribution_chf": -52811.04329996746,
+          "marginal_variable_contribution_chf": 1811.7407987059669
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 21128.238828125002,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 76877.81,
+          "variable_contribution_chf": 12638.351328247112,
+          "contribution_chf": -64239.45867175289,
+          "marginal_variable_contribution_chf": 1384.5529615478918
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 23121.893906250003,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 89690.77833333334,
+          "variable_contribution_chf": 13571.85452563475,
+          "contribution_chf": -76118.9238076986,
+          "marginal_variable_contribution_chf": 933.5031973876376
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 24673.336484375002,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 102503.74666666667,
+          "variable_contribution_chf": 14165.853953491222,
+          "contribution_chf": -88337.89271317545,
+          "marginal_variable_contribution_chf": 593.9994278564718
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 25730.465546875002,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 115316.71500000001,
+          "variable_contribution_chf": 14380.349631713872,
+          "contribution_chf": -100936.36536828613,
+          "marginal_variable_contribution_chf": 214.4956782226509
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 26350.265625000004,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 128129.68333333336,
+          "variable_contribution_chf": 14259.090805664066,
+          "contribution_chf": -113870.5925276693,
+          "marginal_variable_contribution_chf": -121.25882604980688
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 26550.23875,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 140942.65166666667,
+          "variable_contribution_chf": 13813.714810546875,
+          "contribution_chf": -127128.93685611979,
+          "marginal_variable_contribution_chf": -445.37599511719054
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 26571.946953125003,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 153755.62,
+          "variable_contribution_chf": 13230.729762817384,
+          "contribution_chf": -140524.8902371826,
+          "marginal_variable_contribution_chf": -582.9850477294913
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 26575.62984375,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 166568.58833333335,
+          "variable_contribution_chf": 12636.159498974608,
+          "contribution_chf": -153932.42883435875,
+          "marginal_variable_contribution_chf": -594.5702638427756
+        }
+      ]
+    },
+    {
+      "hardware_profile": "cpu-server",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 7.1,
+      "price_source": "docs/research/computing-price.md A1: lowest Swiss-region on-demand 32-vCPU VM per kW; range 7.10-11.09",
+      "fixed_chf_per_server_year": 12812.968333333334,
+      "idle_electric_kw": 0.205,
+      "break_even_server_hours_per_year": 1931.7129215320856,
+      "optimal_server_count": 8,
+      "contribution_at_optimum_chf": 144607.431154012,
+      "contribution_at_4_servers_chf": 103673.96724247241,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 54181.875,
+          "idle_electricity_chf": 76.938421875,
+          "fixed_cost_chf": 12812.968333333334,
+          "variable_contribution_chf": 52379.51095312468,
+          "contribution_chf": 39566.54261979135,
+          "marginal_variable_contribution_chf": 52379.51095312468
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 90794.79999999999,
+          "idle_electricity_chf": 322.54495,
+          "fixed_cost_chf": 25625.93666666667,
+          "variable_contribution_chf": 87580.88824999997,
+          "contribution_chf": 61954.951583333306,
+          "marginal_variable_contribution_chf": 35201.3772968753
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 126229.818359375,
+          "idle_electricity_chf": 579.4597966308594,
+          "fixed_cost_chf": 38438.905,
+          "variable_contribution_chf": 121630.56110766587,
+          "contribution_chf": 83191.65610766587,
+          "marginal_variable_contribution_chf": 34049.67285766589
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 160893.2802734375,
+          "idle_electricity_chf": 843.7818568115233,
+          "fixed_cost_chf": 51251.87333333334,
+          "variable_contribution_chf": 154925.84057580575,
+          "contribution_chf": 103673.96724247241,
+          "marginal_variable_contribution_chf": 33295.27946813988
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 193653.33203125,
+          "idle_electricity_chf": 1126.3773247070312,
+          "fixed_cost_chf": 64064.84166666668,
+          "variable_contribution_chf": 186360.05071044923,
+          "contribution_chf": 122295.20904378255,
+          "marginal_variable_contribution_chf": 31434.21013464348
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 220603.6701171875,
+          "idle_electricity_chf": 1464.7480895263673,
+          "fixed_cost_chf": 76877.81,
+          "variable_contribution_chf": 212113.7826173096,
+          "contribution_chf": 135235.9726173096,
+          "marginal_variable_contribution_chf": 25753.73190686037
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 241419.774609375,
+          "idle_electricity_chf": 1862.0096567871092,
+          "fixed_cost_chf": 89690.77833333334,
+          "variable_contribution_chf": 231869.73522875973,
+          "contribution_chf": 142178.95689542638,
+          "marginal_variable_contribution_chf": 19755.952611450135
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 257618.6603515625,
+          "idle_electricity_chf": 2303.5981498291017,
+          "fixed_cost_chf": 102503.74666666667,
+          "variable_contribution_chf": 247111.17782067868,
+          "contribution_chf": 144607.431154012,
+          "marginal_variable_contribution_chf": 15241.442591918953
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 268656.3314453125,
+          "idle_electricity_chf": 2794.736120825195,
+          "fixed_cost_chf": 115316.71500000001,
+          "variable_contribution_chf": 257306.21553015133,
+          "contribution_chf": 141989.5005301513,
+          "marginal_variable_contribution_chf": 10195.037709472643
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 275127.7734375,
+          "idle_electricity_chf": 3329.7114990234377,
+          "fixed_cost_chf": 128129.68333333336,
+          "variable_contribution_chf": 263036.5986181641,
+          "contribution_chf": 134906.91528483073,
+          "marginal_variable_contribution_chf": 5730.38308801275
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 277215.72812499997,
+          "idle_electricity_chf": 3906.7698988281245,
+          "fixed_cost_chf": 140942.65166666667,
+          "variable_contribution_chf": 264479.20418554684,
+          "contribution_chf": 123536.55251888017,
+          "marginal_variable_contribution_chf": 1442.605567382765
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 277442.38730468747,
+          "idle_electricity_chf": 4501.697390893554,
+          "fixed_cost_chf": 153755.62,
+          "variable_contribution_chf": 264101.1701143799,
+          "contribution_chf": 110345.5501143799,
+          "marginal_variable_contribution_chf": -378.03407116694143
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 277480.841015625,
+          "idle_electricity_chf": 5098.431721728516,
+          "fixed_cost_chf": 166568.58833333335,
+          "variable_contribution_chf": 263541.3706708496,
+          "contribution_chf": 96972.78233751623,
+          "marginal_variable_contribution_chf": -559.7994435303262
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-consumer-rtx4090",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 4132.666666666666,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -6698.047749674388,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 4132.666666666666,
+          "variable_contribution_chf": 3311.1993749996764,
+          "contribution_chf": -821.4672916669897,
+          "marginal_variable_contribution_chf": 3311.1993749996764
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 8265.333333333332,
+          "variable_contribution_chf": 5548.7131999999765,
+          "contribution_chf": -2716.6201333333556,
+          "marginal_variable_contribution_chf": 2237.5138250003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12397.999999999998,
+          "variable_contribution_chf": 7714.2419980467275,
+          "contribution_chf": -4683.758001953271,
+          "marginal_variable_contribution_chf": 2165.528798046751
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 16530.666666666664,
+          "variable_contribution_chf": 9832.618916992276,
+          "contribution_chf": -6698.047749674388,
+          "marginal_variable_contribution_chf": 2118.376918945549
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 20663.33333333333,
+          "variable_contribution_chf": 11834.67334765625,
+          "contribution_chf": -8828.659985677079,
+          "marginal_variable_contribution_chf": 2002.054430663973
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 24795.999999999996,
+          "variable_contribution_chf": 13481.68062871098,
+          "contribution_chf": -11314.319371289017,
+          "marginal_variable_contribution_chf": 1647.00728105473
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 28928.666666666664,
+          "variable_contribution_chf": 14753.808479296857,
+          "contribution_chf": -14174.858187369808,
+          "marginal_variable_contribution_chf": 1272.1278505858772
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33061.33333333333,
+          "variable_contribution_chf": 15743.765736132824,
+          "contribution_chf": -17317.567597200505,
+          "marginal_variable_contribution_chf": 989.9572568359672
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 37193.99999999999,
+          "variable_contribution_chf": 16418.307354101562,
+          "contribution_chf": -20775.69264589843,
+          "marginal_variable_contribution_chf": 674.5416179687381
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 41326.66666666666,
+          "variable_contribution_chf": 16813.794492187502,
+          "contribution_chf": -24512.872174479155,
+          "marginal_variable_contribution_chf": 395.4871380859404
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 45459.33333333333,
+          "variable_contribution_chf": 16939.595334375,
+          "contribution_chf": -28519.737998958328,
+          "marginal_variable_contribution_chf": 125.80084218749835
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 49591.99999999999,
+          "variable_contribution_chf": 16950.899302148435,
+          "contribution_chf": -32641.100697851558,
+          "marginal_variable_contribution_chf": 11.303967773434124
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53724.66666666666,
+          "variable_contribution_chf": 16952.955048828124,
+          "contribution_chf": -36771.71161783853,
+          "marginal_variable_contribution_chf": 2.0557466796890367
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-consumer-rtx4090",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 0.57,
+      "price_source": "derived: 2 x CHF 0.2857 per GPU-hour RunPod RTX 4090 community cloud (cp-mkt-runpod-4090-community, high); vast.ai median 2 x 0.4201 = 0.84 (low); docs/research/computing-price.md A5",
+      "fixed_chf_per_server_year": 4132.666666666666,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -8737.54003483064,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 4349.8125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 4132.666666666666,
+          "variable_contribution_chf": 2624.3868749996764,
+          "contribution_chf": -1508.2797916669897,
+          "marginal_variable_contribution_chf": 2624.3868749996764
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 7289.159999999999,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 8265.333333333332,
+          "variable_contribution_chf": 4397.793199999975,
+          "contribution_chf": -3867.5401333333575,
+          "marginal_variable_contribution_chf": 1773.4063250002982
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 10133.943164062499,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12397.999999999998,
+          "variable_contribution_chf": 6114.145708984226,
+          "contribution_chf": -6283.854291015772,
+          "marginal_variable_contribution_chf": 1716.3525089842515
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 12916.784472656249,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 16530.666666666664,
+          "variable_contribution_chf": 7793.126631836025,
+          "contribution_chf": -8737.54003483064,
+          "marginal_variable_contribution_chf": 1678.9809228517988
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 15546.816796874999,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 20663.33333333333,
+          "variable_contribution_chf": 9379.912800781249,
+          "contribution_chf": -11283.42053255208,
+          "marginal_variable_contribution_chf": 1586.7861689452238
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 17710.435488281248,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 24795.999999999996,
+          "variable_contribution_chf": 10685.296077929725,
+          "contribution_chf": -14110.703922070272,
+          "marginal_variable_contribution_chf": 1305.3832771484758
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 19381.587539062497,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 28928.666666666664,
+          "variable_contribution_chf": 11693.557815234353,
+          "contribution_chf": -17235.108851432313,
+          "marginal_variable_contribution_chf": 1008.2617373046287
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 20682.061464843748,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33061.33333333333,
+          "variable_contribution_chf": 12478.177083789069,
+          "contribution_chf": -20583.15624954426,
+          "marginal_variable_contribution_chf": 784.6192685547157
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 21568.184355468748,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 37193.99999999999,
+          "variable_contribution_chf": 13012.80456113281,
+          "contribution_chf": -24181.19543886718,
+          "marginal_variable_contribution_chf": 534.6274773437417
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 22087.722656249996,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 41326.66666666666,
+          "variable_contribution_chf": 13326.259335937495,
+          "contribution_chf": -28000.407330729162,
+          "marginal_variable_contribution_chf": 313.45477480468435
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 22255.3471875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 45459.33333333333,
+          "variable_contribution_chf": 13425.593146874997,
+          "contribution_chf": -32033.74018645833,
+          "marginal_variable_contribution_chf": 99.33381093750177
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 22273.543769531247,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 49591.99999999999,
+          "variable_contribution_chf": 13434.023970117183,
+          "contribution_chf": -36157.97602988281,
+          "marginal_variable_contribution_chf": 8.430823242186307
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 22276.6308984375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53724.66666666666,
+          "variable_contribution_chf": 13435.592275390623,
+          "contribution_chf": -40289.07439127604,
+          "marginal_variable_contribution_chf": 1.5683052734402736
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-consumer-rtx4090",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 1.5,
+      "price_source": "derived: 2 x CHF 0.7478 per GPU-hour RunPod RTX 4090 secure cloud (data/raw/market/compute-prices.csv cp-mkt-runpod-4090-secure, high); docs/research/computing-price.md A5",
+      "fixed_chf_per_server_year": 4132.666666666666,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 3244.1060261140324,
+      "optimal_server_count": 6,
+      "contribution_at_optimum_chf": 14785.269769335984,
+      "contribution_at_4_servers_chf": 12337.213578450614,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 11446.875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 4132.666666666666,
+          "variable_contribution_chf": 9721.449374999676,
+          "contribution_chf": 5588.78270833301,
+          "marginal_variable_contribution_chf": 9721.449374999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 19182,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 8265.333333333332,
+          "variable_contribution_chf": 16290.633199999977,
+          "contribution_chf": 8025.299866666644,
+          "marginal_variable_contribution_chf": 6569.1838250003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 26668.271484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12397.999999999998,
+          "variable_contribution_chf": 22648.47402929673,
+          "contribution_chf": 10250.47402929673,
+          "marginal_variable_contribution_chf": 6357.840829296752
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 33991.5380859375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 16530.666666666664,
+          "variable_contribution_chf": 28867.880245117278,
+          "contribution_chf": 12337.213578450614,
+          "marginal_variable_contribution_chf": 6219.406215820549
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 40912.67578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 20663.33333333333,
+          "variable_contribution_chf": 34745.77178515625,
+          "contribution_chf": 14082.43845182292,
+          "marginal_variable_contribution_chf": 5877.891540038971
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 46606.4091796875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 24795.999999999996,
+          "variable_contribution_chf": 39581.26976933598,
+          "contribution_chf": 14785.269769335984,
+          "marginal_variable_contribution_chf": 4835.497984179732
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 51004.177734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 28928.666666666664,
+          "variable_contribution_chf": 43316.14801054686,
+          "contribution_chf": 14387.481343880194,
+          "marginal_variable_contribution_chf": 3734.8782412108776
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 54426.4775390625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33061.33333333333,
+          "variable_contribution_chf": 46222.59315800782,
+          "contribution_chf": 13161.25982467449,
+          "marginal_variable_contribution_chf": 2906.4451474609596
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 56758.3798828125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 37193.99999999999,
+          "variable_contribution_chf": 48203.00008847657,
+          "contribution_chf": 11009.000088476576,
+          "marginal_variable_contribution_chf": 1980.406930468751
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 58125.5859375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 41326.66666666666,
+          "variable_contribution_chf": 49364.1226171875,
+          "contribution_chf": 8037.455950520845,
+          "marginal_variable_contribution_chf": 1161.1225287109337
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 58566.703125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 45459.33333333333,
+          "variable_contribution_chf": 49736.949084375,
+          "contribution_chf": 4277.615751041674,
+          "marginal_variable_contribution_chf": 372.8264671875004
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 58614.5888671875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 49591.99999999999,
+          "variable_contribution_chf": 49775.06906777343,
+          "contribution_chf": 183.0690677734383,
+          "marginal_variable_contribution_chf": 38.1199833984283
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 58622.712890625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53724.66666666666,
+          "variable_contribution_chf": 49781.67426757813,
+          "contribution_chf": -3942.992399088529,
+          "marginal_variable_contribution_chf": 6.605199804696895
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4-refurbished",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 6643.169147496617,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -16740.057672994193,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6643.169147496617,
+          "variable_contribution_chf": 3311.1993749996764,
+          "contribution_chf": -3331.969772496941,
+          "marginal_variable_contribution_chf": 3311.1993749996764
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 13286.338294993235,
+          "variable_contribution_chf": 5548.7131999999765,
+          "contribution_chf": -7737.625094993258,
+          "marginal_variable_contribution_chf": 2237.5138250003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19929.507442489852,
+          "variable_contribution_chf": 7714.2419980467275,
+          "contribution_chf": -12215.265444443125,
+          "marginal_variable_contribution_chf": 2165.528798046751
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 26572.67658998647,
+          "variable_contribution_chf": 9832.618916992276,
+          "contribution_chf": -16740.057672994193,
+          "marginal_variable_contribution_chf": 2118.376918945549
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33215.84573748309,
+          "variable_contribution_chf": 11834.67334765625,
+          "contribution_chf": -21381.17238982684,
+          "marginal_variable_contribution_chf": 2002.054430663973
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 39859.014884979704,
+          "variable_contribution_chf": 13481.68062871098,
+          "contribution_chf": -26377.334256268725,
+          "marginal_variable_contribution_chf": 1647.00728105473
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 46502.18403247632,
+          "variable_contribution_chf": 14753.808479296857,
+          "contribution_chf": -31748.37555317946,
+          "marginal_variable_contribution_chf": 1272.1278505858772
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53145.35317997294,
+          "variable_contribution_chf": 15743.765736132824,
+          "contribution_chf": -37401.587443840115,
+          "marginal_variable_contribution_chf": 989.9572568359672
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 59788.52232746956,
+          "variable_contribution_chf": 16418.307354101562,
+          "contribution_chf": -43370.214973368,
+          "marginal_variable_contribution_chf": 674.5416179687381
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 66431.69147496618,
+          "variable_contribution_chf": 16813.794492187502,
+          "contribution_chf": -49617.89698277868,
+          "marginal_variable_contribution_chf": 395.4871380859404
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 73074.86062246279,
+          "variable_contribution_chf": 16939.595334375,
+          "contribution_chf": -56135.26528808779,
+          "marginal_variable_contribution_chf": 125.80084218749835
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 79718.02976995941,
+          "variable_contribution_chf": 16950.899302148435,
+          "contribution_chf": -62767.130467810974,
+          "marginal_variable_contribution_chf": 11.303967773434124
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 86361.19891745603,
+          "variable_contribution_chf": 16952.955048828124,
+          "contribution_chf": -69408.2438686279,
+          "marginal_variable_contribution_chf": 2.0557466796890367
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4-refurbished",
+      "price_label": "spot",
+      "price_chf_per_server_hour": 2.23,
+      "price_source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.1914 AWS g6.xlarge spot eu-central-2 (cp-gpu-aws-g6-xlarge-euc2-spot, medium); buyers do not see the card\u0027s age",
+      "fixed_chf_per_server_year": 6643.169147496617,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 3315.1200895736406,
+      "optimal_server_count": 6,
+      "contribution_at_optimum_chf": 22404.040685137523,
+      "contribution_at_4_servers_chf": 18837.752190287065,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 17017.6875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6643.169147496617,
+          "variable_contribution_chf": 15292.261874999676,
+          "contribution_chf": 8649.092727503059,
+          "marginal_variable_contribution_chf": 15292.261874999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 28517.239999999998,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 13286.338294993235,
+          "variable_contribution_chf": 25625.873199999973,
+          "contribution_chf": 12339.534905006738,
+          "marginal_variable_contribution_chf": 10333.611325000296
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 39646.8302734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19929.507442489852,
+          "variable_contribution_chf": 35627.032818359236,
+          "contribution_chf": 15697.525375869383,
+          "marginal_variable_contribution_chf": 10001.159618359263
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 50534.08662109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 26572.67658998647,
+          "variable_contribution_chf": 45410.428780273534,
+          "contribution_chf": 18837.752190287065,
+          "marginal_variable_contribution_chf": 9783.395961914299
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 60823.511328125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33215.84573748309,
+          "variable_contribution_chf": 54656.60733203125,
+          "contribution_chf": 21440.76159454816,
+          "marginal_variable_contribution_chf": 9246.178551757715
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 69288.19498046875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 39859.014884979704,
+          "variable_contribution_chf": 62263.05557011723,
+          "contribution_chf": 22404.040685137523,
+          "marginal_variable_contribution_chf": 7606.448238085977
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 75826.2108984375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 46502.18403247632,
+          "variable_contribution_chf": 68138.18117460934,
+          "contribution_chf": 21635.997142133027,
+          "marginal_variable_contribution_chf": 5875.125604492117
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 80914.02994140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53145.35317997294,
+          "variable_contribution_chf": 72710.14556035156,
+          "contribution_chf": 19564.792380378625,
+          "marginal_variable_contribution_chf": 4571.96438574222
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 84380.79142578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 59788.52232746956,
+          "variable_contribution_chf": 75825.41163144531,
+          "contribution_chf": 16036.889303975753,
+          "marginal_variable_contribution_chf": 3115.266071093749
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 86413.37109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 66431.69147496618,
+          "variable_contribution_chf": 77651.9077734375,
+          "contribution_chf": 11220.216298471321,
+          "marginal_variable_contribution_chf": 1826.4961419921892
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 87069.1653125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 73074.86062246279,
+          "variable_contribution_chf": 78239.411271875,
+          "contribution_chf": 5164.550649412209,
+          "marginal_variable_contribution_chf": 587.5034984374943
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 87140.35544921875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 79718.02976995941,
+          "variable_contribution_chf": 78300.83564980469,
+          "contribution_chf": -1417.194120154716,
+          "marginal_variable_contribution_chf": 61.424377929695765
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 87152.4331640625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 86361.19891745603,
+          "variable_contribution_chf": 78311.39454101563,
+          "contribution_chf": -8049.804376440399,
+          "marginal_variable_contribution_chf": 10.558891210937873
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4-refurbished",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 4.3,
+      "price_source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.3697 RunPod L4 community (cp-mkt-runpod-l4-community, high)",
+      "fixed_chf_per_server_year": 6643.169147496617,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 1630.6657373761302,
+      "optimal_server_count": 8,
+      "contribution_at_optimum_chf": 94673.33138428486,
+      "contribution_at_4_servers_chf": 65746.07474888081,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 32814.375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6643.169147496617,
+          "variable_contribution_chf": 31088.949374999676,
+          "contribution_chf": 24445.78022750306,
+          "marginal_variable_contribution_chf": 31088.949374999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 54988.399999999994,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 13286.338294993235,
+          "variable_contribution_chf": 52097.03319999997,
+          "contribution_chf": 38810.694905006734,
+          "marginal_variable_contribution_chf": 21008.083825000293
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 76449.044921875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19929.507442489852,
+          "variable_contribution_chf": 72429.24746679673,
+          "contribution_chf": 52499.740024306884,
+          "marginal_variable_contribution_chf": 20332.214266796764
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 97442.4091796875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 26572.67658998647,
+          "variable_contribution_chf": 92318.75133886728,
+          "contribution_chf": 65746.07474888081,
+          "marginal_variable_contribution_chf": 19889.50387207055
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 117283.00390625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33215.84573748309,
+          "variable_contribution_chf": 111116.09991015625,
+          "contribution_chf": 77900.25417267316,
+          "marginal_variable_contribution_chf": 18797.348571288967
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 133605.0396484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 39859.014884979704,
+          "variable_contribution_chf": 126579.90023808597,
+          "contribution_chf": 86720.88535310628,
+          "marginal_variable_contribution_chf": 15463.800327929726
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 146211.976171875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 46502.18403247632,
+          "variable_contribution_chf": 138523.94644804686,
+          "contribution_chf": 92021.76241557054,
+          "marginal_variable_contribution_chf": 11944.046209960885
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 156022.5689453125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53145.35317997294,
+          "variable_contribution_chf": 147818.6845642578,
+          "contribution_chf": 94673.33138428486,
+          "marginal_variable_contribution_chf": 9294.738116210938
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 162707.3556640625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 59788.52232746956,
+          "variable_contribution_chf": 154151.97586972654,
+          "contribution_chf": 94363.45354225698,
+          "marginal_variable_contribution_chf": 6333.291305468738
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 166626.6796875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 66431.69147496618,
+          "variable_contribution_chf": 157865.2163671875,
+          "contribution_chf": 91433.52489222132,
+          "marginal_variable_contribution_chf": 3713.240497460967
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 167891.21562499998,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 73074.86062246279,
+          "variable_contribution_chf": 159061.46158437498,
+          "contribution_chf": 85986.60096191219,
+          "marginal_variable_contribution_chf": 1196.2452171874756
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 168028.48808593748,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 79718.02976995941,
+          "variable_contribution_chf": 159188.96828652342,
+          "contribution_chf": 79470.93851656401,
+          "marginal_variable_contribution_chf": 127.50670214844286
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 168051.776953125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 86361.19891745603,
+          "variable_contribution_chf": 159210.73833007814,
+          "contribution_chf": 72849.5394126221,
+          "marginal_variable_contribution_chf": 21.770043554715812
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4-refurbished",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 10.6,
+      "price_source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.9116 (cp-gpu-aws-g6-xlarge-euc2-od, high)",
+      "fixed_chf_per_server_year": 6643.169147496617,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 640.3733550059878,
+      "optimal_server_count": 10,
+      "contribution_at_optimum_chf": 335560.9858297213,
+      "contribution_at_4_servers_chf": 208510.5347098183,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 80891.25,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6643.169147496617,
+          "variable_contribution_chf": 79165.82437499968,
+          "contribution_chf": 72522.65522750306,
+          "marginal_variable_contribution_chf": 79165.82437499968
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 135552.8,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 13286.338294993235,
+          "variable_contribution_chf": 132661.43319999994,
+          "contribution_chf": 119375.0949050067,
+          "marginal_variable_contribution_chf": 53495.608825000265
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 188455.78515625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19929.507442489852,
+          "variable_contribution_chf": 184435.98770117172,
+          "contribution_chf": 164506.48025868187,
+          "marginal_variable_contribution_chf": 51774.55450117178
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 240206.869140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 26572.67658998647,
+          "variable_contribution_chf": 235083.21129980477,
+          "contribution_chf": 208510.5347098183,
+          "marginal_variable_contribution_chf": 50647.22359863305
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 289116.2421875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 33215.84573748309,
+          "variable_contribution_chf": 282949.3381914063,
+          "contribution_chf": 249733.4924539232,
+          "marginal_variable_contribution_chf": 47866.12689160151
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 329351.958203125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 39859.014884979704,
+          "variable_contribution_chf": 322326.81879277347,
+          "contribution_chf": 282467.8039077938,
+          "marginal_variable_contribution_chf": 39377.48060136719
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 360429.52265625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 46502.18403247632,
+          "variable_contribution_chf": 352741.49293242185,
+          "contribution_chf": 306239.3088999455,
+          "marginal_variable_contribution_chf": 30414.674139648385
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 384613.774609375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 53145.35317997294,
+          "variable_contribution_chf": 376409.8902283203,
+          "contribution_chf": 323264.5370483474,
+          "marginal_variable_contribution_chf": 23668.397295898467
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 401092.551171875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 59788.52232746956,
+          "variable_contribution_chf": 392537.17137753905,
+          "contribution_chf": 332748.6490500695,
+          "marginal_variable_contribution_chf": 16127.281149218732
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 410754.140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 66431.69147496618,
+          "variable_contribution_chf": 401992.6773046875,
+          "contribution_chf": 335560.9858297213,
+          "marginal_variable_contribution_chf": 9455.50592714845
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 413871.36874999997,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 73074.86062246279,
+          "variable_contribution_chf": 405041.61470937496,
+          "contribution_chf": 331966.75408691214,
+          "marginal_variable_contribution_chf": 3048.937404687458
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 414209.76132812497,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 79718.02976995941,
+          "variable_contribution_chf": 405370.24152871093,
+          "contribution_chf": 325652.21175875154,
+          "marginal_variable_contribution_chf": 328.62681933597196
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 414267.17109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 86361.19891745603,
+          "variable_contribution_chf": 405426.1324707031,
+          "contribution_chf": 319064.9335532471,
+          "marginal_variable_contribution_chf": 55.890941992169246
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 6415.343333333333,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -15828.754416341057,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6415.343333333333,
+          "variable_contribution_chf": 3311.1993749996764,
+          "contribution_chf": -3104.143958333657,
+          "marginal_variable_contribution_chf": 3311.1993749996764
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12830.686666666666,
+          "variable_contribution_chf": 5548.7131999999765,
+          "contribution_chf": -7281.97346666669,
+          "marginal_variable_contribution_chf": 2237.5138250003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19246.03,
+          "variable_contribution_chf": 7714.2419980467275,
+          "contribution_chf": -11531.788001953271,
+          "marginal_variable_contribution_chf": 2165.528798046751
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 25661.373333333333,
+          "variable_contribution_chf": 9832.618916992276,
+          "contribution_chf": -15828.754416341057,
+          "marginal_variable_contribution_chf": 2118.376918945549
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 32076.716666666667,
+          "variable_contribution_chf": 11834.67334765625,
+          "contribution_chf": -20242.043319010416,
+          "marginal_variable_contribution_chf": 2002.054430663973
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 38492.06,
+          "variable_contribution_chf": 13481.68062871098,
+          "contribution_chf": -25010.37937128902,
+          "marginal_variable_contribution_chf": 1647.00728105473
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 44907.403333333335,
+          "variable_contribution_chf": 14753.808479296857,
+          "contribution_chf": -30153.594854036477,
+          "marginal_variable_contribution_chf": 1272.1278505858772
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 51322.746666666666,
+          "variable_contribution_chf": 15743.765736132824,
+          "contribution_chf": -35578.98093053384,
+          "marginal_variable_contribution_chf": 989.9572568359672
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 57738.09,
+          "variable_contribution_chf": 16418.307354101562,
+          "contribution_chf": -41319.782645898435,
+          "marginal_variable_contribution_chf": 674.5416179687381
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 64153.433333333334,
+          "variable_contribution_chf": 16813.794492187502,
+          "contribution_chf": -47339.63884114583,
+          "marginal_variable_contribution_chf": 395.4871380859404
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 70568.77666666667,
+          "variable_contribution_chf": 16939.595334375,
+          "contribution_chf": -53629.18133229167,
+          "marginal_variable_contribution_chf": 125.80084218749835
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 76984.12,
+          "variable_contribution_chf": 16950.899302148435,
+          "contribution_chf": -60033.22069785156,
+          "marginal_variable_contribution_chf": 11.303967773434124
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 83399.46333333333,
+          "variable_contribution_chf": 16952.955048828124,
+          "contribution_chf": -66446.50828450521,
+          "marginal_variable_contribution_chf": 2.0557466796890367
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4",
+      "price_label": "spot",
+      "price_chf_per_server_hour": 2.23,
+      "price_source": "derived: 11.6313 x CHF 0.1914 per hour AWS g6.xlarge spot eu-central-2 (data/raw/market/compute-prices.csv cp-gpu-aws-g6-xlarge-euc2-spot, medium); one g6.xlarge = 1 L4 \u002B 4 vCPU",
+      "fixed_chf_per_server_year": 6415.343333333333,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 3201.4288803499844,
+      "optimal_server_count": 6,
+      "contribution_at_optimum_chf": 23770.99557011723,
+      "contribution_at_4_servers_chf": 19749.0554469402,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 17017.6875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6415.343333333333,
+          "variable_contribution_chf": 15292.261874999676,
+          "contribution_chf": 8876.918541666342,
+          "marginal_variable_contribution_chf": 15292.261874999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 28517.239999999998,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12830.686666666666,
+          "variable_contribution_chf": 25625.873199999973,
+          "contribution_chf": 12795.186533333306,
+          "marginal_variable_contribution_chf": 10333.611325000296
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 39646.8302734375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19246.03,
+          "variable_contribution_chf": 35627.032818359236,
+          "contribution_chf": 16381.002818359237,
+          "marginal_variable_contribution_chf": 10001.159618359263
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 50534.08662109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 25661.373333333333,
+          "variable_contribution_chf": 45410.428780273534,
+          "contribution_chf": 19749.0554469402,
+          "marginal_variable_contribution_chf": 9783.395961914299
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 60823.511328125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 32076.716666666667,
+          "variable_contribution_chf": 54656.60733203125,
+          "contribution_chf": 22579.890665364583,
+          "marginal_variable_contribution_chf": 9246.178551757715
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 69288.19498046875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 38492.06,
+          "variable_contribution_chf": 62263.05557011723,
+          "contribution_chf": 23770.99557011723,
+          "marginal_variable_contribution_chf": 7606.448238085977
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 75826.2108984375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 44907.403333333335,
+          "variable_contribution_chf": 68138.18117460934,
+          "contribution_chf": 23230.77784127601,
+          "marginal_variable_contribution_chf": 5875.125604492117
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 80914.02994140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 51322.746666666666,
+          "variable_contribution_chf": 72710.14556035156,
+          "contribution_chf": 21387.3988936849,
+          "marginal_variable_contribution_chf": 4571.96438574222
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 84380.79142578125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 57738.09,
+          "variable_contribution_chf": 75825.41163144531,
+          "contribution_chf": 18087.321631445317,
+          "marginal_variable_contribution_chf": 3115.266071093749
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 86413.37109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 64153.433333333334,
+          "variable_contribution_chf": 77651.9077734375,
+          "contribution_chf": 13498.474440104168,
+          "marginal_variable_contribution_chf": 1826.4961419921892
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 87069.1653125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 70568.77666666667,
+          "variable_contribution_chf": 78239.411271875,
+          "contribution_chf": 7670.6346052083245,
+          "marginal_variable_contribution_chf": 587.5034984374943
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 87140.35544921875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 76984.12,
+          "variable_contribution_chf": 78300.83564980469,
+          "contribution_chf": 1316.715649804697,
+          "marginal_variable_contribution_chf": 61.424377929695765
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 87152.4331640625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 83399.46333333333,
+          "variable_contribution_chf": 78311.39454101563,
+          "contribution_chf": -5088.068792317703,
+          "marginal_variable_contribution_chf": 10.558891210937873
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 4.3,
+      "price_source": "derived: 11.6313 x CHF 0.3697 per GPU-hour RunPod L4 community cloud (cp-mkt-runpod-l4-community, high); Infomaniak Swiss L4 from CHF 0.3053/h gives 3.55",
+      "fixed_chf_per_server_year": 6415.343333333333,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 1574.7424662690132,
+      "optimal_server_count": 8,
+      "contribution_at_optimum_chf": 96495.93789759112,
+      "contribution_at_4_servers_chf": 66657.37800553394,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 32814.375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6415.343333333333,
+          "variable_contribution_chf": 31088.949374999676,
+          "contribution_chf": 24673.606041666342,
+          "marginal_variable_contribution_chf": 31088.949374999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 54988.399999999994,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12830.686666666666,
+          "variable_contribution_chf": 52097.03319999997,
+          "contribution_chf": 39266.3465333333,
+          "marginal_variable_contribution_chf": 21008.083825000293
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 76449.044921875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19246.03,
+          "variable_contribution_chf": 72429.24746679673,
+          "contribution_chf": 53183.217466796734,
+          "marginal_variable_contribution_chf": 20332.214266796764
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 97442.4091796875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 25661.373333333333,
+          "variable_contribution_chf": 92318.75133886728,
+          "contribution_chf": 66657.37800553394,
+          "marginal_variable_contribution_chf": 19889.50387207055
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 117283.00390625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 32076.716666666667,
+          "variable_contribution_chf": 111116.09991015625,
+          "contribution_chf": 79039.38324348957,
+          "marginal_variable_contribution_chf": 18797.348571288967
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 133605.0396484375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 38492.06,
+          "variable_contribution_chf": 126579.90023808597,
+          "contribution_chf": 88087.84023808598,
+          "marginal_variable_contribution_chf": 15463.800327929726
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 146211.976171875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 44907.403333333335,
+          "variable_contribution_chf": 138523.94644804686,
+          "contribution_chf": 93616.54311471352,
+          "marginal_variable_contribution_chf": 11944.046209960885
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 156022.5689453125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 51322.746666666666,
+          "variable_contribution_chf": 147818.6845642578,
+          "contribution_chf": 96495.93789759112,
+          "marginal_variable_contribution_chf": 9294.738116210938
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 162707.3556640625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 57738.09,
+          "variable_contribution_chf": 154151.97586972654,
+          "contribution_chf": 96413.88586972654,
+          "marginal_variable_contribution_chf": 6333.291305468738
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 166626.6796875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 64153.433333333334,
+          "variable_contribution_chf": 157865.2163671875,
+          "contribution_chf": 93711.78303385417,
+          "marginal_variable_contribution_chf": 3713.240497460967
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 167891.21562499998,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 70568.77666666667,
+          "variable_contribution_chf": 159061.46158437498,
+          "contribution_chf": 88492.6849177083,
+          "marginal_variable_contribution_chf": 1196.2452171874756
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 168028.48808593748,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 76984.12,
+          "variable_contribution_chf": 159188.96828652342,
+          "contribution_chf": 82204.84828652343,
+          "marginal_variable_contribution_chf": 127.50670214844286
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 168051.776953125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 83399.46333333333,
+          "variable_contribution_chf": 159210.73833007814,
+          "contribution_chf": 75811.2749967448,
+          "marginal_variable_contribution_chf": 21.770043554715812
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-l4",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 10.6,
+      "price_source": "derived: 11.6313 x CHF 0.9116 per hour AWS g6.xlarge on-demand eu-central-2 (cp-gpu-aws-g6-xlarge-euc2-od, high)",
+      "fixed_chf_per_server_year": 6415.343333333333,
+      "idle_electric_kw": 0,
+      "break_even_server_hours_per_year": 618.4119119456841,
+      "optimal_server_count": 10,
+      "contribution_at_optimum_chf": 337839.24397135415,
+      "contribution_at_4_servers_chf": 209421.83796647144,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 80891.25,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 6415.343333333333,
+          "variable_contribution_chf": 79165.82437499968,
+          "contribution_chf": 72750.48104166634,
+          "marginal_variable_contribution_chf": 79165.82437499968
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 135552.8,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 12830.686666666666,
+          "variable_contribution_chf": 132661.43319999994,
+          "contribution_chf": 119830.74653333328,
+          "marginal_variable_contribution_chf": 53495.608825000265
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 188455.78515625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 19246.03,
+          "variable_contribution_chf": 184435.98770117172,
+          "contribution_chf": 165189.95770117172,
+          "marginal_variable_contribution_chf": 51774.55450117178
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 240206.869140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 25661.373333333333,
+          "variable_contribution_chf": 235083.21129980477,
+          "contribution_chf": 209421.83796647144,
+          "marginal_variable_contribution_chf": 50647.22359863305
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 289116.2421875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 32076.716666666667,
+          "variable_contribution_chf": 282949.3381914063,
+          "contribution_chf": 250872.6215247396,
+          "marginal_variable_contribution_chf": 47866.12689160151
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 329351.958203125,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 38492.06,
+          "variable_contribution_chf": 322326.81879277347,
+          "contribution_chf": 283834.7587927735,
+          "marginal_variable_contribution_chf": 39377.48060136719
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 360429.52265625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 44907.403333333335,
+          "variable_contribution_chf": 352741.49293242185,
+          "contribution_chf": 307834.08959908853,
+          "marginal_variable_contribution_chf": 30414.674139648385
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 384613.774609375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 51322.746666666666,
+          "variable_contribution_chf": 376409.8902283203,
+          "contribution_chf": 325087.1435616537,
+          "marginal_variable_contribution_chf": 23668.397295898467
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 401092.551171875,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 57738.09,
+          "variable_contribution_chf": 392537.17137753905,
+          "contribution_chf": 334799.0813775391,
+          "marginal_variable_contribution_chf": 16127.281149218732
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 410754.140625,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 64153.433333333334,
+          "variable_contribution_chf": 401992.6773046875,
+          "contribution_chf": 337839.24397135415,
+          "marginal_variable_contribution_chf": 9455.50592714845
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 413871.36874999997,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 70568.77666666667,
+          "variable_contribution_chf": 405041.61470937496,
+          "contribution_chf": 334472.8380427083,
+          "marginal_variable_contribution_chf": 3048.937404687458
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 414209.76132812497,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 76984.12,
+          "variable_contribution_chf": 405370.24152871093,
+          "contribution_chf": 328386.12152871094,
+          "marginal_variable_contribution_chf": 328.62681933597196
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 414267.17109375,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 83399.46333333333,
+          "variable_contribution_chf": 405426.1324707031,
+          "contribution_chf": 322026.6691373698,
+          "marginal_variable_contribution_chf": 55.890941992169246
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-t4-refurbished",
+      "price_label": "adopted",
+      "price_chf_per_server_hour": 0.66,
+      "price_source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract.",
+      "fixed_chf_per_server_year": 3909.1613805970146,
+      "idle_electric_kw": 0.464,
+      "break_even_server_hours_per_year": null,
+      "optimal_server_count": 0,
+      "contribution_at_optimum_chf": 0,
+      "contribution_at_4_servers_chf": -7713.854808130156,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 5036.625,
+          "idle_electricity_chf": 174.14355,
+          "fixed_cost_chf": 3909.161380597014,
+          "variable_contribution_chf": 3137.0558249996766,
+          "contribution_chf": -772.1055555973376,
+          "marginal_variable_contribution_chf": 3137.0558249996766
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 8440.08,
+          "idle_electricity_chf": 730.0529600000001,
+          "fixed_cost_chf": 7818.322761194028,
+          "variable_contribution_chf": 4818.6602399999765,
+          "contribution_chf": -2999.662521194052,
+          "marginal_variable_contribution_chf": 1681.6044150003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 11734.039453125,
+          "idle_electricity_chf": 1311.5577835937502,
+          "fixed_cost_chf": 11727.484141791043,
+          "variable_contribution_chf": 6402.684214452977,
+          "contribution_chf": -5324.799927338066,
+          "marginal_variable_contribution_chf": 1584.0239744530008
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 14956.2767578125,
+          "idle_electricity_chf": 1909.8282027343753,
+          "fixed_cost_chf": 15636.645522388057,
+          "variable_contribution_chf": 7922.790714257901,
+          "contribution_chf": -7713.854808130156,
+          "marginal_variable_contribution_chf": 1520.1064998049233
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 18001.57734375,
+          "idle_electricity_chf": 2549.4589203125,
+          "fixed_cost_chf": 19545.806902985074,
+          "variable_contribution_chf": 9285.21442734375,
+          "contribution_chf": -10260.592475641324,
+          "marginal_variable_contribution_chf": 1362.4237130858492
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 20506.820039062502,
+          "idle_electricity_chf": 3315.332261171875,
+          "fixed_cost_chf": 23454.968283582086,
+          "variable_contribution_chf": 10166.348367539103,
+          "contribution_chf": -13288.619916042982,
+          "marginal_variable_contribution_chf": 881.1339401953537
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 22441.838203125,
+          "idle_electricity_chf": 4214.49990609375,
+          "fixed_cost_chf": 27364.1296641791,
+          "variable_contribution_chf": 10539.308573203107,
+          "contribution_chf": -16824.821090975995,
+          "marginal_variable_contribution_chf": 372.9602056640033
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 23947.650117187502,
+          "idle_electricity_chf": 5213.997763515626,
+          "fixed_cost_chf": 31273.291044776113,
+          "variable_contribution_chf": 10529.7679726172,
+          "contribution_chf": -20743.523072158914,
+          "marginal_variable_contribution_chf": -9.540600585907669
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 24973.6871484375,
+          "idle_electricity_chf": 6325.646634453125,
+          "fixed_cost_chf": 35182.45242537313,
+          "variable_contribution_chf": 10092.660719648436,
+          "contribution_chf": -25089.791705724692,
+          "marginal_variable_contribution_chf": -437.1072529687626
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 25575.2578125,
+          "idle_electricity_chf": 7536.517734375,
+          "fixed_cost_chf": 39091.61380597015,
+          "variable_contribution_chf": 9277.276757812502,
+          "contribution_chf": -29814.337048157646,
+          "marginal_variable_contribution_chf": -815.3839618359343
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 25769.349375,
+          "idle_electricity_chf": 8842.640161250001,
+          "fixed_cost_chf": 43000.77518656716,
+          "variable_contribution_chf": 8096.955173124999,
+          "contribution_chf": -34903.820013442164,
+          "marginal_variable_contribution_chf": -1180.3215846875028
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 25790.4191015625,
+          "idle_electricity_chf": 10189.207753046876,
+          "fixed_cost_chf": 46909.93656716417,
+          "variable_contribution_chf": 6761.691549101559,
+          "contribution_chf": -40148.24501806261,
+          "marginal_variable_contribution_chf": -1335.2636240234406
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 25793.993671875,
+          "idle_electricity_chf": 11539.864970156252,
+          "fixed_cost_chf": 50819.09794776119,
+          "variable_contribution_chf": 5413.090078671872,
+          "contribution_chf": -45406.00786908932,
+          "marginal_variable_contribution_chf": -1348.6014704296867
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-t4-refurbished",
+      "price_label": "spot",
+      "price_chf_per_server_hour": 3.19,
+      "price_source": "derived: 11.9643 x CHF 0.2663 AWS g4dn.xlarge (1 T4 \u002B 4 vCPU) spot eu-central-1 (data/raw/market/compute-prices.csv cp-gpu-aws-g4dn-xlarge-euc1-spot, medium); rental price per GPU-hour, NOT per unit of work: per unit of work a T4 is worth about 0.4 L4, see docs/research/refurbished-hardware.md \u00A75",
+      "fixed_chf_per_server_year": 3909.1613805970146,
+      "idle_electric_kw": 0.464,
+      "break_even_server_hours_per_year": 1687.0912457257166,
+      "optimal_server_count": 8,
+      "contribution_at_optimum_chf": 71055.80237705984,
+      "contribution_at_4_servers_chf": 49618.5394301511,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 24343.6875,
+          "idle_electricity_chf": 174.14355,
+          "fixed_cost_chf": 3909.161380597014,
+          "variable_contribution_chf": 22444.118324999676,
+          "contribution_chf": 18534.95694440266,
+          "marginal_variable_contribution_chf": 22444.118324999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 40793.72,
+          "idle_electricity_chf": 730.0529600000001,
+          "fixed_cost_chf": 7818.322761194028,
+          "variable_contribution_chf": 37172.300239999975,
+          "contribution_chf": 29353.977478805948,
+          "marginal_variable_contribution_chf": 14728.1819150003
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 56714.5240234375,
+          "idle_electricity_chf": 1311.5577835937502,
+          "fixed_cost_chf": 11727.484141791043,
+          "variable_contribution_chf": 51383.168784765476,
+          "contribution_chf": 39655.68464297443,
+          "marginal_variable_contribution_chf": 14210.8685447655
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 72288.67099609374,
+          "idle_electricity_chf": 1909.8282027343753,
+          "fixed_cost_chf": 15636.645522388057,
+          "variable_contribution_chf": 65255.18495253915,
+          "contribution_chf": 49618.5394301511,
+          "marginal_variable_contribution_chf": 13872.016167773676
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 87007.623828125,
+          "idle_electricity_chf": 2549.4589203125,
+          "fixed_cost_chf": 19545.806902985074,
+          "variable_contribution_chf": 78291.26091171874,
+          "contribution_chf": 58745.454008733665,
+          "marginal_variable_contribution_chf": 13036.075959179587
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 99116.29685546875,
+          "idle_electricity_chf": 3315.332261171875,
+          "fixed_cost_chf": 23454.968283582086,
+          "variable_contribution_chf": 88775.82518394534,
+          "contribution_chf": 65320.85690036326,
+          "marginal_variable_contribution_chf": 10484.564272226606
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 108468.8846484375,
+          "idle_electricity_chf": 4214.49990609375,
+          "fixed_cost_chf": 27364.1296641791,
+          "variable_contribution_chf": 96566.35501851559,
+          "contribution_chf": 69202.2253543365,
+          "marginal_variable_contribution_chf": 7790.529834570247
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 115746.97556640625,
+          "idle_electricity_chf": 5213.997763515626,
+          "fixed_cost_chf": 31273.291044776113,
+          "variable_contribution_chf": 102329.09342183595,
+          "contribution_chf": 71055.80237705984,
+          "marginal_variable_contribution_chf": 5762.738403320356
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 120706.15455078126,
+          "idle_electricity_chf": 6325.646634453125,
+          "fixed_cost_chf": 35182.45242537313,
+          "variable_contribution_chf": 105825.1281219922,
+          "contribution_chf": 70642.67569661906,
+          "marginal_variable_contribution_chf": 3496.0347001562477
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 123613.74609375,
+          "idle_electricity_chf": 7536.517734375,
+          "fixed_cost_chf": 39091.61380597015,
+          "variable_contribution_chf": 107315.7650390625,
+          "contribution_chf": 68224.15123309236,
+          "marginal_variable_contribution_chf": 1490.636917070311
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 124551.8553125,
+          "idle_electricity_chf": 8842.640161250001,
+          "fixed_cost_chf": 43000.77518656716,
+          "variable_contribution_chf": 106879.461110625,
+          "contribution_chf": 63878.685924057834,
+          "marginal_variable_contribution_chf": -436.3039284375118
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 124653.69232421875,
+          "idle_electricity_chf": 10189.207753046876,
+          "fixed_cost_chf": 46909.93656716417,
+          "variable_contribution_chf": 105624.9647717578,
+          "contribution_chf": 58715.02820459363,
+          "marginal_variable_contribution_chf": -1254.4963388671895
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 124670.96941406249,
+          "idle_electricity_chf": 11539.864970156252,
+          "fixed_cost_chf": 50819.09794776119,
+          "variable_contribution_chf": 104290.06582085937,
+          "contribution_chf": 53470.967873098176,
+          "marginal_variable_contribution_chf": -1334.8989508984378
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-t4-refurbished",
+      "price_label": "home_host",
+      "price_chf_per_server_hour": 2.04,
+      "price_source": "derived: spot 3.186 x RunPod L4 community/datacentre ratio 0.64 (docs/research/computing-price.md C1 method; no T4 marketplace row sourced, assumption)",
+      "fixed_chf_per_server_year": 3909.1613805970146,
+      "idle_electric_kw": 0.464,
+      "break_even_server_hours_per_year": 2672.852168296098,
+      "optimal_server_count": 7,
+      "contribution_at_optimum_chf": 30099.022424649007,
+      "contribution_at_4_servers_chf": 23558.360230932347,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 15567.75,
+          "idle_electricity_chf": 174.14355,
+          "fixed_cost_chf": 3909.161380597014,
+          "variable_contribution_chf": 13668.180824999676,
+          "contribution_chf": 9759.019444402662,
+          "marginal_variable_contribution_chf": 13668.180824999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 26087.52,
+          "idle_electricity_chf": 730.0529600000001,
+          "fixed_cost_chf": 7818.322761194028,
+          "variable_contribution_chf": 22466.100239999978,
+          "contribution_chf": 14647.77747880595,
+          "marginal_variable_contribution_chf": 8797.919415000302
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 36268.84921875,
+          "idle_electricity_chf": 1311.5577835937502,
+          "fixed_cost_chf": 11727.484141791043,
+          "variable_contribution_chf": 30937.49398007798,
+          "contribution_chf": 19210.009838286936,
+          "marginal_variable_contribution_chf": 8471.393740078001
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 46228.491796875,
+          "idle_electricity_chf": 1909.8282027343753,
+          "fixed_cost_chf": 15636.645522388057,
+          "variable_contribution_chf": 39195.0057533204,
+          "contribution_chf": 23558.360230932347,
+          "marginal_variable_contribution_chf": 8257.511773242422
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 55641.239062500004,
+          "idle_electricity_chf": 2549.4589203125,
+          "fixed_cost_chf": 19545.806902985074,
+          "variable_contribution_chf": 46924.87614609375,
+          "contribution_chf": 27379.06924310868,
+          "marginal_variable_contribution_chf": 7729.870392773351
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 63384.716484375,
+          "idle_electricity_chf": 3315.332261171875,
+          "fixed_cost_chf": 23454.968283582086,
+          "variable_contribution_chf": 53044.2448128516,
+          "contribution_chf": 29589.27652926951,
+          "marginal_variable_contribution_chf": 6119.368666757844
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 69365.68171875,
+          "idle_electricity_chf": 4214.49990609375,
+          "fixed_cost_chf": 27364.1296641791,
+          "variable_contribution_chf": 57463.15208882811,
+          "contribution_chf": 30099.022424649007,
+          "marginal_variable_contribution_chf": 4418.907275976511
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 74020.009453125,
+          "idle_electricity_chf": 5213.997763515626,
+          "fixed_cost_chf": 31273.291044776113,
+          "variable_contribution_chf": 60602.1273085547,
+          "contribution_chf": 29328.836263778587,
+          "marginal_variable_contribution_chf": 3138.9752197265916
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 77191.396640625,
+          "idle_electricity_chf": 6325.646634453125,
+          "fixed_cost_chf": 35182.45242537313,
+          "variable_contribution_chf": 62310.370211835936,
+          "contribution_chf": 27127.917786462807,
+          "marginal_variable_contribution_chf": 1708.242903281236
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 79050.796875,
+          "idle_electricity_chf": 7536.517734375,
+          "fixed_cost_chf": 39091.61380597015,
+          "variable_contribution_chf": 62752.815820312506,
+          "contribution_chf": 23661.202014342358,
+          "marginal_variable_contribution_chf": 442.44560847656976
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 79650.71625,
+          "idle_electricity_chf": 8842.640161250001,
+          "fixed_cost_chf": 43000.77518656716,
+          "variable_contribution_chf": 61978.32204812499,
+          "contribution_chf": 18977.54686155783,
+          "marginal_variable_contribution_chf": -774.4937721875176
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 79715.840859375,
+          "idle_electricity_chf": 10189.207753046876,
+          "fixed_cost_chf": 46909.93656716417,
+          "variable_contribution_chf": 60687.11330691407,
+          "contribution_chf": 13777.176739749899,
+          "marginal_variable_contribution_chf": -1291.2087412109177
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 79726.88953125,
+          "idle_electricity_chf": 11539.864970156252,
+          "fixed_cost_chf": 50819.09794776119,
+          "variable_contribution_chf": 59345.98593804687,
+          "contribution_chf": 8526.887990285679,
+          "marginal_variable_contribution_chf": -1341.1273688672009
+        }
+      ]
+    },
+    {
+      "hardware_profile": "gpu-inference-t4-refurbished",
+      "price_label": "on_demand",
+      "price_chf_per_server_hour": 6.62,
+      "price_source": "derived: 11.9643 x CHF 0.5529 AWS g4dn.xlarge on-demand eu-central-1 (cp-gpu-aws-g4dn-xlarge-euc1-od, medium)",
+      "fixed_chf_per_server_year": 3909.1613805970146,
+      "idle_electric_kw": 0.464,
+      "break_even_server_hours_per_year": 803.3765383048443,
+      "optimal_server_count": 10,
+      "contribution_at_optimum_chf": 201137.99107684236,
+      "contribution_at_4_servers_chf": 127345.85651999484,
+      "values": [
+        {
+          "server_count": 0,
+          "computing_income_chf": 0,
+          "idle_electricity_chf": 0,
+          "fixed_cost_chf": 0,
+          "variable_contribution_chf": 0,
+          "contribution_chf": 0,
+          "marginal_variable_contribution_chf": 0
+        },
+        {
+          "server_count": 1,
+          "computing_income_chf": 50518.875,
+          "idle_electricity_chf": 174.14355,
+          "fixed_cost_chf": 3909.161380597014,
+          "variable_contribution_chf": 48619.305824999676,
+          "contribution_chf": 44710.144444402664,
+          "marginal_variable_contribution_chf": 48619.305824999676
+        },
+        {
+          "server_count": 2,
+          "computing_income_chf": 84656.56,
+          "idle_electricity_chf": 730.0529600000001,
+          "fixed_cost_chf": 7818.322761194028,
+          "variable_contribution_chf": 81035.14023999998,
+          "contribution_chf": 73216.81747880596,
+          "marginal_variable_contribution_chf": 32415.834415000303
+        },
+        {
+          "server_count": 3,
+          "computing_income_chf": 117695.971484375,
+          "idle_electricity_chf": 1311.5577835937502,
+          "fixed_cost_chf": 11727.484141791043,
+          "variable_contribution_chf": 112364.61624570299,
+          "contribution_chf": 100637.13210391195,
+          "marginal_variable_contribution_chf": 31329.476005703007
+        },
+        {
+          "server_count": 4,
+          "computing_income_chf": 150015.9880859375,
+          "idle_electricity_chf": 1909.8282027343753,
+          "fixed_cost_chf": 15636.645522388057,
+          "variable_contribution_chf": 142982.5020423829,
+          "contribution_chf": 127345.85651999484,
+          "marginal_variable_contribution_chf": 30617.88579667991
+        },
+        {
+          "server_count": 5,
+          "computing_income_chf": 180561.27578125,
+          "idle_electricity_chf": 2549.4589203125,
+          "fixed_cost_chf": 19545.806902985074,
+          "variable_contribution_chf": 171844.91286484376,
+          "contribution_chf": 152299.1059618587,
+          "marginal_variable_contribution_chf": 28862.410822460864
+        },
+        {
+          "server_count": 6,
+          "computing_income_chf": 205689.6191796875,
+          "idle_electricity_chf": 3315.332261171875,
+          "fixed_cost_chf": 23454.968283582086,
+          "variable_contribution_chf": 195349.1475081641,
+          "contribution_chf": 171894.17922458204,
+          "marginal_variable_contribution_chf": 23504.23464332035
+        },
+        {
+          "server_count": 7,
+          "computing_income_chf": 225098.437734375,
+          "idle_electricity_chf": 4214.49990609375,
+          "fixed_cost_chf": 27364.1296641791,
+          "variable_contribution_chf": 213195.90810445312,
+          "contribution_chf": 185831.778440274,
+          "marginal_variable_contribution_chf": 17846.76059628901
+        },
+        {
+          "server_count": 8,
+          "computing_income_chf": 240202.1875390625,
+          "idle_electricity_chf": 5213.997763515626,
+          "fixed_cost_chf": 31273.291044776113,
+          "variable_contribution_chf": 226784.30539449217,
+          "contribution_chf": 195511.01434971605,
+          "marginal_variable_contribution_chf": 13588.39729003905
+        },
+        {
+          "server_count": 9,
+          "computing_income_chf": 250493.6498828125,
+          "idle_electricity_chf": 6325.646634453125,
+          "fixed_cost_chf": 35182.45242537313,
+          "variable_contribution_chf": 235612.6234540234,
+          "contribution_chf": 200430.17102865028,
+          "marginal_variable_contribution_chf": 8828.318059531244
+        },
+        {
+          "server_count": 10,
+          "computing_income_chf": 256527.5859375,
+          "idle_electricity_chf": 7536.517734375,
+          "fixed_cost_chf": 39091.61380597015,
+          "variable_contribution_chf": 240229.6048828125,
+          "contribution_chf": 201137.99107684236,
+          "marginal_variable_contribution_chf": 4616.981428789091
+        },
+        {
+          "server_count": 11,
+          "computing_income_chf": 258474.383125,
+          "idle_electricity_chf": 8842.640161250001,
+          "fixed_cost_chf": 43000.77518656716,
+          "variable_contribution_chf": 240801.98892312503,
+          "contribution_chf": 197801.21373655787,
+          "marginal_variable_contribution_chf": 572.3840403125214
+        },
+        {
+          "server_count": 12,
+          "computing_income_chf": 258685.7188671875,
+          "idle_electricity_chf": 10189.207753046876,
+          "fixed_cost_chf": 46909.93656716417,
+          "variable_contribution_chf": 239656.99131472656,
+          "contribution_chf": 192747.0547475624,
+          "marginal_variable_contribution_chf": -1144.9976083984657
+        },
+        {
+          "server_count": 13,
+          "computing_income_chf": 258721.57289062502,
+          "idle_electricity_chf": 11539.864970156252,
+          "fixed_cost_chf": 50819.09794776119,
+          "variable_contribution_chf": 238340.6692974219,
+          "contribution_chf": 187521.57134966072,
+          "marginal_variable_contribution_chf": -1316.3220173046575
+        }
+      ]
+    }
+  ]
+}

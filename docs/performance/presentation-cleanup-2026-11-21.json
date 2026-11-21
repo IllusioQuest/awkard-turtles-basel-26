@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-21",
+  "code_commit": "5d6499d",
+  "pull_request": 54,
+  "removed_container_count": 13,
+  "removed_containers": [
+    "digitalheat-cs16-session-d-1",
+    "digitalheat-cs16-session-e-1",
+    "digitalheat-cs16-browser-relay-1",
+    "digitalheat-dozen-session-c-1",
+    "digitalheat-gaming-session-b-1",
+    "digitalheat-mesh-home-1",
+    "digitalheat-mesh-hotel-1",
+    "digitalheat-mesh-spa-1",
+    "digitalheat-render-home-1",
+    "digitalheat-render-hotel-1",
+    "digitalheat-render-spa-1",
+    "digitalheat-minecraft-restore-865395d43905423ebcddcde1337edbab",
+    "digitalheat-minecraft-restore-9c4611c5f0f24f05bd704be52c0f8191"
+  ],
+  "retained_running_containers": [
+    "digitalheat-minecraft-calibration",
+    "digitalheat-gaming-session-a-1"
+  ],
+  "named_volumes_preserved": true,
+  "images_pruned": false,
+  "unrelated_containers_changed": false,
+  "cpu_samples": {
+    "method": "Own docker stats --no-stream point samples; 100% means one CPU core. Different instants, not a controlled benchmark or performance guarantee.",
+    "before_cleanup": {
+      "digitalheat-cs16-session-d-1": 204.51,
+      "digitalheat-mesh-hotel-1": 69.62,
+      "digitalheat-mesh-home-1": 25.74,
+      "digitalheat-mesh-spa-1": 39.9,
+      "digitalheat-dozen-session-c-1": 20.48
+    },
+    "retained_after_cleanup": {
+      "digitalheat-minecraft-calibration": 0.49,
+      "digitalheat-gaming-session-a-1": 1.19
+    }
+  },
+  "checks": {
+    "gaming_tests_passed": 57,
+    "orchestration_tests_passed": 98,
+    "minecraft_power_math": "passed",
+    "minecraft_launcher_present": true,
+    "compose_services": [
+      "session-a"
+    ],
+    "shared_theme_http_matches_source": true,
+    "render_session_preserved": {
+      "id": "365486092f70",
+      "phase": "recovery-paused",
+      "completed_frames": 2
+    },
+    "minecraft_full_guards": "Not rerun in this checkout: local gaming/TestResults/minecraft/build.json is absent. Running server/client retained; no world migration."
+  }
+}

@@ -36,3 +36,7 @@ Papers collected by the team for the paper and related-work section; not yet sum
 ## Residential population composition (T-59)
 
 - BFS, Eigentuemertypen der Gebaeude 2020, published 2022-05-19, accessed 2026-11-21: https://statistik.admin.ch/de/news/2022-0305. Linked overview workbook asset 22444710; 2020 residential buildings excluding ZH/VS. Analysis/calculation path: docs/research/swiss-residential-node-mix.md; source manifest: data/raw/bfs-building-ownership-2020/source.json; PR #49. Counts are not dwelling, household, server or hotel/spa shares.
+
+## Server sizing (T-70)
+
+- Stoft, S. (2002). *Power System Economics: Designing Markets for Electricity*. IEEE Press / Wiley, ch. 3 (screening curves and load-duration curves). Method reference for the marginal-value sizing rule in docs/results/server-sizing.md; no number is taken from it.

@@ -1,6 +1,6 @@
 # T-66 — Landscape renderer and node timing comparison
 
-Owner: Nikita / Codex. Status: in progress. Branch: feat/T-66-landscape-render.
+Owner: Nikita / Codex. Status: done. Branch: feat/T-66-landscape-render.
 Depends on PR #52. ADR 0052. User approved renderer, timing comparison, pause/resume and device stats.
 
 Build a small browser app backed by the existing heat-first mesh. Render the same seeded
@@ -27,3 +27,9 @@ Linux worker checks complete: image build, one real CPU frame, Linux archive/app
 Native follow-up in progress under ADR 0058: Windows driver successfully rendered with Intel Iris Xe (Blender 5.3/OpenGL). User approved native adapter + frame-boundary pause + CPU preparation/GPU Eevee stages, then explicitly retired single-node/comparison execution. One shared multi-node workflow, common scheduler and configuration-only hardware details. Isolated real pipeline test is running; no new GPU scaling claim.
 
 Native integration verified (00c6772, PR #54): real CPU preparation on cpu + GPU frames on gpu using Intel Iris Xe/OpenGL; frame-boundary hold/resume, queued cancellation, preserved four-frame preview and restart checks pass. Single-node/comparison source/UI retired at user request. 98 orchestration + 51 Core tests pass, shared Linux CPU builder passes. Current instructions/evidence: docs/jobs/native-renderer.md and docs/performance/native-renderer-2026-11-21.json. Code still in PR; do not mark merged/done yet.
+
+
+Presentation cleanup: user keeps Minecraft and retires other game labs. PR #54 / `5d6499d` removes their executable setup, retains shared mesh/runtime and Minecraft, and shares the frontend stylesheet with the renderer (header held badge removed). Thirteen scoped containers removed without deleting volumes; only Minecraft server + Node A client remain running. 57 gaming + 98 orchestration tests and power math pass; paused native run and two frames preserved. See `docs/jobs/presentation-cleanup.md` and `docs/performance/presentation-cleanup-2026-11-21.json`. T-66 remains in progress until code PR merges.
+
+
+PR #54 merged into main at `72e602f`. Multi-node-only native GPU scope and retirement of game labs are complete. Node-map/timing explanation follow-up is tracked separately as T-69 / PR #59. Earlier progress notes above are historical.

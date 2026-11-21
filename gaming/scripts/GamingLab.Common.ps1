@@ -2,11 +2,11 @@
 function Get-GamingContainerId {
     param(
         [Parameter(Mandatory=$true)]
-        [ValidateSet('session-a','session-b','session-c')][string]$Node,
+        [ValidateSet('session-a')][string]$Node,
         [switch]$IncludeStopped
     )
 
-    $project = if ($Node -eq 'session-c') { 'digitalheat-dozen' } else { 'digitalheat-gaming' }
+    $project = 'digitalheat-gaming'
     $listing = if ($IncludeStopped) { '-aq' } else { '-q' }
     $ids = @(& docker ps $listing --filter "label=com.docker.compose.project=$project" --filter "label=com.docker.compose.service=$Node")
     if ($LASTEXITCODE -ne 0 -or $ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') {

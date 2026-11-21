@@ -24,7 +24,11 @@ public sealed record OriginJob(WorkloadRequest Request, string ProfileId, long G
     string? Target = null, string Status = "waiting", long InventoryRevision = 0,
     DateTimeOffset HourStartUtc = default, HeatSignal? Heat = null);
 public sealed record ProposalOutcome(string Origin, string JobId, long Generation, string Identity, string Status);
-public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes);
+public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes)
+{
+    public bool OperatorHold { get; init; }
+    public string[] CancelledWorkloads { get; init; } = [];
+}
 
 /// <summary>
 /// Origin-owned peer protocol, not a global scheduler or consensus service. Uses the existing placement
@@ -73,12 +77,37 @@ public sealed class MeshPeer : IDisposable
 
     public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
     public AttemptRecord[] Attempts() => coordinator.Attempts();
+    public bool Held => journal.OperatorHold;
+    public void CancelBatchWorkloads(string[] ids)
+    {
+        if(!journal.OperatorHold)throw new InvalidOperationException("Hold peer before cancelling frame jobs");
+        if(journal.Jobs.Any(j=>ids.Contains(j.Request.Id,StringComparer.Ordinal)
+            &&(j.Request.Kind!="batch"||!j.Request.Lifecycle.AllowStop)))
+            throw new InvalidOperationException("Cannot cancel protected origin work");
+        var selected=coordinator.Attempts().Where(a=>ids.Contains(a.Attempt.Request.Id,StringComparer.Ordinal)&&a.Phase!="released").ToArray();
+        if(selected.Any(a=>a.Attempt.Request.Kind!="batch"||!a.Attempt.Request.Lifecycle.AllowStop))
+            throw new InvalidOperationException("Cannot cancel protected work");
+        journal=journal with{CancelledWorkloads=journal.CancelledWorkloads.Concat(ids).Distinct(StringComparer.Ordinal).ToArray(),
+            Jobs=journal.Jobs.Select(j=>ids.Contains(j.Request.Id,StringComparer.Ordinal)?j with{Status="cancelled"}:j).ToArray()};
+        Save(); // Tombstones precede stop/release and survive delayed proposal/reply delivery.
+        foreach(var row in selected)coordinator.StopAndRelease(row.Attempt.Request.Id);
+        Publish();
+    }
+    /// <summary>Durable hold for a dedicated workload peer. Blocks dispatch and automatic heat resume.</summary>
+    public void SetHold(bool hold)
+    {
+        journal = journal with { OperatorHold = hold }; Save();
+        if (hold)
+            foreach (var row in coordinator.Attempts().Where(a => a.Phase == "running" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
+                coordinator.PauseBatch(row.Attempt.Request.Id);
+    }
 
     public string Submit(WorkloadRequest request, string profileId)
     {
         if (request.OriginSiteId != Id) throw new InvalidDataException("Only an origin may submit its own job.");
         var global = request with { Id = Id + "." + request.Id };
         WorkloadPlacement.ValidateRequest(global);
+        if(journal.CancelledWorkloads.Contains(global.Id,StringComparer.Ordinal))return global.Id;
         var prior = journal.Jobs.SingleOrDefault(j => j.Request.Id == global.Id);
         if (prior is not null)
         {
@@ -134,13 +163,14 @@ public sealed class MeshPeer : IDisposable
             changed = true;
         }
         if (changed) Publish();
+        if (journal.OperatorHold) return;
         foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
         foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
             j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
-            if (job.Status == "accepted") continue;
+            if (job.Status is "accepted" or "cancelled") continue;
             if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
             if (!WorkloadPlacement.DeadlineOpen(job.Request, clock.GetUtcNow())) continue;
             var now = clock.GetUtcNow();
@@ -180,7 +210,7 @@ public sealed class MeshPeer : IDisposable
         bool changed = false;
         foreach (var row in coordinator.Attempts().Where(a => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
         {
-            if (row.Phase == "running" && noHeat || row.Phase == "paused" && !noHeat)
+            if (row.Phase == "running" && (noHeat || journal.OperatorHold) || row.Phase == "paused" && !noHeat && !journal.OperatorHold)
                 changed |= coordinator.ApplyBatchHeat(row.Attempt.Request.Id, heat, scheduler, clock.GetUtcNow());
         }
         return changed;
@@ -203,7 +233,7 @@ public sealed class MeshPeer : IDisposable
                 break;
             case PeerReply reply:
                 var job = journal.Jobs.SingleOrDefault(j => j.Request.Id == reply.JobId);
-                if (job is null || job.Target != from || job.Generation != reply.Generation
+                if (job is null || job.Status=="cancelled" || job.Target != from || job.Generation != reply.Generation
                     || Identity(job.Request, job.ProfileId) != reply.Identity) break;
                 if (reply.Status == "rejected") Put(job with { Target = null, Status = "waiting" });
                 else if (reply.Status == "accepted") Put(job with { Status = "accepted" });
@@ -215,6 +245,9 @@ public sealed class MeshPeer : IDisposable
     {
         if (proposal.Generation <= 0 || proposal.Request.OriginSiteId != origin
             || proposal.Identity != Identity(proposal.Request, proposal.ProfileId)) throw new InvalidDataException("Invalid proposal identity.");
+        if(journal.CancelledWorkloads.Contains(proposal.Request.Id,StringComparer.Ordinal)){
+            transport.Send(Id,origin,new PeerReply(proposal.Request.Id,proposal.Generation,proposal.Identity,"rejected"));return;
+        }
         var old = journal.Outcomes.SingleOrDefault(o => o.Origin == origin && o.JobId == proposal.Request.Id && o.Generation == proposal.Generation);
         if (old is not null)
         {
@@ -234,7 +267,7 @@ public sealed class MeshPeer : IDisposable
                     throw new InvalidDataException("Existing execution has different requirements.");
                 status = "accepted"; // Expired old offer does not erase an existing/uncertain attempt.
             }
-            else if (!profiles.TryGetValue(proposal.ProfileId, out var profile)) status = "rejected";
+            else if (journal.OperatorHold || !profiles.TryGetValue(proposal.ProfileId, out var profile)) status = "rejected";
             else
             {
                 var result = coordinator.TryStartAtSite(proposal.Request, runtimeNodes, profile, clock.GetUtcNow(),

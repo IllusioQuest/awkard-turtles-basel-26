@@ -43,7 +43,8 @@ public static class WorkloadJson
     public static string Identity<T>(T value) => JsonSerializer.Serialize(value, Options);
 }
 
-/// <summary>CPU-equivalent quota, not pinned cores. Slots bound application/desktop concurrency.</summary>
+/// <summary>Requested CPU equivalents, not pinned cores. Enforcement is adapter-specific: Docker quotas,
+/// native admission estimates. Slots bound concurrent owned work; neither implies isolated physical hardware.</summary>
 public sealed record ResourceAmount(double CpuCores, long RamMib, int Slots);
 public sealed record GpuDevice(string Id, string Capability, long? VramMib = null);
 public sealed record ResourceDomain(string Id, ResourceAmount Capacity, GpuDevice[] Gpus);

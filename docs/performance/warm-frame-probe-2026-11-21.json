@@ -1,0 +1,27 @@
+{
+  "probe": "Two consecutive frames in one Blender process, unchanged prepared scene",
+  "scene_load_seconds": 0.02527600002940744,
+  "device": "Intel(R) Iris(R) Xe Graphics",
+  "graphics_api": "OPENGL",
+  "engine": "BLENDER_EEVEE",
+  "effective_samples": 32,
+  "width": 640,
+  "height": 360,
+  "frames": [
+    {
+      "frame": 1,
+      "render_seconds": 8.257011599955149
+    },
+    {
+      "frame": 2,
+      "render_seconds": 1.0148122999817133
+    }
+  ],
+  "date": "2026-11-21",
+  "source": "Own isolated diagnostic; retained prepared scene from paused run 365486092f70. Blender 5.3.0, OpenGL, --threads 1; two consecutive camera frames in one process.",
+  "limitations": [
+    "Only two different animation frames: not a controlled same-frame benchmark, full-run result or SLA.",
+    "No physical extra GPU or measured recovered heat.",
+    "Does not isolate shader compilation from other first-render initialization."
+  ]
+}

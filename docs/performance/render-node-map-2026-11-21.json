@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-21",
+  "ticket": "T-69",
+  "pull_request": 59,
+  "code_commit": "6027676",
+  "run_id": "365486092f70",
+  "source": "Own /ui/status snapshot and retained native frame result.json outputs; native_worker.py times bpy.ops.render.render with time.monotonic.",
+  "physical_hosts": 1,
+  "reported_physical_gpu_devices": 1,
+  "gpu": "Intel Iris Xe, native Blender 5.3.0 Eevee/OpenGL",
+  "logical_nodes": {
+    "cpu": {
+      "scene_preparations": 1,
+      "frames": 0
+    },
+    "gpu": {
+      "scene_preparations": 0,
+      "frames": 5
+    }
+  },
+  "completed_frame_render_seconds": [
+    15.114594600047,
+    16.9146185999271,
+    9.49583019991405,
+    12.1160850999877,
+    10.1188391000032
+  ],
+  "sum_frame_render_seconds": 63.75996759987905,
+  "mean_frame_render_seconds": 12.751993519975809,
+  "active_workflow_seconds": 71.3457648,
+  "preparation_seconds": 5.0610613,
+  "pause_sample_seconds": 1052.3133939,
+  "state_at_visual_check": "paused; no render restarted",
+  "verification": "Real UI screenshot/DOM: current contributions, host grouping, five completed/43 pending tiles, mean/range, pause separation. Executing/stale branches inspected but not exercised by starting or disrupting a job.",
+  "limitations": [
+    "Five-frame sample, not a full-animation benchmark or SLA.",
+    "Render-call timing includes work inside Blender; not a pure GPU hardware timing.",
+    "Elapsed minus render calls is not a scheduler-only benchmark.",
+    "One laptop/GPU; no measured multi-host speedup.",
+    "GPU utilization sensor unavailable; heat inputs synthetic."
+  ]
+}

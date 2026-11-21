@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-21",
+  "code_commit": "757a56b",
+  "pull_request": 59,
+  "decision": "0061",
+  "review": "go with changes; all three issues applied",
+  "checks": {
+    "orchestration_tests_passed": 102,
+    "native_linux_bundle_built": true,
+    "archive_has_no_live_token_config_or_state": true,
+    "archive_sha256": "dbe99adba10248df36012ee6afc7865530a582fa200110df7429da164234adc3",
+    "templates_have_distinct_gpu_ids": true,
+    "live_peers": [
+      "cpu",
+      "gpu"
+    ],
+    "planned_gpu_peers": [
+      "gpu-server-1",
+      "gpu-server-2"
+    ],
+    "live_physical_hosts": 1,
+    "new_remote_servers_contacted": 0,
+    "new_remote_gpus_verified": 0,
+    "run_preserved": {
+      "id": "365486092f70",
+      "frames": 12,
+      "held": true
+    },
+    "ui": "Real screenshot/DOM checked; two reachable peers and two not-connected planned nodes; used-node contributions retained.",
+    "existing_minecraft_containers_running": [
+      "digitalheat-minecraft-calibration",
+      "digitalheat-gaming-session-a-1"
+    ]
+  },
+  "deployment_prerequisites": [
+    "Two actual GPU hosts and reachable private addresses",
+    "Matching Blender version, build hash and exact script recipe",
+    "Working hardware graphics context and successful startup render probe",
+    "Private shared scene/assets storage mounted at configured per-host paths",
+    "Shared lab token and private network/tunnel",
+    "Sourced or explicitly labelled synthetic heat inputs; example heat budget defaults to zero"
+  ],
+  "not_claimed": [
+    "No real multi-host render tested",
+    "No extra physical GPU created or provisioned",
+    "No remote speedup, power or recovered heat measurement",
+    "Configured links do not establish peer-to-peer reachability"
+  ]
+}

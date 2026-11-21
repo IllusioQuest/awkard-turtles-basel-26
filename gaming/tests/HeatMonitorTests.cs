@@ -120,17 +120,16 @@ public class HeatMonitorTests
     [Fact] public void CheckedInSetupMapsNodesToScenarioSitesAndCapabilities()
     {
         var setup = MonitorSetup.Load(Root(), ConfigPath());
-        Assert.Equal(new[] { "basel-reference-house-case-1", "basel-mfh-1", "basel-hotel-spa-1" }, setup.NetworkSites.Keys);
+        Assert.Equal(new[] { "basel-reference-house-case-1" }, setup.NetworkSites.Keys);
         Assert.Equal(0.8, setup.Config.SessionHeatKwhPerHour.Value);
-        // Runtime profiles: only session-c declares Xonotic (docs/gaming-profiles.md).
-        Assert.True(setup.IncompatibleNodes.ContainsKey("session-a"));
-        Assert.True(setup.IncompatibleNodes.ContainsKey("session-b"));
-        Assert.False(setup.IncompatibleNodes.ContainsKey("session-c"));
+        Assert.Equal("minecraft", setup.Config.ApplicationId);
+        Assert.Empty(setup.IncompatibleNodes);
+        Assert.Single(setup.Config.Nodes);
     }
 
     [Fact] public void ReplayHourMatchesScenarioDemandFile()
     {
-        var setup = MonitorSetup.Load(Root(), ConfigPath());
+        var setup = MonitorSetup.Load(Root(), Path.Combine(Root(), "gaming/tests/Fixtures/monitor-heat.json"));
         var csv = NetworkScenarioLoader.ReadDemandCsv(Path.Combine(Root(), "data", "derived", "network",
             "switzerland-test", "basel-hotel-spa-1-demand.csv"));
         int i = setup.IndexOf("2025-07-15T18:00");
@@ -140,13 +139,13 @@ public class HeatMonitorTests
         Assert.Equal(i, setup.SameCalendarHourIndex("2026-07-15T18:00"));
     }
 
-    [Fact] public void CheckedInSetupStartsAndPlacesOnTheOnlyXonoticNode()
+    [Fact] public void CheckedInPreviewUsesOnlyTheRetainedMinecraftClient()
     {
         var setup = MonitorSetup.Load(Root(), ConfigPath());
         var e = setup.CreateEngine();
         e.Begin(setup.ReplayHour(setup.IndexOf(setup.Config.ReplayStartLocal)));
         foreach (var n in setup.Config.Nodes) e.SetReady(n.NodeId, !setup.IncompatibleNodes.ContainsKey(n.NodeId));
-        Assert.Equal("session-c", e.Reserve()!.NodeId);
+        Assert.Equal("session-a", e.Reserve()!.NodeId);
         Assert.Null(e.Reserve());                           // one desktop, one session slot
     }
 

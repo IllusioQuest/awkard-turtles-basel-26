@@ -7,7 +7,7 @@ public class MonitorContractTests
     private static MonitorSetup Setup()
     {
         string root = MonitorSetup.FindRepositoryRoot();
-        return MonitorSetup.Load(root, Path.Combine(root, "gaming/deploy/heat-monitor.json"));
+        return MonitorSetup.Load(root, Path.Combine(root, "gaming/tests/Fixtures/monitor-heat.json"));
     }
     [Fact] public void InputsRoundTripAndRejectUnknownFieldsOrMissingRequiredFlags()
     {
