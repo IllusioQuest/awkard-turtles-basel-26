@@ -12,7 +12,7 @@ forecasts, the problem is a variant of scheduling on parallel machines with inve
 deadlines. That is **NP-hard**: for large networks, an exact solution is not practical.
 
 **But it can be formulated so that it stays tractable.** The services in the current plan
-(transcription, document AI; see `docs/research/service-brainstorm.md`) split into many small work
+(transcription, document AI; see `docs/research/ideas.md`) split into many small work
 units (audio segments, pages). If jobs may be split and servers can run at part load, the core
 becomes a **flow in a time-expanded network**, which is a **linear programme (LP)** and solvable
 in polynomial time.

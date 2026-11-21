@@ -17,7 +17,7 @@ for the host and for DigitalHeat.
 ## Why (decided by the team lead, 2026-11-21)
 
 - Electricity is not the problem (0.33 CHF/h cost vs. 0.11 CHF/h heat value); **hardware and demand are**
-  (`docs/research/hardware.md`, `job-demand.md`, `filler-demand.md`).
+  (`docs/research/hardware.md`, `demand.md`).
 - Competitors failed or retreated exactly at single homes (Nerdalize bankrupt 2018, Cloud&Heat closed
   residential, Qarnot moved to year-round boilers and was restructured 2026; `docs/research/competitors.md`).
 - **Meta-insight:** DigitalHeat has not worked with single-family houses so far, yet the case gives a simple
@@ -31,7 +31,7 @@ for the host and for DigitalHeat.
 | Lever | Status | Content |
 |---|---|---|
 | **A** Size for year-round heat | core | size houses for base load (hot water, shoulder seasons), peaks from the backup; year-round sites as network partners |
-| **B** Premium = compute-heavy sovereign AI | core | private LLM / document AI etc., priced near Swiss on-demand; data rules for homes respected (`filler-demand.md`) |
+| **B** Premium = compute-heavy sovereign AI | core | private LLM / document AI etc., priced near Swiss on-demand; data rules for homes respected (`demand.md`) |
 | **D** Refurbished hardware | core, adopt fully | second-life servers/GPUs, incl. wear and failure costs (T-35); check what DigitalHeat already does |
 | **G** Route work instead of dumping heat | core, part of the model | routing T-11/T-12 |
 | **C** Heat as a service fee | variant | no precedent found |
@@ -46,7 +46,7 @@ for the host and for DigitalHeat.
 - [ ] Economics with these levers, reference house first (T-14).
 - [ ] Refurbished hardware cost and wear (T-35).
 - [ ] What DigitalHeat already does (hardware, sites, model) → `docs/research/digitalheat-company.md`.
-- [ ] Creative ideas for profitable homes → `docs/research/creative-ideas.md`; team picks.
+- [ ] Creative ideas for profitable homes → `docs/research/ideas.md`; team picks.
 - [ ] Write `docs/business-model.md`: value proposition per actor, revenue streams, cost structure, why it works where others failed, when it does not pay off.
 - [ ] Feed the pitch (T-21): competitors slide, residential focus.
 

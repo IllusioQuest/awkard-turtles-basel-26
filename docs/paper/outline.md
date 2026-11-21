@@ -64,7 +64,7 @@ model does not pay off.
 - Swiss projects: IWB + Neutral-IT, IWB + DeepSquare, K51, Infomaniak D4, EPFL Heating Bits
   ([`research/digitalheat-company.md`](../research/digitalheat-company.md) §4).
 - Data-centre heat reuse into district heating; demand response and carbon-aware scheduling of
-  data centres; spot / preemptible capacity markets ([`research/filler-demand.md`](../research/filler-demand.md)).
+  data centres; spot / preemptible capacity markets ([`research/demand.md`](../research/demand.md)).
   `TODO(source)`: academic references (to collect).
 
 ### 3. Case and reference house
@@ -168,7 +168,7 @@ network, with deadlines and year-round sinks; (iii) forecast errors cost little;
 
 ### 10. Conclusion and outlook
 - District heating (out of scope in the case), grid flexibility, PV ("Prepper"), multi-family buildings
-  ([`research/creative-ideas.md`](../research/creative-ideas.md)).
+  ([`research/ideas.md`](../research/ideas.md)).
 
 ### Appendix: reproducibility
 - One command per figure (table below), committed inputs with `SOURCE` files, fixed seeds,

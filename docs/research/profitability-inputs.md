@@ -12,7 +12,7 @@ python3 scripts/profitability_inputs.py     # also writes data/derived/profitabi
 ```
 
 Packages: [R1 power](power-efficiency.md) · [R2 purchase cost](purchase-cost.md) ·
-[R3 household capacity](household-capacity.md) · [R4 compute demand](compute-demand.md) ·
+[R3 household capacity](household-capacity.md) · [R4 compute demand](demand.md) ·
 [R5 trends](trends-2030.md).
 
 ## 1. Short answer
@@ -56,7 +56,7 @@ Packages: [R1 power](power-efficiency.md) · [R2 purchase cost](purchase-cost.md
 | CPU server wall power, load / idle | 341 W / 61.7 W (idle = 18 %) | — | `pe-specpower-9754-100`, `-idle` | high (verified) |
 | Heat recovered | 0.8 (case) | vendor claim up to 0.95 | case, `pe-recovery-qarnot` | case / low |
 | Type 2 price | CHF 0.66 per server-hour | floor 0.226 / 0.3325, ceiling 1.80 | `computing-price.md`, decision 0018 | team decision |
-| Fill rate of offered Type 2 hours | 0.35 | 0.2–0.6 | `filler-demand.md` §6 | sourced estimate |
+| Fill rate of offered Type 2 hours | 0.35 | 0.2–0.6 | `demand.md` §9 | sourced estimate |
 | LLM token price (8B class) | CHF 0.126 per 1M tokens | batch API −50 %; Swiss 70B: CHF 0.70 / 2.50 | `ai-llm-mistral-ministral3-8b`, `ai-llm-infomaniak-apertus-70b` | high / low |
 | LLM energy, RTX 4090 | 0.0305 J per input token; 2.38 J per output token (batch 1) | batched: 0.21 J per token (450 W ÷ 2,148 tok/s) | `pe-rtx4090-llama7b-pp`, `-tg` (verified), `pe-rtx4090-vllm-iog-qps8` (opened) | high / medium |
 | LLM energy, our laptop CPU | 0.45 J per input token; 5.6 J per output token | — | `docs/jobs/llm-summary.md` | own measurement |

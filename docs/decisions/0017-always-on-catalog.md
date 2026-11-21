@@ -1,6 +1,6 @@
 # 0017: Always-on entries in the existing job catalog
 
-- **Status:** proposed; user approved one catalog with batch/always-on
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; user approved one catalog with batch/always-on
 - **Date:** 2026-11-21
 - **Decided by:** Nikita; team confirmation pending
 

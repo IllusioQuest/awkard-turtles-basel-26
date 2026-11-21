@@ -13,12 +13,12 @@ Three findings from 2026-11-21 narrowed the options:
 - **Transcription has very little demand.** All Basel physician dictation is about 546 server-hours a
   year; the reference house offers 22,661 (`docs/research/profitability-inputs.md` §4). Dictations are
   also health data. Home servers cannot easily meet the secrecy rules for health, legal and bank data
-  (`docs/research/filler-demand.md` §1, revDSG Art. 8/9).
+  (`docs/research/demand.md` §1, revDSG Art. 8/9).
 - **Webhosting** was found not to be legally viable in the form the team tested (team finding,
   2026-11-21; the details are `TODO(source)` from Nikita's T-23/T-36 work).
 - **No job type earns a premium just by running in a home.** Heat-led capacity is interruptible, and
   personal data must stay out. So buyers pay commodity prices, not premiums for reliability,
-  latency or trust (`filler-demand.md`, `competitors.md`). The home's advantage is cost: no cooling,
+  latency or trust (`demand.md`, `competitors.md`). The home's advantage is cost: no cooling,
   no building, and the used heat is worth 0.8 kWh × CHF 0.133/kWh = CHF 0.106 per full-load
   server-hour (both inputs from `docs/case/key-figures.md`).
 
@@ -57,7 +57,7 @@ The case's scoring does not reward high income. It asks under which prices the m
 | Scaling to 1 kW | 1,000 Wh ÷ 0.92 Wh ≈ 1,090 documents per server-hour (assumes energy scales linearly; T-33 method) | same method, T-30 |
 | Interruption | freeze/resume of the container (decision 0009, LiveRun) | checkpoint at task boundaries |
 | Deadline | 24 h (our assumption) | none (a long one may be set in T-30) |
-| Arrivals per day | **unlimited jobs** (case-permitted), no sourced volume yet | **unlimited jobs** (case-permitted); fill rate 0.35 (0.2–0.6) as sensitivity (`filler-demand.md` §1) |
+| Arrivals per day | **unlimited jobs** (case-permitted), no sourced volume yet | **unlimited jobs** (case-permitted); fill rate 0.35 (0.2–0.6) as sensitivity (`demand.md` §1) |
 
 **Value proposition in one line:** a home is the cheapest room for patient computing, because its
 heat is needed anyway.
@@ -66,7 +66,7 @@ heat is needed anyway.
 
 - **Host-owned servers** (host buys, DigitalHeat sells the computing for a commission). This needs
   a homeowner to invest about CHF 16,300 per kW (RTX 4090 profile) (`profitability-inputs.md` §2) with no precedent
-  (`creative-ideas.md`, lever F). Kept as a variant in T-14, not the pitch model.
+  (`ideas.md`, lever F). Kept as a variant in T-14, not the pitch model.
 - **Transcription as Type 1 (decision 0018).** Too little demand, and personal data cannot go to
   homes.
 - **Searching further for a high-premium use case.** The research found none that fits home sites

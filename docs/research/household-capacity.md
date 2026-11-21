@@ -82,7 +82,7 @@ house (31,231 kWh = 26,851 space + 4,380 water).
 ## 3. Network capacity
 
 **Ratio (assumption, `hh-ratio-srvh-per-kwh`):** the repo year run sells 22,661 server-hours on 31,231 kWh
-total heat demand (4 servers, 58.0 % coverage, [`job-demand.md`](job-demand.md) §3):
+total heat demand (4 servers, 58.0 % coverage, [`demand.md`](demand.md) §2):
 22,661 / 31,231 = **0.7256 server-hours per kWh of heat demand**.
 Assumption: every joining building gets servers in proportion to its demand, 4 per 31,231 kWh = 0.128 servers per
 MWh (`hh-srv-per-mwh`), each 1 kW electrical, 0.8 kW heat. A large MFH (108 MWh) gets ~14 servers. The ratio is
@@ -110,7 +110,7 @@ result is 2.07 times higher (423 M, 2,113 M, 4,226 M). Switzerland has more smal
 truth lies between; national mean demand per fossil building is a gap.
 
 How to read: the figures are **capacity if all servers sell all heat-led hours**. Compare with demand
-(`job-demand.md`): the low and base job scenarios there use ~13-39 server-hours per house, so capacity is far
+(`demand.md`): the low and base job scenarios there use ~13-39 server-hours per house, so capacity is far
 larger than the demand we modelled.
 
 ## 4. Seasonality
@@ -133,7 +133,7 @@ by 4.7 times, because winter is capped by the 4 servers (about 4.0 busy servers 
 In July only hot water remains: 4,380 kWh ÷ 12 = 365 kWh per month ≈ 456 server-hours if it were all
 used, the rest of the 612 comes from the profile shape. Consequence for scale-up: the same network sells ~4.7
 times more in January than in July; to sell steady summer jobs the heat must be dumped or other demand (filler
-jobs, see [`filler-demand.md`](filler-demand.md)) is needed. Basel heating-degree days from MeteoSwiss were not
+jobs, see [`demand.md`](demand.md)) is needed. Basel heating-degree days from MeteoSwiss were not
 used: TODO(source) if the team wants a Basel-specific shape.
 
 ## 5. Main gaps

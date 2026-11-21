@@ -4,7 +4,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Runtime / integration
 - **Depends on:** T-03
-- **Suggested owner:** Nikita  ·  **Owner:** Nikita / Codex · **Status:** in progress
+- **Suggested owner:** Nikita  ·  **Owner:** Nikita / Codex · **Status:** retired by user request (T-40)
 
 ## Goal
 
@@ -23,7 +23,7 @@ Use the existing webhosting work where it helps the case: as executor platform a
 ## Read first
 
 - `docs/webhosting-prototype.md`
-- `docs/research/service-brainstorm.md (#13)`
+- `docs/research/ideas.md (#13)`
 
 ## Rules
 

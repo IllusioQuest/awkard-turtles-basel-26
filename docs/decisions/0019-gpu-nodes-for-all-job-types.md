@@ -29,7 +29,7 @@ printed by `python3 scripts/profitability_inputs.py`, and every input is a CSV r
 ## Reasons (with sources)
 
 **a) Dedicated Type 2 hardware does not pay, whatever its class.** At the sourced fill rate of 0.35
-(`filler-demand.md` §6), the price needed is `b + N · fixed ÷ (S · φ)`:
+(`demand.md` §9), the price needed is `b + N · fixed ÷ (S · φ)`:
 
 | Dedicated Type 2 hardware | Price needed, CHF/server-h | Market reference |
 |---|---:|---|
