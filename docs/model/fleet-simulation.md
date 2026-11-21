@@ -1,6 +1,6 @@
 # Fleet simulation: implementation spec
 
-> **Status:** agreed with Ennio 2026-11-21, not built. Ticket T-52, branch `feat/T-52-fleet-simulation`.
+> **Status:** agreed with Ennio 2026-11-21; built 2026-11-21 (see §16 for choices made during the build). Ticket T-52, branch `feat/T-52-fleet-simulation`.
 > This file is the decision record for T-52 (design reviewed by Ennio 2026-11-21; no separate ADR).
 > Everything below is in scope for the first build. Values marked `TODO(source)` stay visible
 > parameters; never replace them with invented numbers.
@@ -392,3 +392,56 @@ Not used: solar irradiance (no PV yet), T-12 synthetic sites.
 - Job sizes are known when a job arrives.
 - The mock scheduler and mock pricing are placeholders; the results describe them, not our real
   policy.
+
+## 16. Implementation notes (build of 2026-11-21)
+
+Code: `src/DigitalHeat.Fleet/` (`Contracts/`, `Engine/`, `Inputs/`, `Policies/`, `Output/`,
+`FleetSimulation.cs`), CLI `src/DigitalHeat.FleetRun`, tests `src/DigitalHeat.Fleet.Tests` (106).
+Commands and output columns: `data/derived/fleet/README.md`.
+
+Choices the spec left open, made during the build:
+
+- **Engine.** Overhead (start, resume) elapses only while load > 0; a checkpoint after `Stop`
+  elapses at the current load, and its end is delivered as `OverheadDone` with the chunk in phase
+  `Stopped`. Crossing times are rounded up to whole ms. A house's crossing events are only scheduled
+  up to the next hour start (all houses are recomputed there). Within a batch: heap events, then
+  deadlines, then arrivals, so a chunk finishing exactly at its deadline is on time. `CommittedKwh`
+  has hour granularity and subtracts the progress of running chunks only at chunk end. A
+  non-checkpointable `Stop` loses its progress; its energy stays counted as work energy.
+- **Placement.** All houses are in CH (`country_allowlist`). `origin_site` is read as "same canton as
+  the client" (clients are canton capitals, never houses).
+- **Income** is credited when units are kept (chunk end, checkpointed stop, run end). Late units
+  are paid; misses are reported separately. A job counts as missed if it finished after its
+  deadline or is still open at run end with its deadline passed.
+- **Mock scheduler.** An urgent Type 1 job is evaluated once, then stays urgent (load 1, sorted
+  first in the queue); preemption victims come from a set of houses with checkpointable Type 2
+  chunks. A job that can neither pause nor has a `min_load` is floored at load 1e-3.
+- **Inputs.** LLM work unit = input + output token at 0.21 J each (conservative reading); token
+  sizes sum the input and output quantile tables with the same draw (comonotonic, mean 1,769 vs
+  1,738 tokens in the trace). Research job sizes: Alibaba duration histogram, log-uniform within a
+  bin, open ends 1 s and 7 d (`TODO(source)`). Resolved volumes at scale 1: transcription 428,
+  LLM 1,566 (batches of 1,000 requests), research 135 jobs/day.
+- **Scenarios (team decision 2026-11-21).** `reference.json` runs at `volume_scale` 0.1: at full
+  volume one 4-server house gets the whole regional demand (≈ 16 kW of work on average), 97 % of
+  jobs miss their deadline. `basel-region-100` contains BL houses only: the 10 km grid has no cell
+  inside Basel-Stadt.
+
+Checks (§13): Core cross-check, server-hours 22,595.8 vs 22,661.0 and heat used 18,076.6 vs 18,128.8
+kWh (−0.29 %, tolerance 1 %, hysteresis vs Core's hourly greedy target); event vs tick (January,
+20 houses, 13,225 jobs) per-house deviation ≤ 2.9 kWh against a bound of 37.3 kWh; outputs
+byte-identical across runs; network energy balance closes to 1e-9 kWh.
+
+First results (event mode, 2025, Release build, laptop; mock scheduler and mock pricing, §15):
+
+| Scenario | Wall | Jobs done / missed | Heat used / demand | Income | Margin | Case break-even |
+|---|---|---|---|---|---|---|
+| reference (volume 0.1) | 0.9 s | 77,231 / 1,734 | 9,863 / 31,231 kWh | CHF 14,585 | CHF 11,750 | 0.227 CHF/server-h |
+| basel-region-100 | 4.2 s | 778,526 / 148 | 112,744 / 1,889,291 kWh | CHF 115,831 | CHF 85,988 | 0.212 |
+| ch-1000 | 15.5 s (+ ≈ 12 s job generation) | 778,526 / 149 | 112,744 / 18,958,182 kWh | CHF 114,920 | CHF 89,276 | 0.182 |
+
+How to read it: the sourced job volumes (Basel physicians, 1 % × 1 % of OpenRouter, sciCORE) need
+≈ 140 MWh of electricity a year, so a fleet of 100 or 1,000 houses with 4 servers each is mostly
+idle (heat coverage 6 % and 0.6 %), and both fleets run the same jobs. Income per kWh is high
+because transcription sells at CHF 0.36 per audio hour while an L4 server does 469.9 audio hours
+per server-hour (≈ CHF 169 per server-hour, but only ≈ 36 kWh a year of work), and LLM tokens earn
+≈ CHF 1.5 per kWh. Demand, not heat, is the binding constraint at these volumes.

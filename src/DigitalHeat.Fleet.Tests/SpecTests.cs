@@ -148,7 +148,7 @@ public class SpecTests(ITestOutputHelper output)
                 s.Run.Mode = mode; s.Run.TickMs = tickMs;
                 s.Houses = new HousesSection { Generate = JsonDocument.Parse(spec.ToJsonString()).RootElement };
                 // 20 of 100 houses: volume scaled by 0.2 so the load per house stays that of the 100-house scenario.
-                s.Demand = new DemandSection { VolumeScale = s.JobTypes.ToDictionary(Path.GetFileNameWithoutExtension, _ => 0.2) };
+                s.Demand = new DemandSection { VolumeScale = s.JobTypes.ToDictionary(p => Path.GetFileNameWithoutExtension(p)!, _ => 0.2) };
                 s.Logging.HouseTimeseries = "none";
                 return s;
             }

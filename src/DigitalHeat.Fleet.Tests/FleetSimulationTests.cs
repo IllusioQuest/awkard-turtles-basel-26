@@ -17,7 +17,7 @@ public class FleetSimulationTests
     {
         var s = ReferenceJanuary();
         s.Run.EndLocal = "2026-01-01T00:00";
-        s.Demand.VolumeScale = s.JobTypes.ToDictionary(Path.GetFileNameWithoutExtension, _ => 0.01);
+        s.Demand.VolumeScale = s.JobTypes.ToDictionary(p => Path.GetFileNameWithoutExtension(p)!, _ => 0.01);
         var run = FleetSimulation.Run(s);
         Assert.Equal(206, run.Result.Houses[0].HeatingDays);
         Assert.Equal(26850.5, run.Result.Houses[0].Account.SpaceHeatKwh, 1);
