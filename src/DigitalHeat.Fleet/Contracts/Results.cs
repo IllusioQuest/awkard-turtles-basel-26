@@ -43,6 +43,8 @@ public sealed class EnergyAccount
     /// <summary>Σ hours of installed servers (utilisation denominator).</summary>
     public double InstalledServerHours;
     public double IncomeT1Chf, IncomeT2Chf;
+    /// <summary>Electricity cost: Σ electric kWh × the house's price (per segment, so it adds across houses).</summary>
+    public double ElectricityChf;
     /// <summary>Units / kWh of work done after the job's deadline (mixed units summed as reported).</summary>
     public double UnitsLate, LateWorkKwh;
     public int Pauses;
@@ -59,7 +61,7 @@ public sealed class EnergyAccount
         DischargeKwh += o.DischargeKwh; DumpedKwh += o.DumpedKwh; BackupKwh += o.BackupKwh;
         LoadServerHours += o.LoadServerHours; BusyServerHours += o.BusyServerHours;
         InstalledServerHours += o.InstalledServerHours;
-        IncomeT1Chf += o.IncomeT1Chf; IncomeT2Chf += o.IncomeT2Chf;
+        IncomeT1Chf += o.IncomeT1Chf; IncomeT2Chf += o.IncomeT2Chf; ElectricityChf += o.ElectricityChf;
         UnitsLate += o.UnitsLate; LateWorkKwh += o.LateWorkKwh; Pauses += o.Pauses;
     }
 }

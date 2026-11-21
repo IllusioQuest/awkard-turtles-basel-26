@@ -69,9 +69,14 @@ public static class FleetOutput
         ("heat_used_kwh", a => a.UsedKwh), ("heat_dumped_kwh", a => a.DumpedKwh), ("heat_backup_kwh", a => a.BackupKwh),
         ("units_late", a => a.UnitsLate), ("late_work_kwh", a => a.LateWorkKwh), ("pauses", a => a.Pauses),
         ("income_t1_chf", a => a.IncomeT1Chf), ("income_t2_chf", a => a.IncomeT2Chf),
+        ("electricity_chf", a => a.ElectricityChf),
     ];
 
     private static IEnumerable<string> AccountValues(EnergyAccount a) => AccountColumns.Select(c => R(c.Get(a)));
+
+    // houses-summary has its own electricity_cost_chf column, so the account's electricity_chf is left out there.
+    private static readonly (string Name, Func<EnergyAccount, double> Get)[] SummaryAccountColumns =
+        AccountColumns.Where(c => c.Name != "electricity_chf").ToArray();
 
     // ---------------------------------------------------------------- jobs
 
@@ -99,14 +104,14 @@ public static class FleetOutput
     {
         var sp = run.ServerParams;
         yield return string.Join(',', new[] { "house_id", "cell_id", "servers", "heating_days" }
-            .Concat(AccountColumns.Select(c => c.Name))
+            .Concat(SummaryAccountColumns.Select(c => c.Name))
             .Concat(["coverage", "tank_final_kwh", "utilisation", "busy_share", "server_hours_t1", "server_hours_t2",
                 "electricity_cost_chf", "heat_value_chf", "income_chf", "margin_chf", "break_even_chf_per_server_hour"]));
         foreach (var h in run.Result.Houses)
         {
             var a = h.Account;
             yield return string.Join(',', new[] { h.Spec.HouseId, h.Spec.CellId, I(h.ServerCount), I(h.HeatingDays) }
-                .Concat(AccountValues(a))
+                .Concat(SummaryAccountColumns.Select(c => R(c.Get(a))))
                 .Concat([R(h.Coverage), R(h.TankFinalKwh), R(h.Utilisation), R(h.BusyShare),
                     R(a.ElectricT1Kwh / sp.MaxElectricKw), R(a.ElectricT2Kwh / sp.MaxElectricKw),
                     R(h.ElectricityChf), R(h.HeatValueChf(sp)), R(h.IncomeChf), R(h.MarginChf(sp)),
@@ -130,14 +135,15 @@ public static class FleetOutput
         yield return string.Join(',', "hour", "heat_demand_kwh", "heat_produced_kwh", "heat_direct_kwh", "tank_charge_kwh",
             "tank_discharge_kwh", "heat_used_kwh", "heat_dumped_kwh", "heat_backup_kwh", "electric_kw_mean", "running_chunks",
             "queue_length_t1", "queue_length_t2", "remaining_kwh_t1", "remaining_kwh_t2", "arrivals", "rejections",
-            "completions", "misses", "mean_t2_quote_chf");
+            "completions", "misses", "mean_t2_quote_chf", "electric_kwh", "income_t1_chf", "income_t2_chf", "electricity_chf");
         foreach (var n in run.Result.NetworkHours)
         {
             var a = n.Account;
             yield return string.Join(',', I(n.Hour), R(a.DemandKwh), R(a.ProducedKwh), R(a.DirectKwh), R(a.ChargeKwh),
                 R(a.DischargeKwh), R(a.UsedKwh), R(a.DumpedKwh), R(a.BackupKwh), R(n.ElectricKwMean), I(n.RunningChunks),
                 I(n.QueueLengthT1), I(n.QueueLengthT2), R(n.RemainingKwhT1), R(n.RemainingKwhT2), I(n.Arrivals),
-                I(n.Rejections), I(n.Completions), I(n.Misses), R(n.MeanT2QuoteChf));
+                I(n.Rejections), I(n.Completions), I(n.Misses), R(n.MeanT2QuoteChf), R(a.ElectricKwh), R(a.IncomeT1Chf),
+                R(a.IncomeT2Chf), R(a.ElectricityChf));
         }
     }
 

@@ -497,6 +497,7 @@ public sealed partial class FleetEngine
         seg.HotWaterKwh = dm.HotWaterKw[hour] * dtH;
         seg.DemandKwh = dm.TotalKw[hour] * dtH;
         double produced = _share * electricKwh;
+        seg.ElectricityChf = electricKwh * h.Input.Spec.ElectricityPriceChfPerKwh;
         seg.ProducedKwh = produced;
 
         // The period rolls over before the tank moves, so a flushed row carries the tank at its end.
@@ -539,7 +540,7 @@ public sealed partial class FleetEngine
         a.ElectricOverheadKwh = a.ElectricT1Kwh = a.ElectricT2Kwh = 0;
         a.ProducedKwh = a.DirectKwh = a.ChargeKwh = a.DischargeKwh = a.DumpedKwh = a.BackupKwh = 0;
         a.LoadServerHours = a.BusyServerHours = a.InstalledServerHours = 0;
-        a.IncomeT1Chf = a.IncomeT2Chf = 0;
+        a.IncomeT1Chf = a.IncomeT2Chf = a.ElectricityChf = 0;
         a.UnitsLate = a.LateWorkKwh = 0;
         a.Pauses = 0;
     }
