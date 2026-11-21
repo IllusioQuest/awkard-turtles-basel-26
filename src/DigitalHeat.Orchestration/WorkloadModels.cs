@@ -13,6 +13,33 @@ public static class WorkloadJson
         WriteIndented = true
     };
     public static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value, Options), Options)!;
+    // Explicit hot-path copies: records contain immutable scalars/records, but arrays remain caller-owned.
+    // Add any future mutable member here; generic journal/runtime-record copying remains unchanged.
+    public static WorkloadRequest Copy(WorkloadRequest r)
+    {
+        ArgumentNullException.ThrowIfNull(r);
+        return r with
+        {
+            PlacementPolicy = r.PlacementPolicy is null ? null! : r.PlacementPolicy with { AllowedCountryCodes = r.PlacementPolicy.AllowedCountryCodes?.ToArray() },
+            RequiredCapabilities = r.RequiredCapabilities?.ToArray()!, LatencyLimits = r.LatencyLimits?.ToArray()!
+        };
+    }
+    public static WorkloadInventory Copy(WorkloadInventory i)
+    {
+        ArgumentNullException.ThrowIfNull(i);
+        return i with
+        {
+            Sites = i.Sites?.ToArray()!,
+            Domains = i.Domains?.Select(d => d is null ? null! : d with { Gpus = d.Gpus?.ToArray()! }).ToArray()!,
+            Nodes = i.Nodes?.Select(n => n is null ? null! : n with
+            {
+                Capabilities = n.Capabilities?.ToArray()!, GpuDeviceIds = n.GpuDeviceIds?.ToArray()!,
+                StorageIds = n.StorageIds?.ToArray()!, Latencies = n.Latencies?.ToArray()!
+            }).ToArray()!,
+            ExternalAllocations = i.ExternalAllocations?.ToArray()!
+        };
+    }
+    public static AllocationView[] Copy(AllocationView[] claims) => claims.Select(c => c is null ? null! : c with { Request = Copy(c.Request) }).ToArray();
     public static string Identity<T>(T value) => JsonSerializer.Serialize(value, Options);
 }
 
@@ -36,12 +63,17 @@ public sealed record WorkloadInventory(long Revision, DateTimeOffset IntervalSta
     public DateTimeOffset? ResourceValidUntilUtc { get; init; }
 }
 public sealed record LifecyclePolicy(bool AllowPause, bool AllowStop, bool Restartable);
+/// <summary>Absolute operator-submitted batch budget; never renewed by retry, pause or restart.</summary>
+public sealed record JobDeadline(DateTimeOffset SubmittedAtUtc, DateTimeOffset DueAtUtc, string Source, bool StopWhenOverdue);
 public sealed record WorkloadRequest(string Id, string Kind, string OriginSiteId, JobPlacementPolicy PlacementPolicy,
     ResourceAmount Resources, string ResourceSource, double RecoverableHeatKwhPerHour, string HeatSource,
     string[] RequiredCapabilities, string? GpuCapability, string? PinnedNodeId, string? StorageId,
     LatencyLimit[] LatencyLimits, LifecyclePolicy Lifecycle)
 {
     public long? MinGpuVramMib { get; init; }
+    // Omit only this new optional field: legacy container spec hashes must remain byte-compatible.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public JobDeadline? Deadline { get; init; }
 }
 public sealed record WorkloadReservation(string WorkloadId, string SiteId, string NodeId, string DomainId,
     string? GpuDeviceId, double RecoverableHeatKwhPerHour, double AvailableHeatKwhBeforeReservation);
