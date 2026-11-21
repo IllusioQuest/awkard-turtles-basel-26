@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data
 - **Depends on:** T-05
-- **Suggested owner:** Codex  ·  **Owner:** Nikita / Codex  ·  **Status:** in progress
+- **Suggested owner:** Codex  ·  **Owner:** Nikita / Codex  ·  **Status:** done (PR #10 merged)
 
 ## Goal
 
@@ -10,9 +10,9 @@ One export format that all dashboards and the paper read, so nothing recomputes 
 
 ## Tasks
 
-- [ ] Define the export: per run a folder with `summary.json`, `hourly.csv` per site, `flows.csv` (job moves between sites), `parameters.json` (all inputs with sources), `run.json` (command, git commit, seed).
-- [ ] Write the schema in `docs/model/data-contract.md`.
-- [ ] Make `YearRun` (and later the router) write it; commit small showcase runs to `data/derived/` per its rules.
+- [x] Define the export: per run a folder with `summary.json`, `hourly.csv` per site, `flows.csv` (job moves between sites), `parameters.json` (all inputs with sources), `run.json` (command, git commit, seed).
+- [x] Write the schema in `docs/model/data-contract.md`.
+- [x] Make `YearRun` (and later the router) write it; commit small showcase runs to `data/derived/` per its rules.
 
 ## Done when
 
@@ -31,3 +31,4 @@ Implementation and showcase are ready for review in PR #10:
 https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/10
 29 tests pass; reference hourly output and coverage match legacy output. Keep in progress until
 merged. Contract and generation details: docs/model/data-contract.md.
+

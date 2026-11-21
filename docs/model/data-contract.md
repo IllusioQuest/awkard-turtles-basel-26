@@ -1,6 +1,6 @@
 # Result bundle contract v1 (T-13)
 
-Status: implemented on feat/T-13-result-export; PR validation pending.
+Status: merged to main in PR #10 (e554f196), 2026-11-21.
 Decision: [0011](../decisions/0011-result-export-contract.md).
 This is an opt-in export of existing C# results, not a second model.
 
@@ -82,4 +82,5 @@ Generated at clean code revision 8651786d863a10c99e73421c63a42b90b93f4258:
 All 29 core/runtime/export tests passed. Legacy and bundle hourly files matched byte-for-byte
 in the generation checkout; coverage matched exactly. Git checkout may normalize line endings.
 The showcase is 8,760 hourly rows; hashes identify inputs at generation (line endings affect hashes).
-Committed on feat/T-13-result-export, pending PR review.
+Committed on feat/T-13-result-export, merged in PR #10.
+
