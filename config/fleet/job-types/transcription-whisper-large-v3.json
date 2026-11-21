@@ -1,0 +1,77 @@
+{
+  "id": "transcription-whisper-large-v3",
+  "class": "type1",
+  "work_unit": "audio_minute",
+  "description": "Medical dictation transcription, whisper-large-v3-turbo on a GPU server (docs/model/fleet-simulation.md section 5.2). Type 1: fixed price, served first.",
+  "energy_kwh_per_work_unit": {
+    "value": 3.546853940554728e-05,
+    "unit": "kWh/audio minute",
+    "source": "derived: 1 kWh per 1 kW server-hour / (469.9 audio hours per server-hour x 60 min/h) = 3.5469e-5 kWh per audio minute; TranscriptionAudioHoursPerServerHour in config/hardware/gpu-inference-l4.json (whisper-large-v3-turbo on L4, data/raw/market/hardware.csv hw-perf-e2e-l4-whisper-turbo-b4, low: vendor blog via snippet)"
+  },
+  "size": {
+    "dist": "lognormal",
+    "median": 6.5,
+    "sigma": 0,
+    "unit": "audio minutes/dictation",
+    "source": "median: Bax et al. 2011, Health Econ Rev 1:8: median dictation length 6.5 min per letter, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/ (abstract, accessed 2026-11-21), as config/job-scenarios/transcription-basel.json; sigma 0 (every dictation 6.5 min): TODO(source) spread of dictation length not sourced"
+  },
+  "batch_size": {
+    "dist": "fixed",
+    "value": 1,
+    "unit": "dictations/job",
+    "source": "scenario value: one dictation per job (docs/model/fleet-simulation.md section 5.2: batch size configurable, default 1); not sourced"
+  },
+  "deadline_s": {
+    "dist": "uniform",
+    "min": 7200,
+    "max": 259200,
+    "unit": "s",
+    "source": "team range 2026-11-21, docs/model/fleet-simulation.md §5.1"
+  },
+  "max_chunks": { "value": 1, "unit": "chunks", "source": "scenario value: one dictation is not split (docs/model/fleet-simulation.md section 5.2: splitting per dictation)" },
+  "min_chunk_work_units": { "value": 6.5, "unit": "audio minutes", "source": "one dictation = the median dictation length (Bax et al. 2011, as size); splitting is per dictation (docs/model/fleet-simulation.md section 5.2)" },
+  "start_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): model-load time per chunk start (the T-02 runner reloads a 3 GB model per chunk) not sourced; 0 = not modelled" },
+  "lifecycle": {
+    "allow_pause": true,
+    "checkpointable": true,
+    "min_load": { "value": 0, "unit": "fraction", "source": "TODO(source): lowest sustainable GPU load not sourced; 0 = continuous load as Core (HeatBalance reference)" },
+    "resume_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): 0 = not modelled" },
+    "checkpoint_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): 0 = not modelled" },
+    "source": "allow_pause: interruptible = true in config/jobs/transcription-whisper-large-v3.json; checkpointable: scenario value, a dictation is a short atomic unit, progress is kept on stop; not measured"
+  },
+  "input_mb_per_work_unit": { "value": 0, "unit": "MB/audio minute", "source": "TODO(source): audio data size per minute not in the repo; 0 = not modelled (not used by the engine)" },
+  "state_mb": { "value": 0, "unit": "MB", "source": "TODO(source): checkpoint size not in the repo; 0 = not modelled (not used by the engine)" },
+  "placement_policy": {
+    "mode": "country_allowlist",
+    "countries": ["CH"],
+    "source": "Medical dictations contain patient data (docs/research/demand.md, private-practice physicians of Basel-Stadt); the allowlist keeps processing in Switzerland as the data-locality rule of docs/decisions/0013-job-data-locality.md. TODO(source): the customer contract clause that authorises the policy (decision 0013 requires it as source)"
+  },
+  "volume": {
+    "kind": "requests_per_day",
+    "requests_per_day": {
+      "value": 428,
+      "unit": "jobs/day",
+      "source": "docs/research/demand.md: 1,269 practising physicians in Basel-Stadt (415 primary-care physicians = 32.7 % of all, Jan 2024, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf, search snippet, accessed 2026-11-21) x 66.71 audio min per physician per month (median, Bax et al. 2011, Health Econ Rev 1:8, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/, abstract, accessed 2026-11-21) x 12/365 months per day / 6.5 audio min per job = 428.2, rounded down (config/job-scenarios/transcription-basel.json)"
+    },
+    "volume_scale": { "value": 1, "unit": "factor", "source": "scenario value: reference volume, no scaling" }
+  },
+  "arrival_shape": {
+    "file": "data/derived/demand/llm-azure2024-hour-of-week.csv",
+    "index_column": "hour_of_week_zurich",
+    "column": "requests_rel",
+    "filter": { "service": "conv" },
+    "source": "Azure LLM inference trace 2024, service conv (data/raw/demand-traces/azure-llm-2024/SOURCE.md, https://github.com/Azure/AzurePublicDataset/blob/master/AzureLLMInferenceDataset2024.md, CC BY 4.0, retrieved 2026-11-21); labelled proxy: the shape of conversational LLM traffic stands in for medical dictation arrivals (data/raw/demand-traces/transcription-proxy/SOURCE.md)"
+  },
+  "origin_mix": {
+    "client_site_share": { "value": 1.0, "unit": "fraction", "source": "scenario value, not sourced: every dictation originates at a client site (a practice); clients at the canton capitals, config/fleet/clients/canton-capitals.csv" },
+    "clients_file": "config/fleet/clients/canton-capitals.csv"
+  },
+  "price": {
+    "kind": "fixed",
+    "chf_per_work_unit": {
+      "value": 0.006,
+      "unit": "CHF/audio minute",
+      "source": "derived: CHF 0.36 per audio hour / 60 min/h; 0.36 = Infomaniak Whisper V3 / kvant whisper-large-v3 (docs/research/compute-demand-traces.md section 3, 'Whisper transcription, per audio hour')"
+    }
+  }
+}
