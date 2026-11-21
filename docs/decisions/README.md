@@ -44,3 +44,7 @@ later.
 
 | [0034](0034-minecraft-measured-workload.md) | Official Vanilla Minecraft and measured-power startup gate | proposed; T-44; review pending |
 | [0035](0035-federated-job-ownership.md) | Federated job ownership and node-local heat control | proposed; reviewed with changes; T-45 |
+| [0036](0036-monitor-ui-neutral-contract.md) | UI-independent monitor contract and read-only admin API | proposed; user approved; reviewed with changes; PR #35 |
+| [0037](0037-minute-live-job-deadlines.md) | Minute-level bounded live-job deadlines | proposed; user approved; reviewed with changes; PR #37 |
+| [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; reviewed with changes; PR #38 depends on #37 |
+| [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation transport | proposed; user approved; reviewed with changes; PR #40 depends on #35 |
