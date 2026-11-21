@@ -12,10 +12,12 @@ public sealed record LiveMove(string TaskId, int Job, int FromNode, int ToNode);
 /// <summary>
 /// Demo calibration of one live node (decision 0042). One node = one site with <c>ServersPerNode</c>
 /// worker slots (each runs one task at a time) and one scheduler step = one hour (<c>HoursPerStep = 1</c>).
-/// No tank (the slider is the heat demand of that hour) and no filler (φ = 0: a node without tasks pauses).
+/// No tank (the slider is the heat demand of that hour). Filler (Type 2 research work) is available for
+/// <c>FillerAvailability</c> (φ) × all servers of a node, as in the year simulation (decision 0025).
 /// </summary>
 public sealed record LiveCalibration(double ServerElectricKw, double HeatRecoveryShare, double ServerHoursPerTask,
-    int ForecastHorizonSteps, double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh, int ServersPerNode = 1)
+    int ForecastHorizonSteps, double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh, int ServersPerNode = 1,
+    double FillerAvailability = 0)
 {
     public double RecoverableKwhPerStep => ServerElectricKw * HeatRecoveryShare;
 }
@@ -74,7 +76,8 @@ public static class LiveNetwork
             states[i] = new SiteHeatState(nodeIds[i], signal,
                 HeatForecast.Build(hours, $"live-{nodeIds[i]}", 0, cal.ForecastHorizonSteps));
         }
-        var work = new WorkView(BuildCohorts(tasks, n, cal.ServerHoursPerTask), new double[n]);
+        var filler = Enumerable.Repeat(cal.FillerAvailability * cal.ServersPerNode, n).ToArray();
+        var work = new WorkView(BuildCohorts(tasks, n, cal.ServerHoursPerTask), filler);
         return new NetworkState(step, Label(0), sites, states, work);
     }
 }

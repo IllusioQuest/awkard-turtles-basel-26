@@ -29,6 +29,8 @@ sealed class LiveCoordinator
     private LiveTaskPlanner planner;
     private int step;
     private int nextJob = 1;
+    private int nextFiller = 1;
+    private int fillerDone;
     private long nextEvent = 1;
     private bool autoSpawn;
     private DateTime lastStepUtc = DateTime.UtcNow;
@@ -48,10 +50,10 @@ sealed class LiveCoordinator
         int running = 0, waiting = 0;
         for (int i = 0; i < ids.Length; i++)
         {
-            running += Directory.GetFiles(Dir("running", i), "j*.json", SearchOption.AllDirectories).Length;
-            waiting += Directory.GetFiles(Dir("queue", i), "j*.json").Length;
+            running += Directory.GetFiles(Dir("running", i), "*.json", SearchOption.AllDirectories).Length;
+            waiting += Directory.GetFiles(Dir("queue", i), "*.json").Length;
         }
-        return (Directory.GetFiles(Path.Combine(work, "done"), "j*.json").Length, running, waiting);
+        return (Directory.GetFiles(Path.Combine(work, "done"), "*.json").Length, running, waiting);
     }
 
     public Func<string, double?>? ActualLoad { get; set; }
@@ -121,7 +123,7 @@ sealed class LiveCoordinator
         lock (gate)
         {
             ResetFiles();
-            jobs.Clear(); seenDone.Clear(); events.Clear();
+            jobs.Clear(); seenDone.Clear(); events.Clear(); fillerDone = 0;
             planner = new LiveTaskPlanner(ids.Length, cal.ServerHoursPerTask);
             Add("info", null, null, null, "Demo reset: all queues empty");
         }
@@ -201,6 +203,7 @@ sealed class LiveCoordinator
             foreach (var m in planner.Plan(tasks, decision.Allocations ?? []))
                 Move(m, state);
             for (int i = 0; i < ids.Length; i++) targetLoad[i] = decision.PerSite[i].TargetLoadPerServer;
+            TopUpFiller(decision.FillerServerHours);
         }
         // Docker CLI calls are slow on Docker Desktop; apply the nodes in parallel so a step stays short.
         Parallel.For(0, ids.Length, i =>
@@ -242,8 +245,40 @@ sealed class LiveCoordinator
         Add("move", m.Job, m.FromNode, m.ToNode, $"Job {m.Job}: task {m.TaskId[^2..]} → {Label(m.ToNode)}, because {why}", m.TaskId);
     }
 
+    /// <summary>
+    /// Type 2 filler (research tasks, decision 0020): a node the scheduler gives filler server-hours keeps
+    /// one waiting filler task per server, so every server it lets run has work; a node without filler
+    /// in the plan has its waiting filler removed. Filler is local and never moves; Type 1 tasks go first
+    /// (the worker claims by deadline, filler has none).
+    /// </summary>
+    private void TopUpFiller(IReadOnlyList<double>? fillerServerHours)
+    {
+        for (int i = 0; i < ids.Length; i++)
+        {
+            var waiting = Directory.GetFiles(Dir("queue", i), "f*.json");
+            int want = (fillerServerHours?[i] ?? 0) > 1e-9 ? cal.ServersPerNode : 0;
+            for (int k = want; k < waiting.Length; k++) TryDelete(waiting[k]);
+            for (int k = waiting.Length; k < want; k++)
+            {
+                string name = $"f{nextFiller++:000000}";
+                var task = new Dictionary<string, object>
+                {
+                    ["id"] = name, ["job"] = 0, ["filler"] = true, ["due_step"] = int.MaxValue,
+                    ["temperature"] = Math.Round(1.5 + 2.0 * rng.NextDouble(), 4), ["seed"] = (int)cfg.Seed.Value + 1_000_000 + nextFiller,
+                    ["lattice_size"] = (int)cfg.TaskLatticeSize.Value, ["sweeps"] = (int)cfg.TaskSweeps.Value,
+                    ["thermalisation_sweeps"] = (int)cfg.TaskSweeps.Value / 10,
+                };
+                string path = Path.Combine(Dir("queue", i), name + ".json");
+                File.WriteAllText(path + ".tmp", JsonSerializer.Serialize(task));
+                File.Move(path + ".tmp", path);
+            }
+        }
+    }
+
     private void CollectResults()
     {
+        foreach (var f in Directory.GetFiles(Path.Combine(work, "done"), "f*.json"))
+            if (TryDelete(f)) fillerDone++;
         foreach (var f in Directory.GetFiles(Path.Combine(work, "done"), "j*.json"))
         {
             string name = Path.GetFileNameWithoutExtension(f);
@@ -351,6 +386,10 @@ sealed class LiveCoordinator
                     running = tasks.Where(t => t.Node == i && t.Running)
                         .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep,
                             progress = Progress(i, t.Id) }).ToArray(),
+                    fillerWaiting = Directory.GetFiles(Dir("queue", i), "f*.json").Length,
+                    fillerRunning = Directory.GetFiles(Dir("running", i), "f*.json", SearchOption.AllDirectories)
+                        .Select(f => Path.GetFileNameWithoutExtension(f))
+                        .Select(id => new { id, progress = Progress(i, id) }).ToArray(),
                 }).ToArray(),
                 jobs = jobs.Values.OrderByDescending(j => j.Id).Take(12).Select(j => new
                 {
@@ -362,6 +401,7 @@ sealed class LiveCoordinator
                     finished = jobs.Values.Count(j => !j.Missed && j.Done >= j.Tasks),
                     missed = jobs.Values.Count(j => j.Missed),
                     moves = events.Count(e => e.Kind == "move"),
+                    fillerDone,
                 },
                 events = events.Where(e => e.Seq > since).ToArray(),
             };

@@ -1,6 +1,7 @@
 {
   "description": "Live demo (decision 0042, ticket T-54): one laptop, four Docker containers, the real network scheduler moves real Ising tasks between nodes. Demo settings are labelled as such; they are not scored figures.",
   "serversPerNode": { "value": 3, "unit": "servers/house", "source": "Demo choice: three worker slots per container, so a house runs up to three tasks at once and can take several moved tasks per step (the year simulation uses 12.5 servers per house, config/reference-house.json)." },
+  "fillerAvailability": { "value": 1, "unit": "fraction of server-hours", "source": "Year-simulation default phi = 1 (decision 0025): Type 2 research filler is always available, so a house that wants heat always has work; Type 1 jobs go first." },
   "minimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "Demo setting: permit pause down to zero for visible control; matches the year explorer comparison scenario in config/reference-house.json." },
   "allowedCpuCoresPerContainer": { "value": 1.5, "unit": "CPU cores/container", "source": "Demo setting: 1.5 Docker CPUs per house = 3 servers x 0.5 core at full load (6 cores for four houses), limited by compose.live-demo.yml; not a 1 kW power measurement." },
   "referenceServerElectricKw": { "value": 1, "unit": "kW/server", "source": "config/reference-house.json:ServerElectricKw, reference case only." },

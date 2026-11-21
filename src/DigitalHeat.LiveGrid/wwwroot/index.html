@@ -29,6 +29,8 @@ main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2
 .tok{--c:#888;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
   font-weight:700;font-size:12px;flex:none;box-shadow:0 1px 2px #0003}
 .tok.big{width:60px;height:60px;font-size:19px;background:conic-gradient(var(--c) calc(var(--p,0)*1turn),color-mix(in srgb,var(--c) 35%,white) 0);transition:--p .4s}
+.tok.filler{width:18px;height:18px;box-shadow:none;opacity:.75}
+.slot .tok.filler.big,.slot .tok.filler.big:not(:only-child){width:30px;height:30px}
 .node.paused .slot .tok{filter:saturate(.25) brightness(1.15)}
 .add{position:absolute;left:18px;bottom:16px;border:1.5px solid #13191c55;border-radius:999px;padding:6px 14px;
   font-weight:600;font-size:14px;opacity:.55;transition:opacity .2s,background .2s}
@@ -84,7 +86,7 @@ footer b{color:var(--paper);font-weight:600}
   (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Whenever something changes (a job arrives, a server becomes free, a slider moves) and at least once per hour (2 s here), the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
   <br><br>Circles in the middle: the tasks running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
-  Small circles: waiting tasks. Number = job, colour = house the job came from.
+  Coloured circles: paid jobs with a deadline (number = job, colour = house it came from); they go first and move between houses. Small grey circles: research filler that heats whenever no paid job needs the server; it stays local.
   1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
   <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
 </div></div>
@@ -137,8 +139,9 @@ function send(id,t,final){
 const spawn=id=>api(`/api/nodes/${id}/spawn`,{}).then(poll).catch(()=>{});
 /* tokens: one element per task file; a change of house is a calm flight */
 function tok(t){let e=st.tokens.get(t.id);
-  if(!e){e=document.createElement("div");e.className="tok";e.textContent=t.job;e.style.setProperty("--c",colorOf(t.origin));
-    e.title=`Job ${t.job} from ${labelOf(t.origin)}`;st.tokens.set(t.id,e);}return e;}
+  if(!e){e=document.createElement("div");e.className="tok"+(t.filler?" filler":"");e.textContent=t.filler?"":t.job;
+    e.style.setProperty("--c",t.filler?"#8a969b":colorOf(t.origin));
+    e.title=t.filler?"Research filler task (Type 2): heats when no paid job needs the server":`Job ${t.job} from ${labelOf(t.origin)}`;st.tokens.set(t.id,e);}return e;}
 const MAXQ=14;   // visible waiting tokens per house; the rest is a "+n" counter
 const centreOf=r=>({x:r.left+r.width/2,y:r.top+r.height/2});
 /* A move between houses: a curved path in the job's colour is drawn from the old house to the new one,
@@ -165,13 +168,16 @@ function place(s){
   const first=!st.lastNode; const lastNode=st.lastNode||new Map(), nowNode=new Map(), want=new Set();
   for(const n of s.nodes){const card=cardOf(n.id);
     for(const [kind,box] of [["running",card.querySelector(".slot")],["waiting",card.querySelector(".queue")]]){
-      n[kind].forEach(t=>nowNode.set(t.id,{node:n.id,t,kind}));
-      const shown=kind==="waiting"?n[kind].slice(0,MAXQ):n[kind];
+      // Type 1 tasks first, then Type 2 filler (grey, local, never moves)
+      const list=kind==="running"?[...n.running,...(n.fillerRunning||[]).map(f=>({id:f.id,job:"R",filler:true,progress:f.progress}))]
+        :[...n.waiting,...Array.from({length:n.fillerWaiting||0},(_,k)=>({id:`${n.id}-fw${k}`,job:"R",filler:true}))];
+      list.forEach(t=>nowNode.set(t.id,{node:n.id,t,kind}));
+      const shown=kind==="waiting"?list.slice(0,MAXQ):list;
       const els=shown.map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");
         if(kind==="running")e.style.setProperty("--p",t.progress??0);return e;});
       els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
       [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
-      if(kind==="waiting"&&n[kind].length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${n[kind].length-MAXQ}`;box.appendChild(m);}}}
+      if(kind==="waiting"&&list.length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${list.length-MAXQ}`;box.appendChild(m);}}}
   const queueCentre=id=>centreOf(cardOf(id).querySelector(".queue").getBoundingClientRect());
   // tasks that left every house: done (or dropped after a missed deadline) - a short fade upwards
   lastNode.forEach((v,id)=>{if(nowNode.has(id))return;const r=before.get(id),e=st.tokens.get(id);st.tokens.delete(id);
@@ -210,7 +216,7 @@ function render(s){
   for(const n of s.nodes){const el=cardOf(n.id),input=el.querySelector("input");
     if(!(st.drag[n.id]||Date.now()-(st.lastLocal[n.id]||0)<1500))input.value=n.targetTemperatureC;
     paint(el,+input.value);
-    const work=n.running.length+n.waiting.length,paused=n.targetLoad===0;
+    const work=n.running.length+n.waiting.length+(n.fillerRunning||[]).length+(n.fillerWaiting||0),paused=n.targetLoad===0;
     el.classList.toggle("paused",paused&&work>0);
     el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-n.targetLoad)).toFixed(1));
     el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`+(n.actualLoad==null?"":` · measured ${Math.round(n.actualLoad*100)} %`);
@@ -219,7 +225,7 @@ function render(s){
   document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));
   $("#auto").textContent="auto-spawn "+(s.autoSpawn?"on":"off");$("#auto").style.color=s.autoSpawn?"var(--paper)":"";
   $("#hour").textContent=`Hour ${s.step}`;
-  $("#totals").textContent=`${s.totals.finished} on time · ${s.totals.moves} moved · ${s.totals.missed} missed`;
+  $("#totals").textContent=`${s.totals.finished} on time · ${s.totals.moves} moved · ${s.totals.missed} missed · ${s.totals.fillerDone} research tasks`;
   if(s.events.length){const fresh=s.events.filter(e=>e.seq>st.since);
     if(st.since>0)fresh.forEach(handle);
     else if(!s.events.some(e=>e.kind!=="info"))ticker(`Press + job (or keys 1–${s.nodes.length}) to send work to a house.`);

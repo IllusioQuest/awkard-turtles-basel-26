@@ -47,7 +47,8 @@ state polling also needed, and polling repainted the panels with stale server va
 8. **Calibration (labelled demo settings, `config/live-demo-four-node.json`):** one node = one site with
    `ServerCount = 3` (three worker slots per container, 0.5 core each at full load) and `HoursPerStep = 1`
    (one step = 2 s); no tank (the slider is this
-   hour's demand); φ = 0, no filler, so a node without tasks pauses; 1 task = 1 server-hour, sized with
+   hour's demand); φ = 1: Type 2 research filler is always available (grey tokens, local, never moves),
+   so a house that wants heat always runs at its heat-led load and paid Type 1 jobs go first; 1 task = 1 server-hour, sized with
    `ising.py calibrate` to take about one step at one full core.
 9. **Ownership after a move:** cohorts are rebuilt every step per (job, node the files are on now), with
    that node as origin. Moved work therefore belongs to its new node, which is the one difference from
