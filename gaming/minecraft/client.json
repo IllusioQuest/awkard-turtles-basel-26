@@ -1,0 +1,12 @@
+{
+  "launcher_url": "https://launcher.mojang.com/download/Minecraft.tar.gz",
+  "launcher_sha256": "695269281547bbbcf47fe74633027a0e4ddc13a61060c686a7217e85d314e45e",
+  "source": "Official Mojang Linux launcher downloaded 2026-11-21 over HTTPS. SHA-256 calculated locally, not a publisher signature. Mutable upstream URL: changed bytes require explicit pin review.",
+  "node_id": "session-a",
+  "server_host": "host.docker.internal",
+  "install_directory": "/home/ubuntu/.local/share/digitalheat",
+  "launcher_relative_path": "minecraft-launcher/minecraft-launcher",
+  "download_timeout_seconds": 120,
+  "tcp_timeout_seconds": 3,
+  "credential_source": "Existing local gaming lab credentials; never put account tokens or passwords in this file."
+}

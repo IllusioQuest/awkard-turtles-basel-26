@@ -1,31 +1,14 @@
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace DigitalHeat.Gaming;
 
 /// <summary>Application lifecycle boundary; separate from shared batch pause/throttle control.</summary>
-public interface IDockerCommandRunner { string Run(IReadOnlyList<string> arguments); }
+public interface IDockerCommandRunner : DigitalHeat.Orchestration.IDockerCommands { }
 
 public sealed class DockerCommandRunner : IDockerCommandRunner
 {
-    private static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(30); // Lab control timeout, not a benchmark.
-    public string Run(IReadOnlyList<string> arguments)
-    {
-        using var process = new Process { StartInfo = new ProcessStartInfo("docker")
-            { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true } };
-        foreach (var argument in arguments) process.StartInfo.ArgumentList.Add(argument);
-        process.Start();
-        var output = process.StandardOutput.ReadToEndAsync();
-        var error = process.StandardError.ReadToEndAsync();
-        if (!process.WaitForExit((int)CommandTimeout.TotalMilliseconds))
-        {
-            process.Kill(entireProcessTree: true); process.WaitForExit();
-            throw new TimeoutException("Docker runtime command exceeded the 30-second lab timeout.");
-        }
-        var result = output.GetAwaiter().GetResult(); var detail = error.GetAwaiter().GetResult();
-        if (process.ExitCode != 0) throw new InvalidOperationException($"Docker command failed: {detail.Trim()}");
-        return result;
-    }
+    private readonly DigitalHeat.Orchestration.DockerCommands commands = new();
+    public string Run(IReadOnlyList<string> arguments) => commands.Run(arguments);
 }
 
 public sealed record DesktopLaunchPlan(string ApplicationId, string NodeId, string ContainerId, string BrowserUrl, string[] DockerArguments);
