@@ -1,4 +1,4 @@
-# Source: Swiss 10 km weather grid 2025 (T-47)
+# Source: Swiss 10 km weather grid 2025 (T-51)
 
 Produced by `scripts/fetch_swiss_grid.py` (steps `grid`, `weather`, `forecast`, `check`). Raw API
 responses are cached in `data/external/swiss-grid-cache/` (not committed); the committed files are

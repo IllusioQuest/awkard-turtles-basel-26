@@ -1,4 +1,4 @@
-# Compute demand traces and time-dependent prices (T-47)
+# Compute demand traces and time-dependent prices (T-51)
 
 First version, 2026-11-21, Claude subagent. Covers the three job types: (1) batch LLM inference
 with an 8B model (Apertus 8B), (2) Whisper large-v3 transcription, (3) research GPU/CPU compute.

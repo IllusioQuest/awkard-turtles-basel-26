@@ -9,6 +9,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
+| Nikita / Codex | feat/T-48-live-job-deadlines | Minute-level live batch deadline contract/enforcement, then T-49 admission and T-50 Docker observation improvements | additive deadline metadata/owner polling; ADRs 0037-0039 proposed | T-48 PR #37 verified; T-49 indexing in progress; T-50 queued; games protected |
+| Nikita / Codex | exp/T-47-scheduler-performance | Scheduler latency/scaling investigation complete | none; diagnostics only | 62 cases + raw evidence/recommendations in docs/performance; scripts in PR #36; no production or game changes |
 | Nikita / Codex | feat/T-46-monitor-value-labels | Transfer monitor data into /admin; keep logic in place; retire terminal UI | snake_case inputs/snapshots + thin read-only API; ADR 0036 | implementation checked; 42 tests + web build/lint + HTTP/browser checks; PR #35 in review |
 | Nikita / Codex | feat/T-44-minecraft-server | Minecraft world server plus browser client on Node A | T-43 / PR #33; existing desktop runtime, no new shared interfaces | code integrated into main by user request; gameplay unverified; rejected battery measurement blocks heat placement |
 | Nikita / Codex | `fix/T-42-monitor-integration` | Review/clarify new gaming console; integrate author monitor under T-42 (T-41 already taken) | Existing Core/placement unchanged; read-only resource probe and console controls | PR #32 ready; 36 gaming/46 Core/20 Network tests and clean build; original author checkout preserved; gaming-monitor-review.md |
@@ -17,7 +19,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 | Jona | `feat/T-18-owner-dashboard` | T-18 offline homeowner result view | none | PR #28 open; overlaps `web/` /household (PR #30) |
 | Jona / Codex | `docs/T-41-free-heat-viability` | T-42 free-heat audit and profitable private-home boundary | none | PR #29 in review; Dell R570 card-count mismatch handed to T-14/T-15 |
 | Jona / Claude | `feat/T-12-network-validation` → `main` | T-12 step 3: LP validation, experiments, paper §5/§8 (decisions 0029, 0030) | `NetworkRun` options; map export format unchanged (0025 §7) | in progress |
-| Ennio / Claude | `data/T-47-swiss-grid-data` | T-47 data for the CH-wide simulation (weather grid, forecasts, buildings, ElCom per municipality, demand traces) | new files only in `data/`, `scripts/`; no code interfaces | in progress |
+| Ennio / Claude | `data/T-51-swiss-grid-data` | T-51 data for the CH-wide simulation (weather grid, forecasts, buildings, ElCom per municipality, demand traces) | new files only in `data/`, `scripts/`; no code interfaces | PR open |
 | Ennio / Claude | `main` (`web/`) | T-17/T-18 web dashboard; next: feed `/admin` from the T-12 dataset (`docs/model/network-map-data.md`) | none | first version merged (PR #30) |
 | team lead / Claude | `docs/T-07-draft-submission` | T-07 draft package, must-have checklist | none | in progress |
 | Nikita / Codex | `featur-gaming` | Gaming lab follow-up: automatic heat-to-launch integration (`docs/gaming.md`) | none | pending |
@@ -25,6 +27,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 ## Open coordination
 
+- **Jona's Codex (T-45 federation) ↔ Claude (T-12):** LaTeX paper ownership to avoid edit conflicts: Claude edits `sections/05-scheduling.tex`, `08-evaluation.tex` and the appendix rows for T-12 experiments; Codex edits `09-federation.tex`. Both may add to `references.bib`. Note: two files start with `09-` (`09-federation.tex`, `09-limits.tex`); whoever touches `main.tex` next should renumber (federation → its own section number) and tell the other. T-12 results live in `data/derived/network/experiments/` and `docs/model/network-scheduler.md`; reuse them, do not recompute.
 - **Hardware cost (T-06, T-14):** one Dell R570 draws ≈ 0.16 kW, so a 1 kW reference server is
   ≈ 6.15 R570s (CHF 50,743); the T-06 depreciation sensitivity (A-017) is ≈ 6× too low. See
   `docs/research/hardware.md`.
@@ -64,3 +67,4 @@ coordination between people, shared interfaces and integration risks. Keep your 
    which one the pitch uses.
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
+

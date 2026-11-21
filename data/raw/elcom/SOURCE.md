@@ -52,7 +52,7 @@ Derived for the reference house:
   the IWB value above.
 - Same caveats as above (H4 profile, VAT treatment to verify).
 
-## All municipalities, categories H1–H8, 2026 (T-47)
+## All municipalities, categories H1–H8, 2026 (T-51)
 
 | Field | Value |
 |---|---|

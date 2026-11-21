@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download public compute-demand traces and reduce them to small demand shapes (T-47).
+"""Download public compute-demand traces and reduce them to small demand shapes (T-51).
 
 Large raw files go to the git-ignored ``data/external/<source>/`` (one directory per
 source); only the small aggregates in ``data/derived/demand/`` are committed.

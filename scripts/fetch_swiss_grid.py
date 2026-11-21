@@ -1,4 +1,4 @@
-"""Swiss 10 km weather grid (T-47): grid definition, hourly weather 2025, archived forecasts (lead 0-3 days).
+"""Swiss 10 km weather grid (T-51): grid definition, hourly weather 2025, archived forecasts (lead 0-3 days).
 
 Steps (each writes into data/raw/swiss-grid/, see its SOURCE.md):
 

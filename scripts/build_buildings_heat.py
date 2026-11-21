@@ -1,4 +1,4 @@
-"""Building sizes and heat demand per municipality and per 10 km grid cell (T-47).
+"""Building sizes and heat demand per municipality and per 10 km grid cell (T-51).
 
     python3 scripts/build_buildings_heat.py --download   # fetch the two sources into data/external/ (~1 GB)
     python3 scripts/build_buildings_heat.py              # build data/derived/buildings/*.csv
@@ -13,7 +13,7 @@ Sources (see data/raw/buildings/SOURCE.md):
 Method:
 1. Existing (GSTAT 1004) residential buildings (GKAT 1020/1030/1040). Floor area per building =
    GEBF if recorded, else GAREA x GASTW (gross floor area as proxy for the energy reference area,
-   assumption A-T47-1 in data/raw/buildings/SOURCE.md).
+   assumption A-T51-1 in data/raw/buildings/SOURCE.md).
 2. Each BFE hectare's residential demand NEEDHOME is split among the residential buildings whose
    coordinates fall in that hectare, proportional to floor area (buildings without area get the
    hectare's mean area). Gives a modelled heat demand per building in kWh/a.

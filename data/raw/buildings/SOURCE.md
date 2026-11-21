@@ -1,4 +1,4 @@
-# Source: building register and heat demand map (T-47)
+# Source: building register and heat demand map (T-51)
 
 Both sources are large (~1 GB) and are **not committed**; `python3 scripts/build_buildings_heat.py
 --download` stores them in `data/external/`, and the script writes the committed aggregates to
@@ -28,7 +28,7 @@ Both sources are large (~1 GB) and are **not committed**; `python3 scripts/build
 
 ## Assumptions and caveats
 
-- **A-T47-1:** floor area of a building = `GEBF` if recorded, else `GAREA × GASTW` (gross floor
+- **A-T51-1:** floor area of a building = `GEBF` if recorded, else `GAREA × GASTW` (gross floor
   area as a proxy for the energy reference area; our assumption, not from a source).
 - **Heat per building is modelled, not measured:** each hectare's `NEEDHOME` is split among its
   residential buildings in proportion to floor area. No public source gives measured heat demand per

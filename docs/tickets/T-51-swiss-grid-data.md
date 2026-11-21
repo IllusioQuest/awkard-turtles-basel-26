@@ -1,6 +1,6 @@
-# T-47: Data for the Swiss-wide simulation
+# T-51: Data for the Swiss-wide simulation
 
-Owner: Ennio / Claude. Status: in progress. Branch: `data/T-47-swiss-grid-data`.
+Owner: Ennio / Claude. Status: in review. Branch: `data/T-51-swiss-grid-data`.
 
 ## Goal
 

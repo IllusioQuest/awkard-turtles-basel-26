@@ -1,4 +1,4 @@
-"""ElCom 2026 electricity price per municipality and household category H1-H8 (T-47).
+"""ElCom 2026 electricity price per municipality and household category H1-H8 (T-51).
 
     python3 scripts/fetch_elcom_municipalities.py          # fetch raw JSON + write the flat CSV
     python3 scripts/fetch_elcom_municipalities.py --csv    # only rebuild the CSV from the raw JSON
