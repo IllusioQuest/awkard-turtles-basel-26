@@ -85,4 +85,22 @@ public class IndexedAdmissionTests
         Assert.Equal("game", owned.Request.RequiredCapabilities[0]); Assert.Equal("player", owned.Request.LatencyLimits[0].PeerId);
         Assert.Equal("gpu0", reservation.GpuDeviceId); Assert.True(placement.CanStartHeld(owned.Request.Id, PlacementTests.Now));
     }
+    [Fact] public void AdjacentHeatBoundariesPreserveOriginalAccumulationAndResume()
+    {
+        foreach (double capacity in new[] { Math.BitDecrement(.6), .6, Math.BitIncrement(.6) })
+        {
+            var source = PlacementTests.Inventory();
+            var inventory = source with { Sites = source.Sites.Select(s => s with { Heat = s.Heat with { DemandKwh = capacity, TankCapacityKwh = 0 } }).ToArray(),
+                Nodes = source.Nodes.Select(n => n with { Capacity = new(8, 1024, 8) }).ToArray(),
+                Domains = [source.Domains[0] with { Capacity = new(8, 1024, 8) }] };
+            var old = new BaselineWorkloadPlacement(); var indexed = new WorkloadPlacement(); old.Update(inventory, PlacementTests.Now); indexed.Update(inventory, PlacementTests.Now);
+            foreach (var (heat, id) in new[] { (.1, "one"), (.2, "two"), (.3, "three") })
+            {
+                var request = PlacementTests.Request(id, "batch", .1) with { RecoverableHeatKwhPerHour = heat, PinnedNodeId = "a" };
+                Assert.Equal(old.TryReserve(request, PlacementTests.Now), indexed.TryReserve(request, PlacementTests.Now));
+            }
+            old.ObservePaused("one"); indexed.ObservePaused("one");
+            Assert.Equal(old.TryClaimResume("one", PlacementTests.Now), indexed.TryClaimResume("one", PlacementTests.Now));
+        }
+    }
 }
