@@ -34,3 +34,7 @@ data/derived/network/*/mock-export/
 
 # Per-run cache of scripts/network_experiments.py (aggregated CSV/JSONL are committed)
 data/derived/network/experiments/runs/
+
+# Fleet simulation runs (T-52); small reference runs are force-added
+data/derived/fleet/*
+!data/derived/fleet/README.md

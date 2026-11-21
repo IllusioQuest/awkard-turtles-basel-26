@@ -1,6 +1,6 @@
 # T-52: Fleet simulation (event-driven, many houses)
 
-Owner: Ennio / Claude. Status: spec agreed, not built. Branch: `feat/T-52-fleet-simulation`.
+Owner: Ennio / Claude. Status: in progress. Branch: `feat/T-52-fleet-simulation`.
 
 ## Goal
 
