@@ -1,99 +1,78 @@
-\section{Economics}
+\section{Economics: who receives the heat value?}
 \label{sec:economics}
 
-\textit{Draft paragraphs; numbers from \texttt{docs/business-model.md},
-\texttt{docs/model/routing-optimisation.md}~\S5 and \texttt{docs/research/profitability-inputs.md}.}
+The case break-even is an accounting measure for the combined operator and host. For one
+full-load-equivalent hour, the case server consumes \qty{1}{kWh} of electricity at
+CHF~0.3325/kWh and delivers \qty{0.8}{kWh} of useful heat worth
+CHF~$0.3325/2.5=0.133$ per kWh. If all that heat displaces heat-pump operation, the combined
+electricity cost net of heat value is $0.3325-0.8(0.133)=\text{CHF}~0.2261$ per hour.
+For the four-server reference run, the same calculation is
+$(\text{CHF}~7{,}534.79-\text{CHF}~2{,}411.13)/22{,}661.03
+=\text{CHF}~0.2261$ per sold server-hour
+(\texttt{docs/results/reference-house.md}). This number excludes equipment and operation.
 
-\paragraph{Marginal value of a server-hour.} With the case values ($P = \qty{1}{kW}$,
-$a = \qty{0.8}{kWh}$, $e = \text{CHF}~0.3325$ per kWh, $v = \text{CHF}~0.133$ per kWh of heat), one
-more server-hour sold at price $p$ is worth
+\paragraph{Operator and host.} In the provisional operator model (decision 0020), DigitalHeat
+owns the hardware, sells the computing and pays or reimburses its electricity. The homeowner
+receives the useful heat and retains a backup heat source. With free heat, the host's potential
+avoided heat-pump expense is $Q_{\mathrm{use}}v$, while DigitalHeat's cash balance is computing
+receipts minus electricity, depreciation, operations, wear and installation. The CHF~2,411 heat
+value in the four-server run belongs to the host; it is not also operator income. If the host pays
+a fee $h$ per useful kWh, $Q_{\mathrm{use}}h$ transfers from host to operator without changing
+combined surplus. A positive combined surplus alone does not establish a viable offer for both.
+
+\paragraph{Four-server cost boundary.} The proposed L4 profile in T-14 uses a normalised
+\qty{1}{kW} server, not a quoted installable chassis. The later card-price sensitivity implies
+CHF~44,179 per such server; with six-year depreciation and CHF~708 yearly operations per server,
+the four-server, all-sold, free-heat operator needs an average realised compute price of
+approximately
 \begin{equation}
-  p - eP + va = p - 0.3325 + 0.1064 = p - 0.2261
+  p_{\mathrm{op}}^{*}
+  =0.3325+\frac{4(44{,}179/6+708)}{22{,}661}
+  \simeq \text{CHF}~1.76\text{/server-hour}.
+  \label{eq:operator-break-even}
 \end{equation}
-if its heat is used, now or later through the tank, and $p - 0.3325 - 0.8\,\pi^{\mathrm{dump}}$ if
-its heat is dumped. CHF~0.2261 per server-hour is the case break-even: (electricity cost $-$ value
-of heat actually used) $\div$ server-hours sold. For 4 servers on the reference house this is
-$(\text{CHF}~7{,}534.79 - \text{CHF}~2{,}411.13) \div 22{,}661.03 = \text{CHF}~0.2261$
-(\texttt{docs/results/reference-house.md}).
+The calculation still excludes installation, cooling, financing, platform fees, idle power and
+wear. The earlier CHF~0.956 consumer-GPU threshold was a lower-cost sensitivity, not an operator
+threshold for a deployable L4 system. Consumer-card deployment is excluded from the proposed
+architecture pending licence clarification (\texttt{docs/research/free-heat-viability.md}).
 
-\paragraph{Heat-led operation has a price.} At the adopted filler price of CHF~0.66 per server-hour,
-a dumped filler server-hour still earns $0.66 - 0.3325 = 0.3275$~CHF. A pure surplus maximiser
-therefore runs all servers all the time (B0) and dumps heat. Heat-led behaviour needs a dump
-penalty above $(0.66 - 0.3325) \div 0.8 = 0.409$ CHF per kWh, or a hard no-dump rule as in our
-lexicographic LP. Below CHF~0.2261 filler does not pay even when all its heat is used.
+T-14's hypothetical L4 throughput yields CHF~1.81 per server-hour at an 8B competitor's list
+token price, but only about CHF~0.90 at its batch price. Neither is a DigitalHeat sale: the
+throughput transfers a benchmark for a different model and GPU, and no recurring Type~1 order is
+documented. At the later L4 purchase price, T-14's four-server, all-Type~1 list-price row leaves
+about CHF~1,172 per year before wear and installation. T-35's central wear sensitivity of
+CHF~0.473 per sold hour would subtract roughly CHF~10,719, changing that row to about
+$-\text{CHF}~9{,}547$ (\texttt{docs/research/free-heat-viability.md}). The wear allowance is an
+extrapolation, not an observed L4 replacement bill. The CPU-only measured research kernel is
+also not evidence of a full-power, billable GPU filler workload. Hence the favourable mixed
+Type~1/Type~2 rows remain technical price scenarios.
 
-\paragraph{Full cost.} The case break-even omits hardware, installation and operations. Adding
-depreciation and operations per sold hour gives full-cost break-evens of CHF~1.428 (CPU-dense),
-CHF~1.651 (L4) and CHF~0.956 (RTX~4090) per server-hour
-(\texttt{docs/research/profitability-inputs.md}~\S3). On the RTX~4090 profile the four servers cost
-$4 \times (16{,}300 \div 6 + 1{,}416) = \text{CHF}~16{,}532$ a year. If every heat-led hour is sold at
-one price $p$, the system surplus per house and year is
-$22{,}661 \times (p - 0.2261) - 16{,}532$ (Table~\ref{tab:surplus}).
+\paragraph{Market comparison.} The earlier T-16 comparison
+(\texttt{docs/research/price-comparison.md};
+\texttt{python3 scripts/price\_comparison.py}) provides a dated screening test, not a sales
+forecast. At the older L4 hardware cost, full heat credit and \qty{64.7}{\percent} assumed
+sold hours, it estimates CHF~0.054 per million 8B-class tokens; at \qty{35}{\percent} sold
+hours, CHF~0.093. A listed Swiss 8B offer was CHF~0.034 per million tokens on the same
+date. The estimates use benchmark throughput for a different GPU workload, compare models
+with unequal quality and omit the operator/host split. Under free heat and the later L4
+purchase sensitivity above, they cannot establish a profitable or price-leading offer.
 
-\begin{table}[ht]
-  \centering
-  \caption{System surplus per reference house (4 servers, RTX~4090 profile) if every heat-led hour
-    is sold at price $p$. Values copied from \texttt{docs/business-model.md}; inputs from
-    \texttt{python3 scripts/profitability\_inputs.py} and the year run. Prices are market
-    observations or list prices, not contracted prices.}
-  \label{tab:surplus}
-  \begin{tabular}{rlr}
-    \toprule
-    $p$ [CHF/server-h] & What it stands for & Surplus [CHF/yr] \\
-    \midrule
-    0.57 & RTX 4090 market, RunPod community & \num{-8738} \\
-    0.66 & pinned Type 2 price & \num{-6698} \\
-    0.84 & RTX 4090 market, vast.ai median & \num{-2619} \\
-    1.72 & Type 1 LLM, batch 1, list price & \num{17359} \\
-    1.95 & Type 1 LLM, batched (conservative), list price & \num{22504} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+\paragraph{A smaller residential candidate.} A separate exploratory variant sizes a physical
+node below the home's year-round hot-water demand. Four L4 cards on an R570-class host respect
+Dell's documented four-card limit; the existing host estimate plus card TDP gives about
+\qty{0.4505}{kW} electrical power and, at the case's 80\% recovery assumption,
+\qty{0.3604}{kW} recoverable heat. This is below the case's constant
+$12/24=\qty{0.5}{kW}$ hot-water demand. At continuous operation the variant could deliver at
+most \qty{3157}{kWh} useful heat, worth about CHF~420/year to the host at the case's heat-pump
+comparison. These are estimated physical quantities, not measured wall power or installed heat
+recovery (\texttt{docs/research/profitable-home-path.md}). The fixed scored reference house and
+its abstract \qty{1}{kW} server remain unchanged.
 
-\paragraph{Operator model.} DigitalHeat owns the servers, pays their electricity and sells
-computing; the host (homeowner) provides space and gets the heat, keeping the backup heater. An
-optional heat fee $h$ per kWh of used heat, between 0 and CHF~0.133, moves money between host and
-operator without changing the system surplus; it moves the operator's electricity break-even
-between CHF~0.3325 (free heat) and CHF~0.2261 (full heat value) per server-hour. We maximise the
-system surplus first and split it second. \todo{heat fee and win-win zone (T-14, figure F8)}
-
-\paragraph{Price trends.} \todo{price trends to 2030 and lifetime averages
-(\texttt{profitability-inputs.md}~\S5): token and compute prices fall about 25--29\,\% a year}
-
-\paragraph{Price comparison with known providers.} Table~\ref{tab:price-comparison} sets our cost per
-unit against list prices of known providers (\texttt{docs/research/price-comparison.md}). Running
-costs (electricity minus the value of the heat used) are negligible per unit; hardware and the share
-of hours actually sold decide the price. On an L4 server, transcription costs a small fraction of
-market prices and LLM batch work is in the range of Swiss and global batch offers; a CPU server is
-competitive for neither LLM work nor research computing. Quality, latency guarantees and data location
-are not priced in: our offer is interruptible batch work that stays in Switzerland.
-
-\begin{table}[ht]
-  \centering
-  \caption{Our cost per unit versus market list prices (CHF, 2026-11-21). Full cost includes
-    depreciation and operations at \qty{64.7}{\percent} (\qty{35}{\percent}) sold hours. L4 throughput
-    from third-party benchmarks with assumed card power; CPU values measured on a laptop and scaled
-    to \qty{1}{kW}. Reproduce with \texttt{python3 scripts/price\_comparison.py}
-    (\texttt{data/derived/price\_comparison.csv}).}
-  \label{tab:price-comparison}
-  \small
-  \begin{tabular}{llrl}
-    \toprule
-    Product & Offer & Cost / price & Region \\
-    \midrule
-    LLM 8B, per \num{1e6} tokens & ours, L4, full cost & 0.054 (0.093) & CH \\
-     & ours, CPU, full cost & 0.63 (1.12) & CH \\
-     & kvant Qwen3 8B & 0.034 & CH \\
-     & Mistral Ministral 3 8B & 0.126 & EU \\
-     & Infomaniak Ministral 14B & 0.309 & CH \\
-    \midrule
-    Transcription, per audio hour & ours, L4 (large-v3-turbo), full cost & 0.003 (0.005) & CH \\
-     & Azure batch / Google / OpenAI & 0.151 & Azure: CH \\
-     & AWS Transcribe batch & 0.303 & CH \\
-    \midrule
-    Monte Carlo, per \qty{1}{kW} server-hour & ours, CPU, full cost & 2.49 (4.41) & CH \\
-     & Hetzner dedicated & 0.66 & EU \\
-     & Azure Switzerland North spot & 1.80 & CH \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+At a retail comparison price of CHF~0.2924 per GPU-hour, four billable GPUs, the estimated
+power and a six-year accounting life, that exploratory node needs approximately 5,376 paid
+full-node hours per year under the 9\% repair stress scenario, before missing integration and
+service costs. This is about 61\% of the year. The retail price is not an achievable DigitalHeat
+net contract price; paid reservations can exist without active heat production. The proposed
+experiment is therefore a measured, thermally integrated small node coupled to a minimum-volume
+customer offer, not a demonstrated profitable installation. Its operator and host cash flows must
+be recalculated from measured whole-node power, useful heat and net contracted receipts.

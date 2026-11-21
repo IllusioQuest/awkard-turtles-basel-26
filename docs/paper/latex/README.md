@@ -1,62 +1,22 @@
-# Paper draft in LaTeX (T-22)
+# Paper: heat-led computing in homes
 
-LaTeX version of the skeleton in [`../outline.md`](../outline.md). Draft, not reviewed by the team.
+`main.tex` is the source; `main.pdf` is the reading copy. Rebuild the PDF after every source change and commit the PDF together with the TeX files.
 
-## Build
+## Build and checks
 
-```sh
-cd docs/paper/latex
-latexmk -pdf main.tex      # pdflatex + bibtex, about 14 pages
-latexmk -c                 # remove auxiliary files
-```
+From this directory, run `tectonic main.tex` (or `latexmk -pdf main.tex` with a full TeX Live installation). Tectonic resolves the bibliography and produces `main.pdf`. The Codex LaTeX editor can also compile the project for diagnostics and preview, but its preview alone does not update the versioned PDF. Inspect the title, tables, page breaks and references in the generated PDF. Run `git diff --check` and `dotnet test src/DigitalHeat.sln` from the repo root.
 
-Needs a TeX Live with `amsmath`, `booktabs`, `siunitx`, `hyperref`, `graphicx`, `xcolor` (Debian/Ubuntu:
-`texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science latexmk`).
-`lmodern` and `xurl` are used if installed. The PDF and auxiliary files are not committed
-(`.gitignore`).
+The paper combines three evidence levels: case-defined reference-house parameters, measured software executions, and explicitly synthetic network and market scenarios. The small four-L4 node is a physical and commercial hypothesis, not a measured deployment. The paper does not claim observed profitability. Before external publication, the team should confirm author approval, venue format and the final revision of the underlying results.
 
-## Markers
+## Reproducibility map
 
-- `\todo{...}` (red): text still to be written, or a missing source.
-- `\pending{}` (orange): a result that is being computed (full-year LP runs).
-
-## Status per section
-
-| File | Status |
+| Result | Command or source |
 |---|---|
-| `sections/01-introduction.tex` | short draft; contributions still to be chosen by the team |
-| `sections/02-related-work.tex` | short draft (companies, Swiss projects); academic references `\todo` |
-| `sections/03-case.tex` | drafted |
-| `sections/04-system-model.tex` | drafted: sets, variables, constraints of the LP, forecast error, transfer delay |
-| `sections/05-scheduling.tex` | **drafted** (prose from outline §5, strategies, lexicographic stages, greedy special case, reserves) |
-| `sections/06-economics.tex` | short draft with surplus table; heat fee and price trends `\todo` |
-| `sections/07-demonstrator.tex` | skeleton (architecture paragraph only) |
-| `sections/08-evaluation.tex` | **drafted** (8.1, 8.3–8.5 with tables A, B, C, D, E, decision 0029); 8.2 sizing and 8.6 capacity `\todo` |
-| `sections/09-limits.tex` | short draft |
-| `sections/10-conclusion.tex` | short draft; outlook `\todo` |
-| `sections/appendix-reproducibility.tex` | table of commands |
+| Reference-house year and sizing | `python scripts/export_reference_house.py`; `dotnet run --project src/DigitalHeat.YearRun -- . --sizing data/derived/server-sizing/reference-house.json` |
+| Network experiments A--E | `python3 scripts/network_experiments.py`; LP: add `--lp --jobs 4` |
+| Mixed queue | The two `DigitalHeat.YearRun` commands in `docs/model/mixed-job-queue.md` |
+| Operator and small-node sensitivities | Worked arithmetic and source ledger in `docs/research/free-heat-viability.md` and `docs/research/profitable-home-path.md` |
+| Measured demo jobs | Commands and traces in `docs/jobs/` and `sections/appendix-reproducibility.tex` |
+| Federated admission model | `dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj`; scope and assumptions in `sections/09-federation.tex` |
 
-`\pending{}` cells: LP missed/moved in tables A (4 shares) and D (2 networks), all of table C
-(forecast error), LP at d = 4 and 12 h in table E, and finding (iii) for the network.
-
-## Where the numbers come from
-
-Every number is copied from a repository file; each table caption names the command.
-
-| Table | Command | Values copied from |
-|---|---|---|
-| Reference house, 3/4/5 servers | `python scripts/export_reference_house.py` | `docs/results/reference-house.md` |
-| Strategies on the reference house | `dotnet run --project src/DigitalHeat.NetworkRun -- .` | `docs/model/network-scheduler.md` |
-| A, B, D, E (greedy), decision 0029 | `python3 scripts/network_experiments.py` | `data/derived/network/experiments/*.csv`, `docs/model/network-scheduler.md`, `docs/decisions/0029-*.md` |
-| LP columns, C | `python3 scripts/network_experiments.py --lp --jobs 4` | pending |
-| Surplus per house | `python3 scripts/profitability_inputs.py` | `docs/business-model.md` |
-
-When the LP runs finish, replace the `\pending{}` cells from the new CSV files and update
-`docs/model/network-scheduler.md` at the same time (same numbers everywhere, AGENTS.md §9a).
-
-## References
-
-`references.bib` contains only sources already cited with a URL in the repository
-(`docs/research/*.md`; for the datasets `docs/case/challenge.md` and `data/raw/*/SOURCE.md`), with
-access dates as recorded there. Titles come from the repository notes or URL slugs and must be
-checked against the pages before submission. Academic references are still missing (`\todo` in §2).
+All monetary scenarios are conditional on the documented input prices. The case's abstract 1 kW server and the proposed physical four-L4 node are different systems.

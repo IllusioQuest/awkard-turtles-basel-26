@@ -1,30 +1,27 @@
 \section{Related work}
 \label{sec:related}
 
-\paragraph{Heat-reusing compute companies.} Several companies have sold computing whose heat warms
-buildings. Qarnot started with room radiators and moved to ``digital boilers'' that feed hot water
-and heating networks; its radiators were discontinued because of seasonality
-\cite{qarnot_techcrunch2023}, and its HPC activities were acquired by Scaleway in 2026
-\cite{qarnot_scaleway2026}. Heata places a server at a domestic hot-water cylinder and has run a
-trial with British Gas \cite{heata_centrica2025}. Deep Green heats public swimming pools with
-data-centre heat \cite{deepgreen_exmouth2023,deepgreen_register2024}. Leafcloud places servers in
-buildings with a year-round hot-water demand \cite{leafcloud_heatreuse}. Cloud\&Heat began with
-servers in homes and moved to data centres \cite{cloudandheat_history}; Nerdalize, which heated
-Dutch homes with servers, went bankrupt \cite{nerdalize_bankruptcy}. Our reading of these cases
-(\texttt{docs/research/competitors.md}, from press snippets, confidence per row noted there): the
-residential failures sized for the winter peak, ran always on and lacked demand.
+\paragraph{Existing installations.} Heat reuse from computing is already demonstrated at several
+scales. Centrica describes a trial in which Heata attaches domestic servers to hot-water cylinders,
+pays their electricity and processes the partner's workloads \cite{heata_centrica2025}. In Basel,
+IWB reported a Neutral-IT server-heating pilot in a residential building with conventional
+heating retained as backup \cite{iwb_neutralit}. Infomaniak reports a Geneva data centre feeding
+district heating \cite{infomaniak_d4}. These primary accounts establish examples of integration,
+but do not provide a comparable public dataset of utilisation, operator receipts, capital cost or
+failure rates. We therefore use them as context, not evidence of profitability for our proposed
+home node.
 
-\paragraph{Swiss projects.} In Basel, IWB ran a pilot with Neutral-IT in which a mini data centre
-in an oil bath heats a rental building with six flats, with gas kept as backup
-\cite{iwb_neutralit}. IWB and DeepSquare reported a decentralised-cloud proof of concept with
-immersion cooling \cite{deepsquare_epfl}. Infomaniak's D4 data centre in Geneva feeds district
-heating via heat pumps \cite{infomaniak_d4}, and EPFL's Heating Bits project studies data-centre
-heat for campus district heating with second-life servers \cite{epfl_heatingbits}
-(\texttt{docs/research/digitalheat-company.md}~\S4).
-
-\paragraph{Scheduling.} \todo{academic references: data-centre heat reuse into district heating;
-demand response and carbon-aware scheduling of data centres; spot and preemptible capacity markets;
-scheduling on parallel machines with inventory and deadlines. TODO(source): none collected yet.}
+\paragraph{Academic context.} Antal and colleagues already studied workload scheduling for
+servers placed in homes as a primary heat source. Their constraint-satisfaction approach
+targets room-temperature set points and workload deadlines, using a thermodynamic and learned
+heat model validated against monitored distributed equipment \cite{antal2021}. Thus neither
+residential placement nor thermal-aware scheduling alone is novel here. Our narrower question
+uses the case's water-based heat balance and annual hourly demand, compares a greedy rule with
+a rolling-horizon divisible-work LP, and separates operator cash flow from the host's displaced
+heating expense. District-heating studies such as Wahlroos and colleagues' two-actor analysis
+address a larger, more stable heat sink \cite{wahlroos2017}; our house-scale seasonality and
+customer-fill constraints are different. We do not infer that either earlier result validates
+our unmeasured hardware or commercial assumptions.
 
 \paragraph{Data used.} Hourly weather comes from Open-Meteo \cite{openmeteo}, the electricity price
 from ElCom \cite{elcom}. The case points to MLPerf Inference for energy per job \cite{mlperf} and to

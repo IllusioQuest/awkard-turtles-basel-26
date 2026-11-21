@@ -1,41 +1,54 @@
 \section{Introduction}
 \label{sec:intro}
 
-A server is an electric heater that also computes: almost all of the electricity it draws ends up
-as heat. Homes, on the other hand, pay for heat for most of the year. Placing servers in homes and
-using their heat for space heating and hot water is therefore an old and attractive idea. It is
-also an idea that has repeatedly failed in the residential setting: Nerdalize went bankrupt
-\cite{nerdalize_bankruptcy}, Cloud\&Heat moved away from residential sites \cite{cloudandheat_history},
-and Qarnot discontinued its room radiators because of seasonality \cite{qarnot_techcrunch2023}.
+A server converts most of its electrical input into heat. In a home, that heat can displace
+heat-pump or backup-heater operation, while the server sells computing work. The appeal is simple:
+one electricity bill may provide both a computing service and useful heat. The hard question is
+whether the two uses coincide often enough, and whether the value created covers the equipment and
+operation costs for both the operator and the host.
 
-The core difficulty is a mismatch in time. For the reference house of the case (Basel, 2025
-weather; Section~\ref{sec:case}), the heat demand in the coldest hour would need 12.5 servers of
-\qty{1}{kW}, while hot water alone in summer needs about 0.6 servers
-(\texttt{docs/case/key-figures.md}). Computing demand does not follow this pattern. A design that
-is sized for the winter peak runs mostly idle or dumps heat in summer; a design sized for summer
-covers little of the winter demand.
+This question is especially sharp for a single-family house. In the Basel reference case, hourly
+weather in 2025 implies a peak demand equivalent to 12.5 servers of 1~kW, while summer hot water
+uses only about 0.6 servers. A system sized for the winter peak is therefore poorly utilised in
+summer; a small system leaves much of the winter demand to backup heat. Scheduling can shift work
+within those physical limits, but cannot create compute customers or heat demand. The business
+case must consequently be tested against both the heat balance and the price of sellable work.
 
-We ask three research questions:
+We study the following questions:
 \begin{description}
-  \item[RQ1] How many servers per house, and with which scheduling strategy?
-  \item[RQ2] Which work fits which season, and where should it run?
-  \item[RQ3] Under which electricity, compute and hardware prices does it pay off, and for whom?
+  \item[Q1] What heat coverage and server utilisation can a case-compliant single house achieve,
+    and does planning improve on a local heat-following rule?
+  \item[Q2] Which additional conditions could make the single-house system viable after hardware
+    and operating costs, and how do those conditions compare with observed compute prices?
+  \item[Q3] In a multi-site scenario, can routing deadline-bound work to sites with year-round heat
+    demand reduce missed deadlines?
 \end{description}
 
-\paragraph{Contributions.} \todo{team to choose 3--4 of the candidates below (outline.md)}
+\paragraph{Approach.} We use the case's fixed Basel reference house and hourly weather, then extend
+the same heat balance to a labelled synthetic network. A transparent greedy baseline is compared
+with rolling-horizon planning and a full-year upper bound. For economics, we separate the case
+break-even (electricity net of heat value) from full-cost break-even, and expose the required
+compute price rather than treating heat reuse as automatic profitability. The network experiments
+are scenario analyses: their sites and workload shares are not forecasts of a deployed market.
+
+\paragraph{Contributions.} This paper makes three claims, each limited to the evidence available.
 \begin{enumerate}
-  \item A formal model of heat-led job routing across sites as a linear programme with a rolling
-    horizon, which contains the greedy heat-following scheduler as its one-site, one-hour special
-    case (Sections~\ref{sec:model} and~\ref{sec:scheduling}).
-  \item An economic decomposition per server-hour: the case break-even (electricity minus used heat)
-    versus the full-cost break-even, and the split of the system surplus between host and operator
-    (Section~\ref{sec:economics}).
-  \item The tension between the case's ranking and the operator's money: at a filler price above the
-    electricity price, running all servers and dumping heat maximises the surplus, so heat-led
-    operation is a choice with a price (Section~\ref{sec:economics}).
-  \item Evidence that on a single house the greedy rule is optimal, while the value of planning and
-    routing arises in a network with deadlines and year-round heat sinks (Section~\ref{sec:evaluation}).
-  \item A demonstrator in which one scheduler drives both the year simulation and real containers
-    (Section~\ref{sec:demonstrator}).
-  \item \todo{sizing by load duration (not computed yet)}; \todo{capacity versus demand at city scale}.
+  \item A reproducible reference-house analysis that separates physical heat utilisation from
+    economic viability and shows the boundary at which a single-house system can cover full cost
+    (Sections~\ref{sec:case}, \ref{sec:economics} and~\ref{sec:evaluation}).
+  \item A shared heat-led scheduling model, with the greedy rule as a baseline and a rolling-horizon
+    linear programme for multi-site work allocation (Sections~\ref{sec:model} and~\ref{sec:scheduling}).
+  \item A controlled network scenario showing when routing changes deadline outcomes, alongside a
+    demonstrator that applies scheduler decisions to real containerised work
+    (Sections~\ref{sec:evaluation} and~\ref{sec:demonstrator}).
 \end{enumerate}
+
+For sites that may disconnect, Section~\ref{sec:federation} specifies a deterministic offer
+selector and conditional admission gate. It is an engineering boundary, not a deployed
+federated service or an additional profitability result.
+
+The paper's practical target is not to claim that any server makes a house cheaper to heat. It is
+to identify a credible single-house path: enough paid work at a sufficient realised price, a
+hardware and installation cost compatible with that revenue, and heat that displaces an actual
+alternative. If those conditions cannot be met, the result should make that failure boundary
+legible to a homeowner and to DigitalHeat.

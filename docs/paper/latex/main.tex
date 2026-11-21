@@ -10,6 +10,7 @@
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{siunitx}
 \usepackage{graphicx}
 \usepackage{pgfplots}
@@ -28,6 +29,13 @@
 \sloppy
 \setlength{\emergencystretch}{3em}
 
+% Keep tables visually separated from surrounding prose and from their captions.
+% The slightly larger values are intentional: the paper contains long captions and dense tables.
+\setlength{\textfloatsep}{24pt plus 4pt minus 2pt}
+\setlength{\intextsep}{20pt plus 4pt minus 2pt}
+\setlength{\floatsep}{16pt plus 3pt minus 2pt}
+\setlength{\belowcaptionskip}{8pt}
+
 % Visible markers for unfinished content.
 % \todo{...}    : text that still has to be written (skeleton section, missing source).
 % \pending{...} : a result that is being computed right now (LP experiment runs).
@@ -40,28 +48,30 @@
 \newcommand{\Coh}{\mathcal{C}}
 
 \title{Heat-led computing in homes:\\
-  scheduling, sizing and economics of servers that heat a house\\[0.5ex]
-  \large Draft \textemdash{} not reviewed by the team}
-\author{Team Awkward Turtles \todo{authors and order}}
-\date{Draft of 21 November 2026}
+  scheduling, sizing and economics of servers that heat a house}
+% Author order rotates among the team; this paper starts with Ennio.
+\author{Ennio Binder \and Jona Richartz \and Nikita Sosnovski}
+\date{21 November 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Servers turn almost all of their electricity into heat, while homes pay for heat. We study when
-distributed servers in residential buildings can deliver useful heat \emph{and} useful computing.
-For a reference house in Basel (2025 hourly weather, \qty{31231}{kWh} heat demand a year), heat
-demand needs 12.5 servers in the coldest hour but 0.6 in summer. We formulate heat-led job routing
-as a rolling-horizon linear programme that contains the greedy heat-following scheduler as a special
-case. A demonstrator shows that the same scheduler code pauses and resumes real containerised
-workloads (LLM batch inference, research simulation) on a laptop. With 4 servers the house covers
-\qty{58.0}{\percent} of its heat demand with no heat dumped at \qty{64.7}{\percent} utilisation.
-Electricity net of the used heat costs CHF~0.226 per server-hour, but full cost on consumer GPUs is
-CHF~0.956. On a single house the greedy rule is already optimal; the value of planning and routing
-arises in a network, where paid work with deadlines can move to year-round heat sinks. We show that
-\todo{hardware staging by load duration} and \todo{routing results of the LP} change this, and state
-the prices below which the model does not pay off.
+Heat-led computing promises two services from one electrical input, but heat demand and paid
+computing demand need not coincide. We combine an hourly Basel reference-house simulation with
+measured laptop jobs, an actor-specific economic audit and synthetic network experiments. Four
+abstract \qty{1}{kW} servers cover 58.0\% of annual house heat demand with no dumping and 64.7\%
+utilisation under the case's unlimited-work assumption; a local greedy rule matches the full-year
+heat upper bound. The case break-even of CHF~0.226 per sold server-hour credits heat value to the
+combined system. With free heat, that value accrues to the homeowner, while the operator pays
+electricity and equipment costs. A later-price L4 sensitivity requires about CHF~1.76 per sold
+hour for the four-server operator even if every heat-led hour is sold, before wear and installation.
+No contracted sales or target-hardware throughput establish this price. A separate, smaller
+four-L4 residential variant could fit under the constant hot-water base load, but remains an
+unmeasured hardware and sales hypothesis. On a synthetic 33-site network, routing deadline-bound
+work to year-round heat sinks reduces missed jobs in scenarios where residential sites alone
+cannot. These findings identify measurable conditions for a viable home installation; they do not
+claim realised profitability.
 \end{abstract}
 
 \input{sections/01-introduction}
@@ -72,6 +82,7 @@ the prices below which the model does not pay off.
 \input{sections/06-economics}
 \input{sections/07-demonstrator}
 \input{sections/08-evaluation}
+\clearpage % Keep evaluation tables before the next section.
 \input{sections/09-federation}
 \input{sections/09-limits}
 \input{sections/10-conclusion}

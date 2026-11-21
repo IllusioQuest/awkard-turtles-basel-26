@@ -7,9 +7,10 @@ This section states the model compactly; the full parameter tables with units an
 
 \paragraph{Sites and hours.} A network consists of sites $s \in \Sites$ (houses, hotels with spa,
 indoor pools). Time runs in hourly steps $t$, local time Europe/Zurich. Site $s$ has $N_s$ servers,
-recovers $a_s$ kWh of heat per server-hour ($a_s = 0.8$ in the case), has a minimum load share
-$\mu_s$ while on, and a lossless tank of usable capacity $B_s$ kWh. Its gross heat demand (space
-heating and hot water) in hour $t$ is $D_{s,t}$ kWh.
+recovers $a_s$ kWh of heat per server-hour ($a_s = 0.8$ in the case), and has a lossless tank
+of usable capacity $B_s$ kWh. All reported runs allow zero load, so an idle server may be off.
+A nonzero physical minimum load while on would require an on/off variable and a mixed-integer
+model. Gross heat demand (space heating and hot water) in hour $t$ is $D_{s,t}$ kWh.
 
 \paragraph{Realised heat balance.} Whatever a strategy decides, every hour is settled by one shared
 function (\texttt{HeatBalance.Step}) on the \emph{actual} demand: server heat $a_s u_{s,t}$ first
@@ -38,27 +39,42 @@ an AR(1) process in the lead time $k$:
   \label{eq:ar1}
 \end{equation}
 applied as a relative error to the demand and seeded per site and hour, so runs are reproducible.
-The values of $\sigma_{24}$ and $\rho$ are \texttt{TODO(source)}; we therefore show a sweep
-($\rho = 0.8$ is a placeholder).
+Here $\sigma_{24}$ scales the innovation at lead time 24, not the standard deviation of the
+resulting 24-hour error: AR(1) accumulation changes that standard deviation. The values of
+$\sigma_{24}$ and $\rho$ are scenario parameters without empirical calibration; we show a
+sweep with $\rho=0.8$ rather than interpreting it as forecast skill.
 
-\paragraph{Planning model.} At hour $\tau$ the scheduler plans the window
-$\Win = \{\tau, \dots, \tau + H\}$ with $H = 48$ and commits only hour $\tau$ (rolling horizon,
-decision 0014 \S6.2). It knows the realised tank content $S^0_s$ and the cohorts that have arrived
-but are not finished; it does not know future arrivals. All variables are continuous and
-non-negative: total load $u_{s,t}$, Type~1 work $x_{c,s,t}$ (defined only for $s \in E_c$ and
-$t < d_c$), filler $f_{s,t}$, heat used directly $q^{\mathrm{dir}}_{s,t}$, tank charge
-$q^{\mathrm{ch}}_{s,t}$ and discharge $q^{\mathrm{dis}}_{s,t}$, backup heat $b_{s,t}$, dumped heat
-$z_{s,t}$, tank content $S_{s,t}$ and missed work $m_c$. For all $s \in \Sites$, $t \in \Win$:
+\paragraph{Planning model.} At hour $\tau$ the scheduler plans
+$\Win = \{\tau,\ldots,\tau+H-1\}$, where $H=48$, and executes only the first decision
+(rolling horizon, decision 0014 \S6.2). It knows the actual tank content $S^0_s$ and
+unfinished cohorts already arrived, but no future arrivals. The decision variables are
+non-negative and continuous: load $u$, Type~1 processing $x$, filler $f$, direct heat $q^{\mathrm{dir}}$,
+charge $q^{\mathrm{ch}}$, discharge $q^{\mathrm{dis}}$, backup $b$, dumped heat $z$, stored heat
+$S$, and unprocessed work $m$. Heat is measured in kWh and work in server-hours.
+
+The first constraint assigns all running capacity to a job type. The next three conserve
+produced heat, heat delivered to the site, and heat in the tank, respectively. For every site
+$s$ and planned hour $t$:
 \begin{align}
-  u_{s,t} &= \textstyle\sum_{c} x_{c,s,t} + f_{s,t}, \qquad
-  \mu_s N_s \le u_{s,t} \le N_s, \qquad f_{s,t} \le \varphi N_s, \label{eq:load}\\
-  a_s u_{s,t} &= q^{\mathrm{dir}}_{s,t} + q^{\mathrm{ch}}_{s,t} + z_{s,t}, \label{eq:produce}\\
-  q^{\mathrm{dir}}_{s,t} + q^{\mathrm{dis}}_{s,t} + b_{s,t} &= \hat D_{s,t}, \label{eq:demand}\\
-  S_{s,t+1} &= S_{s,t} + q^{\mathrm{ch}}_{s,t} - q^{\mathrm{dis}}_{s,t}, \qquad
-  0 \le S_{s,t} \le B_s, \qquad S_{s,\tau} = S^0_s, \label{eq:tank}\\
-  \textstyle\sum_{s,t} x_{c,s,t} + m_c &= W_c \quad (d_c \le \tau + H), \qquad
-  \textstyle\sum_{s,t} x_{c,s,t} \le W_c \quad (d_c > \tau + H). \label{eq:work}
+  u_{s,t} &= \sum_c x_{c,s,t}+f_{s,t},
+  &0\le u_{s,t}\le N_s,\quad 0\le f_{s,t}\le\varphi N_s, \label{eq:load}\\
+  a_su_{s,t} &= q^{\mathrm{dir}}_{s,t}+q^{\mathrm{ch}}_{s,t}+z_{s,t}, \label{eq:produce}\\
+  q^{\mathrm{dir}}_{s,t}+q^{\mathrm{dis}}_{s,t}+b_{s,t} &= \hat D_{s,t}, \label{eq:demand}\\
+  S_{s,t+1} &= S_{s,t}+q^{\mathrm{ch}}_{s,t}-q^{\mathrm{dis}}_{s,t}. \label{eq:tank}
 \end{align}
+The tank starts at its measured state, $S_{s,\tau}=S^0_s$, and stays within
+$0\le S_{s,t}\le B_s$ (including the terminal state).
+
+For each arrived cohort, total processing cannot exceed its remaining work $W_c$.
+If its exclusive deadline falls inside the window, any unfinished amount appears as
+$m_c$; otherwise the model can defer the remainder beyond this window:
+\begin{equation}
+  \sum_{s,t}x_{c,s,t}+m_c=W_c\quad(d_c\le\tau+H),\qquad
+  \sum_{s,t}x_{c,s,t}\le W_c\quad(d_c>\tau+H).
+  \label{eq:work}
+\end{equation}
+Here $m_c$ is \emph{missed server-hours}; the reported fraction of missed jobs is a
+separate output metric.
 For the current hour $\hat D_{s,\tau}$ is the measured demand. Eligibility, deadlines and
 locality are enforced by which $x_{c,s,t}$ exist, not by penalties. Work processed at $s \ne o_c$
 counts as \emph{moved}. A uniform transfer delay $\delta$ (whole hours, default 0; decision 0030)
@@ -66,7 +82,7 @@ models friction under the assumption ``data staged at arrival'': the cohort's da
 the eligible sites when it arrives, so $x_{c,s,t}$ with $s \ne o_c$ exists only for
 $\alpha_c + \delta \le t < d_c$, where $\alpha_c$ is the arrival hour. This is a lower bound on
 transfer friction; $\delta \ge \qty{24}{h}$ means no moves. There is no distance model and no
-transfer cost (\texttt{TODO(source)}: a sourced data volume per server-hour); runs report moved
+transfer cost because data volume per server-hour has not been measured; runs report moved
 server-hours instead. The objective is lexicographic and is given in Section~\ref{sec:scheduling}.
 
 \paragraph{Why an LP.} The problem is a flow in a time-expanded network with nodes $(s,t)$: work

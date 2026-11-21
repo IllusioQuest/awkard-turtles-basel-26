@@ -1,0 +1,2 @@
+# Keep downloaded API snapshots byte-identical across platforms for SHA-256 provenance.
+data/raw/market/price-snapshots/*.json -text

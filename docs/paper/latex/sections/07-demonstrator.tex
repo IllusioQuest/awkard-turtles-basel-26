@@ -1,28 +1,31 @@
-\section{Demonstrator}
+\section{Demonstrator and measured jobs}
 \label{sec:demonstrator}
 
-\textit{Skeleton.}
+The annual run and the laptop demonstration use the same control boundary:
+\texttt{IScheduler.Decide(HeatSignal)} chooses a target load and
+\texttt{SchedulerController.Apply} sends it to an \texttt{IExecutor}. The simulated executor
+settles the annual heat balance; \texttt{DockerJobExecutor} pauses, resumes or throttles a
+running container. The network adapter commits an hourly decision through this path and rejects
+a changed heat signal (decisions 0005, 0009 and 0024). A successful pause/resume demonstrates
+control of a process, not thermal recovery from the laptop.
 
-The same scheduler code that produces the yearly balance also controls real running jobs (case
-must-have). Each hour, \texttt{IScheduler.Decide(HeatSignal)} returns a target load per server;
-\texttt{SchedulerController.Apply} passes it to an \texttt{IExecutor}, which is either simulated or
-a \texttt{DockerJobExecutor} that pauses and resumes a container (decisions 0005 and 0009). In the
-network simulation, an adapter feeds each site's committed decision through this unchanged path and
-rejects any signal that differs from the one the decision was made on.
+The proposed Type~1 service is batch summarisation of non-personal documents with Apertus 8B.
+On an eight-thread laptop CPU, a 14.98-minute transcript (3,310 input and 319 output tokens)
+took a mean \qty{133.3}{s} in three runs. Its gross CPU-package energy was approximately
+\qty{0.92}{Wh} per document; the battery meter was invalid with the charger connected
+(\texttt{docs/jobs/llm-summary.md}). No L4 throughput or whole-machine power can be inferred
+without an additional measurement.
 
-\paragraph{Live network demonstrator.} Four Docker containers on one laptop act as four houses with
-three servers each and run real Monte Carlo tasks of the research job (decision 0042, ticket T-54).
-A slider per house sets its heat demand. The network scheduler (B2, the LP or B1) decides on every
-change (job arrival, task start or finish, slider move) and at least once per demo hour (2~s); waiting
-task files move to the house its allocation names, and each house's load goes through the same
-\texttt{SchedulerController.Apply} path to Docker (pause, CPU quota). Running tasks do not migrate:
-a house that wants no heat freezes its running task until heat is wanted again.
+The Type~2 representative is a checkpointable 2D Ising Monte Carlo parameter sweep. On a
+separate laptop, a steady-state run completed 320 tasks in \qty{274.4}{s}, consuming
+\qty{1.3089}{Wh} of gross whole-laptop battery energy, or about \qty{0.00409}{Wh} per task.
+The battery meter updates slowly; a shorter run was discarded for this reason. Completed task
+files are written atomically so a restart repeats only unfinished tasks. The same heat scheduler
+controlled this container in a \texttt{LiveRun} replay (\texttt{docs/jobs/research-sim.md}).
+Both jobs establish executable workload types and interruption behaviour. Their laptop energy
+figures cannot validate the abstract \qty{1}{kW} server, a liquid-cooled L4 build or a paying
+customer workload.
 
-\todo{measured workloads: whisper.cpp transcription (\texttt{docs/jobs/transcription.md}),
-Apertus 8B summaries (\texttt{docs/jobs/llm-summary.md}), research simulation (T-30)}
-
-\todo{measurement method and scaling to the abstract 1~kW server; limits (CPU package versus wall
-power)}
-
-\todo{figure F4: January and July day with demand, tank, server load and the real job paused
-(\texttt{DigitalHeat.LiveRun} replay output)}
+The January and July replay commands and their deterministic output are documented in the
+\texttt{DigitalHeat.LiveRun} project. A process-control trace is evidence of the common scheduler
+path; the annual heat results remain simulated and should not be read as calorimetric measurements.
