@@ -1,0 +1,44 @@
+{
+  "description": "T-67 variant (not a scored figure): case reference houses around FHNW Campus Dreispitz (Münchenstein BL), with and without one Allschwil-sized indoor pool at the campus.",
+  "centre": { "lat_deg": 47.5336, "lon_deg": 7.609 },
+  "rings_m": [300, 600, 900],
+  "houses": { "count": 20, "prefix": "h" },
+  "defaults": {
+    "cell_id": "cap-bs",
+    "bfs_municipality_nr": 2769,
+    "canton": "BL",
+    "weather_ref": "data/raw/open-meteo/basel-2025-hourly.csv",
+    "design_heating_kw": 10,
+    "formula_divisor_c": 25.6,
+    "hot_water_kwh_per_day": 12,
+    "tank_kwh": 35,
+    "tank_initial_kwh": 0,
+    "electricity_price_chf_per_kwh": 0.31977,
+    "server_count": 4
+  },
+  "extra_sites": [
+    { "house_id": "pool-dreispitz", "annual_heat_kwh": 627000, "server_count": 20 }
+  ],
+  "outputs": [
+    { "file": "config/fleet/houses/dreispitz-20.json", "include_extra_sites": false,
+      "description": "T-67 variant: 20 case reference houses around FHNW Campus Dreispitz (baseline, no pool)." },
+    { "file": "config/fleet/houses/dreispitz-20-pool.json", "include_extra_sites": true,
+      "description": "T-67 variant: the 20 Dreispitz houses plus one Allschwil-sized indoor pool at the campus." }
+  ],
+  "sources": {
+    "centre": "Approximate position of FHNW Campus Dreispitz, Freilager-Platz, Münchenstein: TODO(source), not from a geodata source; display only",
+    "rings_m": "Scenario value (T-67): houses alternate over three rings of 300/600/900 m; display only",
+    "houses.count": "Scenario value (T-67): 20 houses",
+    "cell_id": "cap-bs: case Basel weather cell, used for forecasts (data/raw/swiss-grid/SOURCE.md); the campus is about 3 km from the case coordinates",
+    "bfs_municipality_nr": "2769 Münchenstein (data/raw/elcom/municipalities-2026/H4.json)",
+    "canton": "BL: Münchenstein, Basel-Landschaft (data/raw/elcom/municipalities-2026/H4.json)",
+    "weather_ref": "data/raw/open-meteo/basel-2025-hourly.csv, case weather (data/raw/open-meteo/SOURCE.md), used for every site",
+    "design_heating_kw": "Houses: 10 kW, case reference house (config/reference-house.json); pool: 0, its heat is modelled as a flat daily amount",
+    "formula_divisor_c": "25.6, case reference house (config/reference-house.json)",
+    "hot_water_kwh_per_day": "Houses: 12 kWh/day, case (config/reference-house.json); pool: 627,000 kWh/a / 365 = 1,717.8 kWh/day, Hallenbad Allschwil after renovation (data/raw/sites/site-types.csv, https://pubdb.bfe.admin.ch/de/publication/download/816, accessed 2026-11-20); flat shape is synthetic (BFE guide: indoor-pool demand year-round, weakly weather dependent)",
+    "tank_kwh": "35 kWh, case reference house; pool: same 35 kWh, synthetic (the pool water as a buffer is not modelled)",
+    "tank_initial_kwh": "0: tank starts empty as in Core",
+    "electricity_price_chf_per_kwh": "Münchenstein H4 2026, Primeo Netz AG, 31.977 Rp./kWh (data/raw/elcom/municipalities-2026/H4.json)",
+    "server_count": "Houses: 4, case reference house; pool: 20, synthetic scenario value (T-67); its flat heat could absorb 89.5 servers (71.6 kW / 0.8)"
+  }
+}

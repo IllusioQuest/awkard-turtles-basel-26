@@ -97,3 +97,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-64](T-64-linux-mesh-batch-lab.md) | Private Linux mesh and real batch executors | Nikita / Codex | in progress; ADR 0050; separate inner engines approved |
 
 | [T-65](T-65-one-heat-first-policy.md) | Retire competing scheduler policies; one heat-first policy | Nikita / Codex | in progress; ADR 0051; explicit user request |
+| [T-67](T-67-local-fleet-scenarios.md) | Local fleet scenarios around a point (first: FHNW Dreispitz + indoor pool) | Ennio / Claude | in progress; variant only |
