@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
-import { chf, dateTime, dec1, num, pct, wallMs } from './format'
+import { householdSeries } from '../household/series'
+import { chf, dateTime, dec1, num, pct } from './format'
 
 const pctSmall = new Intl.NumberFormat('de-CH', { style: 'percent', maximumSignificantDigits: 2 })
 
@@ -11,21 +12,21 @@ interface Props {
   state: HousePeriod | undefined // the house's period at the selected hour
   series: HousePeriod[] | undefined // all periods of the house (undefined while loading or unavailable)
   t: number
+  fromMs: number // selected window [fromMs, toMs) in wall ms, as on the admin page
+  toMs: number
   onMore: () => void
   onClose: () => void
 }
 
 const HOURS_PER_DAY = 24
-const SPARK_HOURLY = 48
-const SPARK_DAILY = 14
 
-export default function SitePanel({ run, house, state, series, t, onMore, onClose }: Props) {
+export default function SitePanel({ run, house, state, series, t, fromMs, toMs, onMore, onClose }: Props) {
   const daily = run.periodHours === HOURS_PER_DAY
-  const sparkPeriods = daily ? SPARK_DAILY : SPARK_HOURLY
 
+  // Load over the selected window, bucketed like the household view.
   const history = useMemo(
-    () => (series ?? []).filter((p) => p.h <= t && p.h > t - sparkPeriods * run.periodHours).map((p) => ({ t: wallMs(run, p.h), load: p.load })),
-    [series, t, run, sparkPeriods],
+    () => householdSeries(run, house, series ?? [], fromMs, toMs).map((b) => ({ t: b.t, load: b.load })),
+    [run, house, series, fromMs, toMs],
   )
 
   // Hourly runs: the 24 hours up to t; daily runs: the day starting at t.
@@ -98,12 +99,11 @@ export default function SitePanel({ run, house, state, series, t, onMore, onClos
             labelFormatter={(v) => dateTime.format(Number(v))}
             formatter={(v) => [pct.format(Number(v)), 'Load']}
           />
-          <Line dataKey="load" stroke="var(--series-1)" strokeWidth={2} dot={false} isAnimationActive={false} />
+          <Line dataKey="load" stroke="var(--series-1)" strokeWidth={2} dot={history.length <= 2} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
-      <span className="note">{daily ? `last ${SPARK_DAILY} days` : `last ${SPARK_HOURLY} h`}</span>
 
-      <dl className="kv">
+      <dl className="kv" style={{marginTop: 8}}>
         {rows.map(([k, v]) => (
           <div key={k}>
             <dt>{k}</dt>

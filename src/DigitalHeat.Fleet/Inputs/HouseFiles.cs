@@ -121,7 +121,7 @@ public static class HouseFiles
     {
         if (houses.Select(h => h.HouseId).Distinct().Count() != houses.Count) throw new InvalidDataException($"{path}: duplicate house_id.");
         foreach (var h in houses)
-            if (h.DesignHeatingKw <= 0 || h.FormulaDivisorC <= 0 || h.HotWaterKwhPerDay < 0 || h.TankKwh < 0
+            if (h.DesignHeatingKw < 0 || h.FormulaDivisorC <= 0 || h.HotWaterKwhPerDay < 0 || h.TankKwh < 0
                 || h.TankInitialKwh < 0 || h.TankInitialKwh > h.TankKwh || h.ElectricityPriceChfPerKwh < 0
                 || string.IsNullOrWhiteSpace(h.WeatherRef) || string.IsNullOrWhiteSpace(h.CellId))
                 throw new InvalidDataException($"{path}: house {h.HouseId} has invalid values.");

@@ -46,7 +46,11 @@ internal sealed class BaselineWorkloadPlacement
             if (!DeadlineOpen(request, nowUtc) || !Fresh(nowUtc) || request.Kind != "legacy" && !ResourcesFresh(nowUtc)) return null;
             if (inventory!.ExternalAllocations.Any(e => e.Id == request.Id))
                 throw new InvalidDataException("Workload ID is already externally allocated.");
-            var best = Candidates(request).OrderByDescending(c => c.AvailableHeatKwhBeforeReservation)
+            // Decision 0056 order, written out independently of HeatShareRank: free share of the site's
+            // hourly heat budget, then free kWh, then site and node ID.
+            double Budget(string siteId) => HeatCapacity.RemainingKwh(inventory!.Sites.Single(x => x.Id == siteId).Heat);
+            double Share(WorkloadReservation c) => Budget(c.SiteId) > 0 ? c.AvailableHeatKwhBeforeReservation / Budget(c.SiteId) : 0;
+            var best = Candidates(request).OrderByDescending(Share).ThenByDescending(c => c.AvailableHeatKwhBeforeReservation)
                 .ThenBy(c => c.SiteId, StringComparer.Ordinal).ThenBy(c => c.NodeId, StringComparer.Ordinal).FirstOrDefault();
             if (best is not null) held.Add(request.Id, new(request, best, false));
             return best;

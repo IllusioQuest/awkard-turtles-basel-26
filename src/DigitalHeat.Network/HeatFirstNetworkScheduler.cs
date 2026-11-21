@@ -26,14 +26,15 @@ public sealed class HeatFirstNetworkScheduler(int transferDelayHours = 0) : INet
             while (remaining > WorkLedger.MissedEpsilonServerHours)
             {
                 int best = -1;
-                HeatPlacementRank bestRank = default;
+                HeatShareRank bestRank = default;
                 for (int i = 0; i < count; i++)
                 {
                     if (!job.EligibleSites[i] || free[i] <= WorkLedger.MissedEpsilonServerHours
                         || i != job.OriginSite && state.HourIndex < job.ArrivalHour + transferDelayHours) continue;
                     var site = state.Sites[i];
                     double usedHeat = assigned[i] * site.RecoverableKwhPerServerHour / site.HoursPerStep;
-                    var rank = new HeatPlacementRank(HeatCapacity.RemainingKwh(state.States[i].Signal, usedHeat), site.Id);
+                    // Decision 0056: free share of the hour's heat budget, then free kWh, then site ID.
+                    var rank = HeatShareRank.From(HeatCapacity.RemainingKwh(state.States[i].Signal), usedHeat, site.Id);
                     if (best >= 0 && rank.CompareTo(bestRank) <= 0) continue;
                     best = i; bestRank = rank;
                 }

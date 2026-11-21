@@ -31,16 +31,18 @@ public class HeatMonitorTests
         return e;
     }
 
-    [Fact] public void ReservesAtSiteWithMostFreeHeatAndCountsGenerationPerNode()
+    [Fact] public void ReservesAtSiteWithLargestFreeHeatShareAndCountsGenerationPerNode()
     {
-        var e = Started(homeNeed: 1, hotelNeed: 5);           // free: home 1+2=3, hotel 5+10=15
+        // Decision 0053. Free: home 1+2=3, hotel 5+10=15 kWh. Both start at share 1.0, so the tie goes to
+        // more free kWh (hotel). Then hotel has 14.2 / 15 = 0.95 free and home 1.0, so home is next.
+        var e = Started(homeNeed: 1, hotelNeed: 5);
         Assert.Equal("node-hotel", e.Reserve()!.NodeId);
-        Assert.Equal("node-hotel", e.Reserve()!.NodeId);
+        Assert.Equal("node-home", e.Reserve()!.NodeId);
         var hotel = e.NodeViews().Single(n => n.Node.NodeId == "node-hotel");
-        Assert.Equal(1.6, hotel.GenerationKwh, 9);
-        Assert.Equal(new[] { "player-1", "player-2" }, hotel.Sessions);
-        Assert.Equal(15 - 1.6, hotel.SiteFreeCapacityKwh, 9);
-        Assert.Equal(0, e.NodeViews().Single(n => n.Node.NodeId == "node-home").GenerationKwh);
+        Assert.Equal(0.8, hotel.GenerationKwh, 9);
+        Assert.Equal(new[] { "player-1" }, hotel.Sessions);
+        Assert.Equal(15 - 0.8, hotel.SiteFreeCapacityKwh, 9);
+        Assert.Equal(0.8, e.NodeViews().Single(n => n.Node.NodeId == "node-home").GenerationKwh, 9);
     }
 
     [Fact] public void NotReadyNodesGetNoNewSessionsButKeepHeldOnes()

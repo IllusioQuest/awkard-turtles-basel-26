@@ -20,10 +20,13 @@ public class PlacementTests
     private static WorkloadPlacement Start(WorkloadInventory? inventory = null)
     { var p = new WorkloadPlacement(); p.Update(inventory ?? Inventory(), Now); return p; }
 
-    [Fact] public void LargestUsefulHeatWinsAndOwnedHeatIsSharedPerSite()
+    [Fact] public void FreeHeatShareRanksSitesAndOwnedHeatIsSharedPerSite()
     {
+        // Decision 0056. Budgets: home 1 + 2 = 3 kWh, spa 4 + 10 = 14 kWh. Both start at share 1.0, so the
+        // tie goes to more free kWh (spa). Then spa has 13.2 / 14 = 0.94 free and home 1.0, so home is next.
         var p = Start(); Assert.Equal("b", p.TryReserve(Request(), Now)!.NodeId);
-        Assert.Equal(14 - 0.8, p.TryReserve(Request("two"), Now)!.AvailableHeatKwhBeforeReservation, 8);
+        var second = p.TryReserve(Request("two"), Now)!;
+        Assert.Equal(("a", 3.0), (second.NodeId, second.AvailableHeatKwhBeforeReservation));
         Assert.Null(p.TryReserve(Request("three"), Now)); // shared physical CPU is full, despite two logical nodes
     }
 
