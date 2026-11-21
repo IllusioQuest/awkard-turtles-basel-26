@@ -225,3 +225,33 @@ preserve Linux-only nodes), an explicitly approved native Windows worker test,
 or an older Blender compatibility image. No Windows install or renderer change
 has been made. Diagnostic fixes are pushed in PR #54, commit 931912c; not deployed
 over the running comparison. Existing CPU comparison stays available.
+
+
+### Current-upstream follow-up
+
+The subsequent official Blender **5.3.0** binary was actually tested, superseding
+the earlier "not tested" note for Blender (Mesa itself was not rebuilt).
+Archive SHA-256: `dacb8264197a3f7fda6001285a5a506fc97ee943881261c2c3bd63c882f22e05`.
+It rejects the Intel WSL Vulkan device for missing **dual-source blending**, then
+crashes without writing a render. This is a failed test, never GPU verification.
+The source of newer Mesa **26.3.0**, `src/microsoft/vulkan/dzn_device.c:679`, still
+sets `.dualSrcBlend = false`. Source inspection is not a rebuilt-driver test.
+Source: https://gitlab.freedesktop.org/mesa/mesa/-/raw/mesa-26.3.0/src/microsoft/vulkan/dzn_device.c .
+
+For reproduction, run the official checksum-verified Blender 5.3 Linux binary
+with `--background --gpu-backend vulkan --threads 1 --python-exit-code 1` inside
+an isolated Linux graphics container. Pass `/dev/dxg`, read-only `/usr/lib/wsl/lib`
+and `/usr/lib/wsl/drivers`; use existing Mesa Dozen 26.0.8 ICD and libraries from
+`gaming/deploy/Dozen.Dockerfile`; set `VK_DRIVER_FILES` to its ICD. Use Xvfb,
+network none, 2 CPU/2 GiB and a 65-second Blender timeout. The proof script selects
+Eevee, renders the default cube to a 640x360 PNG, then records
+`gpu.platform.renderer_get()`; failure occurs before an image can be saved.
+No software renderer, version-string override or fabricated Vulkan capability is
+accepted as proof. Probe images/files stay local in ignored TestResults.
+
+The portable solution is capability-specific worker configuration, with a current
+pinned renderer image and actual render verification on each hardware/driver path.
+For Linux-only production, use a compatible Linux GPU worker. A native Windows
+worker for this laptop requires a separate user-approved adapter; it has not been
+installed. Neither solution requires a new heat scheduler. Old Blender 3.6 is an
+optional compatibility experiment, not the recommended maintained baseline.
