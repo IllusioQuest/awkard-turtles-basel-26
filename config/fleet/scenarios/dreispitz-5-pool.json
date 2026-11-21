@@ -1,5 +1,5 @@
 {
-  "_note": "T-67 variant, not a scored figure: houses file config/fleet/houses/dreispitz-20-pool.json from config/fleet/local/dreispitz.json. Job volumes as basel-region-100 (sourced Basel volumes, scale 1).",
+  "_note": "T-67 variant, not a scored figure: houses file config/fleet/houses/dreispitz-5-pool.json from config/fleet/local/dreispitz.json. Job volumes as basel-region-100 (sourced Basel volumes, scale 1). Constant customer demand (user choice, T-67): elasticity 0 and no reference-price noise, so every Type 2 job is accepted; the load-based price still sets Type 2 income.",
   "run": {
     "start_local": "2025-01-01T00:00",
     "end_local": "2026-01-01T00:00",
@@ -8,7 +8,7 @@
     "seed": 20261121
   },
   "houses": {
-    "file": "config/fleet/houses/dreispitz-20-pool.json"
+    "file": "config/fleet/houses/dreispitz-5-pool.json"
   },
   "servers": {
     "policy": "from_file",
@@ -28,8 +28,8 @@
     "p_max_chf": 1.2,
     "gamma": 1,
     "p_ref_chf": 0.82,
-    "p_ref_noise_sd": 0.079,
-    "elasticity": -0.8
+    "p_ref_noise_sd": 0,
+    "elasticity": 0
   },
   "forecast": {
     "kind": "archived"

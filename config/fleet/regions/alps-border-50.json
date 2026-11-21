@@ -1,0 +1,42 @@
+{
+  "description": "T-67 variant (not a scored figure): 50 case reference houses. One cluster around Interlaken, one stretched up the Rhône valley above Brig (Brig to Goms), the rest spread over Switzerland.",
+  "heating_limit_c": 12,
+  "populated": { "min_single_family": 300, "max_model_elevation_m": 1300 },
+  "regions": [
+    { "prefix": "il", "min_spacing_km": 9.5,
+      "populated": { "min_single_family": 200 },
+      "select": { "near": { "lat_deg": 46.686, "lon_deg": 7.863, "radius_km": 16 } } },
+    { "prefix": "br", "min_spacing_km": 9.5,
+      "populated": { "min_single_family": 300 },
+      "select": { "along": { "points": [[46.316, 7.988], [46.40, 8.135], [46.505, 8.31]], "max_distance_km": 8 } } }
+  ],
+  "between": { "prefix": "mid", "total": 50, "min_spacing_km": 22 },
+  "house": {
+    "design_heating_kw": 10,
+    "formula_divisor_c": 25.6,
+    "hot_water_kwh_per_day": 12,
+    "tank_kwh": 35,
+    "tank_initial_kwh": 0,
+    "server_count": 4
+  },
+  "output": {
+    "file": "config/fleet/houses/alps-border-50.json",
+    "description": "T-67 variant: 50 case reference houses; Interlaken cluster (il), Brig-Goms cluster (br) and spread across Switzerland (mid)."
+  },
+  "sources": {
+    "climate": "Daily mean of data/raw/swiss-grid/weather-2025-hourly.csv.gz (Open-Meteo, data/raw/swiss-grid/SOURCE.md); winter = Dec/Jan/Feb 2025, summer = Jun/Jul/Aug 2025; computed by scripts/make_climate_fleet.py, for display only",
+    "heating_limit_c": "12 °C daily mean, case heating-day limit (config/reference-house.json HeatingDayThresholdC)",
+    "populated": "Scenario value (T-67): a cell counts as populated with at least 300 single-family buildings (data/derived/buildings/grid-10km-heat-demand.csv) and model elevation at most 1300 m (data/raw/swiss-grid/grid-10km.csv); the clusters drop the elevation limit (Interlaken: at least 200 single-family buildings)",
+    "regions": "Scenario values (T-67, user choice): Interlaken centre 46.686 N 7.863 E, radius 16 km; Brig-Goms polyline Brig 46.316 N 7.988 E - Fiesch 46.40 N 8.135 E - Ulrichen 46.505 N 8.31 E, cells within 8 km. Coordinates approximate (TODO(source)), they only choose grid cells",
+    "min_spacing_km": "Scenario values (T-67): 9.5 km inside a cluster (grid neighbours, 10 km apart in LV95, allowed), 22 km for the spread so points stay apart on the Switzerland map",
+    "between.total": "Scenario value (T-67): 50 houses in all",
+    "design_heating_kw": "10 kW, case reference house everywhere (config/reference-house.json), so only the weather differs between houses",
+    "formula_divisor_c": "25.6, case reference house (config/reference-house.json), kept everywhere as in the fleet house generator",
+    "hot_water_kwh_per_day": "12 kWh/day, case (config/reference-house.json)",
+    "tank_kwh": "35 kWh, case (config/reference-house.json)",
+    "tank_initial_kwh": "0: tank starts empty as in Core",
+    "electricity_price_chf_per_kwh": "ElCom 2026 H4 total of the cell's municipality (data/derived/elcom/price-per-municipality-2026.csv)",
+    "server_count": "4 per house, comparison value as in the other fleet scenarios (config/reference-house.json ServerCount)",
+    "position": "Grid cell centre (data/raw/swiss-grid/grid-10km.csv lat_deg/lon_deg)"
+  }
+}
