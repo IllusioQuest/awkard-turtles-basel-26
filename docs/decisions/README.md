@@ -40,3 +40,5 @@ later.
 | [0032](0032-gaming-monitor-presentation.md) | Read-only gaming console and model/observation boundaries | proposed; reviewed with corrections, T-42 |
 
 | [0033](0033-universal-workload-admission.md) | Universal resource-aware workload admission | proposed; reviewed with changes; user choices pending, T-43 |
+
+| [0034](0034-minecraft-measured-workload.md) | Official Vanilla Minecraft and measured-power startup gate | proposed; T-44; review pending |

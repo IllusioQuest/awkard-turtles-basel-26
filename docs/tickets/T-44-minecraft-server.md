@@ -56,3 +56,7 @@ Current turn: read runtime integration points and official sources, asked import
 claimed ticket and documented plan. No server downloaded, EULA accepted, world created, new image
 pulled, client installed or running game stopped. Code work awaits edition/software decisions;
 startup additionally awaits explicit EULA authorization.
+
+## User answers and preparation milestone
+
+User confirmed Vanilla Java, delegated an easy pinned version, and explicitly accepted the EULA for starting this demo. Official stable metadata resolves 26.3 requiring Java 25. User rejected case-server heat assumptions and requires a measurement before heat-based startup. They agreed to prepare battery measurement; AC is still connected at observation, with invalid discharge sentinel. No heat admission is authorized with a guessed value. Build/preparation and a clearly labelled calibration run are distinct from scheduled heat placement; version/client matching and authenticated gameplay remain visible requirements. ADR 0034 records the measurement/startup boundary.
