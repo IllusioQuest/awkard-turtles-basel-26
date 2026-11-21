@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Prototype
 - **Depends on:** –
-- **Suggested owner:** Claude (team lead's session)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Claude (team lead's session)  ·  **Owner:** Codex  ·  **Status:** in progress
 
 ## Goal
 
@@ -10,10 +10,10 @@ Make the browser explorer honest enough to show: label example inputs, include h
 
 ## Tasks
 
-- [ ] Label the surplus KPI "at example price, without hardware" (or hide it until sourced prices are wired in).
-- [ ] Add a full-cost break-even (incl. hardware) and use it in the verdict sentence.
-- [ ] Inline the data and fonts so it runs from a file without internet; fix the METHOD link.
-- [ ] Describe `verify.py` as "same rule, reimplemented" and add invariant checks.
+- [x] Label the surplus KPI "at example price, without hardware" (or hide it until sourced prices are wired in).
+- [x] Add a full-cost break-even (incl. hardware) and use it in the verdict sentence.
+- [x] Inline the data and use system fonts so it runs from a file without internet; add the METHOD link.
+- [x] Describe `verify.py` as "same rule, reimplemented" and add invariant checks.
 - [ ] Later: read the numbers from the C# `YearRun` output instead of its own model (one model only).
 
 ## Done when

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -18,11 +19,12 @@ REPO = HERE.parent.parent
 WEATHER = REPO / "data" / "raw" / "open-meteo" / "basel-2025-hourly.csv"
 ELCOM = REPO / "data" / "raw" / "elcom" / "iwb-basel-h4-2026.json"
 OUT = HERE / "explorer-data.json"
+HTML = HERE / "index.html"
 RP_PER_CHF = 100.0
 
 
 def read_temperatures() -> tuple[str, list[float]]:
-    lines = WEATHER.read_text().splitlines()
+    lines = WEATHER.read_text(encoding="utf-8").splitlines()
     start = next(i for i, line in enumerate(lines) if line.startswith("time,"))
     rows = list(csv.reader(lines[start:]))
     header, body = rows[0], [r for r in rows[1:] if r]
@@ -31,7 +33,7 @@ def read_temperatures() -> tuple[str, list[float]]:
 
 
 def read_price_chf_per_kwh() -> float:
-    snapshot = json.loads(ELCOM.read_text())
+    snapshot = json.loads(ELCOM.read_text(encoding="utf-8"))
     basel = [o for o in snapshot["response"]["data"]["observations"] if o["municipalityLabel"] == "Basel"]
     return basel[0]["total"] / RP_PER_CHF
 
@@ -47,8 +49,17 @@ def main() -> None:
             "electricity_price_chf_per_kwh": "data/raw/elcom/iwb-basel-h4-2026.json (ElCom 2026, IWB Basel, H4, total)",
         },
     }
-    OUT.write_text(json.dumps(data, separators=(",", ":")) + "\n")
-    print(f"wrote {OUT.relative_to(REPO)}: {len(temps)} hours, price {data['electricity_price_chf_per_kwh']} CHF/kWh")
+    payload = json.dumps(data, separators=(",", ":"), ensure_ascii=False)
+    OUT.write_text(payload + "\n", encoding="utf-8")
+    html = HTML.read_text(encoding="utf-8")
+    html, replaced = re.subn(
+        r'(<script id="explorer-data" type="application/json">).*?(</script>)',
+        lambda match: match.group(1) + payload + match.group(2), html, count=1, flags=re.DOTALL,
+    )
+    if replaced != 1:
+        raise RuntimeError(f"Could not find the inline explorer-data script in {HTML}")
+    HTML.write_text(html, encoding="utf-8", newline="\n")
+    print(f"wrote {OUT.relative_to(REPO)} and inlined {len(temps)} hours into {HTML.relative_to(REPO)}")
 
 
 if __name__ == "__main__":
