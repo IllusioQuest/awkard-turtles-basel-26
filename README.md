@@ -18,6 +18,49 @@ need it, over a full year, with transparent and reproducible numbers.
 - [Data and how to fetch it](data/README.md) · [Assumptions](docs/assumptions.md) · [Decisions](docs/decisions/README.md)
 - [Instructions for AI agents](AGENTS.md)
 
+## Demo in four steps
+
+Requirements: .NET 8 SDK, Docker (Docker Desktop with Linux containers on Windows/macOS). Runs offline
+after the image is built. The demo job is the Type 2 research simulation (2D Ising Monte Carlo, no
+personal data, no model download); details in [`docs/jobs/research-sim.md`](docs/jobs/research-sim.md).
+
+1. **Yearly balance of the reference house** (must-have 3):
+
+   ```bash
+   dotnet run --project src/DigitalHeat.YearRun -- .
+   ```
+
+   Prints coverage, server-hours and the case break-even; writes `results/reference-house/`.
+   Published draft figures: [`docs/results/reference-house.md`](docs/results/reference-house.md).
+
+2. **Build and start the real job** in its own container:
+
+   ```bash
+   docker build -t digitalheat/research-sim jobs/research-sim
+   docker run --rm -v "$PWD/data/external/research-sim/work:/work" digitalheat/research-sim prepare
+   docker run -d --name research-sim -e PASSES=0 -v "$PWD/data/external/research-sim/work:/work" digitalheat/research-sim run
+   ```
+
+3. **January day: the scheduler controls the running job** (must-have 2). The same scheduler code as
+   step 1 sets the job's CPU allowance hour by hour:
+
+   ```bash
+   dotnet run --project src/DigitalHeat.LiveRun -- --date 2025-01-15 --job config/jobs/research-sim-montecarlo.json --container research-sim --cpu-cores 8 --step-seconds 2
+   ```
+
+4. **July day with a forced pause** (tank full → job frozen, then resumed; press `P` for a manual pause):
+
+   ```bash
+   dotnet run --project src/DigitalHeat.LiveRun -- --date 2025-07-15 --job config/jobs/research-sim-montecarlo.json --container research-sim --cpu-cores 8 --step-seconds 2 --force-pause-step 12
+   ```
+
+   Clean up afterwards with `docker rm -f research-sim`.
+
+Other measured jobs (transcription, LLM summary) use the same LiveRun command with their own
+descriptor in [`config/jobs/`](config/jobs/) and container; see [`docs/jobs/`](docs/jobs/).
+The full LiveRun options (placement rules, observed load) are under
+"Live control of a containerized job" below.
+
 ## Quick checks
 
 ```bash
@@ -86,8 +129,8 @@ ElCom snapshot, with exact source labels in the JSON file.
 ## Live control of a containerized job
 
 `DigitalHeat.LiveRun` attaches to an **already running Linux container**. It does not
-start or implement a workload. Nikita's webhosting and Ennio's transcription work own
-their containers, descriptors and measurements; the descriptor format is
+start or implement a workload. Ennio's transcription work owns
+its containers, descriptors and measurements; the descriptor format is
 [`config/jobs/job.schema.json`](config/jobs/job.schema.json). It records an ID,
 image or container command, supported controls, work unit, optional deadline,
 runtime and energy per unit (each number with unit and source), and an optional
@@ -132,3 +175,6 @@ not a sensor reading. A forced pause does not modify later reference snapshots.
 `docker stats` CPU use divided by the allowed CPU cores is shown as observed
 CPU load; it does not establish electrical power or recovered heat. See
 [`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
+
+
+For the separate user-requested browser gaming prototype, see [gaming runtime profiles](docs/gaming-profiles.md). The webhosting feature has been retired.

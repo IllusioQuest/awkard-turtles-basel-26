@@ -1,0 +1,61 @@
+\section{Economics}
+\label{sec:economics}
+
+\textit{Draft paragraphs; numbers from \texttt{docs/business-model.md},
+\texttt{docs/model/routing-optimisation.md}~\S5 and \texttt{docs/research/profitability-inputs.md}.}
+
+\paragraph{Marginal value of a server-hour.} With the case values ($P = \qty{1}{kW}$,
+$a = \qty{0.8}{kWh}$, $e = \text{CHF}~0.3325$ per kWh, $v = \text{CHF}~0.133$ per kWh of heat), one
+more server-hour sold at price $p$ is worth
+\begin{equation}
+  p - eP + va = p - 0.3325 + 0.1064 = p - 0.2261
+\end{equation}
+if its heat is used, now or later through the tank, and $p - 0.3325 - 0.8\,\pi^{\mathrm{dump}}$ if
+its heat is dumped. CHF~0.2261 per server-hour is the case break-even: (electricity cost $-$ value
+of heat actually used) $\div$ server-hours sold. For 4 servers on the reference house this is
+$(\text{CHF}~7{,}534.79 - \text{CHF}~2{,}411.13) \div 22{,}661.03 = \text{CHF}~0.2261$
+(\texttt{docs/results/reference-house.md}).
+
+\paragraph{Heat-led operation has a price.} At the adopted filler price of CHF~0.66 per server-hour,
+a dumped filler server-hour still earns $0.66 - 0.3325 = 0.3275$~CHF. A pure surplus maximiser
+therefore runs all servers all the time (B0) and dumps heat. Heat-led behaviour needs a dump
+penalty above $(0.66 - 0.3325) \div 0.8 = 0.409$ CHF per kWh, or a hard no-dump rule as in our
+lexicographic LP. Below CHF~0.2261 filler does not pay even when all its heat is used.
+
+\paragraph{Full cost.} The case break-even omits hardware, installation and operations. Adding
+depreciation and operations per sold hour gives full-cost break-evens of CHF~1.428 (CPU-dense),
+CHF~1.651 (L4) and CHF~0.956 (RTX~4090) per server-hour
+(\texttt{docs/research/profitability-inputs.md}~\S3). On the RTX~4090 profile the four servers cost
+$4 \times (16{,}300 \div 6 + 1{,}416) = \text{CHF}~16{,}532$ a year. If every heat-led hour is sold at
+one price $p$, the system surplus per house and year is
+$22{,}661 \times (p - 0.2261) - 16{,}532$ (Table~\ref{tab:surplus}).
+
+\begin{table}[ht]
+  \centering
+  \caption{System surplus per reference house (4 servers, RTX~4090 profile) if every heat-led hour
+    is sold at price $p$. Values copied from \texttt{docs/business-model.md}; inputs from
+    \texttt{python3 scripts/profitability\_inputs.py} and the year run. Prices are market
+    observations or list prices, not contracted prices.}
+  \label{tab:surplus}
+  \begin{tabular}{rlr}
+    \toprule
+    $p$ [CHF/server-h] & What it stands for & Surplus [CHF/yr] \\
+    \midrule
+    0.57 & RTX 4090 market, RunPod community & \num{-8738} \\
+    0.66 & pinned Type 2 price & \num{-6698} \\
+    0.84 & RTX 4090 market, vast.ai median & \num{-2619} \\
+    1.72 & Type 1 LLM, batch 1, list price & \num{17359} \\
+    1.95 & Type 1 LLM, batched (conservative), list price & \num{22504} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Operator model.} DigitalHeat owns the servers, pays their electricity and sells
+computing; the host (homeowner) provides space and gets the heat, keeping the backup heater. An
+optional heat fee $h$ per kWh of used heat, between 0 and CHF~0.133, moves money between host and
+operator without changing the system surplus; it moves the operator's electricity break-even
+between CHF~0.3325 (free heat) and CHF~0.2261 (full heat value) per server-hour. We maximise the
+system surplus first and split it second. \todo{heat fee and win-win zone (T-14, figure F8)}
+
+\paragraph{Price trends.} \todo{price trends to 2030 and lifetime averages
+(\texttt{profitability-inputs.md}~\S5): token and compute prices fall about 25--29\,\% a year}

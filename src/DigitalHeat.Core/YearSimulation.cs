@@ -47,15 +47,12 @@ public static class YearSimulation
             var applied = SchedulerController.Apply(signal, effectiveScheduler, effectiveExecutor);
             double actual = applied.ActualLoadPerServer;
             double produced = actual * count * perServerHeatKwh;
-            double direct = Math.Min(produced, hour.TotalHeatKwh);
-            double charge = Math.Min(produced - direct, p.TankCapacityKwh.Value - tankKwh);
-            double discharge = Math.Min(tankKwh, hour.TotalHeatKwh - direct);
-            double dump = produced - direct - charge;
-            double backup = hour.TotalHeatKwh - direct - discharge;
-            tankKwh += charge - discharge;
+            var balance = HeatBalance.Step(produced, hour.TotalHeatKwh, tankKwh, p.TankCapacityKwh.Value);
+            tankKwh = balance.TankStoredKwh;
             rows.Add(new HourResult(hour.LocalTime, hour.TotalHeatKwh, hour.SpaceHeatKwh,
-                hour.HotWaterKwh, applied.TargetLoadPerServer, actual, produced, direct,
-                charge, discharge, tankKwh, dump, backup,
+                hour.HotWaterKwh, applied.TargetLoadPerServer, actual, produced, balance.DirectUsedKwh,
+                balance.TankChargeKwh, balance.TankDischargeKwh, tankKwh, balance.DumpedHeatKwh,
+                balance.BackupHeatKwh,
                 actual * count * p.ServerElectricKw.Value * p.HoursPerStep.Value));
         }
         double space = demand.Sum(x => x.SpaceHeatKwh), hot = demand.Sum(x => x.HotWaterKwh);

@@ -1,3 +1,5 @@
+> Completed prototype: user-verified Xonotic browser gameplay and Intel graphics experiment merged in PR #22 (56501a7). CS2 remains deferred, not verified. Reusable runtime follow-up completed in T-40; current guide: ../gaming-profiles.md. Historical milestones below retain their original pending states.
+
 # T-39: Intel browser gaming compatibility experiment
 
 Owner: Nikita / Codex. Branch: featur-gaming. Status: in progress, streaming stack choice pending.
@@ -46,3 +48,9 @@ Dozen experiment now passes Intel GPU enumeration and vkcube render/presentation
 Dozen experiment code pushed 2e67a0c in PR #22. Final PS5.1 build, enumeration and render pass; login diagnostic helper verifies 200 with local C credentials and 401 without/wrong credentials. User browser login unresolved, asked Incognito + correct C password field. User requested smaller game; recommended Xonotic and asked selection versus SuperTuxKart; no game install yet.
 
 User selected Xonotic instead of CS2 and confirmed C login works. Preparing checksum-verified official original game image; no client install or code modifications. Uniform wallpaper mode applied to C, image sizing issue no longer addressed by stretch. Manual presentation launch first; automatic shared-scheduler runtime integration remains pending.
+
+Xonotic is running on C: unmodified official release checksum verified, non-root desktop, Intel OpenGL, assets and stereo audio startup checks pass under Windows PowerShell 5.1. User browser gameplay confirmation requested; gamepad warning remains. Fixed probe quoting to reject empty-output render false positives. Multi-site automatic launch integration remains pending; game is currently manually launched.
+
+User confirmed Xonotic works on their machine and requested a technical explanation plus cleanup BEFORE live distribution integration. Scope: behavior-preserving gaming C#/PowerShell refactors and a consolidated architecture guide. No container restart, active-session interruption, model change or new stack choice planned. Existing .vs user files retained.
+
+Cleanup complete: existing data records moved to GamingModels.cs without contract changes; SessionPlacement validation/candidate selection named explicitly; common label lookup and PS5.1 HTTP helpers replace duplication. Added gaming/DigitalHeat.Gaming.sln, clean build with zero warnings/errors. 14 gaming + 40 Core tests pass, assignment demo unchanged, A/B/C auth and live Xonotic startup checks pass. No process/container restart. Current guide: docs/gaming-architecture.md. Live distribution integration still pending; ticket remains in progress.

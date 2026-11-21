@@ -1,0 +1,82 @@
+% Paper draft (T-22): heat-led computing in homes.
+% Build: latexmk -pdf main.tex   (see README.md)
+% Every number in this draft is copied from a file in the repository; the file and the command
+% that reproduces it are named in the text or in the table caption.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % break long URLs anywhere
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=green!40!black,
+  urlcolor=blue!60!black}
+
+\sisetup{group-separator={,}, group-minimum-digits=4, detect-all}
+\DeclareSIUnit\chf{CHF}
+
+% Long file paths in \texttt: allow line breaks rather than overfull lines.
+\sloppy
+\setlength{\emergencystretch}{3em}
+
+% Visible markers for unfinished content.
+% \todo{...}    : text that still has to be written (skeleton section, missing source).
+% \pending{...} : a result that is being computed right now (LP experiment runs).
+\newcommand{\todo}[1]{\textcolor{red!75!black}{\textbf{[TODO:~#1]}}}
+\newcommand{\pending}[1]{\textcolor{orange!85!black}{\textbf{[pending]}\if\relax\detokenize{#1}\relax\else~#1\fi}}
+
+% Notation
+\newcommand{\Sites}{\mathcal{S}}
+\newcommand{\Win}{\mathcal{T}_\tau}
+\newcommand{\Coh}{\mathcal{C}}
+
+\title{Heat-led computing in homes:\\
+  scheduling, sizing and economics of servers that heat a house\\[0.5ex]
+  \large Draft \textemdash{} not reviewed by the team}
+\author{Team Awkward Turtles \todo{authors and order}}
+\date{Draft of 21 November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Servers turn almost all of their electricity into heat, while homes pay for heat. We study when
+distributed servers in residential buildings can deliver useful heat \emph{and} useful computing.
+For a reference house in Basel (2025 hourly weather, \qty{31231}{kWh} heat demand a year), heat
+demand needs 12.5 servers in the coldest hour but 0.6 in summer. We formulate heat-led job routing
+as a rolling-horizon linear programme that contains the greedy heat-following scheduler as a special
+case. A demonstrator shows that the same scheduler code pauses and resumes real containerised
+workloads (LLM batch inference, research simulation) on a laptop. With 4 servers the house covers
+\qty{58.0}{\percent} of its heat demand with no heat dumped at \qty{64.7}{\percent} utilisation.
+Electricity net of the used heat costs CHF~0.226 per server-hour, but full cost on consumer GPUs is
+CHF~0.956. On a single house the greedy rule is already optimal; the value of planning and routing
+arises in a network, where paid work with deadlines can move to year-round heat sinks. We show that
+\todo{hardware staging by load duration} and \todo{routing results of the LP} change this, and state
+the prices below which the model does not pay off.
+\end{abstract}
+
+\input{sections/01-introduction}
+\input{sections/02-related-work}
+\input{sections/03-case}
+\input{sections/04-system-model}
+\input{sections/05-scheduling}
+\input{sections/06-economics}
+\input{sections/07-demonstrator}
+\input{sections/08-evaluation}
+\input{sections/09-limits}
+\input{sections/10-conclusion}
+
+\appendix
+\input{sections/appendix-reproducibility}
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

@@ -1,3 +1,5 @@
+> RETIRED by user request in T-40. Webhosting is withdrawn; do not resume this feature. Preserve this ticket as historical context.
+
 # T-36: Connect hosting request routing to the shared heat scheduler
 
 - **Tier:** 2 Pitch · **Area:** Hosting / scheduler integration

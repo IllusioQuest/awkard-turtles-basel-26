@@ -32,10 +32,17 @@ later.
 | [0018](0018-two-job-types-strategy.md) | Two job types: sovereign AI services (Type 1) + batch compute filler (Type 2), job model of T-34 | proposed (Ennio); hardware split superseded by 0019; Type 1 contents superseded by 0020 |
 | [0019](0019-gpu-nodes-for-all-job-types.md) | GPU nodes for all job types, no CPU-only servers (Type 2 runs on Type 1 hardware) | proposed (Ennio); partly supersedes 0018; team confirmation pending |
 | [0020](0020-business-model-operator-two-job-types.md) | Business model (provisional): operator model, Type 1 = batch LLM on non-personal documents, Type 2 = research simulations | proposed (Jona); partly supersedes 0018; reviewed (go with changes); team confirmation pending |
+| [0024](0024-network-scheduler-engine.md) | Network scheduler engine: INetworkScheduler, DigitalHeat.Network(.Lp), OR-Tools GLOP, shared HeatBalance | proposed (Jona); reviewed (go with changes, applied) |
+| [0025](0025-network-work-allocation-and-map-export.md) | Network work allocation (Type 1 cohorts, filler, simulated moves), strategies B1-jobs/B2/LP, map export contract, Swiss test dataset rule | proposed (Jona); reviewed (go with changes, applied) |
 
 | [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
 
 | [0022](0022-gaming-heat-capacity-placement.md) | Shared useful heat capacity and atomic gaming reservations | proposed; user approved ranking, reviewed with changes |
 
 | [0023](0023-intel-dozen-vulkan-experiment.md) | Isolated Mesa Dozen Vulkan build for Intel WSL | proposed; user approved experiment, reviewed with changes |
-| [0024](0024-mixed-job-queue.md) | Finite jobs and sold filler capacity in one C# year run | proposed; user approved T-31, reviewed with changes |
+| [0031](0031-mixed-job-queue.md) | Finite jobs and sold filler capacity in one C# year run | proposed; user approved T-31, reviewed with changes |
+
+| [0026](0026-profile-driven-gaming-runtime.md) | Profile-driven C# gaming runtime and retirement of webhosting | proposed; user authorized, reviewed with changes, implemented PR #22; team acceptance pending |
+| [0029](0029-type1-heat-budget-reservation.md) | Reserve heat-led capacity for Type 1 (B1-reserve/B2-reserve control; LP-persist dropped) | accepted as control experiment (T-12) |
+| [0030](0030-transfer-delay.md) | Transfer delay for moved Type 1 work (amends 0025 §3; data staged at arrival) | proposed; reviewed with changes (T-12) |
+

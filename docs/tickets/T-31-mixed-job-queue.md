@@ -17,7 +17,7 @@ heat-led target as "unlimited jobs" at the pinned price. Results are reported pe
 
 ## Tasks
 
-- [x] Scenario format: `mixed` accepts finite job types and one filler with sourced prices and sold-capacity share (decision 0024).
+- [x] Scenario format: `mixed` accepts finite job types and one filler with sourced prices and sold-capacity share (decision 0031).
 - [x] Priority: Type 1 before Type 2 within the heat target; Type 2 cannot use the dump policy.
 - [x] Results per type: server-hours, income, missed deadlines (Type 1 only), plus the case key figures for the whole house.
 - [x] Cross-check: with zero Type 1 arrivals and fully sold filler, the physical result equals the unlimited run (58.0 % coverage, 0 kWh dumped, 22,661 server-hours, break-even 0.226).
@@ -33,3 +33,4 @@ fixture is runnable now; it is **not** a demand forecast or the decision-0020 pi
 ## Rules
 
 - Follow AGENTS.md: agree the approach with your human first (§10), build on the shared C# core and data (§9a), every number with a source (§5), update `docs/status.md`.
+

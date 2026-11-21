@@ -1,0 +1,12 @@
+# Experimental: D3D12 OpenGL access is independent of Vulkan and hardware encoding.
+# Applies only to node A so node B remains a software baseline.
+services:
+  session-a:
+    devices: ["/dev/dxg:/dev/dxg"]
+    volumes:
+      - /usr/lib/wsl/lib:/usr/lib/wsl/lib:ro
+      - /usr/lib/wsl/drivers:/usr/lib/wsl/drivers:ro
+    environment:
+      LD_LIBRARY_PATH: /usr/lib/wsl/lib
+      GALLIUM_DRIVER: d3d12
+      MESA_D3D12_DEFAULT_ADAPTER_NAME: Intel

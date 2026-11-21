@@ -20,3 +20,14 @@ plus a concrete rollout plan, recorded fallback for the demo.
 | Q&A | **Evidence** | assumptions table, method docs, verification script, source CSVs | T-06, T-13 |
 
 The "by the way" ending only works if another location really runs live (T-10, weather by coordinates).
+
+## Visual reference for the pitch video (2026-11-21)
+
+From a winning pitch at another hackathon (traffic planning; we take only the visual language):
+- **Dark map with a glowing overlay on the network** (green → yellow → red/purple), compact toggles in a
+  corner (for us: `HEAT` / `JOBS` / `FLOW`).
+- **Split-screen with a draggable divider** comparing two strategies on the same map (for us: greedy /
+  always-on vs. our LP router, T-12), labels top left/right, tabs "Formalization" and "Comparison".
+- **Ending: zoom out continuously until the whole 3D globe is visible**, which carries our
+  "Oh, and by the way: any location" ending (T-10, weather by coordinates).
+Feeds T-17 (admin map) and T-12 (map export, decision 0025).

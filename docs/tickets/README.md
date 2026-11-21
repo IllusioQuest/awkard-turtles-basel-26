@@ -22,29 +22,30 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-08](T-08-explorer-fixes.md) | Year explorer: fixes from the review | 2 Pitch | – | Claude (team lead's session) | | open |
 | [T-09](T-09-site-heat-state-forecast.md) | Per-site heat state and forecast | 2 Pitch | T-00 | Codex | Nikita / Codex | done (PR #5 merged) |
 | [T-10](T-10-multi-site-network.md) | Generic sites and network model | 2 Pitch | T-09 | Codex | | open |
-| [T-11](T-11-routing-optimisation-model.md) | Routing as an optimisation problem: formal model | 2 Pitch | T-09, T-10 | team + Claude (needs discussion) | Team lead / Claude (subagent) | draft ready for team review (decision 0014) |
-| [T-12](T-12-routing-algorithms.md) | Routing baselines and optimiser | 2 Pitch | T-11, T-05 | Codex | | open |
+| [T-11](T-11-routing-optimisation-model.md) | Routing as an optimisation problem: formal model | 2 Pitch | T-09, T-10 | team + Claude (needs discussion) | Team lead / Claude (subagent) | done as draft (PR #13 merged, decision 0014 proposed; team review pending) |
+| [T-12](T-12-routing-algorithms.md) | Routing baselines and optimiser | 2 Pitch | T-11, T-05 | Codex | Jona / Claude | in progress (Claude, takeover 2026-11-21): steps 1–2 on main; step 3 validation + experiments A/B/D done, LP experiments running; decision 0029 |
 | [T-13](T-13-results-datasets-contract.md) | Result datasets and data contract for UIs and paper | 2 Pitch | T-05 | Codex | Nikita / Codex | done (PR #10 merged) |
-| [T-14](T-14-economics-actors.md) | Economics per actor, ownership models, heating-cost alternatives | 2 Pitch | T-15 | Codex or Jona | Team lead / Claude (subagent) | in progress (branch feat/T-14-economics) |
-| [T-15](T-15-hardware-profiles.md) | Hardware profiles: CPU vs GPU | 2 Pitch | T-00 | anyone | Team lead / Claude (subagent) | in review |
+| [T-14](T-14-economics-actors.md) | Economics per actor, ownership models, heating-cost alternatives | 2 Pitch | T-15 | Codex or Jona | Team lead / Claude (subagent) | in review (PR #27, decision 0026) — reconcile with decision 0020 before merge |
+| [T-15](T-15-hardware-profiles.md) | Hardware profiles: CPU vs GPU | 2 Pitch | T-00 | anyone | Team lead / Claude (subagent) | done (PR #14 merged) |
 | [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | | open |
-| [T-17](T-17-admin-dashboard.md) | Admin dashboard (DigitalHeat) | 3 Pitch stretch | T-13, T-00 (UI stack) | anyone (Lovable possible) | | open |
-| [T-18](T-18-owner-dashboard.md) | Server-owner dashboard (host, private) | 3 Pitch stretch | T-13 | anyone | | open |
+| [T-17](T-17-admin-dashboard.md) | Admin dashboard (DigitalHeat) | 3 Pitch stretch | T-13, T-00 (UI stack) | anyone (Lovable possible) | Ennio / Claude | in progress (`web/`, /admin, mock data first) |
+| [T-18](T-18-owner-dashboard.md) | Server-owner dashboard (host, private) | 3 Pitch stretch | T-13 | anyone | Ennio / Claude | in progress (`web/`, /household, mock data first) |
 | [T-19](T-19-customer-configurator.md) | Customer configurator and cost-benefit analysis (public) | 3 Pitch stretch | T-10, T-14 | anyone | | open |
 | [T-20](T-20-marketing-website.md) | Marketing website | 4 Later | T-19 | open | | open |
 | [T-21](T-21-pitch.md) | Pitch storyboard, demo script and slides | 2 Pitch | T-00 | team lead + Claude | Team lead / Claude | in progress (storyboard direction agreed: docs/pitch/storyboard.md) |
 | [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | Jona / Claude | in progress (skeleton on main) |
-| [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | in progress |
+| [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | retired by user request (T-40) |
 | [T-24](T-24-job-data-locality.md) | Enforce job data locality before execution | 1 Draft | T-01; T-10/T-12 for routing | Codex | Jona / Codex | in progress |
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | Jona / Codex (previous attempt) | paused — unfinished; user stopped visual work, PR #17 closed |
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
-| [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | PR #11 open |
+| [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | done (PR #11 merged; 0.66 pinned, 0.687 live cross-check) |
 | [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | Jona / Claude | done (measured, LiveRun-tested) |
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decisions 0018, 0020 | Jona / Codex | Jona / Codex | in review (draft PR #25; technical scenario only) |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | done (merged 2026-11-21; Type 1 under decision 0020) |
 | [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | done (PR #20) |
-| [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | in progress |
+| [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | done (PR #26 merged) |
+| [T-41](T-41-client-calculator-web.md) | Web dashboard v1: client heating cost and break-even calculator (shared dark styling) | 2 Pitch | decision 0020 | Ennio | Ennio / Claude | dropped (calculator removed on request; styling kept for T-17/T-18) |
 
 ## Dependency sketch
 
@@ -60,13 +61,15 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 ## Hosting follow-up
 | ID | Title | Owner | Status |
 |---|---|---|---|
-| [T-27](T-27-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | PR #12 ready for review |
+| [T-27](T-27-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | retired by user request (T-40) |
 
 
-| [T-36](T-36-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | in review (PR #19; depends on #12) |
+| [T-36](T-36-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | retired by user request (T-40) |
 | [T-34](T-34-business-model-v2.md) | Business model v2: sovereign GPU cloud that heats homes profitably | 2 Pitch | T-14, T-35, T-11/T-12 | team lead + Claude | Team lead / Claude | in progress (provisionally fixed: decision 0020, docs/business-model.md) |
 
 
 | [T-38](T-38-hybrid-service-review.md) | Review hybrid GPU/CPU service proposal | Nikita / Codex | done: analysis only; implementation awaits user choice |
 
-| [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | in progress: stack choice pending |
+| [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | done: verified Xonotic prototype (PR #22); CS2 deferred |
+
+| [T-40](T-40-gaming-profiles.md) | Reusable gaming profiles and retire webhosting | Nikita / Codex | done (PR #22) |

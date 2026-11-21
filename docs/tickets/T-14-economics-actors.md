@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Core / economics
 - **Depends on:** T-15
-- **Suggested owner:** Codex or Jona  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress (branch `feat/T-14-economics`)
+- **Suggested owner:** Codex or Jona  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in review (PR #27, decision 0026) — reconcile with decision 0020 before merge
 
 ## Goal
 
