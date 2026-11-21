@@ -4,7 +4,7 @@
 
 - **Tier:** 2 Pitch · **Area:** Hosting / scheduler integration
 - **Depends on:** T-09, T-24, T-27
-- **Owner:** Nikita / Codex · **Status:** in review: PR #19; depends on PR #12
+- **Owner:** Nikita / Codex · **Status:** retired by user request (T-40)
 
 ## Goal
 Route requests within separate frontend/API pools using the existing heat scheduler's decisions,

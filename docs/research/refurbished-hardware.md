@@ -211,7 +211,7 @@ year ÷ 5,665 = 0.565. Ops = 708 ÷ 5,665 = 0.125. Wear = 11.964 × 0.09 × 1.5 
   ([Resource Recycling](https://resource-recycling.com/e-scrap/2026/01/22/server-resale-values-surge-in-ai-driven-secondary-it-markets/)),
   so cheap supply is not guaranteed.
 
-## 7. Check of `creative-ideas.md` idea #5 ("GPU retirement home")
+## 7. Check of `ideas.md` idea #5 ("GPU retirement home")
 
 The idea assumes used GPUs at **50 % of the new price [A]** and computes an L4 break-even of
 ≈ CHF 0.86 (from 1.36).

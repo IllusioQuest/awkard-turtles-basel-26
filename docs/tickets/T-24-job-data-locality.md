@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Job catalog / placement
 - **Depends on:** T-01 job descriptor, T-10/T-12 for multi-site routing
-- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** in progress
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** done (PR #9 merged)
 
 ## Goal
 

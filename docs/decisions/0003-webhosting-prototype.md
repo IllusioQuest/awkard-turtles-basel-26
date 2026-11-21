@@ -1,6 +1,6 @@
 # 0003: Resilient local webhosting prototype
 
-- **Status:** proposed
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed
 - **Date:** 2026-11-20
 - **Decided by:** user approved stack/structure/DTO approach; team confirmation pending
 
@@ -12,7 +12,7 @@ This is an isolated hosting task, not a replacement for the reference-house must
 
 ## Decision
 
-Propose the stack, projects and DTOs in [the design proposal](../webhosting-design-proposal.md).
+Propose the stack, projects and DTOs in the design proposal (`docs/webhosting-design-proposal.md`, removed in the repo cleanup; see git history).
 Use ASP.NET Core/YARP, node-local Docker engines and existing etcd consensus with fenced execution.
 First prove a stable browser endpoint with redundant gateways in the user's Windows/Docker Desktop
 environment; ingress details still require approval and verification. Then implement reconciliation.

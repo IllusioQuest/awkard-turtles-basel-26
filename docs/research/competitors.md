@@ -9,7 +9,7 @@ are not independently verified. No number here is used in a scored figure.
 
 Context for reading: our own findings so far are that hardware cost dominates
 ([`hardware.md`](hardware.md)), sourced premium demand fills < 1 % of capacity
-([`job-demand.md`](job-demand.md)), and a pure profit maximiser runs always-on and dumps heat
+([`demand.md`](demand.md)), and a pure profit maximiser runs always-on and dumps heat
 ([`../model/routing-optimisation.md`](../model/routing-optimisation.md) §5.4).
 
 ## 1. Overview

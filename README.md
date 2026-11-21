@@ -177,4 +177,4 @@ CPU load; it does not establish electrical power or recovered heat. See
 [`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
 
 
-For the separate user-requested browser gaming prototype, see [gaming runtime profiles](docs/gaming-profiles.md). The webhosting feature has been retired.
+For the separate user-requested browser gaming prototype, see [gaming prototype](docs/gaming.md). The webhosting feature has been retired.

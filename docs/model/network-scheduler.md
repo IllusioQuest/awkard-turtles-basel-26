@@ -70,7 +70,7 @@ Runtime: about 45 s per rolling-horizon year (8,760 solves of three stages), 2 s
   1,090 documents per 1 kW server-hour from T-33). Volume is a **labelled scenario**: a share of the
   origin's yearly heat-led server-hours (no sourced arrival rate exists, decision 0020).
 - **Type 2** filler: research simulation, no deadline, available φ × servers per hour (φ = 1 is the
-  case-permitted "unlimited jobs"; φ = 0.35 from `docs/research/filler-demand.md`).
+  case-permitted "unlimited jobs"; φ = 0.35 from `docs/research/demand.md`).
 - One ledger attributes the achieved load: Type 1 earliest deadline first, filler last. Moves are
   simulated flows only (no data transfer delay or cost yet, `TODO(source)`).
 - Strategies (all heat-led hard: no dumping):

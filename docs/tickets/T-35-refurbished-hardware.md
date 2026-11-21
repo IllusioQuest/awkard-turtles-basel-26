@@ -32,7 +32,7 @@ and lower work per kWh than new generations.
 ## Read first
 
 - `docs/research/hardware.md`, `config/hardware/*.json`
-- `docs/research/competitors.md` (lesson 6), `docs/research/filler-demand.md`
+- `docs/research/competitors.md` (lesson 6), `docs/research/demand.md`
 
 ## Rules
 
