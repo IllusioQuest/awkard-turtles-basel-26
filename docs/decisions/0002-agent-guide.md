@@ -11,7 +11,7 @@ need shared rules for priorities, code quality, reviews, Git and deadlines.
 
 ## Decision
 
-`AGENTS.md` is the single guide for all tools (`CLAUDE.md` and `GEMINI.md` only import it). Main
+`AGENTS.md` is the single guide for all tools (`CLAUDE.md` and `GEMINI.md` only import it; `GEMINI.md` was later removed as unused). Main
 points: the case is the case owner's view, not our plan; must-haves first; no hard-coded values;
 core logic tested, presentation not; important decisions get a decision record plus a
 fresh-context review ([`../agents/review.md`](../agents/review.md)); feature branches + PRs, agents

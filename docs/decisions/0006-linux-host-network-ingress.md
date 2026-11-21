@@ -1,6 +1,6 @@
 # 0006: Linux host-network ingress experiment
 
-- **Status:** proposed; user approved the Linux-only experiment and host-network setting; team confirmation pending
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; user approved the Linux-only experiment and host-network setting; team confirmation pending
 - **Date:** 2026-11-20
 - **Decided by:** webhosting contributor and user
 
@@ -32,7 +32,7 @@ Same-URL crash recovery is measurable, with interrupted requests recorded rather
 Outer Desktop networking, kernel and laptop remain shared test infrastructure.
 Gateway/container pause recovery and role placement require a further user-approved design.
 No controller resilience, automatic rescheduling, production HA or scored heat result is claimed.
-See [runtime guide](../webhosting-runtime.md) for measurements and reproducible commands.
+See the runtime guide (`docs/webhosting-runtime.md`, removed in the repo cleanup; see git history) for measurements and reproducible commands.
 
 ## Review
 

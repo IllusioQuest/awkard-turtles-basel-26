@@ -12,9 +12,9 @@
 | [WP1](#wp1-priced-ai-services-and-compute-prices) | Priced AI services and compute prices | 2 (market) + 1 (income) | Claude subagent (first version) | `docs/research/ai-services.md`, `data/raw/market/ai-services.csv`, `data/raw/market/compute-prices.csv` |
 | [WP2](#wp2-costs-and-energy-prices) | Costs and energy prices | 1 (financial) | Codex (GPT-6 Astra); status: first version | `docs/research/costs-and-energy.md`, `data/raw/market/costs.csv`, `data/raw/market/energy-prices.csv` |
 | [WP3](#wp3-sites-and-heat-demand-profiles) | Sites and heat-demand profiles | 2 (customers) + 3 (physics input) | Claude subagent (**first version**, 2026-11-20) | `docs/research/sites-and-profiles.md`, `data/raw/sites/site-types.csv`, `data/raw/sites/when2heat/` |
-| T-37 | Profitability inputs: R1 power, R2 purchase cost, R3 household capacity (Basel-Stadt → CH), R4 compute demand, R5 trends to 2030 | 1 + 2 | Ennio / Claude subagents (first version, 2026-11-21) | `power-efficiency.md`, `purchase-cost.md`, `household-capacity.md`, `compute-demand.md`, `trends-2030.md`, synthesis [`profitability-inputs.md`](profitability-inputs.md); one CSV each in `data/raw/market/` |
+| T-37 | Profitability inputs: R1 power, R2 purchase cost, R3 household capacity (Basel-Stadt → CH), R4 compute demand, R5 trends to 2030 | 1 + 2 | Ennio / Claude subagents (first version, 2026-11-21) | `power-efficiency.md`, `purchase-cost.md`, `household-capacity.md`, `demand.md` (R4, merged with the job and filler demand notes), `trends-2030.md`, synthesis [`profitability-inputs.md`](profitability-inputs.md); one CSV each in `data/raw/market/` |
 
-Service brainstorm and current main plan (audio to text, document AI): [`service-brainstorm.md`](service-brainstorm.md).
+Ideas (service brainstorm and current main plan: audio to text, document AI; residential profit ideas): [`ideas.md`](ideas.md). Demand (sourced transcription scenario, compute demand to 2030, filler marketplaces, fill rate and price): [`demand.md`](demand.md); it feeds WP1 (income) and T-37 R4.
 
 Not planned yet (later or on request): competitors in heat-from-compute (Qarnot, Heata, Deep Green,
 Cloud&Heat, Nerdalize), regulation (data protection, Legionella), server power curves.

@@ -19,7 +19,7 @@ Feeds T-14 (economics) and T-34 (business model v2); no second economic model.
 - [x] R3 Capacity from real households: building stock of Basel-Stadt and CH (GWR), heating
       systems, heat and hot-water demand per type → network capacity in server-hours per year → `household-capacity.md`, `household-capacity.csv`
 - [x] R4 Demand for compute today and to 2030: Type 1 (transcription, LLM tokens), Type 2
-      (research HPC, finance Monte Carlo, batch/spot market), seasonality → `compute-demand.md`, `compute-demand.csv`
+      (research HPC, finance Monte Carlo, batch/spot market), seasonality → `demand.md`, `compute-demand.csv`
 - [x] R5 Trends to 2030: performance per W, hardware prices, price per token, electricity prices → `trends-2030.md`, `trends-2030.csv`
 - [x] Synthesis `profitability-inputs.md`: parameter table and two worked calculations (profit per
       house and year; network capacity vs. demand)

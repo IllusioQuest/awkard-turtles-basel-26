@@ -23,6 +23,8 @@ public sealed class JobQueueExecutor : IExecutor
     private readonly int[] completed;
     private readonly int[] missed;
     private readonly double[] workUnitsProcessed;
+    private readonly double[] serverHoursByType;
+    private double fillerServerHours;
     private bool hourStarted;
     private int nextStep;
 
@@ -30,7 +32,7 @@ public sealed class JobQueueExecutor : IExecutor
         int horizonSteps, double serverCount, double hoursPerStep)
     {
         scenario.Validate();
-        if (scenario.Mode != "finite" || hoursPerDay <= 0 || horizonSteps <= 0
+        if (scenario.Mode is not ("finite" or "mixed") || hoursPerDay <= 0 || horizonSteps <= 0
             || !double.IsFinite(serverCount) || serverCount <= 0
             || !double.IsFinite(hoursPerStep) || hoursPerStep <= 0)
             throw new ArgumentException("Invalid finite queue dimensions.");
@@ -47,6 +49,7 @@ public sealed class JobQueueExecutor : IExecutor
         arrived = new int[count]; dueWithinHorizon = new int[count];
         completed = new int[count]; missed = new int[count];
         workUnitsProcessed = new double[count];
+        serverHoursByType = new double[count];
     }
 
     /// <summary>Arrivals occur at local 00:00; dueStep is the exclusive deadline boundary.</summary>
@@ -75,7 +78,10 @@ public sealed class JobQueueExecutor : IExecutor
         if (!hourStarted) throw new InvalidOperationException("BeginHour must precede execution.");
         double capacityServerHours = serverCount * hoursPerStep;
         double availableServerHours = pending.Sum(x => x.RemainingServerHours);
-        double cappedTarget = Math.Min(targetLoadPerServer, availableServerHours / capacityServerHours);
+        double fillerCapacityServerHours = scenario.Mode == "mixed"
+            ? capacityServerHours * scenario.Filler!.SoldCapacityShare.Value : 0;
+        double cappedTarget = Math.Min(targetLoadPerServer,
+            (availableServerHours + fillerCapacityServerHours) / capacityServerHours);
         double achieved = inner.ApplyTargetLoad(cappedTarget);
         if (!double.IsFinite(achieved) || achieved < 0 || achieved > cappedTarget + LoadTolerance)
             throw new InvalidOperationException("Executor achieved more load than available job work.");
@@ -86,8 +92,15 @@ public sealed class JobQueueExecutor : IExecutor
             double used = Math.Min(job.RemainingServerHours, remainingToApply);
             job.RemainingServerHours -= used;
             remainingToApply -= used;
+            serverHoursByType[job.TypeIndex] += used;
             workUnitsProcessed[job.TypeIndex] += used * scenario.JobTypes[job.TypeIndex].WorkUnitsPerServerHour.Value;
             if (job.RemainingServerHours == 0) completed[job.TypeIndex]++;
+        }
+        if (remainingToApply > LoadTolerance)
+        {
+            if (scenario.Mode != "mixed" || remainingToApply > fillerCapacityServerHours + LoadTolerance)
+                throw new InvalidOperationException("Executed work exceeds sold filler capacity.");
+            fillerServerHours += remainingToApply;
         }
         pending.RemoveAll(x => x.RemainingServerHours == 0);
         hourStarted = false;
@@ -104,10 +117,17 @@ public sealed class JobQueueExecutor : IExecutor
             type.WorkUnit, arrived[index], dueWithinHorizon[index], completed[index], missed[index],
             pending.Count(x => x.TypeIndex == index), workUnitsProcessed[index],
             pending.Where(x => x.TypeIndex == index).Sum(x => x.RemainingServerHours)
-                * type.WorkUnitsPerServerHour.Value)).ToArray();
+                * type.WorkUnitsPerServerHour.Value, serverHoursByType[index],
+            type.PriceChfPerServerHour is null ? null
+                : serverHoursByType[index] * type.PriceChfPerServerHour.Value,
+            dueWithinHorizon[index] == 0 ? null
+                : 100.0 * missed[index] / dueWithinHorizon[index])).ToArray();
+        FillerJobSummary? filler = scenario.Filler is null ? null : new FillerJobSummary(
+            scenario.Filler.Id, scenario.Filler.WorkUnit, scenario.Filler.SoldCapacityShare.Value,
+            fillerServerHours, fillerServerHours * scenario.Filler.PriceChfPerServerHour.Value);
         int due = dueWithinHorizon.Sum(), missedCount = missed.Sum();
         return new JobSummary(arrived.Sum(), due, completed.Sum(), missedCount, pending.Count,
-            due == 0 ? null : 100.0 * missedCount / due, byType);
+            due == 0 ? null : 100.0 * missedCount / due, byType, filler);
     }
 
     private void Expire(int step)

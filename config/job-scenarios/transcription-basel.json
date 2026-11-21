@@ -1,7 +1,7 @@
 {
   "mode": "finite",
   "excessHeatPolicy": "wait",
-  "source": "docs/research/job-demand.md: base case, all medical dictations of the private-practice physicians of canton Basel-Stadt routed to one reference house (deliberately generous customer base); heat-led wait policy as in unlimited.json. Scenario variant, not a case requirement.",
+  "source": "docs/research/demand.md: base case, all medical dictations of the private-practice physicians of canton Basel-Stadt routed to one reference house (deliberately generous customer base); heat-led wait policy as in unlimited.json. Scenario variant, not a case requirement.",
   "jobTypes": [
     {
       "id": "medical-dictation-basel",
@@ -10,7 +10,7 @@
       "arrivalsPerDay": {
         "value": 428,
         "unit": "jobs/day",
-        "source": "docs/research/job-demand.md: 1,269 practising physicians in Basel-Stadt (415 primary-care physicians = 32.7 % of all, Jan 2024, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf, search snippet, accessed 2026-11-21) x 66.71 audio min per physician per month (median, Bax et al. 2011, Health Econ Rev 1:8, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/, abstract, accessed 2026-11-21) x 12/365 months per day / 6.5 audio min per job = 428.2, rounded down"
+        "source": "docs/research/demand.md: 1,269 practising physicians in Basel-Stadt (415 primary-care physicians = 32.7 % of all, Jan 2024, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf, search snippet, accessed 2026-11-21) x 66.71 audio min per physician per month (median, Bax et al. 2011, Health Econ Rev 1:8, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/, abstract, accessed 2026-11-21) x 12/365 months per day / 6.5 audio min per job = 428.2, rounded down"
       },
       "workUnitsPerJob": {
         "value": 6.5,

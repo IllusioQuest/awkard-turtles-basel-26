@@ -1,6 +1,6 @@
 # 0012: Component-isolated hosting lab
 
-- **Status:** proposed; user approved component isolation scope
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; user approved component isolation scope
 - **Date:** 2026-11-21
 - **Decided by:** Nikita (implementation approval; team confirmation pending)
 

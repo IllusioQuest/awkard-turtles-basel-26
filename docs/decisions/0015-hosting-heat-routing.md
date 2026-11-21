@@ -1,6 +1,6 @@
 # 0015: Hosting routing adapter for shared heat decisions
 
-- **Status:** proposed; awaiting user choice
+- **Status:** superseded by 0026 (webhosting retired, docs removed in the repo cleanup). Was: proposed; awaiting user choice
 - **Date:** 2026-11-21
 - **Decided by:** pending Nikita; team confirmation pending
 

@@ -1,38 +1,35 @@
 # AGENTS.md
 
-Instructions for AI coding agents (Claude Code, OpenAI Codex, Gemini CLI, ...) in this repository.
-Read this file completely at the start of every session. It is short on purpose; follow the links
-only when your task needs them.
+Instructions for AI coding agents (Claude Code, OpenAI Codex, ...) in this repository. Read this
+file completely at the start of every session. **Then read only what your task needs:** your
+ticket, the files it names, and the indexes (`docs/tickets/README.md`, `docs/decisions/README.md`).
+Do not read all tickets, decisions or research files.
 
 ## 1. Project and status
 
 - **Event:** Basel GreenTech 2026 hackathon, case **DigitalHeat** ("Useful heat from computing").
-  Team **Awkward Turtles**, 3 people, each working with their own agents in parallel.
-- **The case text and the deep-dive notes are the case owner's view, not our plan.** We are free in
-  what we build: in effect we design a business model for DigitalHeat and then simulate it.
-- **Our direction (draft, to be confirmed by the team):** [`docs/vision.md`](docs/vision.md). It
-  must pay off for the host (e.g. a homeowner) *and* for DigitalHeat; work is built in tiers, and
-  tier 1 (must-haves for the draft) comes before everything else. Do not derive further product
+  Team **Awkward Turtles**, 3 people, each with their own agents in parallel.
+- **The case text and deep-dive notes are the case owner's view, not our plan.** We design a
+  business model for DigitalHeat and simulate it. Our direction: [`docs/vision.md`](docs/vision.md)
+  (draft) and the business model in [`docs/business-model.md`](docs/business-model.md) (decision
+  0020, provisional). It must pay off for the host *and* for DigitalHeat. Do not derive product
   direction from the case owner's examples.
-- **Long-term direction:** a general simulation of *any* location with a network of computing and
-  heat sites over time, solid enough that we might write a paper about it. This is why generality,
-  reproducibility and decision records matter from the start.
+- **Long-term:** a general simulation of any location with a network of computing and heat sites,
+  solid enough for a paper. Hence generality, reproducibility and decision records.
 - The case owner suggested a story in three layers: **financial** (money flows over time, sliders
   for when it stops paying off), **marketing** (which priced services we can beat), **physical**
-  (simulation of heat and servers). See [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) §7.
-  Treat this as one option, not a requirement.
-- **Status:** work is organised in **tickets**: [`docs/tickets/README.md`](docs/tickets/README.md).
-  Pick an open ticket that fits your human's task, claim it (owner + status), and keep to its scope.
-  Who works on what right now: [`docs/status.md`](docs/status.md).
-- **Available, not set up yet:** an **ElevenLabs** and a **Lovable** subscription (free for the
-  team). Do not set them up or use them without the team; mention them where they fit (e.g.
-  ElevenLabs as a transcription price point or for pitch audio, Lovable as a dashboard option in
-  the stack decision).
+  (simulation of heat and servers); see `docs/deep-dive/notes-structured.md` §7. One option, not a
+  requirement.
+- **Work is organised in tickets:** [`docs/tickets/README.md`](docs/tickets/README.md). Active
+  branches and coordination: [`docs/status.md`](docs/status.md).
+- **Available, not set up:** ElevenLabs and Lovable subscriptions. Do not use them without the team;
+  mention them where they fit (ElevenLabs as a transcription price point or for pitch audio,
+  Lovable as a dashboard option).
 
 ## 2. Deadlines
 
-All times are Europe/Zurich. `scripts/deadline-reminder.sh` reads the dated rows of this table, so
-keep the format `| YYYY-MM-DD HH:MM | what | notes |` when you edit it.
+All times Europe/Zurich. `scripts/deadline-reminder.sh` reads the dated rows; keep the format
+`| YYYY-MM-DD HH:MM | what | notes |`.
 
 | When | What | Notes |
 |---|---|---|
@@ -47,195 +44,159 @@ unless asked.
 
 | Path | What | Edit? |
 |---|---|---|
-| [`docs/case/challenge.md`](docs/case/challenge.md) | Full case text, verbatim. **Source of truth for scoring.** | never |
-| [`docs/case/DigitalHeat.pdf`](docs/case/DigitalHeat.pdf) | Case presentation slides, original file | never |
-| [`docs/case/DigitalHeat.md`](docs/case/DigitalHeat.md) | Text and figure descriptions of the slides, differences to `challenge.md` | keep as extracted |
-| [`docs/case/key-figures.md`](docs/case/key-figures.md) | Reference-house parameters, must-have checklist, pitch, jury weights | keep in sync |
-| [`docs/case/references.md`](docs/case/references.md) | External sources and where each lives in the repo | yes |
-| [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
-| [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) | Our interpretation of those notes, open questions | yes |
-| [`docs/vision.md`](docs/vision.md) | Our direction: actors, ownership models, building blocks, tiers, paper outline (draft) | yes, with the team |
-| [`docs/tickets/`](docs/tickets/README.md) | Ticket board: every planned task with goal, steps, done criteria, owner, status | claim/update tickets |
-| [`docs/status.md`](docs/status.md) | Work map: who works on what, shared interfaces, integration risks | yes, keep your row current |
-| [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
-| [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
-| [`docs/questions.md`](docs/questions.md) | Open team questions (verbatim, German) and their answers | yes |
-| [`docs/todos.md`](docs/todos.md) | Team task list (verbatim, German) | yes |
-| [`docs/decisions/`](docs/decisions/README.md) | Decision records (ADRs) | new files |
-| [`docs/agents/review.md`](docs/agents/review.md) | How to run a fresh-context review | yes |
-| [`data/`](data/README.md) | Raw and derived data, how to fetch the originals | see rules there |
-| `scripts/fetch_data.py` | Re-download and validate public data | yes |
+| `docs/case/challenge.md` | Full case text, verbatim. **Source of truth for scoring.** | never |
+| `docs/case/DigitalHeat.pdf`, `DigitalHeat.md` | Case slides and their text extraction | never / keep as extracted |
+| `docs/case/key-figures.md` | Reference house, must-have checklist, pitch, jury weights | keep in sync |
+| `docs/case/references.md` | External sources and literature | yes |
+| `docs/deep-dive/notes-verbatim.md` / `notes-structured.md` | Raw deep-dive notes / our interpretation | never / yes |
+| `docs/vision.md`, `docs/business-model.md` | Direction and business model | with the team |
+| `docs/tickets/`, `docs/status.md` | Ticket board; active work and shared interfaces | yes |
+| `docs/decisions/` | Decision records (ADRs) | new files |
+| `docs/model/`, `docs/results/`, `docs/jobs/` | Model docs, result write-ups, measured jobs | yes |
+| `docs/research/` | Research summaries, indexed in its README | yes |
+| `docs/assumptions.md` | Assumptions (ID, value, unit, source) | add rows |
+| `docs/team-notes.md` | Team to-dos and questions (verbatim, German) | yes |
+| `docs/agents/review.md` | How to run a fresh-context review | yes |
+| `src/` | C# core, runners, network scheduler, tests (`DigitalHeat.sln`) | yes |
+| `web/` | Web dashboard (admin map, household view) | yes |
+| `config/` | Parameters: reference house, hardware, jobs, network | yes |
+| `data/` | Raw and derived data; rules in `data/README.md` | see rules |
+| `scripts/` | Data fetch, measurement, export and experiment scripts | yes |
 
 If sources disagree: `challenge.md` > `notes-verbatim.md` > everything else. Read `key-figures.md`
-before any task that touches the model; read `challenge.md` before anything about scoring, the
-reference house, the must-haves or the pitch.
+before touching the model and `challenge.md` before anything about scoring, the reference house,
+the must-haves or the pitch.
 
 ## 4. How we win: priorities
 
-1. **Valid submission first.** The three must-haves in `key-figures.md` are a hard requirement. Get a
-   thin end-to-end version working early (real job paused/resumed by the scheduler, yearly balance,
-   a simple view), then improve it. Do not polish one part while another must-have is missing.
-   Must-have groundwork that does not depend on our vision (e.g. measuring a real workload on a
-   laptop) can start right away.
+1. **Valid submission first.** The three must-haves in `key-figures.md` are hard requirements. Get
+   a thin end-to-end version working early (real job paused/resumed by the scheduler, yearly
+   balance, a simple view), then improve it. Do not polish one part while another must-have is
+   missing.
 2. **Half the score is transparency and feasibility.** Every number traceable, every assumption
-   visible, and an honest statement of when the model does not pay off. A correct, explained
-   number beats an impressive, unexplained one.
-3. **`main` is always demo-ready.** The live demo (January day, July day, interrupted real job) must
-   run on a laptop, without internet, deterministically, and should have a fallback (e.g. a recorded
-   run) in case something fails on stage.
-4. **The WOW effect comes from the story and one or two strong visuals**, plus a real process being
-   paused live. It does not come from the number of features. A homeowner must understand the result
-   in one minute.
-5. **Cut scope instead of leaving things half done.** If a task balloons or you are stuck, stop,
-   report and propose a smaller version.
-6. **Suggest ideas rarely.** Only when an idea clearly raises the score, the WOW effect or removes a
-   real risk: say it in one to three sentences, then carry on with your task. Do not build it unasked.
+   visible, an honest statement of when the model does not pay off. A correct, explained number
+   beats an impressive, unexplained one.
+3. **`main` is always demo-ready.** The live demo (January day, July day, interrupted real job)
+   runs on a laptop, offline, deterministically, with a fallback (e.g. a recorded run).
+4. **WOW comes from the story and one or two strong visuals** plus a real process paused live, not
+   from feature count. A homeowner must understand the result in one minute.
+5. **Cut scope instead of leaving things half done.** If a task balloons, stop, report, propose a
+   smaller version.
+6. **Suggest ideas rarely:** only when they clearly raise the score or remove a real risk, in one
+   to three sentences. Do not build them unasked.
 
 ## 5. Rules from the case (do not break)
 
-1. **The reference house is fixed** for scored figures: exactly the parameters in `challenge.md`
-   (see also `docs/assumptions.md`). Other houses, tanks, prices or locations are welcome **in
-   addition**, labelled as variants, never instead.
-2. **Every number has a source:** case text, a URL plus access date, or our own measurement with
-   how to reproduce it. Never invent a number. If one is missing, leave a visible `TODO(source)` and
-   tell the user.
+1. **The reference house is fixed** for scored figures (parameters in `challenge.md`). Other
+   houses, tanks, prices or locations only **in addition**, labelled as variants.
+2. **Every number has a source:** case text, URL plus access date, or our own reproducible
+   measurement. Never invent one; if missing, leave a visible `TODO(source)` and tell the user.
 3. **The same scheduler code** that produces the yearly balance controls the real running job. No
    separate demo-only control path.
-4. **Units in names:** kW, kWh, °C, CHF, hours (e.g. `heat_demand_kwh`, `price_chf_per_kwh`).
-5. **Time:** hourly steps, local time Europe/Zurich, 24 values per day as in the data
-   (see `data/raw/open-meteo/SOURCE.md`).
+4. **Units in names:** `heat_demand_kwh`, `price_chf_per_kwh`, ...
+5. **Time:** hourly steps, Europe/Zurich, 24 values per day (see `data/raw/open-meteo/SOURCE.md`).
 
 ## 6. Engineering principles
 
-- **Modular and reusable.** Small units with clear interfaces. Core logic (heat physics, storage,
-  scheduling, economics) is independent of UI, files and network, and uses pure functions where
-  sensible, so it can be reused for other locations and later research.
-- **No hard-coded values.** Every fixed number (house, tank, server, prices, efficiencies,
-  thresholds, job types) is defined once, in a central parameter definition, with unit and source,
-  and passed in. The reference house is one parameter set among many; location, house, hardware and
-  prices must be swappable without touching logic. Even universal values get a named constant
-  (`HOURS_PER_YEAR`).
-- **Simulation and reality share interfaces.** The scheduler decides from a heat signal; simulated
-  servers and real processes are executors behind the same interface.
-- **Reproducible runs.** Deterministic (fixed seeds), one documented command per result, every
-  output traceable to its inputs and parameters.
-- **Simple and robust over clever.** Few, well-known dependencies; add one only with a reason.
-  Readable code; formulas get a short docstring with their source.
-- **High quality, but hackathon-sized.** Clean enough that a teammate can extend it tomorrow; no
-  speculative abstractions for features nobody asked for.
+- **Modular:** core logic (heat, storage, scheduling, economics) is independent of UI, files and
+  network; pure functions where sensible.
+- **No hard-coded values:** every fixed number is defined once in `config/` (or a named constant
+  such as `HOURS_PER_YEAR`) with unit and source, and passed in. Location, house, hardware and
+  prices are swappable without touching logic.
+- **Simulation and reality share interfaces:** simulated servers and real processes are executors
+  behind the same `IExecutor`.
+- **Reproducible:** deterministic (fixed seeds), one documented command per result, every output
+  traceable to its inputs and parameters.
+- **Simple and robust:** few well-known dependencies, add one only with a reason; formulas get a
+  short docstring with source.
+- **Hackathon-sized quality:** clean enough for a teammate to extend tomorrow; no speculative
+  abstractions.
 
 ## 7. Testing
 
-- **Test the core logic:** heat balance, storage, scheduler decisions, economics and break-even,
-  data validation. Use the known values from the case as checks (206 heating days, ≈ 27,000 kWh,
-  12.5 servers in the coldest hour, 19.2 kWh per server-day).
-- **No tests for presentation** (layout, plots, styling, copy): check it visually instead, e.g. with
-  a screenshot.
+- Test the core logic (heat balance, storage, scheduler, economics, data validation), using the
+  case's known values as checks (206 heating days, ≈ 27,000 kWh, 12.5 servers in the coldest hour,
+  19.2 kWh per server-day).
+- No tests for presentation; check it visually (e.g. a screenshot).
 - Run the relevant tests before opening a PR and say in the PR what you ran.
 
 ## 8. Decisions and reviews
 
-An important decision gets a short decision record and a **review by a subagent with fresh,
-limited context**. Decide yourself when this applies, run the review, and report the outcome.
+Hard-to-reverse decisions (interfaces, data model, stack, scheduling strategy, economic model or
+key formulas, anything that changes scored figures, scope, larger UI choices) get a decision
+record and one review by a fresh-context subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
 
-**Triggers:** architecture or module boundaries · data model or interfaces between parts · stack or
-a library that is hard to replace · scheduling strategy · economic model or key formulas · anything
-that changes scored figures · scope changes · later: larger UI choices (dashboard structure, main
-visual, demo flow).
-**No review needed for:** bug fixes, small refactors, styling, docs, data re-fetches.
+1. Write `docs/decisions/NNNN-title.md` from the template, status `proposed`, and add it to the
+   index. Take the next free number on `main` and on open branches (see the index); renumber
+   before merging if it collides.
+2. Run the review as in [`docs/agents/review.md`](docs/agents/review.md) (Claude Code: the
+   `decision-reviewer` subagent), with a short packet only, never the conversation.
+3. Apply what convinces you, record it in the "Review" section, report to the user in 2–4 lines.
+   Your user's agreement is enough to implement; the team later sets `accepted`.
 
-Process:
-1. Write `docs/decisions/NNNN-title.md` from the template, status `proposed`.
-2. Run the review as described in [`docs/agents/review.md`](docs/agents/review.md). In Claude Code
-   use the `decision-reviewer` subagent. Give it the short packet only, never the conversation.
-3. Apply what convinces you and record the result in the "Review" section.
-4. Report to the user in 2–4 lines: decision, verdict, what changed. Your user's agreement is
-   enough to start implementing; the team confirms later and sets the status to `accepted`.
-
-One review per decision; no review loops. Keep it proportionate: until the draft submission, review
-only decisions that are hard to reverse (interfaces, stack, scored formulas).
-Decision numbers: take the next free number on your branch; if it collides with one merged to
-`main` in the meantime, renumber yours before merging.
+One review per decision; no review loops.
 
 ## 9. Git workflow
 
-- One short-lived branch per task, created from the latest `main`: `feat/…`, `fix/…`, `docs/…`,
-  `data/…`, `exp/…` (experiments).
-- Small, focused commits with English imperative messages ("Add storage model").
-- Open a PR to `main` with: what and why, how it was tested, assumptions or decisions touched.
-- **Merging:** people merge by default. An agent may merge its own PR only if it is small, tests
-  pass, it changes no architecture, interface or scored figure, needs no decision record, **and**
-  its user agreed in the conversation. Use squash merge.
-- Before opening a PR, bring the branch up to date with `main` and resolve conflicts carefully.
-  Never force-push to `main`, never rewrite other people's branches.
+- One short-lived branch per task from the latest `main`: `feat/…`, `fix/…`, `docs/…`, `data/…`,
+  `exp/…`. Small commits, English imperative messages.
+- PR to `main` with what and why, how it was tested, assumptions or decisions touched. Update the
+  branch with `main` first. Never force-push to `main` or rewrite others' branches.
+- **Merging:** people merge by default. An agent may squash-merge its own PR only if it is small,
+  tests pass, it changes no architecture, interface or scored figure, needs no decision record,
+  **and** its user agreed in the conversation.
 - Stay inside your task's files; three people are working in parallel.
 
 ### 9a. Integration between parallel work
 
-Three people work in parallel with several agents. Keep the pieces fitting together:
-
-- **Work from tickets.** Every task belongs to a ticket in [`docs/tickets/`](docs/tickets/README.md).
-  Claim it before you start (owner + `in progress` in the index and the ticket file), name the
-  branch after it (`feat/T-03-docker-executor`), reference it in the PR, set `done` when merged.
-  New work that has no ticket: add one (next free ID) and tell your human. Respect the ticket's
-  dependencies; if a ticket is wrong or too big, say so instead of silently changing its scope.
-- **Before starting a task,** read [`docs/status.md`](docs/status.md) and check for overlapping
-  work: open branches and PRs, and the last commits on `main` (`git fetch && git branch -r`,
-  `git log --oneline -15 origin/main`).
-- **Check other agents' work during the task, not only at the start.** Re-read `docs/status.md`
-  and fetch recent branches/PRs at each substantial milestone, before changing a shared interface,
-  and before opening a PR. If another agent has changed a dependency, coordinate the handoff in
-  the shared status file or the relevant PR before continuing.
-- **Build on what exists instead of creating parallel versions:** the shared C# core and its
-  `IScheduler`/`IExecutor` interfaces (decision 0005, merged to main), the data in
-  `data/raw/` with its `SOURCE` files, the parameter file `config/reference-house.json`. Never
-  create a second implementation of the heat or economic model. If an interface does not fit,
-  propose a change (decision record) instead of working around it.
-- **Same numbers everywhere.** If two artefacts compute the same figure (e.g. the year explorer
+- **Work from tickets:** claim one (owner + `in progress` in the index and the ticket file), name
+  the branch after it (`feat/T-03-docker-executor`), reference it in the PR, set `done` when
+  merged. New work without a ticket: add one and tell your human. Respect the
+  ticket's dependencies; if a ticket is wrong or too big, say so instead of changing its scope.
+- **Check others' work** at the start, at milestones, before changing a shared interface and before
+  a PR: `docs/status.md`, `git fetch && git branch -r`, `git log --oneline -15 origin/main`, open
+  PRs. If another agent has changed a dependency, coordinate the handoff in `docs/status.md` or the
+  relevant PR before continuing. Keep your row in `docs/status.md` current.
+- **Build on what exists:** the C# core and its interfaces (decisions 0005, 0009, 0024), `data/raw/`
+  with its `SOURCE` files, `config/`. Never create a second heat or economic model; if an interface
+  does not fit, propose a change via a decision record.
+- **Same numbers everywhere:** if two artefacts compute the same figure (e.g. the year explorer
   prototype and the C# core), they must agree; add a cross-check when you touch either.
-- **Update your row in `docs/status.md`** when you start, when you change an interface, and when
-  you finish (branch, what, interfaces touched, status).
-- **When your work depends on or changes someone else's module,** say so in the PR and tell your
-  human.
+- When your work depends on or changes someone else's module, say so in the PR and tell your human.
 
 ## 10. Communication
 
-- **Reply in the user's language.** Everything in the repository (code, comments, docs, commits,
-  PRs) is in English.
-- Keep reports short: what changed, how it was checked, open questions.
-- **Ask instead of deciding** when the choice belongs to the team: vision, stack, hardware, servers
-  per house, business model, scope, anything a juror might ask about. Give a recommendation with
-  reasons.
-- **Agree on the approach before building anything substantial** (a model, a calculation, a
-  visualisation, a new module, a published page): propose in a few lines what you will compute,
-  which assumptions and data you will use and what the result will look like, then wait for your
-  human's agreement. Small, clearly scoped tasks your human described precisely can go ahead.
-- **Every result with numbers comes with its calculation path:** a short written method (formulas,
-  inputs with sources, one worked example) that a human can check, and a plain explanation of how
-  to read each chart or figure.
-- **Say what is a prototype or exploration and what is verified.**
-- **Prefer several short check-ins over one large surprise.** When unsure whether to ask, ask.
-- Be economical with time and tokens: read what you need, do not re-read, use subagents for reviews
-  and broad searches. A check-in is cheap compared to rework, so keep check-ins short, also close
-  to a deadline, but do not skip them.
+- **Reply in the user's language.** Everything in the repository is in English.
+- Short reports: what changed, how it was checked, open questions. Say what is a prototype and what
+  is verified.
+- **Ask instead of deciding** when the choice belongs to the team (vision, stack, hardware, servers
+  per house, business model, scope, anything a juror might ask about); give a recommendation with reasons.
+- **Agree on the approach before building anything substantial** (model, calculation, visual, new
+  module, published page): propose in a few lines, then wait. Small, precisely described tasks can
+  go ahead.
+- **Every result with numbers comes with its calculation path:** method, inputs with sources, one
+  worked example, and how to read each chart.
+- Prefer several short check-ins over one large surprise; when unsure whether to ask, ask. Keep
+  check-ins short close to a deadline, but do not skip them. Be economical with time and tokens;
+  use subagents for reviews and broad searches.
 
 ## 11. Data
 
-- Rules, layout and how to get the originals: [`data/README.md`](data/README.md).
-- Raw data is never edited by hand; derived data comes from scripts only; large datasets are not
-  committed.
-- `python3 scripts/fetch_data.py --check` validates the data in the repository against the case.
-- Never commit secrets, API keys or personal data.
-- From the deep dive: data sovereignty matters (no data to other countries where not allowed;
-  sensitive data stays local or anonymised). Respect this in any design.
+- Rules and layout: [`data/README.md`](data/README.md). Raw data is never edited by hand; derived
+  data comes from scripts only; large datasets are not committed.
+- `python3 scripts/fetch_data.py --check` validates the data against the case.
+- Never commit secrets, API keys or personal data. Data sovereignty matters: no data to other
+  countries where not allowed; sensitive data stays local or anonymised.
 
-## 12. To be decided by the team
+## 12. Team decisions
 
-Fill in when decided (each with a decision record). Until then, do not assume an answer.
+**Decided:**
+- Core stack: C# / .NET 8 (`src/DigitalHeat.sln`, decision 0005); network optimiser with OR-Tools
+  GLOP (decision 0024); Python for data and measurement scripts.
+- Dashboard: `web/` (Vite, React, Recharts, MapLibre).
+- Parameter format: JSON in `config/` with unit and source per value.
+- Build, run and test commands: [`README.md`](README.md) (`dotnet build/test src/DigitalHeat.sln`).
+- Business model (provisional): decision 0020.
 
-- Confirming the vision in `docs/vision.md` (currently a draft)
-- Tech stack (language, frameworks, dashboard)
-- Repository layout for code, notebooks and results
-- Central parameter/configuration format (replaces `docs/assumptions.md` later)
-- Build, run and test commands
-- Feature freeze time and the contents of the draft submission
+**Still open (do not assume an answer):** confirming `docs/vision.md`; feature freeze time;
+contents of the draft submission; whether `docs/assumptions.md` is replaced by `config/`.
