@@ -88,7 +88,7 @@ remain possible. The physical laptop and Docker Desktop remain shared dependenci
 ## Verified results and catalog implementation (2026-11-21)
 - 45 hosting tests and 51 shared-core/catalog tests pass.
 - Real Docker runner passed eight recorded checks: baseline actual pause, heat swap with a
-  six-second in-flight request drained, zero demand availability, expired signals restoring all,
+  twenty-second in-flight request drained (configurable demo delay), zero demand availability, expired signals restoring all,
   partial API signals restoring that pool, locality denial (API 503/frontend 200), gateway kill
   immediately after an observed pause phase, and restoration of the original plan.
 - Independent network checks passed on all six temporarily awake replicas: separate component
@@ -108,3 +108,7 @@ The JSON schema accepts both entries and rejects contradictory interruptible alw
 T-01 broad research/catalog completeness remains separate; its owner was notified before changes.
 
 Hosting ticket was renumbered from T-29 to T-36 to avoid the separately started local-LLM branch.
+
+Final repeat: all eight Docker scenarios passed on the final gateway image. An earlier repeat could not observe drain before the six-second request ended; the test failed rather than claiming coverage. The demo request duration is now a configurable 20 seconds, and the repeated test observed drain successfully. No production timeout was relaxed.
+
+Code review: PR #19 (https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/19), branch feat/T-36-hosting-scheduler. Depends on unmerged component-isolation PR #12. Documentation is on main; code is awaiting human review/merge.

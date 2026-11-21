@@ -30,3 +30,5 @@ Use the existing webhosting work where it helps the case: as executor platform a
 Progress: shared-runtime experiment passed; draft PR #7. See docs/webhosting-heat-runtime.md for commands, measured observations and T-01 handoff. Current schema mandates interruptible=true and freeze support; an always-on hosting descriptor cannot be added honestly without owner agreement. No second scheduler/executor added.
 
 Approved common catalog extension is now implemented with frontend/API always-on descriptors and an explicit LiveRun batch guard, under decision 0017. 51 core/catalog tests pass; code PR pending. Measurement values remain null and no always-on load was added to scored YearSimulation.
+
+Catalog/runtime handoff is included in PR #19 (T-36). Legacy batch descriptors remain compatible; all five current descriptor files validate. Awaiting merge, not marked done.

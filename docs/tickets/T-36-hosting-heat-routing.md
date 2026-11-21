@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch · **Area:** Hosting / scheduler integration
 - **Depends on:** T-09, T-24, T-27
-- **Owner:** Nikita / Codex · **Status:** in progress (approved, implementation verified; PR preparation)
+- **Owner:** Nikita / Codex · **Status:** in review: PR #19; depends on PR #12
 
 ## Goal
 Route requests within separate frontend/API pools using the existing heat scheduler's decisions,
@@ -41,3 +41,6 @@ component), two serving replicas per component and a common batch/always-on cata
 Decision 0016 extends 0015. Implementation must verify readiness-before-switch, request drain,
 safe aborts, locality denial and gateway failure during a transition. T-01 notified via its ticket.
 
+
+## Review handoff
+Implementation and verification complete in PR #19. All eight final Docker scenarios pass; 45 hosting and 51 core/catalog tests pass. Code remains unmerged; mark done after merge. See docs/webhosting-scheduler.md for commands, evidence and limitations.
