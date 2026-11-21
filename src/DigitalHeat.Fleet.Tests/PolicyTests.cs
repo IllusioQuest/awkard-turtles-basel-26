@@ -4,13 +4,7 @@ namespace DigitalHeat.Fleet.Tests;
 
 // ------------------------------------------------------------------ fakes
 
-internal sealed record FixedDist(double Value) : IDistribution
-{
-    public double Sample(Rng rng) => Value;
-    public double Mean => Value;
-    public string Unit => "x";
-    public string Source => "test";
-}
+// FixedDist (test distribution) is shared with EngineTests.cs.
 
 internal sealed class FakeForecast(Func<int, int, int, double> f) : IForecastProvider
 {
