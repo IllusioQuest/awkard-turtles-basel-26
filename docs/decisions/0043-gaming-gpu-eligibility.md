@@ -1,6 +1,6 @@
 # GPU eligibility with unchanged heat-aware admission
 
-- Status: proposed; user approved direction on 2026-11-21; review pending.
+- Status: proposed; user approved direction on 2026-11-21; reviewed with changes.
 - Ticket: T-55. ADR 0042 and T-54 are reserved by the four-node demo branch.
 
 ## Decision
@@ -36,4 +36,14 @@ reference-house parameters. Production scheduler remains unchanged in this first
 
 ## Review
 
-Pending one fresh limited-context review.
+Verdict: go with changes. Applied: an explicit shared-GPU contention opt-in, immediate
+Wine/game process check, E-only override and merged-config validation, and `--no-deps`.
+The user explicitly approved the bounded shared-GPU probe. Reconcile external users into
+one exclusive physical-GPU occupancy claim; multiple external allocations for one exclusive
+GPU are invalid in the existing ledger. Occupancy stays held until every external user is
+confirmed stopped, and uncertainty blocks admission. No automatic inventory publisher was
+added. Keep actual Wine game compatibility separate from desktop GL success.
+
+Result: E reports accelerated Intel Iris Xe/D3D12 OpenGL. D and Minecraft retained start
+timestamps and zero restart count. CS GPU compatibility and FPS remain unverified. See
+`../jobs/gaming-gpu-eligibility.md` for timing results, including a threshold exceedance.

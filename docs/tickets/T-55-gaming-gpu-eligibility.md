@@ -1,7 +1,7 @@
 # T-55 — Preserve heat and speed while validating gaming GPU eligibility
 
 - Owner: Nikita / Codex
-- Status: in progress
+- Status: validation complete; draft PR #44 in review; actual CS GPU dispatch not enabled
 - Branch: feat/T-55-gaming-gpu-eligibility (stacked on T-53 and T-49)
 - Decision: 0043; user approved direction, 2026-11-21.
 
@@ -13,3 +13,6 @@ migration. Automatic CS heat-based dispatch remains blocked by missing measured 
 fresh physical-GPU occupancy. Document actual results, including incompatibilities.
 
 Done: reviewed decision, reproducible probe, regression tests/timing evidence and code PR.
+
+
+Results: 49 tests pass, E desktop accelerated Intel GL verified. Startup/probe p95 exceeded the fixed threshold; steady follow-up passed. Both reports retained. See docs/jobs/gaming-gpu-eligibility.md. Actual Wine CS GPU performance is unverified; heat/occupancy gates remain.
