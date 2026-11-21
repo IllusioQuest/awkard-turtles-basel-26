@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Model / paper
 - **Depends on:** T-09, T-10
-- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress
 
 ## Goal
 
