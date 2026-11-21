@@ -207,3 +207,65 @@ Verified with actual Windows PowerShell 5.1 on Intel node A (/dev/dri absent, D3
 works through /dev/dxg) and PowerShell 7 on software node B. Both complete and report Vulkan
 llvmpipe and unsuccessful VAAPI honestly. No device or driver installation is required to fix this
 script error. Rerun Test-SessionGraphics.ps1; missing DRM does not contradict the dxg OpenGL path.
+
+## Isolated Dozen Vulkan experiment (ADR 0023)
+
+User approved the isolated experiment. Official Mesa 26.0.8 release archive is SHA256-pinned in
+`gaming/deploy/Dozen.Dockerfile`; the pinned Selkies base stays intact. Only Vulkan Dozen is built
+into `/opt/digitalheat-dzn`; system OpenGL is not replaced. Distro build package versions and
+Meson options are included in the output. Apt packages are not fully snapshot-pinned, so rebuilds
+are source-pinned rather than byte-identical. No Windows driver was installed or updated.
+
+The path is Vulkan -> Dozen -> D3D12 -> read-only mounted Intel Windows driver -> Iris Xe.
+The runtime receives /dev/dxg, /usr/lib/wsl/lib and /usr/lib/wsl/drivers. Normal Linux DRM /dev/dri
+is not required for this tested path. Device access still shares the physical host GPU.
+
+Run in the gaming checkout:
+
+    .\gaming\scripts\Build-DozenExperiment.ps1
+    .\gaming\scripts\Test-DozenExperiment.ps1
+    .\gaming\scripts\Test-DozenExperiment.ps1 -RenderSmoke
+    .\gaming\scripts\Test-DozenExperiment.ps1 -FullReport
+    .\gaming\scripts\Start-DozenDesktop.ps1
+    .\gaming\scripts\Show-VulkanCube.ps1
+
+Compilation is limited to two jobs with a 1200-second compile timeout and a 12 GiB free-disk
+admission check. Probes have configurable 30-second default timeouts, CPU/memory limits and no
+network. They are transient labelled containers and cannot control Docker. The desktop is a
+separate Compose project, node C on http://localhost:18883, separate home and generated local
+credentials in gaming/TestResults/dozen-credentials.json (username player). Start requires
+successful enumeration/render reports matching the current experiment image. A/B are untouched.
+CPU video encoding stays enabled. Do not apply the A override to run this experiment.
+
+Repeat graphical diagnostic and stop C without deleting its home:
+
+    .\gaming\scripts\Test-SessionGraphics.ps1 -Node session-c
+    .\gaming\scripts\Stop-DozenDesktop.ps1
+
+Observed results on this laptop:
+- Mesa builds successfully from official source with the minimal Microsoft Vulkan driver option.
+- Headless enumeration exits 0: vendor 0x8086, device 0x46a6, Integrated GPU,
+  Microsoft Direct3D12 (Intel Iris Xe), DRIVER_ID_MESA_DOZEN, device API 1.2.335.
+  Loader instance API 1.4.341 is not the physical device's supported API version.
+- Transient Xvfb + vkcube renders 60 frames on the named Intel GPU and exits 0.
+- vkcube also exits 0 inside actual Selkies desktop C on DISPLAY :20. This tests its X11
+  presentation path, not just device discovery. User visual stream confirmation requested.
+- Desktop C healthy, authenticated HTTP 200; actual Windows PowerShell 5.1 graphics/cube probes
+  complete. Intel D3D12 OpenGL remains available; VAAPI still fails, so no hardware encode claim.
+- VK_KHR_swapchain is present. VK_EXT_graphics_pipeline_library is not advertised;
+  tessellationShader is false. Dozen warns it is non-conformant/testing-only. A cube pass does
+  not establish compatibility or performance for CS2; no game launch or FPS claim is made.
+
+Original-game gate: Valve's current Linux listing requires Vulkan graphics, strongly recommends
+VK_EXT_graphics_pipeline_library, and lists 85 GB available storage. C: currently has about
+20 GB free after the build. A fresh CS2 download is deferred pending a user-selected storage
+location or user-freed space. Existing Windows Steam manifests were observed but not modified;
+a Windows install is not assumed to be a usable Linux game installation. User Steam login and
+any account/terms actions remain with the user. Intel WSL is outside the explicitly named Linux
+GPU families on the current store listing, so actual compatibility remains an experiment.
+
+Build and raw probes are recorded locally under gaming/TestResults (ignored). The 60-frame
+smoke is only a rendering check, not a benchmark or a measurement of useful heat.
+Sources checked 2026-11-21: https://archive.mesa3d.org/mesa-26.0.8.tar.xz,
+https://docs.mesa3d.org/meson.html,
+https://store.steampowered.com/app/730/CounterStrike_2/.
