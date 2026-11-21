@@ -26,11 +26,11 @@ def val(p):
 
 
 def load_json(rel: str) -> dict:
-    return json.loads((ROOT / rel).read_text())
+    return json.loads((ROOT / rel).read_text(encoding="utf-8"))
 
 
 def market_rows(ids: list[str]) -> list[dict]:
-    with open(ROOT / "data/raw/market/ai-services.csv", newline="") as f:
+    with open(ROOT / "data/raw/market/ai-services.csv", newline="", encoding="utf-8") as f:
         rows = {r["id"]: r for r in csv.DictReader(f)}
     return [rows[i] for i in ids]
 
@@ -96,7 +96,7 @@ def main() -> None:
                        "priceChfPerUnit": m["value"], "region": "CH (Zurich) / EU", "source": m["source"], "confidence": "see source"})
 
     dest = ROOT / "data/derived/price_comparison.csv"
-    with open(dest, "w", newline="") as f:
+    with open(dest, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["kind", "product", "unit_or_offer", "hardware_or_provider", "utilisation_or_region",
                     "units_per_server_hour", "case_cost_or_price_chf", "full_cost_chf", "case_cost_per_server_hour",
