@@ -3,9 +3,14 @@ $ErrorActionPreference='Stop'
 $lab=Split-Path -Parent $PSScriptRoot
 $policy=Get-Content (Join-Path $lab 'deploy/cs16-lab.json') -Raw | ConvertFrom-Json
 if(@($policy.nodes|Where-Object{$_.id -eq $Node}).Count -ne 1){throw 'Unknown compatibility node.'}
-& (Join-Path $PSScriptRoot 'Test-Cs16Lab.ps1')
+& (Join-Path $PSScriptRoot 'Test-Cs16Lab.ps1') -AllowOnlineNodes
 $ids=@(& docker --context desktop-linux ps -q --filter "label=com.docker.compose.project=$($policy.compose_project)" --filter "label=com.docker.compose.service=$Node")
 if($LASTEXITCODE -ne 0 -or $ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$'){throw 'CS node scope is not unique.'}
+$target=(& docker --context desktop-linux inspect $ids[0] | ConvertFrom-Json)[0]
+foreach($network in @($target.NetworkSettings.Networks.PSObject.Properties.Name)){
+  $internal=(& docker --context desktop-linux network inspect $network --format '{{.Internal}}' | Out-String).Trim()
+  if($LASTEXITCODE -ne 0 -or $internal -ne 'true'){throw 'The selected installer node must be offline. Do not disconnect an active game merely to rerun setup.'}
+}
 $hash=(& docker --context desktop-linux exec $ids[0] sha256sum /home/ubuntu/cs16-installer.exe | Out-String).Split(' ')[0].Trim()
 if($LASTEXITCODE -ne 0 -or $hash -ne $policy.installer_sha256){throw 'Staged installer differs from the reviewed file.'}
 # Non-root, offline, bounded, interactive trial. Never add silent license-acceptance arguments.

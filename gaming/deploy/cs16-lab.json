@@ -1,6 +1,8 @@
 {
   "image": "digitalheat-cs16-wine:experiment",
   "compose_project": "digitalheat-cs16",
+  "docker_context": "desktop-linux",
+  "online_network": "digitalheat-cs16_browser-access",
   "installer_sha256": "a8cba24594c80a8919167cf096eb0dab9246c34d9d4d52c50c367a2b8f356512",
   "cpu_limit_per_node": 2,
   "memory_limit_mib_per_node": 2048,
