@@ -33,7 +33,7 @@ are synthetic diagnostics, not the scored reference house or measured Minecraft 
 
 At 1,024 nodes, a reservation allocates **2,028,624 B (1.935 MiB)** with independent domains, versus
 **76,756,048 B (73.200 MiB)** with a shared domain. With 100 held claims the shared case reaches
-79,784,632 B (76.088 MiB). These are total managed bytes allocated per operation, not simultaneously
+79,784,632 B (76.089 MiB). These are total managed bytes allocated per operation, not simultaneously
 live memory or a memory leak. Allocated bytes / 1,048,576 converts B to MiB.
 
 Inventory refresh is separate work: at 1,024 independent domains, `Update` measured 67.525 ms
@@ -125,7 +125,7 @@ format is a possible later design, not a measured recommendation to implement no
 
 ## Method and reproduction
 
-Diagnostic source: `scripts/performance/SchedulerProbe.cs`, invoked by
+Reproduction scripts are in [PR #36](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/36), pending merge; report/raw evidence are already on main. Diagnostic source: `scripts/performance/SchedulerProbe.cs`, invoked by
 `scripts/Measure-SchedulerPerformance.ps1`. The script compiles a temporary Release harness against
 the production projects without adding a product console UI or new dependency. It writes ignored
 `results/performance/scheduler-latency.json`. JSON source/metadata and all 62 cases are preserved in

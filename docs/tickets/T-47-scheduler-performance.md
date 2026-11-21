@@ -1,6 +1,6 @@
 # T-47: Measure scheduler latency and suggest improvements
 
-Owner: Nikita / Codex. Status: analysis complete; reproduction scripts preparing for review.
+Owner: Nikita / Codex. Status: analysis complete; reproduction scripts in [PR #36](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/36).
 Branch: exp/T-47-scheduler-performance.
 
 Measure the existing .NET Release scheduler/placement paths with deterministic diagnostic inputs,
