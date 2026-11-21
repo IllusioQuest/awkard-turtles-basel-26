@@ -15,7 +15,7 @@ public interface IContainerControl
 /// <summary>All Docker CLI calls are confined to this class. Arguments never pass through a shell.</summary>
 public sealed class DockerCliContainerControl : IContainerControl
 {
-    private const int CommandTimeoutMilliseconds = 10_000; // Demo policy: ADR 0006.
+    private const int CommandTimeoutMilliseconds = 10_000; // Demo policy: ADR 0009.
     private readonly string dockerPath;
 
     public DockerCliContainerControl(string dockerPath = "docker") => this.dockerPath = dockerPath;

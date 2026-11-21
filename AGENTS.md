@@ -21,9 +21,9 @@ only when your task needs them.
   for when it stops paying off), **marketing** (which priced services we can beat), **physical**
   (simulation of heat and servers). See [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) §7.
   Treat this as one option, not a requirement.
-- **Status:** data collection for the financial and market layers, see
-  [`docs/research/README.md`](docs/research/README.md). Stack, architecture and repository layout
-  are not decided (§12).
+- **Status:** work is organised in **tickets**: [`docs/tickets/README.md`](docs/tickets/README.md).
+  Pick an open ticket that fits your human's task, claim it (owner + status), and keep to its scope.
+  Who works on what right now: [`docs/status.md`](docs/status.md).
 - **Available, not set up yet:** an **ElevenLabs** and a **Lovable** subscription (free for the
   team). Do not set them up or use them without the team; mention them where they fit (e.g.
   ElevenLabs as a transcription price point or for pitch audio, Lovable as a dashboard option in
@@ -61,6 +61,7 @@ Reminder rules:
 | [`docs/deep-dive/notes-verbatim.md`](docs/deep-dive/notes-verbatim.md) | Raw notes from the deep dive with the case owner | never |
 | [`docs/deep-dive/notes-structured.md`](docs/deep-dive/notes-structured.md) | Our interpretation of those notes, open questions | yes |
 | [`docs/vision.md`](docs/vision.md) | Our direction: actors, ownership models, building blocks, tiers, paper outline (draft) | yes, with the team |
+| [`docs/tickets/`](docs/tickets/README.md) | Ticket board: every planned task with goal, steps, done criteria, owner, status | claim/update tickets |
 | [`docs/status.md`](docs/status.md) | Work map: who works on what, shared interfaces, integration risks | yes, keep your row current |
 | [`docs/research/`](docs/research/README.md) | Research plan (work packages) and research summaries | yes |
 | [`docs/assumptions.md`](docs/assumptions.md) | Interim list of all assumptions (ID, value, unit, source) | add rows |
@@ -179,6 +180,11 @@ Decision numbers: take the next free number on your branch; if it collides with 
 
 Three people work in parallel with several agents. Keep the pieces fitting together:
 
+- **Work from tickets.** Every task belongs to a ticket in [`docs/tickets/`](docs/tickets/README.md).
+  Claim it before you start (owner + `in progress` in the index and the ticket file), name the
+  branch after it (`feat/T-03-docker-executor`), reference it in the PR, set `done` when merged.
+  New work that has no ticket: add one (next free ID) and tell your human. Respect the ticket's
+  dependencies; if a ticket is wrong or too big, say so instead of silently changing its scope.
 - **Before starting a task,** read [`docs/status.md`](docs/status.md) and check for overlapping
   work: open branches and PRs, and the last commits on `main` (`git fetch && git branch -r`,
   `git log --oneline -15 origin/main`).

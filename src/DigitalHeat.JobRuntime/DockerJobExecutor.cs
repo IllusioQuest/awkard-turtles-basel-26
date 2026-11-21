@@ -5,7 +5,7 @@ namespace DigitalHeat.JobRuntime;
 /// <summary>Maps heat-led 0..1 requests to Docker freeze and CPU quota controls.</summary>
 public sealed class DockerJobExecutor : IExecutor
 {
-    private const double MinimumDockerCpuCores = 0.01; // Docker CLI --cpus granularity; see ADR 0006.
+    private const double MinimumDockerCpuCores = 0.01; // Docker CLI --cpus granularity; see ADR 0009.
     private readonly IContainerControl control;
     private readonly string containerId;
     private readonly double allowedCpuCores;

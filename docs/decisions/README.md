@@ -18,4 +18,6 @@ later.
 | [0003](0003-webhosting-prototype.md) | Resilient local webhosting prototype | proposed; user approved stack/structure, team confirmation pending |
 | [0004](0004-redundant-windows-ingress.md) | Redundant Windows ingress experiment | proposed then withdrawn; all runtime services must use Linux containers |
 | [0005](0005-csharp-core.md) | Shared C# scheduler and executor boundary | accepted (PR #2 merged) |
-| [0006](0006-generic-job-control.md) | Generic Docker job control through the shared scheduler | proposed |
+| [0006](0006-linux-host-network-ingress.md) | Linux host-network ingress crash experiment | proposed; experiment approved by user, reviewed with changes; full HA pending |
+| [0007](0007-whole-container-pause-recovery.md) | Two Linux managers for paused gateway containers | proposed; reviewed with changes, awaiting user approval |
+| [0009](0009-generic-job-control.md) | Generic Docker job control through the shared scheduler | proposed (code merged to main; renumbered from 0006) |

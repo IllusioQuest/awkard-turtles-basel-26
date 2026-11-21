@@ -100,5 +100,5 @@ as YearRun, but each hour uses an independent **reference simulated tank** snaps
 not a sensor reading. A forced pause does not modify later reference snapshots.
 `docker stats` CPU use divided by the allowed CPU cores is shown as observed
 CPU load; it does not establish electrical power or recovered heat. See
-[`docs/decisions/0006-generic-job-control.md`](docs/decisions/0006-generic-job-control.md).
+[`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
 
