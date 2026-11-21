@@ -27,7 +27,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-13](T-13-results-datasets-contract.md) | Result datasets and data contract for UIs and paper | 2 Pitch | T-05 | Codex | Nikita / Codex | done (PR #10 merged) |
 | [T-14](T-14-economics-actors.md) | Economics per actor, ownership models, heating-cost alternatives | 2 Pitch | T-15 | Codex or Jona | Team lead / Claude (subagent) | in review (PR #27, decision 0026) — reconcile with decision 0020 before merge |
 | [T-15](T-15-hardware-profiles.md) | Hardware profiles: CPU vs GPU | 2 Pitch | T-00 | anyone | Team lead / Claude (subagent) | done (PR #14 merged) |
-| [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | | open |
+| [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | Jona / Claude | done (docs/research/price-comparison.md, scripts/price_comparison.py, paper §6 table) |
 | [T-17](T-17-admin-dashboard.md) | Admin dashboard (DigitalHeat) | 3 Pitch stretch | T-13, T-00 (UI stack) | anyone (Lovable possible) | Ennio / Claude | in progress (`web/`, /admin, mock data first) |
 | [T-18](T-18-owner-dashboard.md) | Server-owner dashboard (host, private) | 3 Pitch stretch | T-13 | anyone | Ennio / Claude | in progress (`web/`, /household, mock data first) |
 | [T-21](T-21-pitch.md) | Pitch storyboard, demo script and slides | 2 Pitch | T-00 | team lead + Claude | Team lead / Claude | in progress (storyboard direction agreed: docs/pitch/storyboard.md) |
@@ -84,6 +84,11 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-47](T-47-scheduler-performance.md) | Measure scheduler latency and scaling | Nikita / Codex | analysis complete; 62 cases + raw evidence; diagnostics only |
 | [T-48](T-48-live-job-deadlines.md) | Minute-level live batch deadlines | Nikita / Codex | PR #37 in review; 42 tests + Docker proof |
 | [T-49](T-49-admission-performance.md) | Indexed admission and safe copy optimization | Nikita / Codex | PR #38 in review; depends on #37; identical-probe evidence published |
-| [T-50](T-50-docker-observation-performance.md) | Faster local Docker observations | Nikita / Codex | in progress; depends on PR #35; ADR 0039 |
+| [T-50](T-50-docker-observation-performance.md) | Faster local Docker observations | Nikita / Codex | PR #40 in review; 57 tests + real observations; depends on #35; ADR 0039 |
 | [T-51](T-51-swiss-grid-data.md) | Data for the Swiss-wide simulation: weather grid + forecasts, buildings and heat demand, ElCom per municipality, compute demand and prices | Ennio / Claude | in review |
-| [T-52](T-52-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | built on branch, in review |
+| [T-52](T-52-reborn-compatibility.md) | Assess ReBorn replacement and multiplayer compatibility | Nikita / Codex | assessment complete; user declined proposed setup; no runtime changes |
+| [T-53](T-53-cs16-linux-compatibility.md) | CS 1.6 Linux compatibility and scheduler regression check | Nikita / Codex | draft PR #42; desktop/background checks pass; installer/multiplayer pending; ADR 0041 |
+| [T-55](T-55-gaming-gpu-eligibility.md) | Preserve heat and speed with GPU eligibility | Nikita / Codex | validation complete; draft PR #44; ADR 0043 reviewed; actual CS GPU dispatch gated |
+| [T-56](T-56-node-feedback.md) | Event-driven node capacity and heat feedback | Nikita / Codex | done; PR #45 merged; ADR 0044 reviewed |
+| [T-57](T-57-scheduler-cleanup.md) | Clean scheduler code and measure owner runtime | Nikita / Codex | PR #46 in review; 61 orchestration + 46 Core tests; runtime evidence shared |
+| [T-58](T-58-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | done |

@@ -5,8 +5,18 @@ using DigitalHeat.Core;
 
 namespace DigitalHeat.Orchestration;
 
-public sealed record AttemptRecord(RuntimeAttempt Attempt, string Phase);
-public sealed record CoordinatorState(string FleetId, AttemptRecord[] Attempts);
+public sealed record AttemptRecord(RuntimeAttempt Attempt, string Phase)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset[]? CommittedHeatIntervalsUtc { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public DeadlineOutcome? Deadline { get; init; }
+}
+public sealed record CoordinatorState(string FleetId, AttemptRecord[] Attempts)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? RetainHourlyHeat { get; init; }
+}
 
 /// <summary>
 /// Single-host/operator coordinator. A stable per-fleet OS file lock prevents two local instances,
@@ -25,13 +35,16 @@ public sealed class WorkloadCoordinator : IDisposable
     private bool reconciled;
     private bool disposed;
     private double lastAppliedBatchLoad;
+    private readonly TimeProvider clock;
+    private readonly bool retainHourlyHeat;
+    private long budgetRevision;
     public bool Reconciled { get { lock (gate) return reconciled; } }
 
-    public WorkloadCoordinator(string fleetId, string stateDirectory, IWorkloadRuntime runtime)
+    public WorkloadCoordinator(string fleetId, string stateDirectory, IWorkloadRuntime runtime, TimeProvider? timeProvider = null, bool retainHourlyHeat = false)
     {
         if (string.IsNullOrWhiteSpace(fleetId) || !System.Text.RegularExpressions.Regex.IsMatch(fleetId, "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"))
             throw new ArgumentException("Invalid fleet identity.");
-        this.fleetId = fleetId; this.runtime = runtime;
+        this.fleetId = fleetId; this.runtime = runtime; clock = timeProvider ?? TimeProvider.System; this.retainHourlyHeat = retainHourlyHeat;
         var lockRoot = Path.Combine(Path.GetTempPath(), "digitalheat-coordinator-locks");
         Directory.CreateDirectory(lockRoot);
         var key = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(fleetId))).ToLowerInvariant();
@@ -48,9 +61,18 @@ public sealed class WorkloadCoordinator : IDisposable
                     || state.Attempts.Select(r => r.Attempt.Request.Id).Distinct().Count() != state.Attempts.Length
                     || state.Attempts.Select(r => r.Attempt.AttemptId).Distinct().Count() != state.Attempts.Length)
                     throw new InvalidDataException("Invalid coordinator journal ownership.");
+                if ((state.RetainHourlyHeat ?? false) != retainHourlyHeat)
+                    throw new InvalidDataException("Cannot change hourly heat accounting mode on an existing journal.");
                 foreach (var record in state.Attempts)
                 {
                     DockerWorkloadRuntime.Validate(record.Attempt);
+                    if (retainHourlyHeat && (record.CommittedHeatIntervalsUtc is null || record.CommittedHeatIntervalsUtc.Length == 0
+                        || record.CommittedHeatIntervalsUtc.Any(t => t.Offset != TimeSpan.Zero || t.Ticks % TimeSpan.TicksPerHour != 0)
+                        || record.CommittedHeatIntervalsUtc.Distinct().Count() != record.CommittedHeatIntervalsUtc.Length))
+                        throw new InvalidDataException("Invalid durable hourly heat commitments.");
+                    if (record.Deadline is {} outcome && (record.Attempt.Request.Deadline is null
+                        || outcome.Status is not ("on_time" or "missed" or "failed" or "unknown") || outcome.ObservedAtUtc.Offset != TimeSpan.Zero))
+                        throw new InvalidDataException("Invalid persisted deadline outcome.");
                     if (record.Phase is not ("reserved" or "creating" or "created" or "starting" or "running" or "paused" or "pausing" or "resuming" or "stopping" or "terminal" or "removing" or "released"))
                         throw new InvalidDataException("Unknown journal phase.");
                 }
@@ -61,7 +83,68 @@ public sealed class WorkloadCoordinator : IDisposable
         catch { fleetLock.Dispose(); throw; }
     }
 
-    public void Update(WorkloadInventory inventory, DateTimeOffset nowUtc) { lock (gate) { placement.Update(inventory, nowUtc); currentInventory = WorkloadJson.Copy(inventory); } }
+    public void Update(WorkloadInventory inventory, DateTimeOffset nowUtc)
+    {
+        lock (gate)
+        {
+            if (!retainHourlyHeat) { placement.Update(inventory, nowUtc); currentInventory = WorkloadJson.Copy(inventory); return; }
+            // Copy caller-owned arrays before validation; do not build a throwaway placement index.
+            var copy = WorkloadJson.Copy(inventory);
+            WorkloadPlacement.ValidateInventory(copy, nowUtc);
+            if (currentInventory is {} old && (copy.Revision <= old.Revision || copy.IntervalStartUtc < old.IntervalStartUtc))
+                throw new InvalidDataException("Cannot regress feedback inventory revision/hour.");
+            currentInventory = copy;
+            foreach (var claim in placement.Allocations().Where(a => !a.Paused)) CommitHeat(claim.Request.Id);
+            RefreshHeatBudget(nowUtc);
+        }
+    }
+
+    private void CommitHeat(string id)
+    {
+        if (!retainHourlyHeat || currentInventory is null) return;
+        int i = records.FindIndex(r => r.Attempt.Request.Id == id);
+        var intervals = records[i].CommittedHeatIntervalsUtc ?? [];
+        if (intervals.Contains(currentInventory.IntervalStartUtc)) return;
+        records[i] = records[i] with { CommittedHeatIntervalsUtc = [.. intervals, currentInventory.IntervalStartUtc] };
+        Save(); // The full-hour commitment precedes create/start/resume, even if those fail.
+    }
+
+    private void RefreshHeatBudget(DateTimeOffset now, string? resuming = null)
+    {
+        if (!retainHourlyHeat || currentInventory is not {} basis || now < basis.IntervalStartUtc || now >= basis.IntervalEndUtc) return;
+        budgetRevision = checked(Math.Max(budgetRevision, basis.Revision) + 1);
+        placement.Update(basis with { Revision = budgetRevision, Sites = BudgetSites(resuming) }, now);
+    }
+
+    private WorkloadSite[] BudgetSites(string? resuming = null, bool previewBatchPause = false)
+    {
+        var basis = currentInventory!;
+        // Group once instead of scanning the entire history for every site. GroupBy preserves
+        // per-site record order: changing summation order can change boundary admission decisions.
+        var committedBySite = records.Where(r => r.CommittedHeatIntervalsUtc?.Contains(basis.IntervalStartUtc) == true)
+            .GroupBy(r => r.Attempt.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Attempt.Reservation.RecoverableHeatKwhPerHour), StringComparer.Ordinal);
+        var heldBySite = placement.Allocations().Where(a => (!a.Paused || a.Request.Id == resuming)
+                && !(previewBatchPause && a.Request.Kind == "batch" && a.Request.Lifecycle.AllowPause))
+            .GroupBy(a => a.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Request.RecoverableHeatKwhPerHour), StringComparer.Ordinal);
+        return basis.Sites.Select(site =>
+        {
+            // Active reservations are already subtracted by WorkloadPlacement. Do not count them twice.
+            double retainedHeat = Math.Max(0, committedBySite.GetValueOrDefault(site.Id) - heldBySite.GetValueOrDefault(site.Id));
+            return site with { ExternalCommittedHeatKwh = site.ExternalCommittedHeatKwh + retainedHeat };
+        }).ToArray();
+    }
+
+    private bool CanAdmitAfterBatchPause(WorkloadRequest request, DateTimeOffset now)
+    {
+        if (!retainHourlyHeat) return placement.CanAdmitAfterBatchPause(request, now);
+        // Use the same placement code, but retain the batch heat in the pause preview too.
+        var preview = new WorkloadPlacement();
+        preview.Restore(placement.Allocations());
+        preview.Update(currentInventory! with { Sites = BudgetSites(previewBatchPause: true) }, now);
+        return preview.CanAdmitAfterBatchPause(request, now);
+    }
     public AllocationView[] Allocations() { lock (gate) return placement.Allocations(); }
     public AttemptRecord[] Attempts() { lock (gate) return WorkloadJson.Copy(records.ToArray()); }
 
@@ -83,6 +166,7 @@ public sealed class WorkloadCoordinator : IDisposable
                     if (observed.State != "missing") throw new InvalidOperationException("Released attempt reappeared; operator reconciliation required.");
                     continue;
                 }
+                CaptureDeadlineEvidence(record.Attempt, observed);
                 if (observed.State == "missing")
                 {
                     if (record.Phase is "reserved" or "removing")
@@ -108,6 +192,7 @@ public sealed class WorkloadCoordinator : IDisposable
                 else throw new InvalidOperationException("Uncertain container transition; ownership retained until operator reconciliation.");
             }
             reconciled = true;
+            RefreshHeatBudget(clock.GetUtcNow());
         }
     }
 
@@ -117,6 +202,7 @@ public sealed class WorkloadCoordinator : IDisposable
         lock (gate)
         {
             RequireReconciled();
+            WorkloadPlacement.ValidateRequest(request);
             var prior = records.SingleOrDefault(r => r.Attempt.Request.Id == request.Id);
             if (prior is not null)
             {
@@ -124,27 +210,36 @@ public sealed class WorkloadCoordinator : IDisposable
                     throw new InvalidDataException("Attempt retry changed requirements/profile.");
                 if (prior.Phase == "created")
                 {
-                    if (!placement.CanStartHeld(request.Id, nowUtc)) return null;
+                    if (!CanDispatch(request)) { EnforceDeadlines(); return CurrentRecord(request.Id); }
+                    if (!placement.CanStartHeld(request.Id, DecisionTime(request, nowUtc))) return null;
                     try
                     {
                         if (runtime.Observe(prior.Attempt).State != "created") throw new InvalidOperationException("Created attempt changed during recovery.");
-                        SetPhase(prior.Attempt, "starting"); runtime.Start(prior.Attempt);
-                        if (runtime.Observe(prior.Attempt).State != "running") throw new InvalidOperationException("Recovered start unconfirmed.");
-                        SetPhase(prior.Attempt, "running");
+                        SetPhase(prior.Attempt, "starting");
+                        if (!CanDispatch(request)) { SetPhase(prior.Attempt, "created"); EnforceDeadlines(); return CurrentRecord(request.Id); }
+                        runtime.Start(prior.Attempt);
+                        var observed = runtime.Observe(prior.Attempt);
+                        if (observed.State != "running" && !(request.Kind == "batch" && observed.Terminal)) throw new InvalidOperationException("Recovered start unconfirmed.");
+                        SetPhase(prior.Attempt, observed.Terminal ? "terminal" : "running");
+                        CaptureDeadlineEvidence(prior.Attempt, observed);
+                        EnforceDeadlines();
                         return WorkloadJson.Copy(records.Single(r => r.Attempt.AttemptId == prior.Attempt.AttemptId));
                     }
                     catch { reconciled = false; throw; }
                 }
                 return WorkloadJson.Copy(prior); // Never reissue an uncertain start or reuse a terminated identity.
             }
+            if (!CanDispatch(request)) return null;
             Preflight(request, nodes, profile);
-            var reservation = placement.TryReserve(request, nowUtc);
-            if (reservation is null && request.Kind == "interactive" && pauseBatchFirst && placement.CanAdmitAfterBatchPause(request, nowUtc))
+            if (!CanDispatch(request)) return null;
+            var reservation = placement.TryReserve(request, DecisionTime(request, nowUtc));
+            if (reservation is null && request.Kind == "interactive" && pauseBatchFirst && CanAdmitAfterBatchPause(request, DecisionTime(request, nowUtc)))
             {
                 foreach (var batch in records.Where(r => r.Phase == "running" && r.Attempt.Request.Kind == "batch" && r.Attempt.Request.Lifecycle.AllowPause).ToArray())
                 {
+                    if (!CanDispatch(request)) break;
                     PauseBatch(batch.Attempt.Request.Id);
-                    reservation = placement.TryReserve(request, nowUtc);
+                    reservation = placement.TryReserve(request, DecisionTime(request, nowUtc));
                     if (reservation is not null) break;
                 }
             }
@@ -160,12 +255,25 @@ public sealed class WorkloadCoordinator : IDisposable
             records.Add(new(attempt, "reserved"));
             try
             {
+                CommitHeat(request.Id);
                 Save();
-                SetPhase(attempt, "creating"); runtime.Create(attempt); SetPhase(attempt, "created");
-                SetPhase(attempt, "starting"); runtime.Start(attempt);
+                SetPhase(attempt, "creating");
+                if (!CanDispatch(request))
+                {
+                    MarkDeadline(attempt, new("missed", clock.GetUtcNow(), "Expired before create dispatch; no container launched."));
+                    SetPhase(attempt, "released"); placement.Release(request.Id); RefreshHeatBudget(clock.GetUtcNow()); return CurrentRecord(request.Id);
+                }
+                runtime.Create(attempt); SetPhase(attempt, "created");
+                if (!CanDispatch(request)) { EnforceDeadlines(); return CurrentRecord(request.Id); }
+                if (!placement.CanStartHeld(request.Id, DecisionTime(request, nowUtc))) return CurrentRecord(request.Id);
+                SetPhase(attempt, "starting");
+                if (!CanDispatch(request)) { SetPhase(attempt, "created"); EnforceDeadlines(); return CurrentRecord(request.Id); }
+                runtime.Start(attempt);
                 var observed = runtime.Observe(attempt);
-                if (observed.State != "running") throw new InvalidOperationException("Start not confirmed running; claim retained.");
-                SetPhase(attempt, "running");
+                if (observed.State != "running" && !(request.Kind == "batch" && observed.Terminal)) throw new InvalidOperationException("Start not confirmed running; claim retained.");
+                SetPhase(attempt, observed.Terminal ? "terminal" : "running");
+                CaptureDeadlineEvidence(attempt, observed);
+                EnforceDeadlines();
                 return WorkloadJson.Copy(records.Single(r => r.Attempt.AttemptId == attempt.AttemptId));
             }
             catch { reconciled = false; throw; }
@@ -187,7 +295,7 @@ public sealed class WorkloadCoordinator : IDisposable
             {
                 SetPhase(a, "pausing"); lastAppliedBatchLoad = runtime.ApplyBatchLoad(a, 0);
                 if (runtime.Observe(a).State != "paused") throw new InvalidOperationException("Pause not confirmed; full claim retained.");
-                placement.ObservePaused(workloadId); SetPhase(a, "paused");
+                placement.ObservePaused(workloadId); SetPhase(a, "paused"); RefreshHeatBudget(clock.GetUtcNow());
             }
             catch { reconciled = false; throw; }
         }
@@ -199,12 +307,17 @@ public sealed class WorkloadCoordinator : IDisposable
         {
             RequireReconciled(); var a = Find(workloadId);
             if (a.Request.Kind != "batch" || !a.Request.Lifecycle.AllowPause) throw new InvalidOperationException("Cannot resume non-batch workload.");
-            if (!placement.TryClaimResume(workloadId, nowUtc)) return false;
+            if (!CanDispatch(a.Request)) { EnforceDeadlines(); return false; }
+            RefreshHeatBudget(DecisionTime(a.Request, nowUtc), workloadId);
+            if (!placement.TryClaimResume(workloadId, DecisionTime(a.Request, nowUtc))) { RefreshHeatBudget(DecisionTime(a.Request, nowUtc)); return false; }
             try
             {
-                SetPhase(a, "resuming"); lastAppliedBatchLoad = runtime.ApplyBatchLoad(a, 1);
+                CommitHeat(workloadId);
+                SetPhase(a, "resuming");
+                if (!CanDispatch(a.Request)) { placement.ObservePaused(workloadId); SetPhase(a, "paused"); RefreshHeatBudget(clock.GetUtcNow()); EnforceDeadlines(); return false; }
+                lastAppliedBatchLoad = runtime.ApplyBatchLoad(a, 1);
                 if (runtime.Observe(a).State != "running") throw new InvalidOperationException("Resume not confirmed; full claim retained.");
-                SetPhase(a, "running"); return true;
+                SetPhase(a, "running"); RefreshHeatBudget(clock.GetUtcNow()); EnforceDeadlines(); return CurrentRecord(workloadId).Phase == "running";
             }
             catch { reconciled = false; throw; }
         }
@@ -245,7 +358,7 @@ public sealed class WorkloadCoordinator : IDisposable
                 {
                     SetPhase(a, "removing"); runtime.Remove(a);
                     if (runtime.Observe(a).State != "missing") throw new InvalidOperationException("Unstarted container removal unconfirmed.");
-                    SetPhase(a, "released"); placement.Release(workloadId); return;
+                    SetPhase(a, "released"); placement.Release(workloadId); RefreshHeatBudget(clock.GetUtcNow()); return;
                 }
                 if (!observed.Terminal)
                 {
@@ -254,7 +367,7 @@ public sealed class WorkloadCoordinator : IDisposable
                 if (!observed.Terminal) throw new InvalidOperationException("Termination unconfirmed; resources remain held.");
                 SetPhase(a, "terminal"); SetPhase(a, "removing"); runtime.Remove(a);
                 if (runtime.Observe(a).State != "missing") throw new InvalidOperationException("Removal unconfirmed; resources remain held.");
-                SetPhase(a, "released"); placement.Release(workloadId);
+                SetPhase(a, "released"); placement.Release(workloadId); RefreshHeatBudget(clock.GetUtcNow());
             }
             catch { reconciled = false; throw; }
         }
@@ -269,9 +382,7 @@ public sealed class WorkloadCoordinator : IDisposable
     {
         WorkloadPlacement.ValidateRequest(request);
         var inventory = currentInventory ?? throw new InvalidOperationException("Update inventory before admission.");
-        foreach (var group in nodes.GroupBy(n => n.DockerContext))
-            if (inventory.Nodes.Where(n => group.Any(r => r.NodeId == n.Id)).Select(n => n.DomainId).Distinct().Count() > 1)
-                throw new InvalidDataException("One Docker context cannot be assigned independent physical resource pools.");
+        WorkloadConfiguration.ValidateRuntimeDomains(inventory, nodes);
         foreach (var node in inventory.Nodes.Where(n => n.Ready && n.NetworkEligible &&
             (request.PinnedNodeId is null || request.PinnedNodeId == n.Id) && (request.StorageId is null || n.StorageIds.Contains(request.StorageId)) &&
             !request.RequiredCapabilities.Except(n.Capabilities).Any()))
@@ -295,11 +406,62 @@ public sealed class WorkloadCoordinator : IDisposable
     private void SetPhase(RuntimeAttempt a, string phase)
     {
         int index = records.FindIndex(r => r.Attempt.AttemptId == a.AttemptId);
-        records[index] = new(a, phase); Save();
+        if (records[index].Phase == phase) return;
+        records[index] = records[index] with { Phase = phase }; Save();
+    }
+    private AttemptRecord CurrentRecord(string id) => records.Single(r => r.Attempt.Request.Id == id);
+    private bool CanDispatch(WorkloadRequest request)
+    {
+        var now = clock.GetUtcNow();
+        return WorkloadPlacement.DeadlineOpen(request, now) && (!retainHourlyHeat || currentInventory is {} i
+            && now >= i.IntervalStartUtc && now < i.IntervalEndUtc
+            && i.ResourceObservedAtUtc is {} observed && now >= observed && i.ResourceValidUntilUtc is {} until && now < until);
+    }
+    private DateTimeOffset DecisionTime(WorkloadRequest request, DateTimeOffset fallback) => !retainHourlyHeat && request.Deadline is null ? fallback : clock.GetUtcNow();
+
+    private void MarkDeadline(RuntimeAttempt a, DeadlineOutcome result)
+    {
+        int index = records.FindIndex(r => r.Attempt.AttemptId == a.AttemptId);
+        records[index] = records[index] with { Deadline = result };
+        Save(); // Evidence/intent precedes any cleanup or stop mutation.
+    }
+    private void CaptureDeadlineEvidence(RuntimeAttempt a, ContainerObservation observed)
+    {
+        if (a.Request.Deadline is not {} d || CurrentRecord(a.Request.Id).Deadline is not null) return;
+        var now = clock.GetUtcNow();
+        if (observed.Terminal)
+        {
+            string status = observed.ExitCode is null ? "unknown" : observed.ExitCode != 0 ? "failed" : now < d.DueAtUtc ? "on_time" : "unknown";
+            MarkDeadline(a, new(status, now, status == "on_time" ? "Successful terminal state observed before deadline."
+                : status == "failed" ? "Observed nonzero process exit; not successful completion."
+                : "Successful completion time/exit is not established before deadline; remote wall-clock finish is informational only."));
+        }
+        else if (now >= d.DueAtUtc)
+            MarkDeadline(a, new("missed", now, "Deadline reached without confirmed successful completion."));
+    }
+
+    /// <summary>Explicit owner tick; expiry alone never releases resources. Caller must keep polling.</summary>
+    public AttemptRecord[] EnforceDeadlines()
+    {
+        lock (gate)
+        {
+            RequireReconciled();
+            foreach (var record in records.Where(r => r.Attempt.Request.Deadline is not null && r.Phase != "released").ToArray())
+            {
+                var a = record.Attempt;
+                CaptureDeadlineEvidence(a, runtime.Observe(a));
+                var result = CurrentRecord(a.Request.Id).Deadline;
+                if (result?.Status != "missed" || !a.Request.Deadline!.StopWhenOverdue || !a.Request.Lifecycle.AllowStop) continue;
+                if (!result.StopIntentPersisted) MarkDeadline(a, result with { StopIntentPersisted = true });
+                StopAndRelease(a.Request.Id);
+            }
+            return WorkloadJson.Copy(records.ToArray());
+        }
     }
     private void Save()
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(new CoordinatorState(fleetId, records.ToArray()), WorkloadJson.Options);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(new CoordinatorState(fleetId, records.ToArray())
+            { RetainHourlyHeat = retainHourlyHeat ? true : null }, WorkloadJson.Options);
         string temporary = journalPath + ".tmp";
         using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
         { stream.Write(bytes); stream.Flush(flushToDisk: true); }

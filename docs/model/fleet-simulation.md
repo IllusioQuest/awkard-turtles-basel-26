@@ -1,7 +1,7 @@
 # Fleet simulation: implementation spec
 
-> **Status:** agreed with Ennio 2026-11-21; built 2026-11-21 (see §16 for choices made during the build). Ticket T-52, branch `feat/T-52-fleet-simulation`.
-> This file is the decision record for T-52 (design reviewed by Ennio 2026-11-21; no separate ADR).
+> **Status:** agreed with Ennio 2026-11-21; built 2026-11-21 (see §16 for choices made during the build). Ticket T-58, branch `feat/T-52-fleet-simulation`.
+> This file is the decision record for T-58 (design reviewed by Ennio 2026-11-21; no separate ADR).
 > Everything below is in scope for the first build. Values marked `TODO(source)` stay visible
 > parameters; never replace them with invented numbers.
 

@@ -1,6 +1,6 @@
-# T-52: Fleet simulation (event-driven, many houses)
+# T-58: Fleet simulation (event-driven, many houses)
 
-Owner: Ennio / Claude. Status: built, in review (results and choices: spec §16). Branch: `feat/T-52-fleet-simulation`.
+Owner: Ennio / Claude. Status: done (results and choices: spec §16; renumbered from T-52, which Nikita had taken in parallel). Branch: `feat/T-52-fleet-simulation`.
 
 ## Goal
 

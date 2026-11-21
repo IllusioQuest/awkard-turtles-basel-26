@@ -1,6 +1,6 @@
 # Fleet results API (dashboard backend)
 
-Read-only HTTP API that serves fleet-simulation runs (`data/derived/fleet/<run-id>/`, T-52) to the
+Read-only HTTP API that serves fleet-simulation runs (`data/derived/fleet/<run-id>/`, T-58) to the
 web dashboard. JSON shapes: [`web/src/data/types.ts`](../../web/src/data/types.ts) (the contract;
 field names camelCase, units in the names).
 

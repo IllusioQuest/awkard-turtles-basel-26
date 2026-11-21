@@ -5,6 +5,7 @@ import type { DataSource, HouseInfo, HousePeriod, NetworkHour, RunInfo } from '.
 import MapView, { type HeatLayer, type MapState } from './MapView'
 import MockBanner from './MockBanner'
 import SitePanel from './SitePanel'
+import MonitoringPanel from './monitoring/MonitoringPanel'
 import { EconomicsChart, HeatChart, LoadChart, MissedChart, type MissedPoint, type MonthlyPoint, type SeriesPoint } from './charts'
 import { DAY_MS, HOURS_PER_DAY, alignHour, chf, dateTime, dayTick, dec1, lastHour, monthTick, num, pct, wallMs } from './format'
 import {
@@ -222,6 +223,10 @@ function RunView({ source, run, runs, houses, network }: Props) {
           </div>
         </div>
       </div>
+
+      <MonitoringPanel />
+
+      <MonitoringPanel />
 
       <section className="stats">
         <Stat label="Houses" value={num.format(run.houses)} note={`${num.format(run.servers)} servers`} />

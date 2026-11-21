@@ -1,4 +1,4 @@
-# Competitor prices and price elasticity for Type 2 dynamic pricing (T-52)
+# Competitor prices and price elasticity for Type 2 dynamic pricing (T-58)
 
 > Research agent (Claude subagent), 2026-11-21, all accessed 2026-11-21. Feeds
 > `docs/model/fleet-simulation.md` §7.1. Rows for `data/raw/market/compute-prices.csv`: `TODO`

@@ -1,0 +1,77 @@
+{
+  "source_commit": "b163f97 (pre-deadline WorkloadModels and coordinator)",
+  "expected_spec_sha256": "834a86308ac0988a8d33609fc4c4177a992e2c5e638834437e9b54ed6f890344",
+  "journal": {
+    "fleet_id": "deadline-legacy-fixture",
+    "attempts": [
+      {
+        "attempt": {
+          "fleet_id": "deadline-legacy-fixture",
+          "attempt_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request": {
+            "id": "legacy-batch",
+            "kind": "batch",
+            "origin_site_id": "home",
+            "placement_policy": {
+              "mode": "anywhere",
+              "source": "Synthetic legacy fixture",
+              "allowed_country_codes": null
+            },
+            "resources": {
+              "cpu_cores": 0.5,
+              "ram_mib": 64,
+              "slots": 1
+            },
+            "resource_source": "Synthetic legacy fixture",
+            "recoverable_heat_kwh_per_hour": 0.8,
+            "heat_source": "Synthetic legacy fixture",
+            "required_capabilities": [],
+            "gpu_capability": null,
+            "pinned_node_id": null,
+            "storage_id": null,
+            "latency_limits": [],
+            "lifecycle": {
+              "allow_pause": true,
+              "allow_stop": true,
+              "restartable": false
+            },
+            "min_gpu_vram_mib": null
+          },
+          "reservation": {
+            "workload_id": "legacy-batch",
+            "site_id": "spa",
+            "node_id": "b",
+            "domain_id": "host",
+            "gpu_device_id": null,
+            "recoverable_heat_kwh_per_hour": 0.8,
+            "available_heat_kwh_before_reservation": 14
+          },
+          "node": {
+            "node_id": "b",
+            "docker_context": "fixture-context",
+            "network": "none",
+            "gpus": [],
+            "volumes": []
+          },
+          "profile": {
+            "id": "fixture",
+            "image": "local-fixture-image",
+            "user": "65534",
+            "command": [
+              "sleep",
+              "300"
+            ],
+            "env_file": null,
+            "loopback_ports": [],
+            "startup_command": [],
+            "ready_command": [
+              "true"
+            ],
+            "shm_mib": 64
+          }
+        },
+        "phase": "running"
+      }
+    ]
+  }
+}
