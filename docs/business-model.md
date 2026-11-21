@@ -106,8 +106,9 @@ customers.
 - **Licensed hardware costs more** *(changed: L4, decision 0027)*. NVIDIA's GeForce driver licence excludes "datacenter
   deployment", and a fleet run by DigitalHeat counts as one, so we use L4 data-centre cards
   (decision 0027). That raises the yearly fixed cost per house from CHF 16,532 to 25,661 (4 servers),
-  or more at the newer verified L4 card price (CHF 44,179 instead of 34,244 per kW,
-  [`profitability-inputs.md`](research/profitability-inputs.md) §7).
+  or to CHF 32,285 at the newer verified L4 card price (CHF 44,179 instead of 34,244 per kW,
+  [`profitability-inputs.md`](research/profitability-inputs.md) §7). Then the full-cost break-even is
+  CHF 1.651, and Type 1 at list price (1.81) clears it by only about 10 %.
 - **Scale.** sciCORE fills about 3.5 reference houses. A network needs anchor customers.
 - **Not yet priced:** water blocks, heat exchanger, installation, house electrical connection,
   upload bandwidth, maintenance visits.

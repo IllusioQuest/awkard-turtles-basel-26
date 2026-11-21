@@ -65,7 +65,11 @@ server-hour.
 Throughput readings not in the table, by linearity (`p_1` scales with tokens): batch 1 (0.237 J per
 token) gives 12.7 M tokens and CHF 1.60 at list; the optimistic batched reading of T-37 (only output
 tokens at 0.21 J, input tokens 0.0305 J) gives about 65 M tokens and ≈ CHF 8.2 at list, ≈ 4.1 at
-batch-API level. Until an L4 is measured, read every Type 1 result below as "conservative proxy".
+batch-API level. Until an L4 is measured, read every Type 1 result below as a **proxy whose
+direction of error is unknown** (the L4 has a much smaller memory system than the RTX 4090, and both
+J/token figures divide board power ratings, not measured power). Sanity bound: AWS Zurich spot rents
+the same L4 capacity for CHF 2.23 per server-hour. Measurement plan: one hour on Google Cloud
+g2-standard-4 in Zurich (CHF 0.82/h) with `vllm bench serve` + `nvidia-smi` (decision 0027).
 
 ### 1.3 Money: system surplus first, split second
 
@@ -191,6 +195,12 @@ Lever by lever:
   server-hour at φ = 1 (1.6 at φ = 0.6, 2.6 at φ = 0.35), i.e. above the pinned 0.66.
 - **Heat alternative:** replacing oil or gas instead of a heat pump raises the host's gain but does
   not change the required Type 1 share (≤ 0.01).
+
+**Card price sensitivity (decision 0027 review):** the L4 profile uses CHF 2,235 per card (low
+confidence). At the verified CHF 3,089 a server costs CHF 44,179, the full-cost break-even of the
+draft scenario rises from 1.358 to 1.651 and Type 1 at list (1.81) clears it by only about 10 %, so
+all required Type 1 shares above rise (4 servers, operator win-win: Type 1 must take about 95 % of the sold hours, by hand as in `business-model.md`). The profile default is a team
+decision (T-15/T-35 own the file).
 
 **Does not pay off:** any profile at batch-API token prices with the conservative L4 throughput;
 Type 2 alone at the pinned CHF 0.66; CPU homes under any sourced price; every result ignores

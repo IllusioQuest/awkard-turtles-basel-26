@@ -24,7 +24,9 @@ cleared full cost. Both records listed NVIDIA's driver licence as the biggest op
   commercial compute service is, in substance, a distributed data centre, even if the boxes stand in
   basements. GPU compute without the NVIDIA driver is not a realistic option for CUDA workloads.
 
-The team lead decided (2026-11-21) not to carry this legal risk into the pitch.
+The team lead decided (2026-11-21) not to carry this legal risk into the pitch. This is **risk
+avoidance, not a legal finding**: we do not claim that home servers are a data centre in law, only
+that we cannot show they are not.
 
 ## Decision
 
@@ -37,8 +39,11 @@ The team lead decided (2026-11-21) not to carry this legal risk into the pitch.
    marked "not permitted (licence)" and excluded from the economics defaults (T-14).
 4. **Type 1 income on L4** is computed with the 0020 rule (price per token × tokens per server-hour).
    No L4 LLM throughput is sourced yet, so the L4 energy per token reuses the RTX 4090 figures of
-   T-37 (same Ada Lovelace generation) as a labelled proxy, `TODO(source)` until measured on an L4
-   (`vllm bench serve` + `nvidia-smi`).
+   T-37 as a labelled **proxy, direction of error unknown** (same Ada Lovelace generation, but a
+   much smaller memory system, and both J/token figures divide board power ratings, not measured
+   power). `TODO(source)`: replace it by one hour on a rented cloud L4 in Zurich (Google Cloud
+   g2-standard-4, CHF 0.82/h, `cp-gpu-gcp-g2-standard-4-euw6-od`) with `vllm bench serve` +
+   `nvidia-smi`.
 5. Scored reference-house figures stay on the case's abstract 1 kW server and do not change.
 
 ## Alternatives considered
@@ -61,13 +66,34 @@ The team lead decided (2026-11-21) not to carry this legal risk into the pitch.
   token (T-37 batched, conservative) = 14.36 M tokens, i.e. **CHF 1.81** at the list price of
   CHF 0.126 per 1M tokens and **CHF 0.90** at the batch-API level (−50 %). Only the list price clears
   full cost; numbers and the required Type 1 share come from the T-14 economics bundle
-  (`docs/model/economics.md`, decision 0028).
+  (`docs/model/economics.md`, decision 0028). Sanity bound: the AWS Zurich spot
+  price of the same L4 capacity is CHF 2.23 per server-hour (`gpu-inference-l4.json`), so a buyer
+  can rent equivalent capacity for about 1.2× our list-price token income.
+- **The L4 profile uses the cheaper card price** (CHF 2,235, low confidence). At the verified
+  CHF 3,089 (`pc-gpu-bechtle-l4`, `profitability-inputs.md` §7) one server costs CHF 44,179 and the
+  full-cost break-even of the draft scenario is **CHF 1.651**; Type 1 at list (1.81) then clears it
+  by only about 10 %. The profile file belongs to T-15/T-35 and is not changed here; the team must
+  pick the default card price (see Review).
 - `docs/business-model.md` switches its numbers to L4 (changed rows marked), T-14 (PR #27) uses L4
   as default and removes RTX 4090 from its defaults.
 - Open checks: measured L4 LLM throughput and power (moves every Type 1 number); confirmed L4 card
-  price (34,244 vs 44,179 CHF/kW); NVIDIA data-centre driver/vGPU licence terms for L4 (no per-GPU
-  software fee is assumed for bare-metal CUDA use, `TODO(source)`).
+  price (34,244 vs 44,179 CHF/kW); NVIDIA data-centre driver licence and CUDA licence terms for
+  bare-metal L4 use (no per-GPU software fee is assumed, `TODO(source)`: nvidia.com was not
+  reachable from this session).
 
 ## Review
 
-See the "Review" section below once the fresh-context review has run.
+Fresh-context review (separate Claude Code session with only the packet, 2026-11-21): **go with
+changes.** Points and what we did:
+
+1. *Card price:* the default L4 profile uses the low-confidence CHF 2,235; the verified CHF 3,089
+   gives CHF 44,179 per server and a full-cost break-even of 1.651, which list-price Type 1 clears by
+   only ~10 %. **Partly adopted:** stated in Consequences, `business-model.md` and
+   `docs/model/economics.md`; the profile default is not switched in this PR because the file is
+   owned by T-15/T-35 and it would move every figure — team decision.
+2. *Throughput proxy:* "same generation" is weak; label it "direction of error unknown", add the
+   AWS spot sanity bound and measure one hour on a cloud L4. **Adopted** (label, bound, measurement
+   named as the `TODO(source)`); the measurement itself is not done yet.
+3. *Licence of the replacement:* cite NVIDIA's data-centre/CUDA licence and say the decision avoids
+   a risk, not a legal finding. **Adopted** the wording; the citation stays `TODO(source)` because
+   nvidia.com was not reachable from this session.
