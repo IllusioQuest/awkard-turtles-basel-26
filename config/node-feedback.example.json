@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "fallback_interval_seconds": 1,
+  "max_report_age_seconds": 30,
+  "max_report_bytes": 65536,
+  "max_queued_jobs": 100,
+  "source": "Operator lab limits for T-56, 2026-11-21; not measured latency SLAs or physical parameters. Explicit example authority bindings must match the operator's trusted fleet inventory.",
+  "heat_reporters": [
+    { "site_id": "home", "node_id": "a" },
+    { "site_id": "spa", "node_id": "b" }
+  ]
+}
