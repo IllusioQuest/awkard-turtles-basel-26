@@ -26,3 +26,5 @@ later.
 | [0011](0011-result-export-contract.md) | Versioned snake_case result export | proposed; review pending |
 | [0012](0012-hosting-component-isolation.md) | Separate frontend and API node pools | proposed; review pending |
 | [0013](0013-job-data-locality.md) | Job data-locality eligibility | proposed |
+| [0015](0015-hosting-heat-routing.md) | Shared heat scheduler in hosting routing | proposed; approval/review pending |
+| [0016](0016-hosting-replica-lifecycle.md) | Six-node heat-guided hosting lifecycle | proposed; user approved scope, review pending |

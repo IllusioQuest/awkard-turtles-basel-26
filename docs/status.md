@@ -19,11 +19,17 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude | `feat/T-01-job-catalog` | T-01: schema change for always-on services (webhosting) once Nikita has decided the representation; transcription descriptor comes from T-02 | `config/jobs/job.schema.json`, `JobDescriptorLoader` (decision 0009) | blocked: waiting for Nikita's decision (options in T-01) |
 | team lead / Claude | `docs/T-07-draft-submission` | T-07: fresh-clone check and must-have checklist (`docs/submission/draft-checklist.md`); README demo section once T-02 is merged | none | in progress |
 | team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
-| team lead / Claude (subagent) | `feat/T-28-price-updater` | T-28: Azure Retail Prices snapshot (Switzerland North) and derived CHF per server-hour (`data/derived/computing-price.json`) | new files only (`scripts/`, `data/raw/market/price-snapshots/`, `data/derived/`); does not change `config/reference-house.json` (T-06) | in progress |
+| team lead / Claude (subagent) | `feat/T-28-price-updater` | T-28: Azure Retail Prices snapshot (Switzerland North) and derived CHF per server-hour (`data/derived/computing-price.json`) | new files only (`scripts/`, `data/raw/market/price-snapshots/`, `data/derived/`); does not change `config/reference-house.json` (T-06) | PR #11 open; derived C1 0.687 vs adopted 0.66 |
+| team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new `HardwareProfile` loader in Core (new file, no existing interface changed); reference house keeps the case's 1 kW server | PR open; 40 .NET tests pass. Finding for T-06: one R570 is ≈ 0.16 kW, not 1 kW |
+| team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none yet; proposes interface changes for T-12 in the decision record | in progress |
+| team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new files only; reference house keeps the case's 1 kW server | in progress |
+| team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none; decision 0014 proposes `INetworkScheduler`/`NetworkState`/`NetworkDecision` and an allocation-aware queue for T-12 (own ADR there) | draft ready for team review; 3 team questions in model §11 |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Open coordination
 
+- **Jona (T-06), hardware cost:** T-15 found that one Dell R570 draws ≈ 0.16 kW, not 1 kW; a 1 kW reference server is ≈ 6.15 R570s (CHF 50,743). The hardware depreciation sensitivity in T-06 (A-017: one R570 per server) is therefore ≈ 6× too low. See `docs/research/hardware.md`.
+- **Team lead decision (2026-11-21):** GPU inference server (L4 profile, `config/hardware/`) is the main hardware scenario for the pitch, with the three-profile comparison on one slide; scored reference-house figures keep the case's abstract 1 kW server.
 - **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
 - **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
 - **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).
@@ -42,7 +48,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
   laptop runtime and power/energy measurements (or a visible `TODO(source)`), then test pause,
   resume and throttle using the shared scheduler. No job protocol is imposed by this branch.
 - `data/raw/` with its `SOURCE` files (on `main`).
-- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006).
+- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006), 0014 (routing optimisation model, T-11).
 
 ## Known integration risks
 
@@ -78,3 +84,12 @@ T-13: 29 tests pass; 8,760-row showcase generated from clean 8651786, legacy hou
 T-13 ready for review in PR #10 (29 tests, exact hourly legacy comparison). T-27 images build; internal bridge ingress failed. Awaiting user choice on per-node firewall rules before network rollout. Existing hosting lab left running; privacy research and topology in docs/webhosting-privacy.md.
 T-27: four independent frontend/API engines verified with firewall isolation, 17 hosting tests, browser inspection, all four node-kill recovery scenarios and paused-gateway recovery. Runtime guide contains measured results; code PR pending, no automatic controller or heat-routing claim.
 T-13 complete: PR #10 verified merged as e554f196; snake_case export contract and showcase are now on main. T-27 remains a separate reviewed implementation branch.
+
+## Hosting scheduler handoff (2026-11-21 03:15 Europe/Zurich)
+Nikita / Codex claims T-29 for the user's requested scheduler connection. Proposed scope is a
+hosting adapter using existing IScheduler and JobPlacement, keeping both component replicas
+running; decision 0015 is pending user agreement/review. No T-10/T-12 network optimiser or shared
+schema files are claimed. T-01 owner: user has been asked to choose one batch/always-on catalog
+versus separate catalogs; no approval is implied until that reply is recorded.
+T-29 decision 0015 reviewed (go with changes): mandatory pre-selection locality filtering, whole-set fallback for incomplete telemetry, controlled-demo traffic only. User routing/catalog choices pending; runtime unchanged. T-27 PR #12 is still a code dependency outside main at this check.
+T-29: Nikita approved six-node automatic stateless replica move/pause and common batch/always-on catalog. T-01 decision is now recorded in its ticket; schema/loader implementation remains Claude-owned. Lifecycle decision 0016 under review; gateway controller reuses shared scheduler and locality, scored model unchanged.
