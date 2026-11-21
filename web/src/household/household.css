@@ -119,34 +119,8 @@
   max-width: none;
 }
 
-.head-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
 
-.live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--series-1);
-  animation: live-pulse 2s ease-in-out infinite;
-}
-
-@keyframes live-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
+.household .link.back {
+  display: inline-block;
+  margin: 0 0 8px;
 }

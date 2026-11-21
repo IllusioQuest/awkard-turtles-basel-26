@@ -10,7 +10,12 @@ export default defineConfig({
   server: {
     host: '127.0.0.1', port: monitorPolicy.frontend_port, strictPort: true,
     allowedHosts: ['localhost', '127.0.0.1'],
-    proxy: { '/api/monitor': { target: `http://127.0.0.1:${monitorPolicy.port}`, changeOrigin: true } },
+    // The more specific monitor route must come before the fleet-results catch-all /api.
+    proxy: {
+      '/api/monitor': { target: `http://127.0.0.1:${monitorPolicy.port}`, changeOrigin: true },
+      // Fleet-results API: dotnet run --project src/DigitalHeat.FleetApi
+      '/api': 'http://localhost:5080',
+    },
     fs: { allow: [searchForWorkspaceRoot(process.cwd()), '../data/raw'] },
   },
 })

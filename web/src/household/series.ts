@@ -1,23 +1,20 @@
-// Time series for one household, aggregated into buckets that fit the selected range.
-// Values come from the same mock site model as the admin dashboard (admin/mock.ts).
+// Time series for one house, aggregated into buckets that fit the selected range.
+// Values come from the simulation's house series (HousePeriod); times are wall ms (admin/format.ts).
 
-import { HOURS_PER_DAY, MS_PER_HOUR, siteState, type Site } from '../admin/mock'
+import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
+import { DAY_MS, MS_PER_HOUR, wallMs } from '../admin/format'
 
-const DAY_MS = HOURS_PER_DAY * MS_PER_HOUR
-
-/** Bucket and sampling step for a range: fine for short ranges, coarse for long ones. */
-export function resolution(spanMs: number) {
-  if (spanMs <= 3 * DAY_MS) return { bucketMs: MS_PER_HOUR, sampleMs: MS_PER_HOUR, unit: 'hour' as const }
-  if (spanMs <= 14 * DAY_MS) return { bucketMs: 3 * MS_PER_HOUR, sampleMs: MS_PER_HOUR, unit: '3 hours' as const }
-  if (spanMs <= 120 * DAY_MS) return { bucketMs: DAY_MS, sampleMs: 2 * MS_PER_HOUR, unit: 'day' as const }
-  return { bucketMs: 7 * DAY_MS, sampleMs: 6 * MS_PER_HOUR, unit: 'week' as const }
+/** Bucket size for a range: fine for short ranges, coarse for long ones (never finer than the run's period). */
+export function resolution(spanMs: number, periodHours: number) {
+  const hours = spanMs <= 3 * DAY_MS ? 1 : spanMs <= 14 * DAY_MS ? 3 : spanMs <= 120 * DAY_MS ? 24 : 168
+  const bucketHours = Math.max(hours, periodHours)
+  const unit = bucketHours === 1 ? 'hour' : bucketHours === 24 ? 'day' : bucketHours === 168 ? 'week' : `${bucketHours} hours`
+  return { bucketMs: bucketHours * MS_PER_HOUR, unit }
 }
 
 export interface Bucket {
   t: number
-  forecast: boolean
   load: number
-  loadBand: [number, number] | null
   powerKwh: number
   heatUsedKwh: number
   heatDemandKwh: number
@@ -26,70 +23,29 @@ export interface Bucket {
   temperatureC: number
 }
 
-/** Forecast uncertainty (MOCK): grows with distance from now, capped. */
-const uncertainty = (daysAhead: number) => Math.min(0.35, 0.04 + 0.01 * daysAhead)
-
-export function householdSeries(site: Site, from: number, to: number, now: number): Bucket[] {
-  const { bucketMs, sampleMs } = resolution(to - from)
-  const sampleHours = sampleMs / MS_PER_HOUR
-  const start = Math.floor(from / bucketMs) * bucketMs
-  const out: Bucket[] = []
-  for (let b = start; b < to; b += bucketMs) {
-    let load = 0
-    let power = 0
-    let used = 0
-    let demand = 0
-    let dumped = 0
-    let tank = 0
-    let temp = 0
-    let n = 0
-    for (let ts = b; ts < b + bucketMs; ts += sampleMs) {
-      const s = siteState(site, ts, ts > now)
-      load += s.load
-      power += s.serversRunning * sampleHours // 1 kW per running server (case)
-      used += s.heatUsedKw * sampleHours
-      demand += s.heatDemandKw * sampleHours
-      dumped += s.heatDumpedKw * sampleHours
-      tank += s.tankLevel
-      temp += s.temperatureC
-      n++
+/** Periods in [fromMs, toMs) summed (energies) or averaged (load, tank level, temperature) per bucket. */
+export function householdSeries(run: RunInfo, house: HouseInfo, periods: HousePeriod[], fromMs: number, toMs: number): Bucket[] {
+  const { bucketMs } = resolution(toMs - fromMs, run.periodHours)
+  const buckets = new Map<number, Bucket & { n: number }>()
+  for (const p of periods) {
+    const ms = wallMs(run, p.h)
+    if (ms < fromMs || ms >= toMs) continue
+    const start = fromMs + Math.floor((ms - fromMs) / bucketMs) * bucketMs
+    let b = buckets.get(start)
+    if (!b) {
+      b = { t: start, load: 0, powerKwh: 0, heatUsedKwh: 0, heatDemandKwh: 0, heatDumpedKwh: 0, tankLevel: 0, temperatureC: 0, n: 0 }
+      buckets.set(start, b)
     }
-    const forecast = b >= now
-    const avgLoad = load / n
-    const u = uncertainty((b - now) / DAY_MS)
-    out.push({
-      t: b,
-      forecast,
-      load: avgLoad,
-      loadBand: forecast ? [Math.max(0, avgLoad * (1 - u)), Math.min(1, avgLoad * (1 + u))] : null,
-      powerKwh: power,
-      heatUsedKwh: used,
-      heatDemandKwh: demand,
-      heatDumpedKwh: dumped,
-      tankLevel: tank / n,
-      temperatureC: temp / n,
-    })
+    b.load += p.load
+    b.powerKwh += p.electricKwh
+    b.heatUsedKwh += p.heatUsedKwh
+    b.heatDemandKwh += p.heatDemandKwh
+    b.heatDumpedKwh += p.heatDumpedKwh
+    b.tankLevel += house.tankKwh > 0 ? p.tankEndKwh / house.tankKwh : 0
+    b.temperatureC += p.temperatureC
+    b.n++
   }
-  // Live point: at hourly resolution, add the current instant so the line ends at "now".
-  if (bucketMs === MS_PER_HOUR && now > from && now < to && now % bucketMs !== 0) {
-    const s = siteState(site, now)
-    const live: Bucket = {
-      t: now,
-      forecast: false,
-      load: s.load,
-      loadBand: null,
-      powerKwh: s.serversRunning,
-      heatUsedKwh: s.heatUsedKw,
-      heatDemandKwh: s.heatDemandKw,
-      heatDumpedKwh: s.heatDumpedKw,
-      tankLevel: s.tankLevel,
-      temperatureC: s.temperatureC,
-    }
-    const at = out.findIndex((b) => b.t > now)
-    if (at === -1) out.push(live)
-    else out.splice(at, 0, live)
-  }
-  return out
+  return [...buckets.values()].map(({ n, ...b }) => ({ ...b, load: b.load / n, tankLevel: b.tankLevel / n, temperatureC: b.temperatureC / n }))
 }
 
 export function totals(buckets: Bucket[]) {

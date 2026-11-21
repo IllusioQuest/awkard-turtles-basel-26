@@ -1,5 +1,5 @@
 // Mock data for the admin dashboard. Deterministic: every value is a pure function of the site,
-// the hour and a fixed seed, so a reload shows the same picture. Replace with exported runs (T-13).
+// the hour and a fixed seed, so a reload shows the same picture. Only the fallback when the fleet API is not running (data/mockSource.ts).
 //
 // Physics follows the case where it can (heating formula, 0.8 kW heat per 1 kW server, heat-led
 // load); network layout, weather, jobs and noise are MOCK values chosen to look plausible.
@@ -178,37 +178,6 @@ export function temperatureC(lat: number, lon: number, t: number) {
   return seasonal + daily + weather + south + lapse
 }
 
-export const WEATHER_BOUNDS = { west: 5.8, east: 10.6, south: 45.75, north: 47.9 }
-const WEATHER_COLS = 160
-const WEATHER_ROWS = 96
-
-export interface WeatherField {
-  cols: number
-  rows: number
-  temperatureC: Float32Array // row-major, north row first
-  lowC: number // 5th percentile
-  medianC: number
-  highC: number // 95th percentile
-}
-
-/** Temperature field over Switzerland for the weather overlay. */
-export function weatherField(t: number): WeatherField {
-  const { west, east, south, north } = WEATHER_BOUNDS
-  const temperature = new Float32Array(WEATHER_COLS * WEATHER_ROWS)
-  for (let r = 0; r < WEATHER_ROWS; r++) {
-    const lat = north - ((r + 0.5) / WEATHER_ROWS) * (north - south)
-    for (let c = 0; c < WEATHER_COLS; c++) {
-      const lon = west + ((c + 0.5) / WEATHER_COLS) * (east - west)
-      temperature[r * WEATHER_COLS + c] = temperatureC(lat, lon, t)
-    }
-  }
-  const sorted = Float32Array.from(temperature).sort()
-  const lowC = sorted[Math.floor(sorted.length * 0.05)]
-  const medianC = sorted[Math.floor(sorted.length * 0.5)]
-  const highC = sorted[Math.floor(sorted.length * 0.95)]
-  return { cols: WEATHER_COLS, rows: WEATHER_ROWS, temperatureC: temperature, lowC, medianC, highC }
-}
-
 // ---------- site state ----------
 
 export interface SiteState {
@@ -281,7 +250,7 @@ export function siteState(site: Site, t: number, forecast = false): SiteState {
   }
 }
 
-// ---------- aggregates ----------
+// ---------- aggregate ----------
 
 export interface NetworkPoint {
   t: number
@@ -332,106 +301,4 @@ export function networkAt(t: number, now: number): NetworkPoint {
   p.serversRunning = p.load
   p.load /= servers
   return p
-}
-
-/** Hourly network series. Forecast hours carry a widening uncertainty band (MOCK). */
-export function networkSeries(from: number, to: number, now: number) {
-  const out = []
-  for (let t = from; t <= to; t += MS_PER_HOUR) {
-    const p = networkAt(t, now)
-    const daysAhead = Math.max(0, (t - now) / (MS_PER_HOUR * HOURS_PER_DAY))
-    const band = t > now ? 0.03 + 0.015 * daysAhead : 0
-    out.push({
-      ...p,
-      actualLoad: t <= now ? p.load : null,
-      forecastLoad: t >= now ? p.load : null,
-      forecastBand: t >= now ? [clamp(p.load - band, 0, 1), clamp(p.load + band, 0, 1)] : null,
-    })
-  }
-  return out
-}
-
-/** Sum of a network series over a period (hourly steps). */
-export function networkTotals(from: number, to: number, now: number) {
-  const totals = { serverHours: 0, heatUsedKwh: 0, heatDumpedKwh: 0, jobs: 0, missed: 0, electricityChf: 0, incomeChf: 0 }
-  for (let t = from; t < to; t += MS_PER_HOUR) {
-    const p = networkAt(t, now)
-    totals.serverHours += p.serversRunning
-    totals.heatUsedKwh += p.heatUsedKw
-    totals.heatDumpedKwh += p.heatDumpedKw
-    totals.jobs += p.jobs
-    totals.missed += p.missed
-    totals.electricityChf += p.electricityChf
-    totals.incomeChf += p.incomeChf
-  }
-  return totals
-}
-
-/** Monthly income and electricity cost, from 12 months back to 12 months ahead. Sampled every 6 h. */
-export function monthlyEconomics(now: number) {
-  const SAMPLE_H = 6
-  const nowDate = new Date(now)
-  const out = []
-  for (let m = -12; m <= 12; m++) {
-    const start = Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + m, 1)
-    const end = Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + m + 1, 1)
-    let income = 0
-    let cost = 0
-    let used = 0
-    let dumped = 0
-    for (let t = start; t < end; t += SAMPLE_H * MS_PER_HOUR) {
-      const p = networkAt(t, t > now ? t - 1 : now)
-      income += p.incomeChf * SAMPLE_H
-      cost += p.electricityChf * SAMPLE_H
-      used += p.heatUsedKw * SAMPLE_H
-      dumped += p.heatDumpedKw * SAMPLE_H
-    }
-    out.push({
-      month: new Date(start).toLocaleDateString('de-CH', { month: 'short', year: '2-digit' }),
-      start,
-      forecast: start > now,
-      incomeChf: income,
-      electricityChf: cost,
-      heatUsedMwh: used / 1000,
-      heatDumpedMwh: dumped / 1000,
-    })
-  }
-  return out
-}
-
-// ---------- missed deadlines ----------
-
-export const JOB_TYPES = ['Batch LLM', 'Research simulation'] as const
-
-export interface MissedJob {
-  id: string
-  siteId: string
-  siteName: string
-  jobType: (typeof JOB_TYPES)[number]
-  deadline: number
-  lateMinutes: number
-}
-
-/** Missed jobs in the 24 hours before `t`, newest first (MOCK, drawn from the site miss rates). */
-export function missedJobs(t: number, limit = 12): MissedJob[] {
-  const out: MissedJob[] = []
-  const end = Math.floor(t / MS_PER_HOUR)
-  for (let h = end; h > end - HOURS_PER_DAY && out.length < limit; h--) {
-    for (const site of SITES) {
-      const s = siteState(site, h * MS_PER_HOUR)
-      const r = hash(h, site.servers, site.lat * 1e3)
-      if (r < s.missedPerHour / 4) {
-        out.push({
-          id: `J-${(h % 46656).toString(36).toUpperCase()}${Math.floor(r * 1e4).toString(36).toUpperCase().padStart(3, '0')}`,
-          siteId: site.id,
-          siteName: site.name,
-          jobType: JOB_TYPES[r < s.missedPerHour / 8 ? 0 : 1],
-          deadline: h * MS_PER_HOUR - Math.floor(hash(h, site.servers, 9) * 60) * 60000,
-          lateMinutes: 5 + Math.floor(hash(h, site.servers, 2) * 180),
-        })
-        if (out.length >= limit) break
-      }
-    }
-  }
-  return out
 }

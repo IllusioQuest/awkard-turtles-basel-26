@@ -77,7 +77,7 @@
   position: absolute;
   left: 16px;
   bottom: 16px;
-  width: 200px;
+  width: 240px;
   padding: 10px 12px;
   background: rgba(22, 22, 22, 0.9);
   border-radius: 8px;
@@ -96,6 +96,31 @@
   display: flex;
   justify-content: space-between;
   color: var(--muted);
+}
+
+/* Ticks at fixed positions on the fixed temperature scale. */
+.legend-ticks.fixed {
+  position: relative;
+  display: block;
+  height: 14px;
+  margin-bottom: 4px;
+}
+
+.legend-ticks.fixed span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.legend-ticks.fixed span:first-child {
+  transform: none;
+}
+
+.legend-ticks.fixed span:last-child {
+  transform: translateX(-100%);
+}
+
+.segmented.speed {
+  flex: none;
 }
 
 .maplibregl-ctrl-attrib {
@@ -165,10 +190,6 @@
   border-radius: 50%;
   background: #161616;
   color: var(--ink);
-}
-
-.mk-site.offline .mk-icon {
-  color: var(--muted);
 }
 
 .mk-site.selected .mk-ring {
@@ -298,11 +319,11 @@
 }
 
 .timeline-slider::-webkit-slider-runnable-track {
-  background: linear-gradient(90deg, var(--surface-2) var(--now), rgba(57, 135, 229, 0.3) var(--now));
+  background: var(--surface-2);
 }
 
 .timeline-slider::-moz-range-track {
-  background: linear-gradient(90deg, var(--surface-2) var(--now), rgba(57, 135, 229, 0.3) var(--now));
+  background: var(--surface-2);
 }
 
 .timeline-slider::-moz-range-progress {
@@ -316,11 +337,6 @@
   font-size: 12px;
   color: var(--muted);
   height: 18px;
-}
-
-.timeline-ticks span:nth-child(2) {
-  position: absolute;
-  transform: translateX(-50%);
 }
 
 /* Charts */
@@ -475,4 +491,55 @@
 
 .play:hover {
   background: var(--accent);
+}
+
+.head-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.head-controls select {
+  width: auto;
+  height: 36px;
+}
+
+.banner {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  background: rgba(217, 89, 38, 0.15);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.banner code {
+  font-size: 13px;
+}
+
+.panel .more {
+  align-self: flex-start;
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.panel .more:hover {
+  background: var(--accent);
+}
+
+.head-controls {
+  flex: none;
+}
+
+.page-head .note {
+  display: block;
+  max-width: 760px;
+}
+
+.page-head .segmented.compact button {
+  white-space: nowrap;
 }

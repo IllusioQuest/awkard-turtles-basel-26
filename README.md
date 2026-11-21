@@ -126,6 +126,25 @@ is all used, electricity costs CHF 0.3325, heat is worth CHF 0.1064, and the cas
 break-even is CHF 0.2261 per server-hour. These inputs come from the case and the
 ElCom snapshot, with exact source labels in the JSON file.
 
+## Fleet simulation (T-58)
+
+Many houses with servers, jobs arriving over a year, a pluggable scheduler and pricing. Spec:
+[`docs/model/fleet-simulation.md`](docs/model/fleet-simulation.md); outputs and columns:
+[`data/derived/fleet/README.md`](data/derived/fleet/README.md).
+
+```bash
+dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/reference.json
+dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/ch-1000.json
+dotnet run --project src/DigitalHeat.FleetRun -- generate-houses config/fleet/houses/ch-1000.spec.json -o config/fleet/houses/ch-1000.csv
+dotnet run --project src/DigitalHeat.FleetRun -- post data/derived/fleet/reference --hardware config/hardware/gpu-inference-l4.json
+dotnet test src/DigitalHeat.Fleet.Tests
+# read-only results API for the dashboard (port 5080; endpoints in docs/model/fleet-api.md)
+dotnet run -c Release --project src/DigitalHeat.FleetApi -- --runs data/derived/fleet --port 5080
+```
+
+Results go to `data/derived/fleet/<scenario>/` (git-ignored). Mock scheduler and mock pricing are
+placeholders; see the known simplifications in the output README.
+
 ## Live control of a containerized job
 
 `DigitalHeat.LiveRun` attaches to an **already running Linux container**. It does not
