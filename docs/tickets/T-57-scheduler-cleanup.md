@@ -1,7 +1,7 @@
 # T-57 — Scheduler cleanup and event-owner runtime
 
 - Owner: Nikita / Codex
-- Status: in progress
+- Status: implementation complete; PR #46 in review
 - Branch: fix/T-57-scheduler-cleanup, based on latest main after PR #45.
 
 Remove redundant inventory-validator placement instances/indexes, repeated immutable queue
@@ -15,3 +15,5 @@ run existing behavioral tests and the pure admission benchmark. No live game/con
 
 Done: focused cleanup PR, tests/build pass, reproducible performance method and limitations,
 and handoff documentation committed directly to main.
+
+Results: cleanup and comments in existing modules, 61 orchestration + 46 Core tests, clean WorkloadRun build. Queued 128-node owner median 194.7 -> 94.5 ms; reverse-order comparison 99.3 -> 51.7 ms; managed allocation 87.3 -> 14.7 MB. Idle timings varied; all raw runs and caveats retained in docs/jobs/scheduler-cleanup.md. No new robustness feature, policy or live runtime change.
