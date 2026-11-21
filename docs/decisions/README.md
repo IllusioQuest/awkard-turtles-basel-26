@@ -55,3 +55,4 @@ later.
 | [0045](0045-bfs-residential-population.md) | Separate sourced residential-stock composition profile | proposed; user approved; T-59 |
 | 0048 | Jona unified network/admission boundary | reserved on feat/T-60-unified-scheduler |
 | [0049](0049-origin-owned-mesh-prototype.md) | Shared heat-first policy and origin-owned mesh prototype | proposed; user approved simulation-first/origin ownership; T-62 |
+| [0050](0050-private-linux-mesh-lab.md) | Private Linux mesh and real batch lab | proposed; user approved real nested-engine execution; T-63 |
