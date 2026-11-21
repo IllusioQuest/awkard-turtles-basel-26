@@ -17,8 +17,7 @@ services:
       WINEPREFIX: /home/ubuntu/.wine-cs16
       LIBGL_ALWAYS_SOFTWARE: "true"
       SELKIES_ENABLE_HTTPS: "false"
-      SELKIES_BASIC_AUTH_USER: player
-      SELKIES_BASIC_AUTH_PASSWORD: ${CS16_PASSWORD:?Missing local password}
+      SELKIES_ENABLE_BASIC_AUTH: "false"
       SELKIES_USE_CPU: "true"
       SELKIES_ENCODER: h264enc
       SELKIES_FRAMERATE: "20-20"

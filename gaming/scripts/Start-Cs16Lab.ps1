@@ -10,10 +10,7 @@ $relayImage=(& docker --context desktop-linux image inspect $policy.relay_image 
 if($LASTEXITCODE -ne 0 -or $relayImage -notmatch '^sha256:[a-f0-9]{64}$'){throw 'Build TcpRelay.Dockerfile first.'}
 $reports=Join-Path $lab 'TestResults'
 New-Item -ItemType Directory -Path $reports -Force | Out-Null
-$credentialPath=Join-Path $reports 'cs16-credentials.json'
-if(Test-Path -LiteralPath $credentialPath){$credential=Get-Content -LiteralPath $credentialPath -Raw | ConvertFrom-Json}
-else{$credential=@{user='player';password=[guid]::NewGuid().ToString('N')};$credential|ConvertTo-Json|Set-Content -LiteralPath $credentialPath}
-$values=@{CS16_IMAGE=$image;CS16_PASSWORD=$credential.password;CS16_PORT_D=[string]$policy.nodes[0].browser_port;CS16_PORT_E=[string]$policy.nodes[1].browser_port;
+$values=@{CS16_IMAGE=$image;CS16_PORT_D=[string]$policy.nodes[0].browser_port;CS16_PORT_E=[string]$policy.nodes[1].browser_port;
   CS16_CPUS=[string]$policy.cpu_limit_per_node;CS16_MEMORY_MIB=[string]$policy.memory_limit_mib_per_node;CS16_PIDS=[string]$policy.pids_limit_per_node;
   CS16_RELAY_IMAGE=$relayImage;CS16_RELAY_CPUS=$policy.relay_cpu_limit.ToString([Globalization.CultureInfo]::InvariantCulture);
   CS16_RELAY_MEMORY_MIB=[string]$policy.relay_memory_limit_mib;CS16_RELAY_PIDS=[string]$policy.relay_pids_limit;
@@ -44,6 +41,6 @@ try{
     }
     Write-Output "$($node.id): http://localhost:$($node.browser_port)"
   }
-  Write-Output "Credentials: $credentialPath"
-  Write-Output 'Installer staged only. No installer, game, license acceptance or scheduler dispatch has run.'
+  Write-Output 'Local test desktops have no login; relay ports must remain bound to 127.0.0.1.'
+  Write-Output 'This script stages the installer only; it does not launch it, accept licenses or dispatch workloads.'
 }finally{foreach($key in $values.Keys){[Environment]::SetEnvironmentVariable($key,$previous[$key],'Process')}}

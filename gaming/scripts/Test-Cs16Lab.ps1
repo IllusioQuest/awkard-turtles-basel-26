@@ -1,7 +1,6 @@
 $ErrorActionPreference='Stop'
 $lab=Split-Path -Parent $PSScriptRoot
 $policy=Get-Content (Join-Path $lab 'deploy/cs16-lab.json') -Raw | ConvertFrom-Json
-$credentials=Get-Content (Join-Path $lab 'TestResults/cs16-credentials.json') -Raw | ConvertFrom-Json
 . (Join-Path $PSScriptRoot 'GamingLab.Common.ps1')
 $records=@()
 foreach($node in $policy.nodes){
@@ -15,7 +14,6 @@ foreach($node in $policy.nodes){
   }
   $url="http://127.0.0.1:$($node.browser_port)"
   $unauthenticated=Get-GamingHttpStatusCode -Url $url -TimeoutSeconds 5
-  $authenticated=Get-GamingHttpStatusCode -Url $url -Username $credentials.user -Password $credentials.password -TimeoutSeconds 5
   $ok=$details.Config.User -eq 'ubuntu' -and -not $details.HostConfig.Privileged -and
     $details.HostConfig.CapDrop -contains 'ALL' -and $details.HostConfig.CapAdd.Count -eq 0 -and
     $details.HostConfig.SecurityOpt -contains 'no-new-privileges:true' -and
@@ -23,10 +21,10 @@ foreach($node in $policy.nodes){
     $details.HostConfig.Memory -eq ([long]$policy.memory_limit_mib_per_node * 1MB) -and
     $details.HostConfig.NanoCpus -eq ([long]$policy.cpu_limit_per_node * 1000000000) -and
     $details.HostConfig.PidsLimit -eq $policy.pids_limit_per_node -and
-    $internalOnly -and $unauthenticated -eq 401 -and $authenticated -eq 200
+    $internalOnly -and $unauthenticated -eq 200 -and $details.Config.Env -contains 'SELKIES_ENABLE_BASIC_AUTH=false'
   if(!$ok){throw "CS lab isolation/readiness failed for $($node.id)."}
   $records+=@{node_id=$node.id;user=$details.Config.User;internal_network=$internalOnly;memory_limit_mib=$policy.memory_limit_mib_per_node;
-    cpu_limit=$policy.cpu_limit_per_node;unauthenticated_http=$unauthenticated;authenticated_http=$authenticated;installer_gameplay_verified=$false}
+    cpu_limit=$policy.cpu_limit_per_node;unauthenticated_http=$unauthenticated;installer_gameplay_verified=$false}
 }
 $relay=(& docker --context desktop-linux inspect "$($policy.compose_project)-browser-relay-1" | ConvertFrom-Json)[0]
 if($relay.HostConfig.Privileged -or $relay.Config.User -ne '1000:1000' -or !$relay.HostConfig.ReadonlyRootfs -or
@@ -35,4 +33,4 @@ if($relay.HostConfig.Privileged -or $relay.Config.User -ne '1000:1000' -or !$rel
 $bindings=@($relay.HostConfig.PortBindings.PSObject.Properties|ForEach-Object{$_.Value}|ForEach-Object{$_})
 if($bindings.Count -ne $policy.nodes.Count -or @($bindings|Where-Object{$_.HostIp -ne '127.0.0.1' -or [int]$_.HostPort -notin @($policy.nodes.browser_port)}).Count -gt 0){throw 'Relay ports differ from loopback-only policy.'}
 $records|ConvertTo-Json -Depth 8|Set-Content (Join-Path $lab 'TestResults/cs16-node-preflight.json')
-Write-Output 'PASS: two isolated desktops, capped resources, internal networks, loopback relay and HTTP authentication. This does not prove game installation or multiplayer.'
+Write-Output 'PASS: two isolated desktops, capped resources, internal networks and loopback-only access without login. This does not prove game installation or multiplayer.'
