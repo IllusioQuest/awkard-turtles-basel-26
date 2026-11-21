@@ -153,6 +153,22 @@ public class WorkModelTests
     }
 
     [Fact]
+    public void WorkLpMovesOnlyWhatHomeCannotFinish()
+    {
+        // House "h" can run 1 server-hour per hour of heat-led work (1 kWh/h demand, no tank) for 2 hours;
+        // its 3 server-hours due in 2 h need 1 server-hour moved to the pool "p" (3 kWh/h demand).
+        var sites = new[] { Site("h", [1, 1, 1], servers: 5), Site("p", [3, 3, 3], servers: 5) };
+        var ledger = new WorkLedger(sites, [new Type1Spec(6, 0.5, 2, Anywhere), null], [1.0, 1.0], 3, 24);
+        var r = NetworkSimulation.Run(sites, new DigitalHeat.Network.Lp.RollingHorizonWorkLpScheduler(),
+            new PerfectForesightForecasts(), 2, work: ledger);
+        Assert.Equal(0, r.Work!.Type1.Missed);
+        Assert.Equal(1.0, r.Work.Type1.MovedServerHours, 6);
+        Assert.Equal(2.0, r.Work.Type1ServerHoursBySite[0].Sum(), 6);
+        Assert.All(r.Sites, s => Assert.Equal(0, s.Summary.DumpedHeatKwh, 9));
+        Assert.Equal(9.0, r.Sites[1].Summary.ServerHours, 6); // pool stays fully heat-led: 3 kWh/h × 3 h
+    }
+
+    [Fact]
     public void PlacementPolicyBlocksMovesAbroad()
     {
         var originSite = new JobPlacementPolicy("origin-site", TestSource, null);

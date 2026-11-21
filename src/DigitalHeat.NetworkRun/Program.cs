@@ -118,7 +118,7 @@ static void RunScenario(string root, string scenarioPath, string[] strategyIds, 
         {
             "B1" => new LocalGreedyJobsScheduler(),
             "B2" => new NetworkGreedyJobsScheduler(),
-            "LP" => throw new NotSupportedException("Multi-site LP with work: step 5, not built yet."),
+            "LP" => new RollingHorizonWorkLpScheduler(),
             _ => throw new ArgumentException($"Unknown strategy {id} (B1, B2, LP).")
         };
         var ledger = new WorkLedger(sites, specs, sites.Select(_ => phi).ToArray(), sites[0].Demand.Count,
