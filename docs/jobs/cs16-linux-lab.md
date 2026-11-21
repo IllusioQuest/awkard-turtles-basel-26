@@ -49,6 +49,13 @@ GUI browser automation was stopped by the user. The user is handling the install
 terms manually; no silent-acceptance flag was used. Do not repeat any accidentally shared credential
 in docs, code or logs. No credential value has been added here.
 
+The fixed retry subsequently reached its 180-second timeout while waiting for manual completion;
+no installed `hl.exe` was found. The configured **installer-only** interactive window is now
+600 seconds, and another trial was dispatched. This does not change job deadlines or game lifetime.
+The original CS checkout was externally switched to an old local `main`; it was left intact.
+Continue from `C:\Users\nikit\AppData\Local\Temp\digitalheat-cs16-runtime`, which reattaches the
+saved feature branch. Browser ports and Docker-managed game data are unchanged.
+
 ## Commands
 
 Run from the feature checkout in PowerShell:
