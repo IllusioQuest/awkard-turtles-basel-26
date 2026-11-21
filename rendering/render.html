@@ -7,11 +7,11 @@
 <div class="actions"><button class="primary" id="render">Render</button><button id="restart">Restart render</button><button id="pause">Pause</button><button id="resume">Resume</button><button id="stop">Stop after current frame</button></div><div id="error" role="alert"></div><div class="notice" id="device"></div>
 <section class="card" aria-labelledby="topologyTitle"><div class="topology-head"><h2 id="topologyTitle">Where your render runs</h2><small id="nodeSummary">Reading node status…</small></div>
 <div class="flow" aria-label="Work stages"><span>CPU scene preparation</span><b class="arrow" aria-hidden="true">→</b><span>Shared scene</span><b class="arrow" aria-hidden="true">→</b><span>GPU frame jobs</span><b class="arrow" aria-hidden="true">→</b><span>Frame preview</span></div>
-<svg id="networkMap" class="network-svg" viewBox="0 0 900 340" role="img" aria-label="Configured peer links from this UI node; planned servers are dashed"></svg><small id="networkCaption"></small><div id="hostMap" class="hosts"></div><p id="topologyNote"></p><div id="frameMap" class="frame-map" role="list" aria-label="Frame placement and progress"></div>
+<svg id="networkMap" class="network-svg" viewBox="0 0 900 340" role="img" aria-label="Configured peer links from this UI node; planned servers are dashed"></svg><div id="hostMap" class="hosts"></div><p id="topologyNote"></p><div id="frameMap" class="frame-map" role="list" aria-label="Frame placement and progress"></div>
 <div class="legend"><span><i class="done"></i>Completed</span><span><i class="busy"></i>Executing</span><span><i></i>Pending</span></div><small>Node borders show active work or completed contributions. Frame colors show work state, not GPU utilization.</small></section>
 <div class="grid"><main><div class="card"><div class="row"><h2>Rendered landscape</h2><span class="muted" id="frameLabel">Waiting for the first completed frame</span></div><a id="downloadVideo" hidden download="landscape.mp4">Download final video</a><video id="animation" controls hidden style="width:100%"></video><div id="empty" class="placeholder">Mountains · lake · forest · moving camera<br><br>48 frames · 640 × 360 · 32 samples</div><img id="preview" alt="Completed Blender landscape frame" hidden><input id="scrub" type="range" min="0" max="0" value="0" aria-label="Preview frame"><button id="play">Play completed frames</button></div>
 <div class="card"><h2>Measured render time</h2><div class="row"><span>CPU scene preparation</span><b id="prepTime">—</b></div><div class="row"><span>Active render workflow</span><b class="big" id="activeTime">—</b></div><div class="row"><span>Mean completed-frame render</span><b id="meanFrame">—</b></div><small id="frameRange"></small><div class="row"><span>Confirmed pause</span><b id="pausedTime">—</b></div><div class="row"><span>Total render elapsed</span><b id="elapsedTime">—</b></div><small>Preparation is measured separately. Render time includes queueing, startup, shaders and result collection.</small></div></main>
-<aside><div class="card"><h2>Progress</h2><div class="row"><b id="count">0 / 48 frames</b><span class="pill">heat-first placement</span></div><progress id="progress" max="48" value="0"></progress><p class="muted">CPU 1 prepares the scene. GPU workers render its frames. CPU 2 assembles the final video.</p><small>Frames appear when each render completes. Timers continue while a frame is rendering. The first GPU frame may take longer while shaders compile.</small></div><div class="card"><h2>Worker details</h2><div id="nodes">Reading worker status…</div></div></aside></div>
+<aside><div class="card"><h2>Progress</h2><div class="row"><b id="count">0 / 48 frames</b><span class="pill">heat-first placement</span></div><progress id="progress" max="48" value="0"></progress><p class="muted">CPU 1 prepares the scene. GPU workers render its frames. CPU 2 assembles the final video.</p><small>Frames appear when each render completes. Timers continue while a frame is rendering. The first GPU frame may take longer while shaders compile.</small></div></aside></div>
 <footer><p id="physical"></p><p id="pauseNote"></p><p>Native CPU/RAM are measured process values; admission requests are not OS quotas. GPU usage is unavailable without a verified sensor. Heat inputs are synthetic lab settings, not measured recovered heat.</p></footer></div>
 <script>
 let snapshot,frames=[],playing=false,idx=0,refreshing=false;const el=id=>document.getElementById(id);const seconds=n=>Number(n||0).toFixed(1)+' s';
@@ -44,7 +44,6 @@ function renderNetwork(s){
   const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});circle.append(shape('title',{},id+' · '+state));svg.append(circle);
   svg.append(shape('text',{x:p.x,y:p.y+39},id+(id===origin?' · UI origin':'')),shape('text',{x:p.x,y:p.y+56,class:'caption'},state));
  }
- el('networkCaption').textContent='Lines show this UI node’s configured peer links; they do not prove links between other servers. Blue: reachable · orange: executing · dashed: planned. '+(network.work_data_stale?'Work/device data retained from '+(network.peer_snapshot_utc||'no complete snapshot')+'.':'');
  return {configured,planned,checks};
 }
 function renderTopology(s){
@@ -64,7 +63,7 @@ function renderTopology(s){
  el('nodeSummary').textContent=Array.from(network.checks.values()).filter(c=>c.state==='reachable').length+' / '+s.configured_peers+' configured peers reachable · '+network.planned.length+' planned GPU servers · '+liveHostCount+' reported physical host(s)';
  el('hostMap').replaceChildren();
  for(const [host,peers] of hosts){
-  const group=element('div','host'+(peers[0]?.planned?' planned':''));group.append(element('div','host-name',peers[0]?.planned?host:'PHYSICAL HOST · '+host));
+  const group=element('div','host'+(peers[0]?.planned?' planned':''));
   const list=element('div','node-list');
   for(const n of peers){
    if(n.planned||n.unreported){const card=element('div','node planned');card.append(element('b','',n.peer_id),element('div','node-state',n.planned?'Planned GPU server · not connected':network.checks.get(n.peer_id)?.state||'Not checked'),element('div','node-detail','No verified hardware, heat capacity or executed work reported.'));list.append(card);continue}
@@ -84,7 +83,6 @@ function renderTopology(s){
    const workCount=n.worker_role==='prepare'?preparations:n.worker_role==='assemble'?done.filter(f=>f.metadata.stage==='assemble').length:frameCount;
    const meter=element('div','node-meter');const fill=element('span');fill.style.width=(100*Math.min(workCount,roleTotal)/Math.max(1,roleTotal))+'%';meter.append(fill);card.append(meter);
    card.append(element('div','node-detail',workCount+' / '+roleTotal+(n.worker_role==='prepare'?' scenes prepared':n.worker_role==='assemble'?' videos assembled':' total frames rendered here')));
-   card.append(element('div','node-detail','Role: '+(n.worker_role||'general')+' · relative work budget: '+(n.work_weight||1)+' (not a GPU percentage)'));
    card.append(element('div','node-detail',(n.shared_gpu_group?'Heat quota: ':'Heat demand: ')+Number(n.heat_demand_kwh).toLocaleString(undefined,{maximumFractionDigits:1})+' kWh · unmeasured lab input'));
    list.append(card);
   }
@@ -115,13 +113,8 @@ async function refresh(){
   el('count').textContent=s.completed+' / '+s.frames_per_run+' frames';el('progress').max=s.frames_per_run;el('progress').value=s.completed;
   el('prepTime').textContent=seconds(s.preparation_seconds)+(s.preparation_finished_utc?' · complete':s.preparation_started_utc?' · in progress':'');
   el('activeTime').textContent=seconds(s.active_seconds);el('pausedTime').textContent=seconds(s.paused_seconds);el('elapsedTime').textContent=seconds(s.elapsed_seconds);
-  frames=s.frames||[];el('scrub').max=Math.max(0,frames.length-1);if(!playing)image();el('nodes').replaceChildren();
-  for(const n of s.peers){
-   const card=document.createElement('div');card.style='border-top:1px solid var(--grid);padding:12px 0';const title=document.createElement('b');title.textContent=n.peer_id;card.append(title);
-   const running=n.attempts.filter(a=>['running','paused','starting'].includes(a.phase));const done=n.results.filter(f=>s.id&&f.job_id.includes(s.id+'-'));
-   const lines=[n.device,'Heat demand: '+n.heat_demand_kwh+' kWh (synthetic)',...running.map(a=>a.attempt.profile.command[0]==='prepare'?'CPU: preparing shared scene':a.attempt.profile.command[0]==='assemble'?'CPU: encoding final video':'Rendering frame '+a.attempt.profile.command[0]),done.filter(f=>f.metadata.stage==='prepare').length+' scene preparations · '+done.filter(f=>f.metadata.stage==='frame').length+' frames · '+done.filter(f=>f.metadata.stage==='assemble').length+' videos',...(n.resource_stats||[]).map(x=>x.cpu_percent_one_core!=null?'CPU: '+x.cpu_percent_one_core.toFixed(1)+'% of one core · RAM: '+x.ram_mib.toFixed(0)+' MiB':'CPU: '+(x.CPUPerc||'sampling')+' · RAM: '+(x.MemUsage||'sampling')),'GPU utilization: '+(n.gpu_stats?n.gpu_stats.utilization_percent+'%':'Unavailable (no verified sensor)')];
-   for(const t of lines){const div=document.createElement('div');div.className='muted';div.style='font-size:13px;margin-top:5px';div.textContent=t;card.append(div)}el('nodes').append(card);
-  }
+  frames=s.frames||[];el('scrub').max=Math.max(0,frames.length-1);if(!playing)image();
+
  }catch(e){el('error').textContent=e.message}finally{refreshing=false}
 }
 refresh();setInterval(refresh,2000);
