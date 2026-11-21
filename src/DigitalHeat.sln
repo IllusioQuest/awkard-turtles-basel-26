@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.NetworkRun", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Network.Tests", "DigitalHeat.Network.Tests\DigitalHeat.Network.Tests.csproj", "{50E8E535-118D-439D-BE10-99BAC4E81BEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.LiveGrid", "DigitalHeat.LiveGrid\DigitalHeat.LiveGrid.csproj", "{D73E7038-15AD-4C73-BA42-7F6C4A9E44A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50E8E535-118D-439D-BE10-99BAC4E81BEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D73E7038-15AD-4C73-BA42-7F6C4A9E44A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D73E7038-15AD-4C73-BA42-7F6C4A9E44A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D73E7038-15AD-4C73-BA42-7F6C4A9E44A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D73E7038-15AD-4C73-BA42-7F6C4A9E44A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DigitalHeat Live Network</title>
+<style>
+:root{--bg:#101415;--ink:#13191c;--paper:#f4f6f6;--muted:#8d9a9f;--ok:#2f9e6e;--bad:#d64545;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden}
+body{display:grid;grid-template-rows:1fr auto;padding:8px;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;white-space:nowrap}
+main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));grid-auto-rows:minmax(0,1fr)}
+/* a house */
+.node{--room:#e9e3a2;position:relative;border-radius:14px;background:var(--room);color:var(--ink);
+  transition:background-color .8s ease;min-height:0;overflow:hidden}
+.name{position:absolute;left:22px;top:18px;font-weight:700;font-size:clamp(15px,1.4vw,21px);opacity:.55}
+.heat{position:absolute;left:22px;top:44px;font-weight:300;font-size:clamp(28px,3.4vw,52px);font-variant-numeric:tabular-nums;line-height:1}
+.heat small{font-size:.4em;font-weight:500;opacity:.55;margin-left:4px}
+.server{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(84px,9vw,120px);aspect-ratio:1}
+.server svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.server .track{fill:none;stroke:#0000001a;stroke-width:5}
+.server .arc{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
+.server .slot{position:absolute;inset:12%;display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;align-content:center}
+.slot .tok.big:not(:only-child){width:40px;height:40px;font-size:14px}
+.state{position:absolute;left:50%;top:calc(44% + clamp(54px,5.6vw,74px));transform:translateX(-50%);font-size:clamp(12px,1vw,15px);
+  font-weight:600;opacity:.55;white-space:nowrap}
+.queue{position:absolute;left:22px;right:96px;bottom:62px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:84px;overflow:hidden}
+.tok{--c:#888;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
+  font-weight:700;font-size:12px;flex:none;box-shadow:0 1px 2px #0003}
+.tok.big{width:60px;height:60px;font-size:19px;background:conic-gradient(var(--c) calc(var(--p,0)*1turn),color-mix(in srgb,var(--c) 35%,white) 0);transition:--p .4s}
+.node.paused .slot .tok{filter:saturate(.25) brightness(1.15)}
+.add{position:absolute;left:18px;bottom:16px;border:1.5px solid #13191c55;border-radius:999px;padding:6px 14px;
+  font-weight:600;font-size:14px;opacity:.55;transition:opacity .2s,background .2s}
+.add:hover{opacity:1;background:#ffffff55}
+.note{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);max-width:calc(100% - 260px);font-size:clamp(13px,1.05vw,16px);
+  font-weight:600;background:#ffffffb3;border-radius:999px;padding:5px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  opacity:0;transition:opacity .5s}
+.note.show{opacity:1}.note.ok{color:var(--ok)}.note.bad{color:var(--bad)}
+.slider{position:absolute;right:18px;top:18px;bottom:18px;width:clamp(44px,4vw,58px)}
+.slider input{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:100%;height:100%;margin:0;
+  background:linear-gradient(to top,#78bfe0,#e9e3a2 50%,#ff9a55);border:2px solid #13191c;border-radius:999px;cursor:ns-resize;touch-action:none}
+.slider input::-webkit-slider-thumb{-webkit-appearance:none;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #13191c}
+.slider input::-moz-range-thumb{width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid #13191c}
+/* the one status line */
+footer{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:15px;padding:0 6px;min-height:30px}
+footer b{color:var(--paper);font-weight:600}
+.seg{display:flex;gap:2px}
+.seg button{padding:3px 10px;border-radius:999px;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--paper);color:var(--bg)}
+.ticker{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--paper)}
+.ticker span{animation:fade .5s}
+@keyframes fade{from{opacity:0}}
+.quiet{color:var(--muted)}
+.flyer{position:fixed;left:0;top:0;z-index:50;pointer-events:none}
+#flow{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:49}
+#flow .route{fill:none;stroke-width:5;stroke-linecap:round;opacity:.9;filter:drop-shadow(0 1px 2px #0006)}
+.more{height:30px;padding:0 10px;border-radius:15px;background:#13191c22;display:grid;place-items:center;font-weight:700;font-size:13px}
+#help{position:fixed;inset:0;display:none;place-items:center;background:#000a;z-index:90}
+#help.show{display:grid}
+#help div{max-width:620px;background:var(--paper);color:var(--ink);border-radius:16px;padding:22px 26px;font-size:16px;line-height:1.5}
+#help h2{margin:0 0 8px;font-size:20px}
+#offline{position:fixed;inset:0;display:none;place-items:center;background:#000c;color:#fff;z-index:99;font-size:18px;text-align:center;line-height:1.6}
+#offline.show{display:grid}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<main id="grid"></main>
+<footer>
+  <span><b id="hour">Hour –</b> <span class="quiet" id="next"></span></span>
+  <div class="seg" role="group" aria-label="Scheduler">
+    <button data-sched="B2">Network</button><button data-sched="LP">Optimiser</button><button data-sched="B1">No network</button>
+  </div>
+  <span class="ticker" id="ticker"></span>
+  <span id="totals" class="quiet"></span>
+  <button class="quiet" id="auto" title="A">auto-spawn off</button>
+  <button class="quiet" id="helpBtn" title="?">?</button>
+</footer>
+<svg id="flow" aria-hidden="true"></svg>
+<div id="help"><div>
+  <h2>How to read it</h2>
+  Each panel is a house with three servers (three tasks can run at once). The slider sets the room temperature the house wants
+  (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Every hour (a few seconds here) the network scheduler sets each server's load
+  from that heat and moves waiting tasks whose house cannot finish them before their deadline.
+  <br><br>Circles in the middle: the tasks running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
+  Small circles: waiting tasks. Number = job, colour = house the job came from.
+  1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
+  <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
+</div></div>
+<div id="offline"><div><b>LiveGrid is not reachable.</b><br>From the repository root:<br><code>dotnet run --project src/DigitalHeat.LiveGrid -- --up</code></div></div>
+<script>
+"use strict";
+const PALETTE=["#2563eb","#c026d3","#059669","#d97706","#7c3aed","#0891b2","#dc2626","#4d7c0f"];
+const ARC=2*Math.PI*46;
+const $=s=>document.querySelector(s);
+const st={nodes:[],byId:{},since:0,step:0,tokens:new Map(),drag:{},sentAt:{},lastLocal:{},range:[15,25],built:false,stepMs:4000,nextAt:0,tasksPerJob:6};
+const colorOf=id=>PALETTE[Math.max(0,st.nodes.findIndex(n=>n.id===id))%PALETTE.length];
+const labelOf=id=>(st.byId[id]||{}).label||id;
+const cardOf=id=>document.querySelector(`.node[data-id="${id}"]`);
+function mix(a,b,t){const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));const A=p(a),B=p(b);
+  return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("");}
+const room=s=>s<.5?mix("#78bfe0","#e9e3a2",s*2):mix("#e9e3a2","#ff9a55",(s-.5)*2);
+async function api(path,body){
+  const r=await fetch(path,body===undefined?{}:{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok&&r.status!==204)throw new Error(await r.text()); return r.status===204?null:r.json();
+}
+function build(s){
+  const g=$("#grid"); g.innerHTML=""; g.style.setProperty("--cols",s.nodes.length>4?4:2);
+  s.nodes.slice().sort((a,b)=>a.position-b.position).forEach(n=>{
+    const el=document.createElement("section"); el.className="node"; el.dataset.id=n.id;
+    el.innerHTML=`<div class="name">${n.label}</div><div class="heat"></div>
+      <div class="server"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="46"/>
+        <circle class="arc" cx="50" cy="50" r="46" stroke-dasharray="${ARC}" stroke-dashoffset="${ARC}"/></svg><div class="slot"></div></div>
+      <div class="state"></div><div class="queue"></div>
+      <button class="add" title="key ${s.nodes.indexOf(n)+1}">+ job</button><div class="note"></div>
+      <div class="slider"><input type="range" min="${s.temperatureRange[0]}" max="${s.temperatureRange[1]}" step="0.5" aria-label="Target temperature in ${n.label}"></div>`;
+    g.appendChild(el);
+    const input=el.querySelector("input"); input.value=n.targetTemperatureC;
+    input.addEventListener("pointerdown",()=>st.drag[n.id]=true);
+    const end=()=>{st.drag[n.id]=false;send(n.id,+input.value,true);};
+    input.addEventListener("pointerup",end); input.addEventListener("change",end);
+    input.addEventListener("input",()=>{st.lastLocal[n.id]=Date.now();paint(el,+input.value);send(n.id,+input.value,false);});
+    el.querySelector(".add").addEventListener("click",()=>spawn(n.id));
+  });
+  $("#nkeys").textContent=s.nodes.length; st.built=true;
+}
+function share(t){const[lo,hi]=st.range;return Math.min(1,Math.max(0,(t-lo)/(hi-lo)));}
+function paint(el,t){const h=share(t);el.style.setProperty("--room",room(h));
+  el.querySelector(".heat").innerHTML=`${t.toFixed(1)}<small>°C</small>`;}
+const timers={};
+function send(id,t,final){
+  const go=()=>{st.sentAt[id]=Date.now();api(`/api/nodes/${id}/target`,{temperatureC:t}).catch(()=>{});};
+  clearTimeout(timers[id]); const wait=250-(Date.now()-(st.sentAt[id]||0));
+  if(final||wait<=0)go(); else timers[id]=setTimeout(go,wait);
+}
+const spawn=id=>api(`/api/nodes/${id}/spawn`,{}).then(poll).catch(()=>{});
+/* tokens: one element per task file; a change of house is a calm flight */
+function tok(t){let e=st.tokens.get(t.id);
+  if(!e){e=document.createElement("div");e.className="tok";e.textContent=t.job;e.style.setProperty("--c",colorOf(t.origin));
+    e.title=`Job ${t.job} from ${labelOf(t.origin)}`;st.tokens.set(t.id,e);}return e;}
+const MAXQ=14;   // visible waiting tokens per house; the rest is a "+n" counter
+const centreOf=r=>({x:r.left+r.width/2,y:r.top+r.height/2});
+/* A move between houses: a curved path in the job's colour is drawn from the old house to the new one,
+   the task travels along it, then the path fades. Driven by the task files, so every real move shows. */
+function flyAlong(colour,label,big,from,to){
+  const svg=$("#flow"), ns="http://www.w3.org/2000/svg", p=document.createElementNS(ns,"path");
+  const dx=to.x-from.x, dy=to.y-from.y, len=Math.hypot(dx,dy)||1, bend=Math.min(160,len*.28);
+  const cx=(from.x+to.x)/2-dy/len*bend, cy=(from.y+to.y)/2+dx/len*bend;
+  p.setAttribute("d",`M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`);
+  p.setAttribute("stroke",colour);p.setAttribute("class","route");svg.appendChild(p);
+  const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+  p.animate([{strokeDashoffset:L},{strokeDashoffset:0}],{duration:600,fill:"forwards",easing:"ease-out"});
+  const t=document.createElement("div");t.className="tok flyer"+(big?" big":"");t.textContent=label;t.style.setProperty("--c",colour);
+  document.body.appendChild(t);const half=(big?48:30)/2, start=performance.now()+250, dur=1900;
+  return new Promise(done=>{(function step(now){
+    const k=Math.min(1,Math.max(0,(now-start)/dur)), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, pt=p.getPointAtLength(L*e);
+    t.style.transform=`translate(${pt.x-half}px,${pt.y-half}px) scale(${1+.25*Math.sin(Math.PI*k)})`;
+    if(k<1)requestAnimationFrame(step);
+    else{t.remove();p.animate([{opacity:1},{opacity:0}],{duration:900,fill:"forwards"}).finished.then(()=>p.remove());done();}
+  })(performance.now());});
+}
+function place(s){
+  const before=new Map();st.tokens.forEach((e,id)=>e.isConnected&&before.set(id,e.getBoundingClientRect()));
+  const first=!st.lastNode; const lastNode=st.lastNode||new Map(), nowNode=new Map(), want=new Set();
+  for(const n of s.nodes){const card=cardOf(n.id);
+    for(const [kind,box] of [["running",card.querySelector(".slot")],["waiting",card.querySelector(".queue")]]){
+      n[kind].forEach(t=>nowNode.set(t.id,{node:n.id,t,kind}));
+      const shown=kind==="waiting"?n[kind].slice(0,MAXQ):n[kind];
+      const els=shown.map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");
+        if(kind==="running")e.style.setProperty("--p",t.progress??0);return e;});
+      els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
+      [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
+      if(kind==="waiting"&&n[kind].length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${n[kind].length-MAXQ}`;box.appendChild(m);}}}
+  const queueCentre=id=>centreOf(cardOf(id).querySelector(".queue").getBoundingClientRect());
+  // tasks that left every house: done (or dropped after a missed deadline) - a short fade upwards
+  lastNode.forEach((v,id)=>{if(nowNode.has(id))return;const r=before.get(id),e=st.tokens.get(id);st.tokens.delete(id);
+    if(r&&e){const c=e.cloneNode(true);c.classList.add("flyer");document.body.appendChild(c);
+      c.animate([{transform:`translate(${r.left}px,${r.top}px)`,opacity:1},{transform:`translate(${r.left}px,${r.top-28}px)`,opacity:0}],{duration:900}).finished.then(()=>c.remove());}});
+  nowNode.forEach((v,id)=>{
+    const prev=lastNode.get(id), e=st.tokens.get(id), shown=e&&want.has(id);
+    if(!prev){if(shown&&!first){e._new=false;e.animate([{opacity:0,transform:"scale(.4)"},{opacity:1,transform:"scale(1)"}],{duration:700,easing:"ease-out"});}
+      if(e)e._new=false;return;}
+    const a=before.get(id), b=shown?e.getBoundingClientRect():null;
+    if(prev.node!==v.node){            // moved to another house: show the route
+      const from=a?centreOf(a):queueCentre(prev.node), to=b?centreOf(b):queueCentre(v.node);
+      if(shown)e.style.visibility="hidden";
+      flyAlong(colorOf(v.t.origin),v.t.job,false,from,to).then(()=>{if(e)e.style.visibility="";});
+    } else if(a&&b){const dx=a.left-b.left,dy=a.top-b.top;
+      if(Math.abs(dx)+Math.abs(dy)>=1&&e.style.visibility!=="hidden")e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:500,easing:"ease-out"});}
+  });
+  st.lastNode=new Map([...nowNode].map(([id,v])=>[id,v]));
+}
+function note(id,text,cls,full){const c=cardOf(id);if(!c)return;const n=c.querySelector(".note");
+  n.textContent=text;n.title=full||text;n.className="note show "+(cls||"");clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove("show"),4500);}
+function ticker(text){$("#ticker").innerHTML=`<span>${text}</span>`;}
+function handle(e){
+  if(e.kind==="spawn"){note(e.to,`New job ${e.job} · ${st.tasksPerJob} tasks`);ticker(e.text);}
+  if(e.kind==="move"){const src=st.byId[e.from];
+    note(e.to,`← job ${e.job} from ${labelOf(e.from)}`,"",e.text);
+    ticker(`Job ${e.job} → ${labelOf(e.to)} · ${labelOf(e.from)} is set to ${src?src.targetTemperatureC.toFixed(1):"?"} °C, too little heat to finish before the deadline`);}
+  if(e.kind==="finished"){note(e.to,`✓ job ${e.job} on time`,"ok");ticker(e.text);}
+  if(e.kind==="missed"){note(e.to,`✗ job ${e.job} missed`,"bad");ticker(e.text);}
+  if(e.kind==="info")ticker(e.text);
+}
+function render(s){
+  st.nodes=s.nodes;st.byId=Object.fromEntries(s.nodes.map(n=>[n.id,n]));st.range=s.temperatureRange;st.step=s.step;
+  st.tasksPerJob=s.tasksPerJob;st.stepMs=s.stepSeconds*1000;st.nextAt=performance.now()+s.msToNextStep;
+  if(!st.built)build(s);
+  for(const n of s.nodes){const el=cardOf(n.id),input=el.querySelector("input");
+    if(!(st.drag[n.id]||Date.now()-(st.lastLocal[n.id]||0)<1500))input.value=n.targetTemperatureC;
+    paint(el,+input.value);
+    const work=n.running.length+n.waiting.length,paused=n.targetLoad===0;
+    el.classList.toggle("paused",paused&&work>0);
+    el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-n.targetLoad)).toFixed(1));
+    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`+(n.actualLoad==null?"":` · measured ${Math.round(n.actualLoad*100)} %`);
+    el.querySelector(".state").title=n.error||"";}
+  place(s);
+  document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));
+  $("#auto").textContent="auto-spawn "+(s.autoSpawn?"on":"off");$("#auto").style.color=s.autoSpawn?"var(--paper)":"";
+  $("#hour").textContent=`Hour ${s.step}`;
+  $("#totals").textContent=`${s.totals.finished} on time · ${s.totals.moves} moved · ${s.totals.missed} missed`;
+  if(s.events.length){const fresh=s.events.filter(e=>e.seq>st.since);
+    if(st.since>0)fresh.forEach(handle);
+    else if(!s.events.some(e=>e.kind!=="info"))ticker(`Press + job (or keys 1–${s.nodes.length}) to send work to a house.`);
+    st.since=s.events[s.events.length-1].seq;}
+  else if(!$("#ticker").textContent)ticker(`Press + job (or keys 1–${s.nodes.length}) to send work to a house.`);
+}
+let busy=false;
+async function poll(){if(busy)return;busy=true;
+  try{render(await api(`/api/state?since=${st.since}`));$("#offline").classList.remove("show");}
+  catch(e){$("#offline").classList.add("show");}finally{busy=false;}}
+(function tick(){if(st.built)$("#next").textContent=`· next decision in ${(Math.max(0,st.nextAt-performance.now())/1000).toFixed(0)} s`;
+  setTimeout(tick,250);})();
+const nextSched=()=>{const o=["B2","LP","B1"],c=document.querySelector('[data-sched][aria-pressed="true"]')?.dataset.sched;
+  api("/api/scheduler",{id:o[(o.indexOf(c)+1)%o.length]}).then(poll);};
+document.querySelectorAll("[data-sched]").forEach(b=>b.addEventListener("click",()=>api("/api/scheduler",{id:b.dataset.sched}).then(poll)));
+$("#auto").addEventListener("click",()=>api("/api/autospawn",{on:!$("#auto").textContent.endsWith("on")}).then(poll));
+$("#helpBtn").addEventListener("click",()=>$("#help").classList.toggle("show"));
+$("#help").addEventListener("click",()=>$("#help").classList.remove("show"));
+document.addEventListener("keydown",e=>{const k=+e.key;
+  if(k>=1&&k<=st.nodes.length)return spawn(st.nodes[k-1].id);
+  const key=e.key.toLowerCase();
+  if(key==="s")nextSched(); if(key==="a")$("#auto").click(); if(key==="?"||key==="h")$("#help").classList.toggle("show");
+  if(key==="r"&&confirm("Empty all queues and start over?"))api("/api/reset",{}).then(poll);
+  if(key==="escape")$("#help").classList.remove("show");});
+setInterval(poll,400);poll();
+</script>
+</body>
+</html>

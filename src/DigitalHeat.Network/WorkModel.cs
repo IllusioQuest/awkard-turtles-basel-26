@@ -23,6 +23,25 @@ public sealed class Type1Cohort
     public required IReadOnlyList<bool> EligibleSites { get; init; }
     public double RemainingServerHours { get; internal set; }
     public double TotalServerHours => Jobs * ServerHoursPerJob;
+
+    /// <summary>
+    /// A cohort observed from outside a simulation (live demo, decision 0042): remaining work is what is
+    /// still on disk, not what a <see cref="WorkLedger"/> tracked.
+    /// </summary>
+    public static Type1Cohort Observed(int id, int originSite, int arrivalHour, int dueHour, int jobs,
+        double serverHoursPerJob, IReadOnlyList<bool> eligibleSites, double remainingServerHours)
+    {
+        if (jobs < 1 || !double.IsFinite(serverHoursPerJob) || serverHoursPerJob <= 0 || dueHour <= arrivalHour
+            || originSite < 0 || originSite >= eligibleSites.Count || !double.IsFinite(remainingServerHours)
+            || remainingServerHours < 0 || remainingServerHours > jobs * serverHoursPerJob + 1e-9)
+            throw new ArgumentOutOfRangeException(nameof(remainingServerHours), "Invalid observed cohort.");
+        return new Type1Cohort
+        {
+            Id = id, OriginSite = originSite, ArrivalHour = arrivalHour, DueHour = dueHour, Jobs = jobs,
+            ServerHoursPerJob = serverHoursPerJob, EligibleSites = eligibleSites,
+            RemainingServerHours = remainingServerHours,
+        };
+    }
 }
 
 /// <summary>Server-hours of one cohort planned at one site in the current hour.</summary>

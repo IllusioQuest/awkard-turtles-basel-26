@@ -56,6 +56,51 @@ personal data, no model download); details in [`docs/jobs/research-sim.md`](docs
 
    Clean up afterwards with `docker rm -f research-sim`.
 
+## Live network demo (T-54)
+
+Four Docker containers act as four houses on one laptop. The **real network scheduler** (B2 by
+default, the LP or B1 one click away) decides every scheduler hour from the four heat sliders and
+moves real waiting Ising tasks between the houses' queues; each container's load goes through
+`SchedulerController.Apply` → `DockerJobExecutor` (pause / CPU quota). New jobs appear only when you
+press **+ New job** (or keys 1–4) or switch on auto-spawn. Decision
+[0042](docs/decisions/0042-live-demo-network-scheduler.md).
+
+**Start (one line, repository root, Docker Desktop running, .NET 8 SDK):**
+
+```
+dotnet run --project src/DigitalHeat.LiveGrid -- --up
+```
+
+It builds and starts the four containers, opens <http://127.0.0.1:5087> and stops the containers on
+**Ctrl+C**. Press **F11** for full screen.
+
+**Showing it:** set House 1 to 0 % heat and House 2 to 100 %, then press **1**. Job 1 arrives at
+House 1 (blue banner); House 1 pauses and the scheduler sends its tasks one by one to the warm
+houses (flying tokens; the reason appears in the receiving house and in the log). Switch to "No
+network" (B1) and repeat: the job stays and misses its deadline. Keys: 1–4 new job, A auto-spawn,
+S scheduler. Reset empties all queues.
+
+**Recorded fallback:** while LiveGrid is running, record two minutes and replay the same page without
+Docker. Replay serves the saved frames in a loop; controls are inert during playback.
+
+```
+python scripts/record_live_demo.py --minutes 2
+dotnet run --project src/DigitalHeat.LiveGrid -- --replay data/derived/live-demo/recording.jsonl
+```
+
+The recorder polls `/api/state` every 0.4 seconds. Use `--output` to choose another recording path.
+
+**Task size on a new laptop:** one step is 2 s; each house has 3 servers of 0.5 core, and one task should take about 4 s (two steps) on one server, i.e. 2 s on a full core. Measure
+once and put the printed `sweeps` into `taskSweeps` in `config/live-demo-four-node.json`:
+
+```
+docker compose -f compose.live-demo.yml run --rm -e TARGET_SECONDS=2 node-1 calibrate
+```
+
+Queue check without Docker (four workers, a mover that keeps moving files):
+`python jobs/research-sim/test_fleet.py`. Limits: the slider is an illustrative heat demand, one
+step is a slowed hour, running tasks do not migrate, laptop power and heat are not measured.
+
 Other measured jobs (transcription, LLM summary) use the same LiveRun command with their own
 descriptor in [`config/jobs/`](config/jobs/) and container; see [`docs/jobs/`](docs/jobs/).
 The full LiveRun options (placement rules, observed load) are under

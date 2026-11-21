@@ -9,7 +9,9 @@ The exact critical temperature T_c = 2 / ln(1 + sqrt(2)) ≈ 2.269 (Onsager 1944
 check the results.
 
   prepare   write the task queue to $WORK/in (one JSON file per task)
-  run       process every task that has no result yet; PASSES=0 repeats forever (live demo)
+  run       process every task that has no result yet; PASSES=0 repeats forever
+            with NODE_ID set: live-demo node with its own queue (see _run_node, decision 0042)
+  calibrate print the sweeps for one task of TARGET_SECONDS on this CPU (live-demo task size)
 
 Contract with the host (same shape as the transcription job, docs/jobs/transcription.md):
   $WORK/in/task_NNNN.json          input queue
@@ -27,9 +29,8 @@ import math
 import os
 import sys
 import time
-from multiprocessing import Pool
+from multiprocessing import Pool, Process
 from pathlib import Path
-
 import random
 
 WORK = Path(os.environ.get("WORK", "/work"))
@@ -45,12 +46,14 @@ T_MAX = float(os.environ.get("T_MAX", "3.5"))
 N_TEMPERATURES = int(os.environ.get("N_TEMPERATURES", "16"))
 N_SEEDS = int(os.environ.get("N_SEEDS", "2"))
 BASE_SEED = int(os.environ.get("BASE_SEED", "20251115"))
+NODE_ID = os.environ.get("NODE_ID", "local")
+LIVE_LOOP = os.environ.get("LIVE_LOOP", "0").lower() in {"1", "true", "yes"}
 
 WORK_UNIT = "simulation task"
 ONSAGER_TC = 2.0 / math.log(1.0 + math.sqrt(2.0))
 
 
-def simulate(task: dict) -> dict:
+def simulate(task: dict, progress=None) -> dict:
     """Metropolis checkerboard simulation of one task; returns per-spin observables.
 
     Energy per spin e = -(1/N) sum_<ij> s_i s_j; |m| = |sum s_i| / N. Susceptibility
@@ -72,7 +75,11 @@ def simulate(task: dict) -> dict:
     # Only dE = 4 and 8 can be rejected; acceptance probabilities exp(-dE/T).
     accept = {4: math.exp(-4.0 / temp), 8: math.exp(-8.0 / temp)}
     m_abs, m2, e1, e2 = [], [], [], []
-    for sweep in range(task["thermalisation_sweeps"] + task["sweeps"]):
+    total_sweeps = task["thermalisation_sweeps"] + task["sweeps"]
+    report_every = max(1, total_sweeps // 50)
+    for sweep in range(total_sweeps):
+        if progress is not None and sweep % report_every == 0:
+            progress(sweep / total_sweeps)
         for i in order:
             d_e = 2 * spins[i] * (spins[right[i]] + spins[left[i]] + spins[down[i]] + spins[up[i]])
             if d_e <= 0 or rng.random() < accept[d_e]:
@@ -123,14 +130,34 @@ def _work(args: tuple[dict, str]) -> tuple[str, int, int]:
     return task["id"], start, end
 
 
+def _calculate(task: dict, progress=None) -> tuple[dict, int, int]:
+    start = time.time_ns()
+    result = simulate(task, progress)
+    end = time.time_ns()
+    result["runtime_s"] = (end - start) / 1e9
+    return result, start, end
+
+
 def write_progress(pass_no: int, done: int, total: int, units_done: int) -> None:
-    tmp = WORK / "progress.json.tmp"
+    tmp = WORK / f"progress.{NODE_ID}.{os.getpid()}.tmp"
     tmp.write_text(json.dumps({"work_unit": WORK_UNIT, "units_done": units_done,
                                "pass": pass_no, "tasks_done": done, "tasks_total": total}) + "\n")
     os.replace(tmp, WORK / "progress.json")
 
 
 def run() -> None:
+    if NODE_ID != "local":
+        # One process per server slot (SLOTS, live demo: servers per house); claims are atomic renames.
+        slots = int(os.environ.get("SLOTS", "1"))
+        if slots == 1:
+            _run_node(WORK / "out", 0)
+            return
+        procs = [Process(target=_run_node, args=(WORK / "out", k)) for k in range(slots)]
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join()
+        return
     tasks = [json.loads(p.read_text()) for p in sorted((WORK / "in").glob("task_*.json"))]
     if not tasks:
         sys.exit(f"no tasks in {WORK / 'in'}; run prepare first")
@@ -139,6 +166,7 @@ def run() -> None:
     log = out_root / "log.csv"
     if not log.exists():
         log.write_text("pass,task,start_unix_ns,end_unix_ns\n")
+    # Keep the original single-container runner semantics unchanged.
     units_done = 0
     pass_no = 0
     with Pool(WORKERS) as pool:
@@ -146,7 +174,7 @@ def run() -> None:
             out = out_root / f"pass_{pass_no:03d}"
             out.mkdir(exist_ok=True)
             for stale in out.glob("*.part"):
-                stale.unlink()  # unfinished task from an earlier kill: redo it
+                stale.unlink()
             pending = [t for t in tasks if not (out / f"{t['id']}.json").exists()]
             done = len(tasks) - len(pending)
             units_done += done
@@ -160,6 +188,109 @@ def run() -> None:
             pass_no += 1
 
 
+def _run_node(out_root: Path, slot: int = 0) -> None:
+    """Live-demo node (decision 0042): claim only from this node's own queue, one task at a time.
+
+    $WORK/queue/<node>/<task>.json    waiting; the coordinator may move it to another node's queue
+    $WORK/running/<node>/s<slot>/<task>.json  claimed by one server slot of this node (atomic rename; never moved)
+    $WORK/done/<task>.json            result, written atomically; then the running file is removed
+    $WORK/out/<node>.csv              task, job, start_unix_ns, end_unix_ns, node_id
+    A rename that fails because the file is gone means the coordinator moved it first: skip it.
+    Earliest deadline first (field due_step), then by file name.
+    """
+    queue = WORK / "queue" / NODE_ID
+    running = WORK / "running" / NODE_ID / f"s{slot}"
+    done = WORK / "done"
+    for d in (queue, running, done, out_root):
+        d.mkdir(parents=True, exist_ok=True)
+    node_log = out_root / f"{NODE_ID}.csv"
+    if not node_log.exists():
+        node_log.write_text("task,job,start_unix_ns,end_unix_ns,node_id\n")
+    # A task left in running/ by a killed worker is still ours: finish it first.
+    while True:
+        claimed = sorted(running.glob("*.json"))
+        if not claimed:
+            claimed = _claim_next(queue, running)
+        if claimed is None or not claimed:
+            if not LIVE_LOOP:
+                return
+            time.sleep(0.2)
+            continue
+        path = claimed[0]
+        try:
+            task = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            time.sleep(0.2)
+            continue
+        result, start, end = _calculate(task, lambda f, name=path.name: _write_progress(name, f))
+        _clear_progress(path.name)
+        result["node_id"] = NODE_ID
+        target = done / path.name
+        tmp = done / f".{path.name}.{NODE_ID}.s{slot}.part"
+        tmp.write_text(json.dumps(result))
+        for attempt in range(50):  # the host may hold done/ or running/ files open for a moment (Windows)
+            try:
+                os.replace(tmp, target)
+                path.unlink(missing_ok=True)
+                break
+            except OSError:
+                time.sleep(0.1)
+        try:
+            with node_log.open("a") as f:
+                f.write(f"{task['id']},{task.get('job', '')},{start},{end},{NODE_ID}\n")
+        except OSError:
+            pass
+
+
+def _write_progress(task_name: str, fraction: float) -> None:
+    """$WORK/progress/<node>/<task>.json: share of the running task's sweeps done (the view shows it)."""
+    try:  # best effort: on Windows bind mounts the host may hold the file open for a moment
+        d = WORK / "progress" / NODE_ID
+        d.mkdir(parents=True, exist_ok=True)
+        tmp = d / f".{task_name}.tmp"
+        tmp.write_text(json.dumps({"task": task_name.removesuffix(".json"), "fraction": round(fraction, 3)}))
+        os.replace(tmp, d / task_name)
+    except OSError:
+        pass
+
+
+def _clear_progress(task_name: str) -> None:
+    try:
+        (WORK / "progress" / NODE_ID / task_name).unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def _claim_next(queue: Path, running: Path) -> list[Path] | None:
+    """Claim the most urgent waiting task by atomic rename; None if the queue is empty."""
+    waiting = []
+    for p in queue.glob("*.json"):
+        try:
+            waiting.append((json.loads(p.read_text()).get("due_step", 0), p.name, p))
+        except (OSError, json.JSONDecodeError):
+            continue  # moved away or still being written by the coordinator
+    for _, name, p in sorted(waiting):
+        try:
+            os.rename(p, running / name)
+            return [running / name]
+        except OSError:
+            continue  # the coordinator moved it first, or it is locked for a moment
+    return None
+
+
+def calibrate() -> None:
+    """Print the sweep count for which one task takes TARGET_SECONDS on this CPU (live-demo setting)."""
+    target = float(os.environ.get("TARGET_SECONDS", "4"))
+    probe = {"id": "calibrate", "temperature": 2.3, "seed": BASE_SEED, "lattice_size": LATTICE_SIZE,
+             "sweeps": 2000, "thermalisation_sweeps": 200}
+    _, start, end = _calculate(probe)
+    seconds = (end - start) / 1e9
+    sweeps = max(10, round(probe["sweeps"] * target / seconds))
+    print(json.dumps({"lattice_size": LATTICE_SIZE, "probe_sweeps": 2200, "probe_seconds": round(seconds, 3),
+                      "target_seconds": target, "sweeps": sweeps, "thermalisation_sweeps": sweeps // 10}))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "run"
-    {"prepare": prepare, "run": run}.get(cmd, lambda: sys.exit("usage: ising.py prepare | run"))()
+    {"prepare": prepare, "run": run, "calibrate": calibrate}.get(
+        cmd, lambda: sys.exit("usage: ising.py prepare | run | calibrate"))()

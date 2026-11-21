@@ -14,6 +14,9 @@ later.
 | No. | Decision | Status |
 |---|---|---|
 | [0036](0036-monitor-ui-neutral-contract.md) | Keep monitor logic in place; transfer typed JSON to existing /admin via loopback API | proposed; user approved direction; fresh review go with changes |
+| [0037](0037-minute-live-job-deadlines.md) | Minute-level deadlines for bounded live batch jobs | proposed; T-48 |
+| [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; T-49 |
+| [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation connections | proposed; T-50 |
 | [0001](0001-data-storage.md) | Data storage layout (`data/raw`, `data/derived`, fetch script) | accepted |
 | [0002](0002-agent-guide.md) | Agent working guide (`AGENTS.md`), reviews, Git, deadlines | accepted |
 | [0003](0003-webhosting-prototype.md), [0004](0004-redundant-windows-ingress.md), [0006](0006-linux-host-network-ingress.md), [0007](0007-whole-container-pause-recovery.md), [0012](0012-hosting-component-isolation.md), [0015](0015-hosting-heat-routing.md), [0016](0016-hosting-replica-lifecycle.md), [0017](0017-always-on-catalog.md) | Webhosting prototype cluster (ingress, pause recovery, isolation, heat routing, replicas, always-on catalog) | superseded by 0026 (webhosting retired) |
@@ -44,9 +47,10 @@ later.
 
 | [0034](0034-minecraft-measured-workload.md) | Official Vanilla Minecraft and measured-power startup gate | proposed; T-44; review pending |
 | [0035](0035-federated-job-ownership.md) | Federated job ownership and node-local heat control | proposed; reviewed with changes; T-45 |
+| [0040](0040-local-four-node-demo.md) | Local four-node demo queue and shared C# live control | superseded for the live demo by 0042 (T-54) |
+| [0042](0042-live-demo-network-scheduler.md) | Live demo driven by the network scheduler | proposed; T-54; reviewed with changes |
 | [0036](0036-monitor-ui-neutral-contract.md) | UI-independent monitor contract and read-only admin API | proposed; user approved; reviewed with changes; PR #35 |
 | [0037](0037-minute-live-job-deadlines.md) | Minute-level bounded live-job deadlines | proposed; user approved; reviewed with changes; PR #37 |
 | [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; reviewed with changes; PR #38 depends on #37 |
 | [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation transport | proposed; user approved; reviewed with changes; PR #40 depends on #35 |
-| 0040 | Local four-node demo | reserved on `feat/T-51-four-node-live-demo` |
 | [0041](0041-cs16-linux-compatibility.md) | Isolated CS 1.6 Linux compatibility trial | proposed; user approved two-node Wine trial; reviewed with changes; T-53 |
