@@ -161,3 +161,38 @@ waste-heat execution remains a fallback choice. No queue/waste policy is silentl
 
 Source accessed 2026-11-21:
 https://app.sprintd.org/events/sprintd-basel-greentech/cases/useful-load-useful-heat-can-your-computing-power-heat-a-home
+
+## Implemented heat-capacity reservation demo
+
+The user confirmed the available-capacity interpretation. The shared core now factors the
+existing GreedyHeatScheduler numerator into HeatCapacity.RemainingKwh. The gaming reservation
+model calls that helper, so the heat formula is shared with the yearly scheduler. Valid legacy
+scheduler output is regression-checked. No new thermal or economic scenario is substituted.
+
+From the gaming checkout:
+
+    dotnet run --project gaming/demo
+    dotnet test gaming/tests
+
+The fixed synthetic demo has home capacity 0.5 kWh, hotel capacity 2 + 4 - 3 = 3 kWh, and spa
+capacity 3 + 2 - 1 = 4 kWh for the hour. Each illustrative session reserves 2 kWh/hour, NOT a
+measured gaming rate. Player 1 selects spa-a (4 available), player 2 selects hotel-a (3 available
+versus spa's remaining 2), player 3 selects spa-b (remaining 2). Raising home demand to 5 kWh
+places player 4 at home-a. Player 1 remains on spa-a. JSON output is snake_case.
+
+This demonstrates that two servers at a spa SHARE the site's thermal reserve. An admission
+atomically claims one node slot and its recoverable heat amount. Request-ID retries are
+idempotent; changing a request under an existing ID fails. Readiness, network eligibility and
+T-24 locality filter candidates before ranking. Equal reserves use stable site/node IDs.
+Current UTC-hour snapshots require increasing revisions. External committed heat excludes
+claims already owned by this coordinator. Allocatable slots exclude external workloads but
+include this coordinator's held slots, which are subtracted internally exactly once. Held
+per-hour heat rates carry into the next interval and are released only by explicit caller action
+following observed termination (or cancellation of an unlaunched claim).
+
+If no site can absorb the declared request heat with available compute slots, TryReserve returns
+no assignment. There is no automatic waste-heat placement or queue service. Sessions already
+held remain pinned after demand or inventory changes. The component is in-memory and local;
+restart reconciliation/durable ownership must precede actual game launching. No automatic
+Selkies routing, batch pause or game execution is claimed by this console demo. Independent
+remote-engine control remains an adapter integration task, not delivered by two local desktops.
