@@ -156,3 +156,7 @@ missing-config error proves apphost execution, not a running remote deployment.
 88 orchestration tests passed; four focused probe regressions also passed after
 removing a test-style warning. Full evidence:
 [Linux worker checks](../performance/linux-render-worker-2026-11-21.json).
+
+The final bundle includes main commit 4e363d6 (shared free-heat-share rank,
+ADR 0056 by the other agent). All 88 orchestration tests passed again after
+integration. Worker packaging is ADR 0057; no parallel placement policy was added.

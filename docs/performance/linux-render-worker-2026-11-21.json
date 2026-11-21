@@ -1,11 +1,11 @@
 {
   "observed_date": "2026-11-21",
-  "code_commit": "5d9ba2fc7fcc4cfe162704a5f7ad4835ce1bbb7f",
+  "code_commit": "d7a0aee7146b2af54623f26d568709dc12e9b7f1",
   "status": "deployment_prepared_no_compatible_gpu_host_available",
   "blender": "5.3.0",
   "image_local_oci_digest": "sha256:24e1e7873a638e24256033efd1966ed44d96bf141add14fdc833c49bb7352147",
   "blender_archive_sha256": "dacb8264197a3f7fda6001285a5a506fc97ee943881261c2c3bd63c882f22e05",
-  "bundle_sha256": "4c9191dd1be18bf5c5cfdba33479b1fd7c5b42878123d945cbc1c4fdff6c82f1",
+  "bundle_sha256": "eba16727c9ac9534c6c86816585142935eac1bcddbfb39409337526b5b30a91a",
   "validation": {
     "workload_run_build": "pass",
     "orchestration_tests_passed": 88,
@@ -24,12 +24,14 @@
       "height": 360,
       "samples": 32,
       "seed": 66
-    }
+    },
+    "post_integration_orchestration_tests_passed": 88
   },
   "limits": [
     "No actual GPU render succeeded on this laptop.",
     "No Linux GPU host available; remote deployment, actual GPU telemetry, cross-host connectivity and multi-GPU scaling remain unverified.",
     "Real CPU frame is one sample under a one-core/1536MiB cap, not a full animation benchmark or SLA.",
     "Existing running comparison, game and Minecraft containers were not changed."
-  ]
+  ],
+  "integrated_main_heat_policy_commit": "4e363d6"
 }
