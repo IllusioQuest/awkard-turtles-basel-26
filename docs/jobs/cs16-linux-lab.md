@@ -176,3 +176,20 @@ and [mouse implementation](https://github.com/ValveSoftware/halflife/blob/master
 accessed 2026-11-21. The supplied old client binaries do not contain the `m_rawinput` command string;
 do not assume modern client raw-input options are available. No persistent input change or active
 game restart was performed for this diagnostic step.
+
+The user could not open the console. The existing config binds backtick/tilde, which may be awkward
+with the client/browser keyboard layout. Prepared an opt-in `input-check` application variant that
+applies the stated mouse-look defaults and adds `F8 toggleconsole`, retaining the old bindings and
+standard wheel actions. Its launch plan was validated without dispatch first. The user explicitly
+approved restarting **only CS on D**, because doing so disconnects its current match. Scoped graceful
+exit/relaunch completed; inspection confirmed the new running `hl.exe` received the preset/F8
+arguments (commit `ce0b341`). No node/Minecraft restart or network change. User verification of
+vertical aiming and the F8 console is pending; launch arguments alone do not prove either works.
+
+```powershell
+./gaming/scripts/Start-Application.ps1 -Application cs16 -Node session-d -Variant input-check -Profiles ./gaming/deploy/runtime-profiles.cs16.json
+```
+
+Close the existing game explicitly before using that launcher; do not silently replace an active
+match. On a laptop with media keys, the F8 key may require Fn+F8. Two-finger scrolling remains weapon
+selection by user preference; one-finger movement is the aiming test.
