@@ -1,6 +1,6 @@
 # Status: work map
 
-Last updated: 2026-11-21 01:08 Europe/Zurich. Every agent updates its row when it starts, when it
+Last updated: 2026-11-21 02:25 Europe/Zurich. Every agent updates its row when it starts, when it
 changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Who works on what
@@ -9,7 +9,8 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 |---|---|---|---|---|
 | team | `main` | Case context; data (Open-Meteo Basel 2025, ElCom 2026 IWB H4, WP1 AI service and compute prices, WP2 costs and energy prices, WP3 sites and profiles incl. When2Heat extract); vision draft (`docs/vision.md`); research plan; AGENTS rules | `data/raw/` and its `SOURCE` files | merged |
 | Jona (IllusioQuest) / Codex | `feat/core-csharp` | .NET 8 `DigitalHeat.Core` (heat demand, tank, `IScheduler.Decide(HeatSignal)`, `IExecutor.ApplyTargetLoad`, `SchedulerController.Apply`, `GreedyHeatScheduler`, year simulation, economics), `DigitalHeat.YearRun`, xUnit tests, `config/reference-house.json`, decision 0005 (accepted) | defines `IScheduler`, `IExecutor`, `HeatSignal`, `config/reference-house.json` | merged to main (PR #2); real Docker executor added by PR #3 |
-| Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | PR #6 open; 13 .NET tests and data check pass; T-01 sourced job catalog data pending |
+| Jona (IllusioQuest) / Codex | `feat/T-05-job-queue` | T-05 job arrivals, queue, deadlines and year results; no runtime or example-job work | extends `YearSimulation` with optional finite-job inputs while keeping unlimited comparison intact | merged to main (PR #6); T-01 sourced job catalog data pending |
+| Jona (IllusioQuest) / Codex | `docs/T-06-reference-results` | T-06 reproducible reference-house result variants and cost caveats | reads YearRun outputs and WP2 costs; no core or runtime interface changes | first version ready in PR #8; 4-server draft presentation baseline selected after user delegation; sourced finite job inputs pending |
 | Nikita | `feat/T-23-webhosting-integration` | Linux gateway crash experiment, three nested Docker engines, sample, placement/contracts; ADRs 0003 and 0006 proposed | no shared heat interface changed; future integration must use existing IExecutor | merged networking milestone (0e7115a); T-09 merged in PR #5; T-23 isolated shared-runtime probe in progress; always-on catalog boundary awaits T-01 agreement; plan photo still missing; whole-container pause recovery tested with either manager absent; controller/etcd/node orchestration and heat integration pending; see webhosting-runtime.md |
 | Jona (IllusioQuest) / Codex | `feat/job-runtime` | Generic Docker control of a running job through the shared scheduler; day replay and decision 0009 (was 0006). Does not implement example jobs. | Adds `IContainerControl` and `DockerJobExecutor : IExecutor`; consumes core interfaces without changing them. | merged to main (PR #3); 9 .NET tests pass and a Busybox Docker smoke replay paused, resumed and throttled as requested |
 | Ennio / Claude | `feat/T-02-transcription-job` | T-02: whisper.cpp (base) transcription container, laptop runtime and energy measurement (RAPL + battery), scaling to 1 kW | Supplies `config/jobs/transcription-whisper.json` (schema from decision 0009) and a running container for `DigitalHeat.LiveRun` | in progress |
