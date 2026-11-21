@@ -92,4 +92,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-56](T-56-node-feedback.md) | Event-driven node capacity and heat feedback | Nikita / Codex | done; PR #45 merged; ADR 0044 reviewed |
 | [T-57](T-57-scheduler-cleanup.md) | Clean scheduler code and measure owner runtime | Nikita / Codex | PR #46 in review; 61 orchestration + 46 Core tests; runtime evidence shared |
 | [T-58](T-58-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | done |
-| [T-59](T-59-swiss-building-mix.md) | Swiss building and ownership weights for simulation nodes | Nikita / Codex; coordinate T-58 | in progress; source analysis and generator handoff |
+| [T-59](T-59-swiss-building-mix.md) | Swiss building and ownership weights for simulation nodes | Nikita / Codex; coordinate T-58 | PR #49 in review; composition prepared; mixed thermal inputs pending T-58 |

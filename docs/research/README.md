@@ -164,3 +164,5 @@ seasonality and a source for its daily shape.
 > Read `AGENTS.md` and `docs/research/README.md`. Do work package WPn as described there, on a new
 > branch `data/research-wpn`. Collect values with sources into the CSV files using the schema,
 > write the Markdown summary, keep to the time box, do not model anything. Open a PR when done.
+
+Residential building/ownership composition: [BFS 2020 node mix](swiss-residential-node-mix.md) (T-59). Separate building type and owner type; source excludes ZH/VS. Composition fixture prepared; mixed thermal integration remains a T-58 dependency.

@@ -32,3 +32,7 @@ Papers collected by the team for the paper and related-work section; not yet sum
   official CSV and our own profile differ, the official CSV wins.
 - Sanity check for any heating-demand profile: about **27,000 kWh/year** on **206 heating days**
   (our own computation: 26,851 kWh, 206 days).
+
+## Residential population composition (T-59)
+
+- BFS, Eigentuemertypen der Gebaeude 2020, published 2022-05-19, accessed 2026-11-21: https://statistik.admin.ch/de/news/2022-0305. Linked overview workbook asset 22444710; 2020 residential buildings excluding ZH/VS. Analysis/calculation path: docs/research/swiss-residential-node-mix.md; source manifest: data/raw/bfs-building-ownership-2020/source.json; PR #49. Counts are not dwelling, household, server or hotel/spa shares.
