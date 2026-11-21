@@ -145,7 +145,13 @@ Lever by lever:
   `TODO(source)`. Decision 0020 warns that non-personal batch AI competes with batch APIs at about
   half of list price; at such prices the required share rises well above these values.
 - **D (refurbished) is necessary if premium stays small:** the break-even factor 0.52 says what a
-  T-35 profile must reach, including its wear. Note: `profitability-inputs.md` reports a newer L4
+  T-35 profile must reach, including its wear. Trial run with the profiles of open PR #26 (T-35, not
+  merged, 2026-11-21): `gpu-inference-l4-refurbished` (CHF 21,930 per kW, but 3 years remaining card
+  life) has a *higher* yearly depreciation than new L4 (CHF 5,935 vs 5,707), so it needs 14 % premium
+  instead of 13 % (1 server) before wear; refurbished CPU stays negative even with free hardware.
+  Refurbishing pays only if the remaining life is longer or the price lower than in that profile.
+  Profiles without a price set (e.g. `gpu-inference-t4-refurbished`) are skipped and listed in
+  `run.json` until a T4 price set is added. Note: `profitability-inputs.md` reports a newer L4
   card price (profile 44,179 CHF/kW instead of 34,244), which would raise all required shares; the
   profile file is T-15/T-35's to update.
 - **G (route instead of dump) costs this house money:** always-on with dumping needs less premium
