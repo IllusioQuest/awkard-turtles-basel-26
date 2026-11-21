@@ -1,0 +1,23 @@
+{
+  "Id": "gpu-inference-l4-refurbished",
+  "Label": "GPU inference server with used NVIDIA L4 cards (new host), scaled to 1 kW",
+  "Status": "variant: refurbished hardware (lever D, T-35); not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+  "Description": "Same build as gpu-inference-l4 (one R570-class host + 11.6 L4 cards), but the cards are bought used. The L4 is the current generation (2023), so used prices are thin and close to new; this profile isolates the GPU-price effect. Wear and failure cost: config/hardware/wear/refurbished-wear.json.",
+  "TranscriptionModel": "whisper-large-v3-turbo (GPU), third-party benchmark, batch 4 (same chip as gpu-inference-l4)",
+  "UnitsPerServer": { "value": 11.6313, "unit": "units/server", "source": "derived: (ServerElectricKw - HostElectricKw) / UnitElectricKw = (1 - 0.1625) / 0.072" },
+  "UnitElectricKw": { "value": 0.072, "unit": "kW/unit", "source": "data/raw/market/hardware.csv hw-power-nvidia-l4-tdp: max TDP 72 W (high)" },
+  "UnitPurchasePriceChf": { "value": 1176.28, "unit": "CHF/unit", "source": "derived: USD 1,400 x 0.8402 CHF/USD; one completed eBay.de sale of a used L4 24 GB ('tested good', scratched; https://www.ebay.de/itm/157127945920, search snippet, accessed 2026-11-21, low: single sale, date unclear). Used asking price seen: USD 2,898 (https://www.ebay.com/itm/236238919558), i.e. above the new Bechtle price CHF 2,235" },
+  "HostElectricKw": { "value": 0.1625, "unit": "kW/server", "source": "same estimate as config/hardware/cpu-server.json UnitElectricKw (Xeon 6507P TDP + memory)" },
+  "HostPurchasePriceChf": { "value": 8248.03, "unit": "CHF/server", "source": "data/raw/market/costs.csv cost-server-dell-r570 (new host kept on purpose, to isolate the GPU effect)" },
+  "ServerElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation" },
+  "IdleElectricKw": { "value": null, "unit": "kW/server", "source": "TODO(source): idle draw of L4 cards and host not sourced (as gpu-inference-l4)" },
+  "HeatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; L4 cards are passively air-cooled)" },
+  "PurchasePriceChfPerServer": { "value": 21930.45, "unit": "CHF/server", "source": "derived: 11.6313 x CHF 1176.28 + CHF 8248.03 (host)" },
+  "LifetimeYears": { "value": 3.695, "unit": "years", "source": "derived: value-weighted life so that purchase / life = cards / 3 years + host / 6 years = 13682.42 / 3 + 8248.03 / 6 = CHF 5935.48 per year; 3 years remaining for used cards (assumption, docs/research/refurbished-hardware.md §4), 6 years for the new host (data/raw/market/costs.csv lifetime-coreweave-technology-accounting)" },
+  "OpsChfPerServerYear": { "value": 708, "unit": "CHF/server-year", "source": "derived: 1 host x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic); expected failure cost NOT included, see config/hardware/wear/refurbished-wear.json" },
+  "TranscriptionAudioHoursPerServerHour": { "value": 469.9, "unit": "audio hours/server-hour", "source": "derived: as gpu-inference-l4 (11.6313 x 40.4, low); same chip, no throughput loss with age assumed (assumption: silicon ageing is not a measurable throughput loss for a cooled card, TODO(source))" },
+  "WebhostingSitesPerServer": { "value": null, "unit": "sites/server", "source": "TODO(source): GPUs add nothing to webhosting; host CPU only" },
+  "SpotPriceChfPerServerHour": { "value": 2.23, "unit": "CHF/server-hour", "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.1914 AWS g6.xlarge spot eu-central-2 (cp-gpu-aws-g6-xlarge-euc2-spot, medium); buyers do not see the card's age" },
+  "OnDemandPriceChfPerServerHour": { "value": 10.60, "unit": "CHF/server-hour", "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.9116 (cp-gpu-aws-g6-xlarge-euc2-od, high)" },
+  "HomeHostPriceChfPerServerHour": { "value": 4.30, "unit": "CHF/server-hour", "source": "derived: as gpu-inference-l4: 11.6313 x CHF 0.3697 RunPod L4 community (cp-mkt-runpod-l4-community, high)" }
+}
