@@ -1,0 +1,55 @@
+{
+  "machine": {
+    "cpu_model": "AMD Ryzen 7 250 w/ Radeon 780M Graphics",
+    "logical_cpus": 16,
+    "kernel": "7.2.11-200.fc44.x86_64",
+    "os": "Fedora Linux 44 (Workstation Edition)",
+    "scaling_governor": "powersave",
+    "platform_profile": "balanced",
+    "rapl_domain": "package-0",
+    "image": "digitalheat/transcription-whisper",
+    "image_id": "sha256:26d8bf57caad3b065b4744674820347c2c217e7da056aff5d47408b7f63c4451",
+    "image_labels": {
+      "org.digitalheat.whisper-cpp-version": "v1.9.5"
+    },
+    "docker_cpus": 8.0,
+    "env": [
+      "THREADS=8",
+      "PASSES=0"
+    ],
+    "cmd": [
+      "run"
+    ],
+    "started_local": "2026-11-21T01:18:55+0100"
+  },
+  "phases": {
+    "idle": {
+      "duration_s": 28.99954605102539,
+      "rapl_j": 70.372154,
+      "rapl_w": 2.426663985573378,
+      "battery_w": 6.9813,
+      "battery_valid": true
+    },
+    "running": {
+      "duration_s": 28.999996662139893,
+      "rapl_j": 601.003969,
+      "rapl_w": 20.72427717843924,
+      "battery_w": 15.6699,
+      "battery_valid": true
+    },
+    "paused": {
+      "duration_s": 29.000221490859985,
+      "rapl_j": 74.679534,
+      "rapl_w": 2.575136676922857,
+      "battery_w": 20.020966666666666,
+      "battery_valid": true
+    },
+    "resumed": {
+      "duration_s": 29.703040838241577,
+      "rapl_j": 601.6430349999999,
+      "rapl_w": 20.25526740768597,
+      "battery_w": 17.77758064516129,
+      "battery_valid": true
+    }
+  }
+}

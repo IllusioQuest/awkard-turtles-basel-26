@@ -1,0 +1,1 @@
+{"id": "task_0018", "temperature": 2.7, "seed": 20251133, "lattice_size": 32, "sweeps": 10000, "thermalisation_sweeps": 2000, "mean_abs_magnetisation": 0.12201328125, "mean_energy_per_spin": -0.96342578125, "susceptibility": 3.365502528009259, "specific_heat": 0.6114875492969839, "runtime_s": 6.246393332}

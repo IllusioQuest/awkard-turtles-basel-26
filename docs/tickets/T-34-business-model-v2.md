@@ -4,6 +4,11 @@
 - **Depends on:** T-14 (economics), T-35 (refurbished hardware), T-11/T-12 (routing)
 - **Suggested owner:** team lead + Claude  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (direction decided 2026-11-21)
 
+> **Update 2026-11-21 (Jona):** business model provisionally fixed: operator model, Type 1 = batch LLM
+> on non-personal documents, Type 2 = research simulations; transcription and webhosting out.
+> See decision [0020](../decisions/0020-business-model-operator-two-job-types.md) and
+> [`docs/business-model.md`](../business-model.md) (the one-page task below, first version).
+
 ## Goal
 
 Turn the night's findings into one coherent business model and make **residential houses profitable**
@@ -33,6 +38,8 @@ for the host and for DigitalHeat.
 | **E** Grid flexibility revenue | variant / upside | scheduler as controllable load |
 | **F** Host- or investor-owned hardware | variant | no precedent found |
 | Filler as spot capacity | under consideration | fill rate ≈ 0.35 (range 0.2–0.6) |
+
+**Job model (Ennio, decision 0018, proposed):** Type 1 = sovereign AI services (mainly transcription + batch LLM, OCR later) = lever B; Type 2 = CPU batch compute filler (Monte Carlo, simulations) via our own broker at a heat-led price = the filler lever. No unpaid work.
 
 ## Tasks
 

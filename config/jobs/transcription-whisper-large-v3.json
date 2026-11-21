@@ -1,0 +1,29 @@
+{
+  "id": "transcription-whisper-large-v3",
+  "containerImage": "digitalheat/transcription-whisper",
+  "command": [
+    "run"
+  ],
+  "interruptible": true,
+  "supportedControlLevels": [
+    "freeze",
+    "throttle"
+  ],
+  "deadlineHours": null,
+  "workUnit": "audio minute",
+  "runtimeSecondsPerWorkUnit": {
+    "value": 70.3,
+    "unit": "s/work unit",
+    "source": "Own measurement 2026-11-21, AMD Ryzen 7 250 laptop, 8 threads, 3 runs x 5.0 audio min, charger connected; docs/jobs/transcription.md, data/raw/measurements/transcription-whisper-large-v3/energy-2026-11-21"
+  },
+  "energyKwhPerWorkUnit": {
+    "value": 0.000477,
+    "unit": "kWh/work unit",
+    "source": "Own measurement 2026-11-21, AMD Ryzen 7 250 laptop, 8 threads, 3 runs x 5.0 audio min, charger connected; docs/jobs/transcription.md, data/raw/measurements/transcription-whisper-large-v3/energy-2026-11-21 (CPU package only, gross, RAPL; whole machine is higher, about x1.31 in the base runs)"
+  },
+  "progressFile": "data/external/transcription/large/progress.json",
+  "placementPolicy": {
+    "mode": "anywhere",
+    "source": "Demo workload only: public-domain LibriVox recording (docs/jobs/transcription.md), no personal data and no customer contract. A real customer job must carry the policy from its contract (decision 0013)."
+  }
+}
