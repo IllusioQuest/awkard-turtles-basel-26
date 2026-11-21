@@ -71,7 +71,3 @@ coordination between people, shared interfaces and integration risks. Keep your 
    which one the pitch uses.
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
-
-
-
-

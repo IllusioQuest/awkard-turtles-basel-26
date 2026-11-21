@@ -91,4 +91,3 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-55](T-55-gaming-gpu-eligibility.md) | Preserve heat and speed with GPU eligibility | Nikita / Codex | validation complete; draft PR #44; ADR 0043 reviewed; actual CS GPU dispatch gated |
 
 | [T-56](T-56-node-feedback.md) | Event-driven node capacity and heat feedback | Nikita / Codex | PR #45 in review; 58 orchestration + 46 Core tests; ADR 0044 reviewed |
-
