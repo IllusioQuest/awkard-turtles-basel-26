@@ -34,4 +34,5 @@ Local compare/UI state durable; recovery defaults paused until reconciled. Node 
 transfer via trusted private HTTP; never expose Docker control socket to the browser app.
 
 ## Review
-Pending fresh limited-context review.
+Fresh limited-context review: go with changes. Added durable dedicated-peer operator holds that block dispatch/acceptance and heat-driven resume; acknowledgement requires every live attempt to confirm paused. Recovery suppresses headline speedup. Physical host/GPU identity and quota slices are explicit; duplicate GPU claims reject the comparison. GPU rendering requires a successful tiny Cycles render, not enumeration or OpenGL. The local CPU fallback has no GPU-kernel pause guarantee. Renderer pause tests cover persistence across restart and heat updates.
+

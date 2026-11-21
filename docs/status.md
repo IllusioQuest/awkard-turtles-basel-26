@@ -76,4 +76,5 @@ coordination between people, shared interfaces and integration risks. Keep your 
    and session routing are not integrated (`docs/gaming.md`).
 
 
-Renderer work: Nikita/Codex, feat/T-66-landscape-render; depends PR #52. Reuses MeshPeer, no separate placement policy. CPU/GPU probe, browser timing comparison and pause/resume. Games untouched; ADR 0052.
+Renderer work: Nikita/Codex, feat/T-66-landscape-render; depends PR #52. Reuses MeshPeer, no separate placement policy. PR #54 ready for review; browser app localhost:18900/ui, real CPU render and two-frame-per-leg/pause test pass; GPU unavailable locally, full 48-frame timings pending user run. Games untouched; ADR 0052.
+

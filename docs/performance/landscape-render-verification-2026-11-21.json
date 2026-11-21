@@ -1,0 +1,93 @@
+{
+  "mode": "real_two_frames_per_leg_verification_not_48_frame_benchmark",
+  "pause_verified": true,
+  "frames_per_leg": 2,
+  "image": "sha256:d618f2e326638a9993f059a26bf9d0e8b1036e6d74497e4bf6fcfee99ab4abc2",
+  "physical_host_note": "Physical hosts: shared-windows-laptop. Engines on the same host share its hardware.",
+  "legs": [
+    {
+      "mode": "single",
+      "completed": 2,
+      "started_utc": "2026-11-21T18:17:02.2242719+01:00",
+      "finished_utc": "2026-11-21T18:18:06.6752301+01:00",
+      "elapsed_seconds": 64.4509582,
+      "active_seconds": 60.4181924,
+      "paused_seconds": 4.0327658,
+      "frames": [
+        {
+          "job_id": "home.a0ff8b83210e-0-001",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 1,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 19.862487354999757,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        },
+        {
+          "job_id": "home.a0ff8b83210e-0-002",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 2,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 19.40792373399745,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        }
+      ]
+    },
+    {
+      "mode": "multiple",
+      "completed": 2,
+      "started_utc": "2026-11-21T18:18:06.6760519+01:00",
+      "finished_utc": "2026-11-21T18:18:39.1572564+01:00",
+      "elapsed_seconds": 32.4812045,
+      "active_seconds": 32.4812045,
+      "paused_seconds": 0,
+      "frames": [
+        {
+          "job_id": "home.a0ff8b83210e-1-001",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 1,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 21.427057300999877,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        },
+        {
+          "job_id": "home.a0ff8b83210e-1-002",
+          "peer_id": "spa",
+          "metadata": {
+            "frame": 2,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 19.70240841300256,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        }
+      ]
+    }
+  ],
+  "speedup": null,
+  "speedup_note": "Only shown after both legs finish without pauses and with matching backend"
+}
