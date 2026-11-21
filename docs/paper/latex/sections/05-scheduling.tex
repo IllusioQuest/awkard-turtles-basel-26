@@ -1,0 +1,91 @@
+\section{Scheduling}
+\label{sec:scheduling}
+
+Every strategy answers the same question each hour: how much should each site's servers run, and
+which work should they do? All strategies share one heat balance per site (the case's lossless
+tank, \qty{80}{\percent} recovery, backup heater for the rest) and one actuation path, so the
+scheduler that computes the year is the one that drives a real container in the demonstrator
+(Section~\ref{sec:demonstrator}).
+
+\subsection{Five strategies}
+
+We compare strategies of increasing intelligence.
+
+\textbf{B0 (always on)} runs every server all the time, $u_{s,t} = N_s$, and dumps what the house
+cannot take.
+
+\textbf{B1 (local greedy, heat-led)} runs exactly what the house needs now plus what fits into the
+tank, and never dumps:
+\begin{equation}
+  u_{s,t} = \operatorname{clamp}\!\left(\frac{D_{s,t} + B_s - S_{s,t}}{a_s},\ \mu_s N_s,\ N_s\right).
+  \label{eq:greedy}
+\end{equation}
+This is the scheduler that produces the scored figures of the reference house. With jobs, each site
+first serves its own Type~1 work in earliest-deadline-first order and then fills the rest with
+filler; it never moves work.
+
+\textbf{B2 (network greedy)} keeps B1's load at every site but moves paid work (Type~1, with a
+24-hour deadline) that its home site cannot finish in time to the eligible site with the most free
+heat-led capacity. Whether the origin can finish in time is estimated by persistence. With a
+transfer delay $\delta$, a cohort may move only from hour $\alpha_c + \delta$ on.
+
+\textbf{LP (rolling horizon)} plans all sites over a rolling 48-hour window
+(Section~\ref{sec:model}) and decides, in a strict order of priorities that mirrors the case's
+ranking, how to minimise dumped heat, maximise used heat, avoid missed deadlines, maximise
+server-hours and, last, keep work at home unless moving helps.
+
+\textbf{UB (full-year LP)} solves the same model once for the whole year with perfect knowledge of
+all demand. It is not a strategy that could run; it serves only as an upper bound.
+
+The LP is a linear programme because our work splits into small units (documents, simulation
+tasks) and servers can run at part load. This keeps it fast: a full year of rolling-horizon solves
+on the reference house takes about \qty{45}{s}, and on 33 sites about \qty{0.22}{s} per hour in
+January and \qty{0.38}{s} per hour in July (Debug build, one core), i.e.\ roughly 30 to 60 minutes
+per year (\texttt{docs/model/network-scheduler.md}). Integer servers or non-splittable jobs would
+make it a MILP (future work). Weather-based demand forecasts are perfect foresight unless a forecast
+error \eqref{eq:ar1} is added; we label every result accordingly.
+
+\subsection{Lexicographic objective}
+
+The LP solves a sequence of stages over the window. Let $J_1, \dots, J_5$ be
+\begin{align*}
+  J_1 &= \textstyle\sum_{s,t} z_{s,t} \ (\min), &
+  J_2 &= \textstyle\sum_{s,t} \bigl(q^{\mathrm{dir}}_{s,t} + q^{\mathrm{dis}}_{s,t}\bigr) \ (\max), &
+  J_3 &= \textstyle\sum_{c} m_c \ (\min),\\
+  J_4 &= \textstyle\sum_{s,t} u_{s,t} \ (\max), &
+  J_5 &= \textstyle\sum_{c} \sum_{s \ne o_c} \sum_{t} x_{c,s,t} \ (\min). &&
+\end{align*}
+Stage $k$ optimises $J_k$ subject to \eqref{eq:load}--\eqref{eq:work} and to every earlier stage
+staying at its optimum $J_i^\star$ within a tolerance of $10^{-9}$ (relative) plus $10^{-9}$
+(absolute), $i < k$. If $J_1^\star = 0$, dump is fixed to exactly zero (heat-led ``hard'' mode).
+On one site without jobs only stages $J_1$, $J_2$ and $J_4$ apply. The order encodes a choice: heat
+comes first, money only through the server-hours that heat allows. Section~\ref{sec:economics}
+shows what this choice costs.
+
+\subsection{The greedy rule as a special case}
+
+Take one site, a one-hour window, no Type~1 work and unlimited filler. In that LP an extra
+server-hour is worth $p^\varphi - eP + v a$ while it covers demand, $p^\varphi - eP + \theta v a$
+while it charges the tank (with $\theta$ the value of heat left in the tank at the window end) and
+$p^\varphi - eP - \pi^{\mathrm{dump}} a$ when it is dumped, where $p^\varphi$ is the filler price,
+$e$ the electricity price, $P$ the server power, $v$ the value of used heat and $\pi^{\mathrm{dump}}$
+a dump penalty. If charging pays and dumping does not, the LP runs exactly until the tank is full,
+which is \eqref{eq:greedy} (\texttt{docs/model/routing-optimisation.md}~\S8.1). The LP therefore
+generalises the greedy rule in three directions: \emph{time} (a forecast, $H > 1$), \emph{space}
+(moves, $|\Sites| > 1$) and \emph{markets} (paid work versus filler).
+
+\subsection{Local timing versus the network}
+
+Part of what moving achieves could also be achieved locally: in summer a site's heat-led budget
+(hot-water draw plus free tank room) is scarce, and B1 spends free tank room on filler as soon as
+the day's Type~1 work is done. Two control strategies (decision 0029) separate \emph{local timing}
+from \emph{the network}. \textbf{B1-reserve} and \textbf{B2-reserve} work like B1 and B2, but filler
+may not fill the tank beyond a reserve kept free for tomorrow's paid work:
+\begin{equation}
+  R_s = \min\!\Bigl(B_s,\ a_s \cdot \max\bigl(0,\ \hat W_s - \bar D_s\, d / a_s\bigr)\Bigr),
+  \label{eq:reserve}
+\end{equation}
+where $\hat W_s$ is the Type~1 work that arrived at the site in the last \qty{24}{h} (persistence
+estimate of the next cohort), $\bar D_s$ the mean demand of the last 24 observed hours and
+$d = \qty{24}{h}$ the deadline. Filler in the current hour is capped so that the tank keeps at least
+$R_s$ free. Sites without Type~1 behave exactly like B1. The reserves use no forecast.

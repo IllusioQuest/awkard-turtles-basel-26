@@ -1,4 +1,4 @@
-# A candidate path to profitable home compute (T-41)
+# A candidate path to profitable home compute (T-42)
 
 Status: exploratory recommendation, 2026-11-21; not an accepted business-model change or a verified investment case. Extends [the free-heat audit](free-heat-viability.md). The user explicitly keeps private homes as the target. Three parallel audits checked revenue, physical hardware and break-even arithmetic.
 

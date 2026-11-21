@@ -1,4 +1,4 @@
-# Free heat: paid demand versus operator revenue (T-41)
+# Free heat: paid demand versus operator revenue (T-42)
 
 Follow-up: [a candidate profitable private-home path](profitable-home-path.md) checks a smaller,
 physically sized GPU node and reserved capacity sales. It is conditional, not a verified profit.

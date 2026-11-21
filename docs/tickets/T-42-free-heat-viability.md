@@ -1,4 +1,4 @@
-# T-41: Free-heat viability from paid demand and realised revenue
+# T-42: Free-heat viability from paid demand and realised revenue
 
 - **Tier:** 2 Pitch · **Area:** Business model / evidence
 - **Depends on:** T-14, T-31, T-35, T-37

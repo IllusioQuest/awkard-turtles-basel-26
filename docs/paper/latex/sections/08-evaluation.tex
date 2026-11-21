@@ -1,0 +1,285 @@
+\section{Evaluation}
+\label{sec:evaluation}
+
+We report the case's metrics: coverage (share of the total heat demand covered by server heat; the
+rest comes from the backup heater), dumped heat, utilisation (server running hours $\div$ (servers
+$\times$ 8{,}760)), missed deadlines in per cent of Type~1 jobs, and the work moved between sites.
+Every table names the command that reproduces it; the raw rows, each with its exact command line,
+are in \texttt{data/derived/network/experiments/*.csv}.
+
+\subsection{Reference house}
+\label{sec:eval-house}
+
+Four servers cover \qty{58.0}{\percent} of the house's heat demand with no dumped heat at
+\qty{64.7}{\percent} utilisation (Table~\ref{tab:house-sizes}). Four is the draft presentation
+baseline, chosen because two independent implementations reproduce it; it is \emph{not} an
+optimised server count. Three and five servers are shown for comparison.
+
+\begin{table}[ht]
+  \centering
+  \caption{Year balance of the reference house (Basel 2025, case parameters, B1 scheduler,
+    unlimited jobs). Reproduce with \texttt{python scripts/export\_reference\_house.py}; values
+    from \texttt{docs/results/reference-house.md}. Server-hours are full-load equivalents and
+    assumed sold.}
+  \label{tab:house-sizes}
+  \begin{tabular}{lrrr}
+    \toprule
+    & 3 servers & \textbf{4 servers} & 5 servers \\
+    \midrule
+    Heat demand covered by server heat & \qty{45.5}{\percent} & \qty{58.0}{\percent} & \qty{69.9}{\percent} \\
+    Backup heat [kWh] & \num{17007} & \num{13102} & \num{9410} \\
+    Heat dumped [kWh] & 0 & 0 & 0 \\
+    Utilisation & \qty{67.7}{\percent} & \qty{64.7}{\percent} & \qty{62.3}{\percent} \\
+    Server-hours (full-load equivalent) & \num{17779} & \num{22661} & \num{27275} \\
+    Case break-even [CHF/server-h] & 0.2261 & 0.2261 & 0.2261 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+On a single house the greedy rule B1 is optimal: it reaches the full-year upper bound exactly, and
+the rolling-horizon LP cannot improve on it (Table~\ref{tab:house-strategies}). The reason is that on
+the reference house the minimum load is zero, the tank is lossless and work is unlimited, so using
+heat now never reduces what can be used later; four servers are the limit in cold hours whatever the
+strategy. Always-on (B0) reaches the same coverage but only adds \qty{9903}{kWh} of dumped heat in
+mild hours. Planning on imperfect forecasts costs little: coverage falls from \qty{58.05}{\percent}
+to \qty{57.82}{\percent} at $\sigma_{24} = \qty{20}{\percent}$, because the LP plans the current hour
+for the forecast world and its plan can be slightly worse in reality.
+\emph{On one house, intelligence does not pay; heat physics decides.}
+
+\begin{table}[ht]
+  \centering
+  \caption{Strategy comparison on the reference house (4 servers, \qty{35}{kWh} tank, Basel 2025).
+    Reproduce with \texttt{dotnet run -{}-project src/DigitalHeat.NetworkRun -{}- .}; values from
+    \texttt{docs/model/network-scheduler.md}. The forecast errors are \emph{synthetic}
+    (AR(1), $\rho = 0.8$, both parameters \texttt{TODO(source)}); UB is a bound, not a strategy. B1 is the scheduler of the scored figures.}
+  \label{tab:house-strategies}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llrrrr}
+    \toprule
+    Strategy & Information & Coverage & Dumped [kWh] & Server-hours & Utilisation \\
+    \midrule
+    B0 always on & current hour & \qty{58.05}{\percent} & \num{9903} & \num{35040} & \qty{100}{\percent} \\
+    B1 local greedy & current hour & \qty{58.05}{\percent} & 0 & \num{22661.0} & \qty{64.67}{\percent} \\
+    LP rolling horizon & perfect foresight & \qty{58.05}{\percent} & 0 & \num{22661.0} & \qty{64.67}{\percent} \\
+    LP rolling horizon & error $\sigma_{24} = \qty{5}{\percent}$ & \qty{58.03}{\percent} & 0 & \num{22654.7} & \qty{64.65}{\percent} \\
+    LP rolling horizon & error $\sigma_{24} = \qty{10}{\percent}$ & \qty{57.99}{\percent} & 0 & \num{22639.1} & \qty{64.61}{\percent} \\
+    LP rolling horizon & error $\sigma_{24} = \qty{20}{\percent}$ & \qty{57.82}{\percent} & 0 & \num{22572.9} & \qty{64.42}{\percent} \\
+    UB full-year LP & perfect foresight, year & \qty{58.05}{\percent} & 0 & \num{22661.0} & \qty{64.67}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Sizing}
+\label{sec:eval-sizing}
+
+\todo{full 1--13 server sweep (figure F2) and load duration of the $n$-th server (figure F3).
+Exported so far: 1 server covers \qty{19.5}{\percent} at \qty{87.1}{\percent} utilisation,
+13 servers cover \qty{100}{\percent} at \qty{34.3}{\percent} utilisation
+(\texttt{docs/results/reference-house.md}).}
+
+\subsection{Strategy comparison on a Swiss test network}
+\label{sec:eval-network}
+
+The test network (\texttt{config/network/switzerland-test.json}) has 33 sites in nine Swiss cities:
+the reference house, single- and multi-family houses, nine hotels with spa and five indoor pools.
+Locations and sizes are \emph{synthetic test data}; heat demand comes from the case formula
+(houses) or from the profiles named in the scenario file. All results in this subsection are
+\emph{scenarios}, not forecasts of a real network.
+
+All heat-led strategies cover the same \qty{83.42}{\percent} of demand with no dumped heat, because
+coverage is set by how much heat the available work produces, not by where it runs. The strategies
+differ in missed deadlines (Table~\ref{tab:exp-a}): with \qty{30}{\percent} paid work, B1 misses
+\qty{15.69}{\percent} of jobs, while B2 misses none by moving about \num{103000} server-hours to
+sites with summer heat demand.
+
+\begin{table}[ht]
+  \centering
+  \caption{Experiment A: Type~1 volume, $\varphi = 1$, 33 synthetic sites (scenario data; Type~1
+    share is a labelled scenario, not a sourced demand). Greedy columns:
+    \texttt{python3 scripts/network\_experiments.py}; LP columns:
+    \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}. Output:
+    \texttt{data/derived/network/experiments/A\_type1\_share.csv}. Coverage is \qty{83.42}{\percent}
+    and dumped heat \qty{0}{kWh} in every greedy run (B2-reserve \qty{83.40}{\percent}).}
+  \label{tab:exp-a}
+  \small
+  \begin{tabular}{rrrrrrr}
+    \toprule
+    Type 1 & B1 & B2 & B2 moved & B2-reserve & LP & LP moved \\
+    share & missed & missed & [server-h] & moved [server-h] & missed & [server-h] \\
+    \midrule
+    \qty{10}{\percent} & \qty{0}{\percent} & \qty{0}{\percent} & \num{7725} & \num{7725} & \pending{} & \pending{} \\
+    \qty{30}{\percent} & \qty{15.69}{\percent} & \qty{0}{\percent} & \num{102754} & \num{64230} & \pending{} & \pending{} \\
+    \qty{50}{\percent} & \qty{25.19}{\percent} & \qty{0}{\percent} & \num{205267} & \num{161968} & \pending{} & \pending{} \\
+    \qty{70}{\percent} & \qty{29.47}{\percent} & \qty{0}{\percent} & \num{309325} & \num{265260} & \pending{} & \pending{} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Why the network helps}
+\label{sec:eval-why}
+
+In summer a house can only absorb heat for hot water, about 0.6 servers per day in the case. Paid
+work above that cannot run at home without dumping heat. If the network contains year-round heat
+sinks (hotels with spas, indoor pools), the work moves there and no deadline is missed. Remove them
+and moving still happens, but \qty{13.80}{\percent} of jobs are missed, because every house is short
+at the same time (Table~\ref{tab:exp-d}).
+
+\begin{table}[ht]
+  \centering
+  \caption{Experiment D: network mix, Type~1 share \qty{30}{\percent}, $\varphi = 1$ (synthetic
+    sites, scenario data). Greedy columns: \texttt{python3 scripts/network\_experiments.py};
+    LP columns: \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}. Output:
+    \texttt{data/derived/network/experiments/D\_network\_mix.csv}. Coverage is the same for B1 and
+    B2.}
+  \label{tab:exp-d}
+  \small
+  \begin{tabular}{lrrrrrrr}
+    \toprule
+    Network & Sites & B1 & B2 & B2 moved & Coverage & LP & LP moved \\
+    & & missed & missed & [server-h] & & missed & [server-h] \\
+    \midrule
+    all sites & 33 & \qty{15.69}{\percent} & \textbf{\qty{0}{\percent}} & \num{102754} & \qty{83.42}{\percent} & \pending{} & \pending{} \\
+    residential only & 19 & \qty{15.69}{\percent} & \textbf{\qty{13.80}{\percent}} & \num{63333} & \qty{63.18}{\percent} & \pending{} & \pending{} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Timing at home does not substitute for the network (Table~\ref{tab:reserve}). Keeping tank room for
+tomorrow's work (B1-reserve) saves only 0.07 points of missed deadlines (\qty{15.62}{\percent}
+versus \qty{15.69}{\percent} for B1), because a daily shortfall returns the next day. Combined with moves (B2-reserve) it reduces the work that has to move by
+\qty{37}{\percent}, at a cost of 0.02 points of coverage, because origins keep tank room and need to
+send less work away.
+
+\begin{table}[ht]
+  \centering
+  \caption{Local timing versus moving work (decision 0029), Type~1 share \qty{30}{\percent},
+    $\varphi = 1$, 33 synthetic sites (scenario data). Reproduce with
+    \texttt{python3 scripts/network\_experiments.py}; values from
+    \texttt{docs/decisions/0029-type1-heat-budget-reservation.md}.}
+  \label{tab:reserve}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Strategy & Coverage & Dumped [kWh] & Missed Type 1 & Moved Type 1 [server-h] \\
+    \midrule
+    B1 & \qty{83.42}{\percent} & 0 & \qty{15.69}{\percent} & 0 \\
+    B1-reserve & \qty{83.42}{\percent} & 0 & \qty{15.62}{\percent} & 0 \\
+    B2 & \qty{83.42}{\percent} & 0 & \qty{0}{\percent} & \num{102754} \\
+    B2-reserve & \qty{83.40}{\percent} & 0 & \qty{0}{\percent} & \num{64230} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Transfer delay.} The results above move work without friction. Experiment~E
+(decision 0030) lets moved work start at the destination only $\delta$ hours after the cohort's
+arrival (``data staged at arrival'', a lower bound on friction). The delays are an assumption
+sweep; no sourced delay exists. Even $\delta = \qty{12}{h}$ costs no deadline: B2 stays at
+\qty{0}{\percent} missed (Table~\ref{tab:exp-e}), because the year-round sinks have enough free
+summer capacity to finish the excess in the remaining \qty{12}{h}. B2 even moves less with a delay,
+from \num{102754} to \num{76680} and \num{61727} server-hours, i.e.\ from 1.57 to 0.95 moved
+server-hours per avoided missed job: without a delay, its persistence test sends work away that would
+still have finished at home. With $\delta \ge \qty{24}{h}$ (the deadline) no work can move and missed
+deadlines return to B1's level.
+
+\begin{table}[ht]
+  \centering
+  \caption{Experiment E: transfer delay $\delta$ (decision 0030, assumption sweep, no sourced delay),
+    Type~1 share \qty{30}{\percent}, $\varphi = 1$, 33 synthetic sites (scenario data). ``Avoided
+    jobs'' = B1's missed jobs minus the strategy's missed jobs (\num{65352} at every $\delta$).
+    Reproduce with \texttt{python3 scripts/network\_experiments.py} (LP column:
+    \texttt{-{}-lp -{}-jobs 4}); output \texttt{data/derived/network/experiments/E\_transfer\_delay.csv};
+    values from \texttt{docs/model/network-scheduler.md}. The LP at $\delta = 0$ is the
+    \qty{30}{\percent} row of Table~\ref{tab:exp-a}; $\delta = 1$~h was not run with the LP.}
+  \label{tab:exp-e}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{rrrrrrr}
+    \toprule
+    $\delta$ & B2 & B2 moved & B2 moved per & B2-reserve & B2-reserve moved & LP missed \\
+    & missed & [server-h] & avoided job & moved [server-h] & per avoided job & / moved \\
+    \midrule
+    \qty{0}{h} & \qty{0}{\percent} & \num{102754} & 1.57 & \num{64230} & 0.98 & Table~\ref{tab:exp-a} \\
+    \qty{1}{h} & \qty{0}{\percent} & \num{102771} & 1.57 & \num{64230} & 0.98 & -- \\
+    \qty{4}{h} & \qty{0}{\percent} & \num{76680} & 1.17 & \num{60527} & 0.93 & \pending{} \\
+    \qty{12}{h} & \qty{0}{\percent} & \num{61727} & 0.95 & \num{58775} & 0.90 & \pending{} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Sensitivity}
+\label{sec:eval-sensitivity}
+
+\paragraph{Paid-work volume.} From a Type~1 share of \qty{10}{\percent} to \qty{70}{\percent}, B1's
+missed deadlines grow from \qty{0}{\percent} to \qty{29.47}{\percent}; B2 stays at
+\qty{0}{\percent}, while the moved server-hours grow roughly linearly (Table~\ref{tab:exp-a}).
+
+\paragraph{Filler availability.} When the filler availability $\varphi$ falls from 1.0 to 0.2,
+coverage falls from \qty{83.42}{\percent} to about \qty{21}{\percent} for every strategy
+(Table~\ref{tab:exp-b}). A shortage of sellable work, not the algorithm, limits the delivered heat.
+B2 helps coverage a little when filler is scarce (0.5 to 0.9 points), because moved Type~1 work
+runs where heat is needed and filler would otherwise be missing.
+
+\begin{table}[ht]
+  \centering
+  \caption{Experiment B: filler availability $\varphi$, Type~1 share \qty{30}{\percent}, 33 synthetic
+    sites (scenario data; $\varphi = 0.35$ from \texttt{docs/research/filler-demand.md}). Reproduce
+    with \texttt{python3 scripts/network\_experiments.py}; output
+    \texttt{data/derived/network/experiments/B\_phi.csv}.}
+  \label{tab:exp-b}
+  \begin{tabular}{rrrrr}
+    \toprule
+    $\varphi$ & B1 coverage & B2 coverage & B1 missed & B2 missed \\
+    \midrule
+    1.0 & \qty{83.42}{\percent} & \qty{83.42}{\percent} & \qty{15.69}{\percent} & \qty{0}{\percent} \\
+    0.6 & \qty{54.21}{\percent} & \qty{54.71}{\percent} & \qty{15.54}{\percent} & \qty{0}{\percent} \\
+    0.35 & \qty{34.58}{\percent} & \qty{35.38}{\percent} & \qty{14.93}{\percent} & \qty{0}{\percent} \\
+    0.2 & \qty{21.41}{\percent} & \qty{22.34}{\percent} & \qty{14.82}{\percent} & \qty{0}{\percent} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Forecast error in the network.} Table~\ref{tab:exp-c} will show the full-year LP on the
+test network with synthetic forecast errors. On the single house the effect is small
+(Table~\ref{tab:house-strategies}).
+
+\begin{table}[ht]
+  \centering
+  \caption{Experiment C: forecast error for the LP, Type~1 share \qty{30}{\percent}, $\varphi = 1$,
+    33 synthetic sites (scenario data). Synthetic AR(1) error with $\rho = 0.8$, seed 20251121;
+    $\sigma_{24}$ and $\rho$ are \texttt{TODO(source)} and shown as a sweep. Reproduce with
+    \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4}; output
+    \texttt{data/derived/network/experiments/C\_forecast\_error-lp.csv} (not yet produced).}
+  \label{tab:exp-c}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Forecast & Coverage & Dumped [kWh] & Missed Type 1 & Moved [server-h] \\
+    \midrule
+    perfect foresight & \pending{} & \pending{} & \pending{} & \pending{} \\
+    $\sigma_{24} = 0.05$ & \pending{} & \pending{} & \pending{} & \pending{} \\
+    $\sigma_{24} = 0.10$ & \pending{} & \pending{} & \pending{} & \pending{} \\
+    $\sigma_{24} = 0.20$ & \pending{} & \pending{} & \pending{} & \pending{} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Economic sensitivities.} Compute price, hardware, electricity price and heat fee: see
+Section~\ref{sec:economics}.
+
+\subsection{Capacity versus demand}
+\label{sec:eval-capacity}
+
+\todo{city scale (\texttt{docs/research/profitability-inputs.md}~\S4): 1\,\% of Basel's gas- and
+oil-heated residential buildings would offer 4.8~M server-hours a year, far more than local
+research or dictation demand; figure F7}
+
+\subsection{Summary of findings}
+
+\begin{enumerate}
+  \item[(i)] On one house the greedy rule is optimal: it reaches the full-year upper bound.
+  \item[(ii)] Value arises in the network: paid work with deadlines moves to year-round heat sinks;
+    without them deadlines are missed because every house is short at the same time.
+  \item[(iii)] Forecast errors cost little on one house (coverage \qty{58.05}{\percent} to
+    \qty{57.82}{\percent} at $\sigma_{24} = \qty{20}{\percent}$); the network case is
+    \pending{(Table~\ref{tab:exp-c})}.
+  \item[(iv)] The limits of these statements are listed in Section~\ref{sec:limits}.
+\end{enumerate}

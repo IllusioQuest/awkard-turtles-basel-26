@@ -230,4 +230,24 @@ public class WorkModelTests
         Assert.Equal(b1.Work!.Type1.Missed, reserve.Work!.Type1.Missed);
     }
 
+    [Theory]
+    [InlineData(0, 0, 1)]
+    [InlineData(1, 3, 0)]
+    public void TransferDelayBlocksMovesUntilDataIsStaged(int delayHours, int expectedMissed, int expectedFlows)
+    {
+        // Same toy as above (decision 0030): 2.5 server-hours due in 1 h, 1 at home. With d = 0 the excess
+        // 1.5 moves to the pool; with d = 1 it may not run elsewhere before the due hour, so
+        // ⌈1.5 / 0.5⌉ = 3 jobs are missed. Checked for B2 and the LP.
+        foreach (INetworkScheduler scheduler in new INetworkScheduler[]
+                 { new NetworkGreedyJobsScheduler(transferDelayHours: delayHours),
+                   new DigitalHeat.Network.Lp.RollingHorizonWorkLpScheduler(delayHours) })
+        {
+            var sites = new[] { Site("h", [1], servers: 5), Site("p", [3], servers: 5), Site("x", [2], servers: 5) };
+            var ledger = new WorkLedger(sites, [new Type1Spec(5, 0.5, 1, Anywhere), null, null], [1.0, 1.0, 1.0], 1, 24);
+            var r = NetworkSimulation.Run(sites, scheduler, new PerfectForesightForecasts(), 1, work: ledger);
+            Assert.Equal(expectedMissed, r.Work!.Type1.Missed);
+            Assert.Equal(expectedFlows, r.Work.Flows.Count);
+            Assert.All(r.Sites, s => Assert.Equal(0, s.Summary.DumpedHeatKwh, 9));
+        }
+    }
 }

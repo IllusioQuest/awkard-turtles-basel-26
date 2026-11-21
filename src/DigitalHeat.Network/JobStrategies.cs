@@ -129,7 +129,7 @@ public sealed class LocalGreedyJobsScheduler(bool reserveForType1 = false) : INe
 /// most free heat-led capacity (ties: lower site index). Filler fills what is left. So work stays at
 /// home unless a move helps (no arbitrary flows, decision 0025 review).
 /// </summary>
-public sealed class NetworkGreedyJobsScheduler(bool reserveForType1 = false) : INetworkScheduler
+public sealed class NetworkGreedyJobsScheduler(bool reserveForType1 = false, int transferDelayHours = 0) : INetworkScheduler
 {
     private readonly Type1HeatReserve? reserve = reserveForType1 ? new Type1HeatReserve() : null;
 
@@ -164,6 +164,12 @@ public sealed class NetworkGreedyJobsScheduler(bool reserveForType1 = false) : I
             if (home) stay -= Assign(c, o, stay);
             // Work that must leave is still done at home now if the origin has capacity left this hour.
             double toMove = mustMove - (home ? Assign(c, o, mustMove) : 0);
+            // Transfer delay (decision 0030): data staged at arrival may run elsewhere only from arrival + d.
+            if (state.HourIndex < c.ArrivalHour + transferDelayHours)
+            {
+                movedFrom[o] += toMove; // blocked excess leaves the home queue in the EDF test (no double count)
+                toMove = 0;
+            }
             while (toMove > WorkLedger.MissedEpsilonServerHours)
             {
                 int best = -1;
