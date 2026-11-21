@@ -1,6 +1,6 @@
 # T-46: Transfer monitoring data into the admin web dashboard
 
-Owner: Nikita / Codex. Status: implementation checked; preparing code PR.
+Owner: Nikita / Codex. Status: in review, [PR #35](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/35).
 Branch: feat/T-46-monitor-value-labels. Depends on T-42 (already integrated).
 
 ## Scope
@@ -24,4 +24,4 @@ only a monitoring component import/render; household and other agent-owned model
 Clean API build; 42 gaming/monitor tests, frontend build/lint, API Host/Origin/input/content-type
 smoke and read-only Docker snapshot, browser controls/July values/value-guide checks. No presentation
 unit tests. See [web monitoring guide](../monitoring-web.md) for commands, field meanings, source
-and failure boundaries. Documentation on main; code feature PR pending. No live game changes.
+and failure boundaries. Documentation on main; code in [PR #35](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/35), not merged. No live game changes.

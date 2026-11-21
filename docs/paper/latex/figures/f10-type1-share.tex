@@ -1,0 +1,28 @@
+% Figure F10 (T-12): data from figures/data/a_type1_share.dat, produced by
+% python3 scripts/paper_figure_data.py from data/derived/network/experiments/A_type1_share[-lp].csv
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[name=left, width=0.47\textwidth, height=5.2cm, xlabel={Type~1 share [\%]},
+        ylabel={Missed Type~1 deadlines [\%]}, xtick={10,30,50,70}, ymin=0, ymax=35,
+        legend style={font=\scriptsize, at={(0.02,0.98)}, anchor=north west}, unbounded coords=jump]
+      \addplot+[mark=square*] table[x=share, y=B1missed] {figures/data/a_type1_share.dat};
+      \addplot+[mark=triangle*] table[x=share, y=B2missed] {figures/data/a_type1_share.dat};
+      \addplot+[mark=*, dashed] table[x=share, y=LPmissed] {figures/data/a_type1_share.dat};
+      \legend{B1 local, B2 network, LP}
+    \end{axis}
+    \begin{axis}[at={(left.east)}, anchor=west, xshift=1.6cm, width=0.47\textwidth, height=5.2cm,
+        xlabel={Type~1 share [\%]}, ylabel={Moved Type~1 work [$10^3$ server-h]}, xtick={10,30,50,70},
+        ymin=0, legend style={font=\scriptsize, at={(0.02,0.98)}, anchor=north west}, unbounded coords=jump]
+      \addplot+[mark=triangle*] table[x=share, y=B2moved] {figures/data/a_type1_share.dat};
+      \addplot+[mark=diamond*] table[x=share, y=B2Rmoved] {figures/data/a_type1_share.dat};
+      \addplot+[mark=*, dashed] table[x=share, y=LPmoved] {figures/data/a_type1_share.dat};
+      \legend{B2, B2-reserve, LP}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Experiment A on 33 synthetic Swiss sites (scenario data, $\varphi = 1$): missed deadlines
+    (left) and moved work (right) versus the Type~1 share. All strategies cover \qty{83.42}{\percent}
+    of demand with no dumped heat. Reproduce with \texttt{python3 scripts/network\_experiments.py
+    -{}-lp} and \texttt{python3 scripts/paper\_figure\_data.py}.}
+  \label{fig:f10}
+\end{figure}

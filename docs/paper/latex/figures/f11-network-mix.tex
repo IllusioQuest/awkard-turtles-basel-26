@@ -1,0 +1,20 @@
+% Figure F11 (T-12): data from figures/data/d_network_mix.dat (python3 scripts/paper_figure_data.py)
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[ybar, bar width=12pt, width=0.6\textwidth, height=5cm, ymin=0, ymax=20,
+        ylabel={Missed Type~1 deadlines [\%]}, symbolic x coords={all,residential}, xtick=data,
+        xticklabels={{all 33 sites}, {residential only (19)}}, enlarge x limits=0.4,
+        legend style={font=\scriptsize, at={(0.02,0.98)}, anchor=north west}, nodes near coords,
+        nodes near coords style={font=\scriptsize}, every node near coord/.append style={/pgf/number format/fixed, /pgf/number format/precision=1}]
+      \addplot table[x=network, y=B1missed] {figures/data/d_network_mix.dat};
+      \addplot table[x=network, y=B2missed] {figures/data/d_network_mix.dat};
+      \addplot table[x=network, y=LPmissed] {figures/data/d_network_mix.dat};
+      \legend{B1 local, B2 network, LP}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Experiment D (scenario data, Type~1 share \qty{30}{\percent}, $\varphi = 1$): without
+    year-round heat sinks (hotels with spas, indoor pools) moving work cannot prevent missed deadlines,
+    because every house is short of summer heat at the same time.}
+  \label{fig:f11}
+\end{figure}
