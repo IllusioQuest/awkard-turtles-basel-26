@@ -21,6 +21,7 @@ Submit a coherent first version on time.
 
 ## Read first
 
+- `docs/submission/draft-checklist.md` (fresh-clone check, must-haves → evidence and gaps)
 - AGENTS.md §2
 
 ## Rules
