@@ -1,0 +1,29 @@
+{
+  "id": "llm-summary-apertus-8b",
+  "containerImage": "digitalheat/llm-summary",
+  "command": [
+    "run"
+  ],
+  "interruptible": true,
+  "supportedControlLevels": [
+    "freeze",
+    "throttle"
+  ],
+  "deadlineHours": null,
+  "workUnit": "audio minute summarised",
+  "runtimeSecondsPerWorkUnit": {
+    "value": 8.9,
+    "unit": "s/work unit",
+    "source": "Own measurement 2026-11-21, AMD Ryzen 7 250 laptop, 8 threads, 3 runs x 14.98 audio min (3,310 prompt + 319 generated tokens per run); docs/jobs/llm-summary.md, data/raw/measurements/llm-summary-apertus-8b-q4km/energy-2026-11-21"
+  },
+  "energyKwhPerWorkUnit": {
+    "value": 6.14e-05,
+    "unit": "kWh/work unit",
+    "source": "Own measurement 2026-11-21, AMD Ryzen 7 250 laptop, 8 threads, 3 runs x 14.98 audio min (3,310 prompt + 319 generated tokens per run); docs/jobs/llm-summary.md, data/raw/measurements/llm-summary-apertus-8b-q4km/energy-2026-11-21 (CPU package only, gross, RAPL)"
+  },
+  "progressFile": "data/external/llm/work/progress.json",
+  "placementPolicy": {
+    "mode": "anywhere",
+    "source": "Demo workload only: summary of a public-domain LibriVox recording, no personal data and no customer contract (decision 0013)."
+  }
+}
