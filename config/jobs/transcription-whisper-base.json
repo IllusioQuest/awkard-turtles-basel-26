@@ -1,0 +1,12 @@
+{
+  "id": "transcription-whisper-base",
+  "containerImage": "digitalheat/transcription-whisper",
+  "command": ["run"],
+  "interruptible": true,
+  "supportedControlLevels": ["freeze", "throttle"],
+  "deadlineHours": null,
+  "workUnit": "audio minute",
+  "runtimeSecondsPerWorkUnit": null,
+  "energyKwhPerWorkUnit": null,
+  "progressFile": "data/external/transcription/work/progress.json"
+}
