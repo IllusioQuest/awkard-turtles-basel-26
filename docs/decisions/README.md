@@ -33,6 +33,7 @@ later.
 | [0019](0019-gpu-nodes-for-all-job-types.md) | GPU nodes for all job types, no CPU-only servers (Type 2 runs on Type 1 hardware) | proposed (Ennio); partly supersedes 0018; team confirmation pending |
 | [0020](0020-business-model-operator-two-job-types.md) | Business model (provisional): operator model, Type 1 = batch LLM on non-personal documents, Type 2 = research simulations | proposed (Jona); partly supersedes 0018; reviewed (go with changes); team confirmation pending |
 | [0024](0024-network-scheduler-engine.md) | Network scheduler engine: INetworkScheduler, DigitalHeat.Network(.Lp), OR-Tools GLOP, shared HeatBalance | proposed (Jona); reviewed (go with changes, applied) |
+| [0025](0025-network-work-allocation-and-map-export.md) | Network work allocation (Type 1 cohorts, filler, simulated moves), strategies B1-jobs/B2/LP, map export contract, Swiss test dataset rule | proposed (Jona); reviewed (go with changes, applied) |
 
 | [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
 
