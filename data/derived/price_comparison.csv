@@ -1,0 +1,39 @@
+kind,product,unit_or_offer,hardware_or_provider,utilisation_or_region,units_per_server_hour,case_cost_or_price_chf,full_cost_chf,case_cost_per_server_hour,full_cost_per_server_hour,source
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),cpu-server,reference-house,3.937,0.0574,0.6319,0.2261,2.4878,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,cpu-server,reference-house,436,0.00052,0.00571,0.2261,2.4878,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,cpu-server,reference-house,244000,0.2261,2.4878,0.2261,2.4878,config/price-comparison.json; config/hardware
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),cpu-server,filler-fill-rate,3.937,0.0574,1.1189,0.2261,4.4052,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,cpu-server,filler-fill-rate,436,0.00052,0.0101,0.2261,4.4052,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,cpu-server,filler-fill-rate,244000,0.2261,4.4052,0.2261,4.4052,config/price-comparison.json; config/hardware
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),gpu-inference-l4,reference-house,,,,0.2261,1.3585,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,gpu-inference-l4,reference-house,469.9,0.00048,0.00289,0.2261,1.3585,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,gpu-inference-l4,reference-house,,0.2261,1.3585,0.2261,1.3585,config/price-comparison.json; config/hardware
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),gpu-inference-l4,filler-fill-rate,,,,0.2261,2.3185,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,gpu-inference-l4,filler-fill-rate,469.9,0.00048,0.00493,0.2261,2.3185,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,gpu-inference-l4,filler-fill-rate,,0.2261,2.3185,0.2261,2.3185,config/price-comparison.json; config/hardware
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),gpu-inference-l4-refurbished,reference-house,,,,0.2261,1.3987,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,gpu-inference-l4-refurbished,reference-house,469.9,0.00048,0.00298,0.2261,1.3987,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,gpu-inference-l4-refurbished,reference-house,,0.2261,1.3987,0.2261,1.3987,config/price-comparison.json; config/hardware
+ours,LLM batch (8B class),CHF per 1M tokens (91 % input),gpu-inference-l4-refurbished,filler-fill-rate,,,,0.2261,2.3928,config/price-comparison.json; config/hardware
+ours,Transcription,CHF per audio hour,gpu-inference-l4-refurbished,filler-fill-rate,469.9,0.00048,0.00509,0.2261,2.3928,config/price-comparison.json; config/hardware
+ours,Research Monte Carlo,CHF per 1 kW server-hour,gpu-inference-l4-refurbished,filler-fill-rate,,0.2261,2.3928,0.2261,2.3928,config/price-comparison.json; config/hardware
+market,LLM batch (8B class),inference-qwen3-8b,Phoenix Technologies (kvant AI),Switzerland (Swiss sovereign infrastructure),,0.034,,,,https://documentation.kvant.cloud/maas/active-models/
+market,LLM batch (8B class),inference-granite-33-8b,Phoenix Technologies (kvant AI),Switzerland,,0.1539,,,,https://documentation.kvant.cloud/maas/active-models/
+market,LLM batch (8B class),inference-mistral-v03-7b,Phoenix Technologies (kvant AI),Switzerland,,0.1539,,,,https://documentation.kvant.cloud/maas/active-models/
+market,LLM batch (8B class),mistralai/Ministral-3-14B-Instruct-2512,Infomaniak,Switzerland,,0.309,,,,https://www.infomaniak.com/en/hosting/ai-services/prices
+market,LLM batch (8B class),swiss-ai/apertus-v1.5-8b (262K ctx),Public AI,not stated (AWS blog: Intel EC2 R8i),,0.0916,,,,https://platform.publicai.co/models
+market,LLM batch (8B class),"Ministral 3 8B (ministral-8b-2512), input and output",Mistral,EU provider (location not checked),,0.126,,,,https://docs.mistral.ai/models/model-cards/ministral-3-8b-25-12
+market,LLM batch (8B class),Llama 3.1 8B Instruct (fp8),DeepInfra (via OpenRouter),not stated (US provider),,0.0183,,,,https://openrouter.ai/api/v1/models/meta-llama/llama-3.1-8b-instruct/endpoints
+market,LLM batch (8B class),Llama 3.1 8B Instruct,Amazon Bedrock (via OpenRouter),not stated,,0.1848,,,,https://openrouter.ai/api/v1/models/meta-llama/llama-3.1-8b-instruct/endpoints
+market,LLM batch (8B class),"gpt-5-nano, Batch API",OpenAI,not stated,,0.0342,,,,https://developers.openai.com/api/docs/pricing
+market,LLM batch (8B class),"Claude Haiku 5.5, Message Batches API (prompts up to 100k)",Anthropic,global routing,,0.0571,,,,https://platform.claude.com/docs/en/about-claude/pricing
+market,Transcription,Transcribe batch (TranscribeAudio),AWS,eu-central-2 (Zurich),,0.3025,,,,https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/transcribe/current/eu-central-2/index.json
+market,Transcription,Speech to Text batch transcription (Standard),Microsoft Azure,Switzerland North,,0.1512,,,,https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/
+market,Transcription,Speech-to-Text V2 Standard dynamic batch recognition,Google Cloud,not stated on pricing page,,0.1512,,,,https://cloud.google.com/speech-to-text/pricing
+market,Transcription,gpt-4o-mini-transcribe,OpenAI,not stated,,0.1512,,,,https://developers.openai.com/api/docs/pricing
+market,Transcription,Scribe v3 (speech to text),ElevenLabs,not stated,,0.168,,,,https://elevenlabs.io/pricing/api
+market,Transcription,"Nova-3 Monolingual, pre-recorded",Deepgram,US default; EU endpoint api.eu.deepgram.com offered,,0.2168,,,,https://deepgram.com/pricing
+market,Research Monte Carlo,"data/derived/computing-price.json a1_on_demand_min (Azure Switzerland North D32as v5, scaled to 1 kW, snapshot 2026-11-21)",azure-zurich-on-demand-1kw,CH (Zurich) / EU,,9.7348,,,,"data/derived/computing-price.json a1_on_demand_min (Azure Switzerland North D32as v5, scaled to 1 kW, snapshot 2026-11-21)"
+market,Research Monte Carlo,"data/derived/computing-price.json a2_spot_min (Azure Switzerland North spot, scaled to 1 kW)",azure-zurich-spot-1kw,CH (Zurich) / EU,,1.799,,,,"data/derived/computing-price.json a2_spot_min (Azure Switzerland North spot, scaled to 1 kW)"
+market,Research Monte Carlo,docs/research/computing-price.md: adopted price (Hetzner dedicated server equivalent),hetzner-dedicated-1kw,CH (Zurich) / EU,,0.66,,,,docs/research/computing-price.md: adopted price (Hetzner dedicated server equivalent)
+market,Research Monte Carlo,data/derived/computing-price.json c1_market_tracking (spot x community/datacentre ratio),home-host-market-1kw,CH (Zurich) / EU,,0.6873,,,,data/derived/computing-price.json c1_market_tracking (spot x community/datacentre ratio)
