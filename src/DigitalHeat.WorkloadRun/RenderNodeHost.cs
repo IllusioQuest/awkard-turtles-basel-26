@@ -14,6 +14,7 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
 {
     public GpuBinding? Gpu { get; init; }
     public string? GpuBackend { get; init; }
+    public double GpuFrameShare { get; init; } = .8; // User-approved workload mix; not a utilization promise.
 }
 internal sealed record FrameSubmit(string JobId, int Frame, string? PinnedNode, string Backend="CPU");
 internal sealed record RenderHold(bool Hold);
@@ -35,6 +36,11 @@ internal static class RenderNodeHost
     internal static readonly JsonSerializerOptions Json = WorkloadJson.Options;
     public static async Task Run(string path)
     {
+        // This adapter calls the existing synchronous Docker CLI. Reserve control workers so a
+        // one-core render quota cannot starve ASP.NET status/message continuations behind it.
+        const int MinimumControlWorkers = 8;
+        ThreadPool.GetMinThreads(out var workers,out var completionPorts);
+        ThreadPool.SetMinThreads(Math.Max(workers,MinimumControlWorkers),completionPorts);
         var cfg=JsonSerializer.Deserialize<RenderConfig>(File.ReadAllText(path),Json)!;
         string token=Environment.GetEnvironmentVariable("MESH_TOKEN") ?? throw new InvalidDataException("Missing lab token");
         var docker=new DockerCommands();
@@ -84,9 +90,11 @@ internal static class RenderNodeHost
         // On restart operator must explicitly resume: no unattended comparison continuation.
         peer.SetHold(true);
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
-        RenderPeerStatus Status(){lock(gate)return new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
+        RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
             gpuBackend is null?"CPU fallback (no verified Cycles GPU)":gpuBackend+" verified GPU; CPU available",error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
-            {VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};}
+            {VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
+        var published=CaptureStatus();
+        RenderPeerStatus Status()=>Volatile.Read(ref published);
         var builder=WebApplication.CreateBuilder();builder.Logging.SetMinimumLevel(LogLevel.Warning);
         builder.Services.ConfigureHttpJsonOptions(o=>o.SerializerOptions.PropertyNamingPolicy=JsonNamingPolicy.SnakeCaseLower);
         var app=builder.Build();var stop=app.Lifetime.ApplicationStopping;
@@ -103,11 +111,13 @@ internal static class RenderNodeHost
             if(!cfg.Peers.ContainsKey(packet.Sender))return Results.BadRequest();
             return inbox.Writer.TryWrite(()=>peer.Receive(packet.Sender,packet.Message))?Results.Accepted():Results.StatusCode(503);
         });
-        app.MapPost("/hold",(RenderHold h)=>{lock(gate){peer.SetHold(h.Hold);return Results.Json(Status(),Json);}});
+        app.MapPost("/hold",(RenderHold h)=>{lock(gate){peer.SetHold(h.Hold);Volatile.Write(ref published,CaptureStatus());return Results.Json(Status(),Json);}});
         app.MapPost("/frames",(FrameSubmit f)=>{
             if(f.Frame<1||f.Frame>cfg.Frames||!manifestBackends.Contains(f.Backend)||!System.Text.RegularExpressions.Regex.IsMatch(f.JobId,"^[a-z0-9-]{1,80}$"))return Results.BadRequest();
-            lock(gate){
-                if(peer.Held)return Results.Conflict(new {error="Origin held"});
+            if(Status().Held)return Results.Conflict(new {error="Origin held"});
+            if(!inbox.Writer.TryWrite(()=>{
+                // Durable intent is idempotent; a lost HTTP acknowledgement retries this ID.
+                if(peer.Held)return;
                 var prior=peer.Jobs().SingleOrDefault(j=>j.Request.Id==cfg.Id+"."+f.JobId);
                 if(prior is null){
                     var now=DateTimeOffset.UtcNow;
@@ -116,8 +126,8 @@ internal static class RenderNodeHost
                         {Deadline=new(now,now.AddSeconds(cfg.DeadlineSeconds),cfg.Source,true)};
                     peer.Submit(r,"landscape-"+f.Backend+"-"+f.Frame);
                 }
-                return Results.Ok(new {job_id=cfg.Id+"."+f.JobId});
-            }
+            }))return Results.StatusCode(503);
+            return Results.Accepted(value:new {job_id=cfg.Id+"."+f.JobId});
         });
         app.MapGet("/image/{job}",(string job)=>{
             if(!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
@@ -127,8 +137,8 @@ internal static class RenderNodeHost
         app.MapGet("/ui",()=>Results.Content(File.ReadAllText("/app/render.html"),"text/html"));
         app.MapGet("/ui/status",async()=>Results.Json(await comparison.LiveSnapshot(),Json));
         app.MapPost("/ui/render",async()=>{await comparison.Start();return Results.Accepted();});
-        app.MapPost("/ui/pause",async()=>{await comparison.Hold(true);return Results.Ok();});
-        app.MapPost("/ui/resume",async()=>{await comparison.Hold(false);return Results.Ok();});
+        app.MapPost("/ui/pause",()=>{comparison.RequestHold(true);return Results.Accepted();});
+        app.MapPost("/ui/resume",()=>{comparison.RequestHold(false);return Results.Accepted();});
         app.MapGet("/ui/image/{node}/{job}",async(string node,string job)=>{
             if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
             var bytes=await http.GetByteArrayAsync(url+"/image/"+job);return Results.File(bytes,"image/png");
@@ -143,10 +153,15 @@ internal static class RenderNodeHost
             using var timer=new PeriodicTimer(TimeSpan.FromSeconds(2));
             while(await timer.WaitForNextTickAsync(stop)){
                 lock(gate)try{
-                    while(inbox.Reader.TryRead(out var action))action();
+                    for(int count=0;count<32&&inbox.Reader.TryRead(out var action);count++)action();
                     peer.Update(Inventory());peer.Tick();error=null;
                 }catch(Exception e){error=e.Message;}
+                lock(gate)Volatile.Write(ref published,CaptureStatus());
             }
+        },stop);
+        _=Task.Run(async()=>{
+            using var timer=new PeriodicTimer(TimeSpan.FromSeconds(2));
+            do{await comparison.RefreshPeers();}while(await timer.WaitForNextTickAsync(stop));
         },stop);
         _=Task.Run(async()=>{
             using var timer=new PeriodicTimer(TimeSpan.FromSeconds(5));
