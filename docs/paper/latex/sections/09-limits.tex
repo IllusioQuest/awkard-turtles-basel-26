@@ -1,28 +1,39 @@
 \section{Limits and threats to validity}
 \label{sec:limits}
 
-\paragraph{When it does not pay off.} Commodity compute prices do not cover full cost: below
-CHF~0.956 per sold server-hour the RTX~4090 profile loses money, and Type~2 market prices
-(CHF~0.57--0.84) are below that. Sensitive data stays out of homes, so Type~1 competes with batch
-APIs; it pays only if the optimistic batched GPU throughput holds, which is not yet measured. Token
-and compute prices fall about 25--29\,\% a year, so over a six-year life nothing pays at commodity
-prices without fixed multi-year contracts or a shorter payback. NVIDIA's consumer driver licence
-excludes ``datacenter deployment''; if a home network counts as one, professional cards raise the
-break-even. Water blocks, heat exchanger, installation, the house's electrical connection, upload
-bandwidth and maintenance visits are not yet priced (\texttt{docs/business-model.md}).
+\paragraph{Physical model.} The case-defined reference house assumes a lossless tank, 80\% heat
+recovery, constant daily hot-water demand, flat electricity price and abstract \qty{1}{kW}
+servers. The smaller four-L4 variant uses host-power estimates and GPU TDP rather than measured
+wall power or a quoted liquid-cooled build. Its calculated heat fits the constant hot-water
+base load; actual draw timing, delivery temperature, thermal losses and water hygiene require
+engineering validation. Neither normalised 1~kW L4 profile nor the candidate four-card host is
+an installed bill of materials.
+The case also omits tank standby losses, circulation-pump electricity and the temperatures
+required to deliver space heat or hygienic domestic hot water. Its constant \qty{80}{\percent}
+recovery is independent of load and temperature. The reported useful heat is therefore an
+idealised upper bound until these quantities are measured. The comparison heat pump has a
+fixed coefficient of performance (COP) of 2.5: at another COP, the host's avoided electricity
+cost per useful kWh is $e/\mathrm{COP}$, while the free-heat operator threshold in
+\eqref{eq:operator-break-even} is unchanged.
 
-\paragraph{Simplifications from the case.} Lossless tank, \qty{80}{\percent} heat recovery, no heat
-pump on the server side, an abstract \qty{1}{kW} server and one flat electricity price.
+The LP also permits continuous part load and immediate shutoff. Real nodes draw idle power,
+start over finite time and may need discrete on/off decisions. Their electricity costs and
+switching constraints require a measured node profile and a mixed-integer extension before
+the model can predict shoulder-season operation.
 
-\paragraph{Simplifications of our model.} Demand forecasts are perfect foresight unless a synthetic
-error is set, and the error parameters are not sourced. Work is ``unlimited'' ($\varphi = 1$) unless
-stated, and the Type~1 volume is a share, not a sourced demand. The transfer delay is one uniform
-assumption counted from arrival (a lower bound on friction), with no distance model, and transfer
-cost is not modelled, so B2 and the LP remain optimistic for distant sites. Persistence estimates (B2, reserves) assume daily
-cohorts. The LP knows arrived work only. Sites of the test network are synthetic. The yearly runs take one
-decision per hour; re-deciding within the hour on events (Section~\ref{sec:scheduling}) is
-implemented in the live demonstrator but not evaluated. Running tasks are frozen, not migrated, when
-their site stops wanting heat.
+\paragraph{Work and markets.} The reference-house maximum assumes unlimited paid work. The
+mixed-queue run uses a medical-dictation arrival fixture for technical validation, not the
+proposed public-document LLM market; sensitive health records are not placed in homes. Its
+0.35 filler capacity cap is an analogy, not observed sales. The laptop Apertus measurement is
+CPU-package energy, not L4 throughput or whole-node power. The research simulation was measured
+on a CPU laptop; a billable GPU-compatible filler has not been demonstrated. Competitor list
+prices and retail GPU rates are buyer prices, not DigitalHeat contracts or net receipts. GPU wear
+and purchase prices are sensitivity inputs. Cooling integration, idle energy, connectivity,
+maintenance, insurance, financing, tax bases and sales costs remain incompletely priced. The
+consumer-GPU cost case is excluded from the proposed deployment pending licence clarification.
 
-\paragraph{Measurements and inputs.} Marketplace fill rates come from search snippets; laptop
-measurements are scaled linearly to \qty{1}{kW}. \todo{complete after the demonstrator section}
+\paragraph{Network inference.} The 33-site locations and sizes and Type~1 arrival shares are
+synthetic. Unless a forecast-error sweep is explicitly stated, planning uses perfect heat
+foresight while knowing only arrived jobs. Uniform transfer delay assumes data staged at arrival;
+transfer cost and distance-dependent delay are absent. The experiments therefore compare
+algorithms under controlled inputs rather than predict an operating Swiss network.

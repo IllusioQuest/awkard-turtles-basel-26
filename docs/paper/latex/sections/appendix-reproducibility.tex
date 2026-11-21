@@ -1,16 +1,24 @@
 \section{Reproducibility}
 \label{app:repro}
-
-All inputs are committed with \texttt{SOURCE} files (\texttt{data/raw/}), runs are deterministic
-(fixed seeds), and every output row records the command that produced it. The reference-house
-export repeats with identical SHA-256 hashes of its outputs
-(\texttt{scripts/export\_reference\_house.py}).
+The case weather and price inputs have \texttt{SOURCE} files in \texttt{data/raw/}.
+The reference-house export repeats with identical SHA-256 output hashes
+(\texttt{scripts/export\_reference\_house.py}); network experiment rows record their
+command lines and fixed seeds. The operator and small-node economic sensitivities are
+worked calculations from versioned input ledgers; no single command currently regenerates
+their full cash-flow table. Section~\ref{sec:economics} states the arithmetic and its limits.
+Network outputs live in \texttt{data/derived/network/experiments/}. The greedy and LP
+files are, respectively, \texttt{A\_type1\_share.csv} / \texttt{A\_type1\_share-lp.csv},
+\texttt{D\_network\_mix.csv} / \texttt{D\_network\_mix-lp.csv}, and
+\texttt{E\_transfer\_delay.csv} / \texttt{E\_transfer\_delay-lp.csv}.
+Experiment B uses \texttt{B\_phi.csv}; experiment C uses
+\texttt{C\_forecast\_error-lp.csv}. The reservation comparison is included in
+\texttt{A\_type1\_share.csv}.
 
 \begin{table}[ht]
   \centering
   \caption{One command per table. Paths are relative to the repository root.}
   \label{tab:repro}
-  \begin{tabular}{p{0.28\linewidth}p{0.66\linewidth}}
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.28\linewidth}>{\raggedright\arraybackslash}p{0.66\linewidth}}
     \toprule
     Table & Command and output \\
     \midrule
@@ -18,16 +26,26 @@ export repeats with identical SHA-256 hashes of its outputs
       \texttt{python scripts/export\_reference\_house.py} $\to$ \texttt{data/derived/reference-house/*.json} \\
     \ref{tab:house-strategies} (strategies, reference house) &
       \texttt{dotnet run -{}-project src/DigitalHeat.NetworkRun -{}- .} \\
-    \ref{tab:exp-a}, \ref{tab:exp-b}, \ref{tab:exp-d}, \ref{tab:reserve}, \ref{tab:exp-e} (greedy) &
+    Server sizing (Section~\ref{sec:eval-sizing}) &
+      \texttt{dotnet run -{}-project src/DigitalHeat.YearRun -{}- . -{}-sizing data/derived/server-sizing/reference-house.json} \\
+    Network greedy (A, B, D, E, reserve) &
       \texttt{python3 scripts/network\_experiments.py} $\to$ \texttt{data/derived/network/experiments/*.csv} \\
-    LP columns of \ref{tab:exp-a}, \ref{tab:exp-d}, \ref{tab:exp-e}; \ref{tab:exp-c} &
-      \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4} (about 1.5--2~h per LP year) \\
-    \ref{tab:surplus} (surplus) &
-      \texttt{python3 scripts/profitability\_inputs.py}; values in \texttt{docs/business-model.md} \\
+    Network LP (A, C, D, E) &
+      \texttt{python3 scripts/network\_experiments.py -{}-lp -{}-jobs 4} (long-running full-year experiments) \\
+    Mixed-queue fixture (Section~\ref{sec:eval-house}) &
+      \texttt{dotnet run -{}-project src/DigitalHeat.YearRun -{}- . config/job-scenarios/mixed-basel-technical.json}
+      and \texttt{mixed-basel-35pct-technical.json}; see \texttt{docs/model/mixed-job-queue.md} \\
+    Operator and small-node sensitivities (Section~\ref{sec:economics}) &
+      Worked arithmetic and input ledgers in \texttt{docs/research/free-heat-viability.md} and
+      \texttt{docs/research/profitable-home-path.md}; no full automated rerun yet \\
+    Market price screen (Section~\ref{sec:economics}) &
+      \texttt{python3 scripts/price\_comparison.py}; inputs and limits in
+      \texttt{docs/research/price-comparison.md} \\
+    Measured laptop jobs (Section~\ref{sec:demonstrator}) &
+      Logs and commands in \texttt{docs/jobs/llm-summary.md} and
+      \texttt{docs/jobs/research-sim.md} \\
     Tests &
       \texttt{dotnet test src/DigitalHeat.sln} \\
     \bottomrule
   \end{tabular}
 \end{table}
-
-\todo{list of figures F1--F10 with their commands (\texttt{docs/paper/outline.md})}

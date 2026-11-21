@@ -9,43 +9,43 @@
 
 ## Working title
 
-*Heat-led computing in homes: scheduling, sizing and economics of servers that heat a house*
+*Heat-led computing in homes: when does a server pay for heating a house?*
 
 Alternatives: "When does a server pay for heating a home?" · "The house as the cheapest room for
 patient computing".
 
-## Draft abstract (placeholders in [brackets])
+## Paper's central question
 
-Servers turn almost all of their electricity into heat, while homes pay for heat. We study when
-distributed servers in residential buildings can deliver useful heat *and* useful computing. For a
-reference house in Basel (2025 hourly weather, 31,231 kWh heat demand a year), heat demand
-needs 12.5 servers in the coldest hour but 0.6 in summer. We formulate heat-led job routing as a
-rolling-horizon linear programme that contains the greedy heat-following scheduler as a special
-case. A demonstrator shows that the same scheduler code pauses and resumes real containerised
-workloads (LLM batch inference, research simulation) on a laptop. With 4 servers the house covers
-58.0 % of its heat demand with no heat dumped at 64.7 % utilisation. Electricity net of the used
-heat costs CHF 0.226 per server-hour, but full cost on consumer GPUs is CHF 0.956. We show that
-[hardware staging by load duration] and [routing] change this, and state the prices below which the
-model does not pay off.
+Can a single home be a viable unit for heat-led computing, and what must be true for it to pay for
+itself? The single-house reference case is the main economic test. Network routing is a separate
+extension that answers whether year-round heat sinks can improve deadline outcomes; it must not be
+presented as evidence that the single-house business case already works.
 
-## Contributions (candidates, team to choose 3–4)
+## Draft abstract
 
-1. **A formal model** of heat-led job routing across sites as an LP / MILP with rolling horizon,
-   with the greedy heat-following scheduler as its one-site, one-hour special case
-   ([`model/routing-optimisation.md`](../model/routing-optimisation.md) §8.1).
-2. **An economic decomposition** per server-hour: case break-even (electricity − used heat) vs.
-   full-cost break-even, "system surplus first, split second" between host and operator
-   ([`business-model.md`](../business-model.md), [`vision.md`](../vision.md)).
-3. **The tension between the case's ranking and the operator's money** (§5.4 of the routing model):
-   at a filler price above the electricity price, running all servers and dumping heat maximises
-   surplus; heat-led operation is a choice with a price.
-4. **Sizing by load duration** (proposed, not computed yet): the n-th server in a house runs far fewer
-   hours than the first, so peak servers should be the cheapest hardware.
-5. **A demonstrator** in which one scheduler drives both the year simulation and real containers
-   (decisions 0005, 0009), with measured workloads.
-6. **Capacity vs. demand at city scale**: 1 % of Basel's gas- and oil-heated residential buildings
-   would offer 4.8 M server-hours a year, far more than local research or dictation demand
-   ([`research/profitability-inputs.md`](../research/profitability-inputs.md) §4).
+The LaTeX abstract in `latex/main.tex` is the current version. Its essential claim is deliberately
+conditional: four abstract servers cover 58.0 % of the reference house's annual heat demand under
+unlimited work, but this does not establish profitability. With free heat, the host receives the
+heat value and the operator must cover its own costs from sold compute. The later-price L4
+sensitivity needs about CHF 1.76 per sold hour for the four-server operator before wear and
+installation. A smaller four-L4 house node is an exploratory, unmeasured variant. Network results
+are explicitly labelled scenarios.
+
+## Contributions (current proposed set)
+
+1. **Single-house viability boundary:** separate the case's combined heat-value break-even from
+   the operator's cash threshold, with an explicitly conditional small-node experiment
+   ([`research/free-heat-viability.md`](../research/free-heat-viability.md),
+   [`research/profitable-home-path.md`](../research/profitable-home-path.md)).
+2. **Heat-led scheduling comparison:** establish what local greedy control can achieve and use
+   rolling-horizon optimisation for multi-site work allocation
+   ([`model/routing-optimisation.md`](../model/routing-optimisation.md)).
+3. **Scenario evidence and shared demonstrator:** test how network composition affects missed
+   deadlines and show the same control path applied to simulated and real containerised work.
+
+Do not elevate city-scale capacity, hardware staging or the formal LP itself into a headline
+contribution unless the paper adds corresponding validated results and makes their relevance to the
+single-house economic question clear.
 
 ## Sections
 
@@ -54,8 +54,8 @@ model does not pay off.
   [`case/key-figures.md`](../case/key-figures.md)).
 - Why homes: competitors failed or retreated exactly there (Nerdalize bankrupt 2018, Cloud&Heat left
   residential sites, Qarnot left room radiators; [`research/competitors.md`](../research/competitors.md)).
-- Research questions: (RQ1) how many servers per house and with which scheduling? (RQ2) which work fits
-  which season? (RQ3) under which electricity, compute and hardware prices does it pay off, and for whom?
+- Questions: (Q1) how many servers per house and with which scheduling? (Q2) which work fits
+  which season? (Q3) under which electricity, compute and hardware prices does it pay off, and for whom?
 - Contributions (above).
 
 ### 2. Related work
@@ -107,19 +107,21 @@ Two control strategies (decision 0029) separate *local timing* from *the network
 **B2-reserve** stop filler work from filling the tank when tomorrow's paid work will need the room.
 
 ### 6. Economics
-- Marginal value of a server-hour: `p − 0.2261` if its heat is used, `p − 0.3325 − 0.8·π_dump` if
-  dumped (§5.2).
-- Full cost: depreciation and operations per sold hour; hardware profiles CPU, L4, RTX 4090
-  (full-cost break-even 1.428 / 1.651 / 0.956 CHF per server-hour,
-  [`research/profitability-inputs.md`](../research/profitability-inputs.md) §3).
-- Operator model, heat fee `h` and the split of the system surplus ([`business-model.md`](../business-model.md)).
-- Price trends to 2030 and lifetime averages (§5 of the same file).
+- Distinguish the combined case break-even (CHF 0.2261 per sold hour) from the free-heat
+  operator's own threshold. The host receives the heat value unless it pays a heat fee.
+- Four-server L4 sensitivity: approximately CHF 1.76 per sold hour at full heat-led sales,
+  excluding wear and integration; the current list-price scenario has little margin and the
+  documented wear sensitivity can remove it ([`research/free-heat-viability.md`](../research/free-heat-viability.md)).
+- Exploratory four-card L4 node below constant hot-water base load: measure power, useful heat,
+  installable cost and contracted net price before claiming viability
+  ([`research/profitable-home-path.md`](../research/profitable-home-path.md)).
 
 ### 7. Demonstrator
 - Architecture: `IScheduler.Decide(HeatSignal)` → `SchedulerController.Apply` → `IExecutor`
   (simulated or `DockerJobExecutor`), decisions 0005 and 0009.
 - Measured workloads: whisper.cpp ([`jobs/transcription.md`](../jobs/transcription.md)), Apertus 8B
-  ([`jobs/llm-summary.md`](../jobs/llm-summary.md)), research simulation (T-30, `TODO`).
+  ([`jobs/llm-summary.md`](../jobs/llm-summary.md)), research simulation
+  ([`jobs/research-sim.md`](../jobs/research-sim.md)).
 - Measurement method and scaling to 1 kW; limits (CPU package vs. wall power).
 
 ### 8. Evaluation
@@ -200,4 +202,6 @@ network, with deadlines and year-round sinks; (iii) forecast errors cost little;
    Energy Informatics (journal). To check: deadlines, page limits.
 2. Which 3–4 contributions carry the paper (list above)?
 3. Is the LP (T-11/T-12) part of this paper, or a second paper?
-4. Authors and order.
+
+Author order rotates across papers; this draft starts with Ennio Binder, followed by Jona Richartz
+and Nikita Sosnovski. The next paper starts with Jona, then Nikita, then Ennio.

@@ -1,13 +1,24 @@
-\section{Conclusion and outlook}
+\section{Conclusion}
 \label{sec:conclusion}
 
-Heat-led computing in homes is limited by heat physics and by the amount of sellable work, not by
-the scheduling algorithm on a single house: there the greedy heat-following rule already reaches
-the full-year optimum. Planning and routing pay off in a network, where paid work with deadlines
-can move to sites that need heat all year, such as hotels with spas and indoor pools. Whether the
-model pays off at all depends on prices: the case break-even of CHF~0.2261 per server-hour is low,
-but full cost on consumer GPUs is CHF~0.956, above today's commodity compute prices.
+The case reference house establishes a physical result: four abstract servers can deliver
+\qty{18129}{kWh} of useful heat in the unlimited-work run, and a simple local controller already
+reaches the full-year upper bound on that house. The mixed year-run fixture shows the dependence
+on sold work: at its assumed 35\% filler capacity cap, achieved coverage falls to 25.00\%.
+Neither run measures market demand for DigitalHeat's proposed jobs.
 
-\todo{outlook: district heating (out of scope in the case), grid flexibility, PV, multi-family
-buildings (\texttt{docs/research/ideas.md}); MILP extensions with integer servers and
-non-splittable jobs; transfer delays and costs}
+Economic viability is an actor-level question. With free heat, the homeowner can benefit from
+avoided heating expense, but DigitalHeat must earn enough from computing to pay its electricity,
+hardware and operation. The more recent L4 purchase-price sensitivity places the four-server
+operator threshold near CHF~1.76 per sold hour even with all heat-led hours sold, before wear and
+installation. The proposed small base-load node may improve utilisation and reduce the amount of
+capital at one home, yet its power, thermal integration, net sales price and paid volume remain
+unverified. Its next test is a complete build quote, whole-node and useful-heat measurements, and
+a customer commitment stating price and minimum paid capacity. The thermal test must also record
+delivery temperature, circulation-pump power and storage losses, so that measured useful heat
+can replace the idealised recovery assumption.
+
+In the synthetic network, year-round heat sinks allow deadline-bound work to move when houses
+cannot absorb its heat. This result explains a potential role for routing after the economics of
+each installation have been established. The paper's central contribution is thus a reproducible
+boundary between demonstrated heat control, conditional home economics and network scenarios.

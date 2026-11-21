@@ -4,7 +4,7 @@
 Residential sites may lose connectivity while jobs and thermal processes continue. We separate
 local heat control from placement and ownership. This section specifies an implemented,
 deterministic admission model and the assumptions needed for a distributed runtime. It reports
-no deployed federation or measured economic advantage (decision 0035).
+no deployed federation or measured economic advantage.
 
 \subsection{System and failure assumptions}
 Each site uses the existing greedy scheduler and executor path. A trusted ownership service must
@@ -69,7 +69,7 @@ protected outputs. Chubby sequencers illustrate why receivers must reject stale-
 
 \subsection{Validation and experimental design}
 Reproduce local checks with
-\texttt{dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj}.
+\texttt{dotnet test src/DigitalHeat.sln} (which includes the network tests).
 Cases cover missing policy revisions and heat signals, retransmission, conflicting offers,
 locality, timestamp extremes, incomplete predecessor evidence and execution-end bounds. A finite
 sweep enumerates clock-error bounds zero through five seconds and successor local times minus

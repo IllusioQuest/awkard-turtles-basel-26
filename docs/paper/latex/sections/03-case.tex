@@ -1,8 +1,8 @@
 \section{Case and reference house}
 \label{sec:case}
 
-All scored figures use the reference house exactly as defined in the case text
-(\texttt{docs/case/challenge.md}); other houses and sites appear only as labelled variants.
+All reference-case figures use the house exactly as defined in the challenge specification;
+other houses and sites appear only as labelled variants (Appendix~\ref{app:repro}).
 
 \paragraph{Weather and heat demand.} Hourly air temperature $T$ for Basel (47.56\,N, 7.59\,E),
 1~January to 31~December 2025, local time Europe/Zurich, comes from the Open-Meteo historical
@@ -15,7 +15,7 @@ below \qty{12}{\celsius}. On heating days the space-heating demand per hour is
 where $25.6 = 20 - (-5.6)$ and \qty{-5.6}{\celsius} is the coldest hour of 2025. Hot water adds
 \qty{12}{kWh} per day, all year. With the 2025 weather this gives 206 heating days,
 \qty{26850.55}{kWh} of space heat and \qty{4380}{kWh} of hot water, i.e.\ \qty{31230.55}{kWh} of heat
-demand (\texttt{docs/results/reference-house.md}).
+demand. The calculation and input files are listed in Appendix~\ref{app:repro}.
 
 \paragraph{Storage, server and prices.} The house has one lossless tank with \qty{35}{kWh} usable
 capacity. A server draws \qty{1}{kW} at full load, of which \qty{80}{\percent} is recoverable, i.e.\
