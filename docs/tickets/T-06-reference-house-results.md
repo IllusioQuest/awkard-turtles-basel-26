@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Results / docs
 - **Depends on:** T-05
-- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** in progress (first version ready; T-26 finite job inputs pending)
+- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** in review (final price and hardware pass)
 
 ## Goal
 
@@ -14,6 +14,7 @@ Produce the official key figures for the reference house, with every assumption 
 - [x] Write `docs/results/reference-house.md` with all currently computable key figures, an explicitly undefined missed-deadline rate, a hardware-only sensitivity and the full-cost formula with missing inputs.
 - [x] List assumptions in `docs/assumptions.md` and the conditions under which the model does not pay off.
 - [x] Generate small result JSON files through `scripts/export_reference_house.py` under `data/derived/`.
+- [x] Re-run the C# model at the adopted CHF 0.66/server-hour price; normalize the user-approved Dell illustration to estimated 1 kW, and export a separate sourced finite-only deadline diagnostic.
 
 ## Done when
 
@@ -31,8 +32,11 @@ Produce the official key figures for the reference house, with every assumption 
 
 ## Integration status
 
-The result page and reproducible files are ready on `docs/T-06-reference-results`. The user
-delegated the draft presentation choice; 4 servers is the baseline because both C# and the
-year explorer reproduce it. A finite-job missed-deadline percentage awaits sourced T-01/T-02
-inputs. The WP2 hardware anchor is a user-approved illustrative example, not a full-cost
-installation quote. Keep this ticket in progress until the data gap is resolved.
+The first result page and reproducible files were merged through PR #8. The user delegated the
+draft presentation choice; 4 servers is the baseline because both C# and the year explorer
+reproduce it. This branch updates the adopted CHF 0.66/server-hour income and corrects the
+illustrative Dell cost to equivalent 1 kW power using the T-15 estimate. T-26 has a sourced
+finite-only transcription scenario, but the agreed premium-plus-filler result needs T-31's mixed
+queue. All 40 Core tests pass and the six JSON results reproduce byte for byte. Keep the
+unlimited-work assumption explicit until the mixed result exists. The branch changes an input
+and a partial-cost illustration, not the scored case formula or physical heat model.
