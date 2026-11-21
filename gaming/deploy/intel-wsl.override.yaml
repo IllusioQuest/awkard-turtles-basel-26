@@ -1,5 +1,5 @@
 # Experimental: D3D12 OpenGL access is independent of Vulkan and hardware encoding.
-# Applies only to node A so node B remains a software baseline.
+# Applies to the retained Minecraft browser client on Node A.
 services:
   session-a:
     devices: ["/dev/dxg:/dev/dxg"]

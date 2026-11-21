@@ -11,7 +11,7 @@ public class DockerEngineObservationTests
     private static readonly DateTimeOffset Now = new(2026, 1, 15, 17, 0, 0, TimeSpan.Zero);
     private static MonitorSetup Setup()
     {
-        string root = MonitorSetup.FindRepositoryRoot(); return MonitorSetup.Load(root, Path.Combine(root, "gaming/deploy/heat-monitor.json"));
+        string root = MonitorSetup.FindRepositoryRoot(); return MonitorSetup.Load(root, Path.Combine(root, "gaming/tests/Fixtures/monitor-heat.json"));
     }
     private static JsonDocument Stats(ulong own, ulong system, int seconds, bool v1 = false) => JsonDocument.Parse(JsonSerializer.Serialize(new
     {
@@ -48,7 +48,7 @@ public class DockerEngineObservationTests
             Calls.Add(args.ToArray());
             if (args[2] == "context") { Resolutions++; return JsonSerializer.Serialize(new { Host = endpoint, SkipTLSVerify = false }); }
             if (args[2] == "inspect") return "true false";
-            if (args[2] == "top") return "COMMAND\n/opt/Xonotic/xonotic-linux64-sdl";
+            if (args[2] == "top") return "COMMAND\n/opt/test-app/application";
             if (args[2] == "stats") return "";
             return "aaaaaaaaaaaa";
         }
@@ -80,7 +80,7 @@ public class DockerEngineObservationTests
                     Labels = new Dictionary<string, string> { ["com.docker.compose.project"] = c == 'c' ? "digitalheat-dozen" : "digitalheat-gaming", ["com.docker.compose.service"] = "session-" + c } });
                 return Response(JsonSerializer.Serialize(data));
             }
-            if (path.EndsWith("/top")) return Response("{\"Titles\":[\"COMMAND\"],\"Processes\":[[\"SECRET_PROCESS_ARGUMENT /opt/Xonotic/xonotic-linux64-sdl\"]]}");
+            if (path.EndsWith("/top")) return Response("{\"Titles\":[\"COMMAND\"],\"Processes\":[[\"SECRET_PROCESS_ARGUMENT /opt/test-app/application\"]]}");
             string id = path.Split('/')[3]; int sample;
             if (FailStatsA && id[0] == 'a') return new(HttpStatusCode.ServiceUnavailable);
             lock (samples) { sample = samples.GetValueOrDefault(id) + 1; samples[id] = sample; }

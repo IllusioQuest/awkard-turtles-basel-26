@@ -1,0 +1,75 @@
+{
+  "applications": [
+    {
+      "id": "test-workload",
+      "executable": "/opt/test-app/application",
+      "working_directory": "/opt/test-app",
+      "user": "ubuntu",
+      "log_path": "/home/ubuntu/test-workload-demo.log",
+      "arguments": [],
+      "variants": {},
+      "environment": {
+        "DISPLAY": ":20",
+        "XDG_RUNTIME_DIR": "/tmp/runtime-ubuntu",
+        "PULSE_SERVER": "unix:/tmp/runtime-ubuntu/pulse/native"
+      },
+      "required_capabilities": [
+        "test-workload-installed",
+        "opengl",
+        "streaming-desktop"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "session-a",
+      "docker_context": "desktop-linux",
+      "compose_project": "digitalheat-gaming",
+      "compose_service": "session-a",
+      "browser_url": "http://localhost:18881",
+      "hardware_profile_id": "intel-desktop"
+    },
+    {
+      "id": "session-b",
+      "docker_context": "desktop-linux",
+      "compose_project": "digitalheat-gaming",
+      "compose_service": "session-b",
+      "browser_url": "http://localhost:18882",
+      "hardware_profile_id": "software-desktop"
+    },
+    {
+      "id": "session-c",
+      "docker_context": "desktop-linux",
+      "compose_project": "digitalheat-dozen",
+      "compose_service": "session-c",
+      "browser_url": "http://localhost:18883",
+      "hardware_profile_id": "intel-test-workload"
+    }
+  ],
+  "hardware_profiles": [
+    {
+      "id": "intel-desktop",
+      "capabilities": [
+        "opengl",
+        "streaming-desktop"
+      ],
+      "source": "Synthetic monitoring test fixture; not a deployed node or measured capacity."
+    },
+    {
+      "id": "software-desktop",
+      "capabilities": [
+        "streaming-desktop"
+      ],
+      "source": "Synthetic monitoring test fixture; not a deployed node or measured capacity."
+    },
+    {
+      "id": "intel-test-workload",
+      "capabilities": [
+        "test-workload-installed",
+        "opengl",
+        "streaming-desktop"
+      ],
+      "source": "Synthetic monitoring test fixture; not a deployed node or measured capacity."
+    }
+  ]
+}

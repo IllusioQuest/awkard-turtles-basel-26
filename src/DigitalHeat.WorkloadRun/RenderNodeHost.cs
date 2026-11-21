@@ -171,6 +171,7 @@ internal static class RenderNodeHost
             string file=native?.ImagePath(job)??Path.Combine(output,job,"frame.png");return File.Exists(file)?Results.File(file,"image/png"):Results.NotFound();
         });
         var session=new RenderSession(cfg,http);
+        app.MapGet("/ui/theme.css",()=>Results.Content(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"dashboard.css")),"text/css"));
         app.MapGet("/ui",()=>Results.Content(File.ReadAllText(Path.Combine(cfg.Native?.ScriptsDirectory??AppContext.BaseDirectory,"render.html")),"text/html"));
         app.MapGet("/ui/status",async()=>Results.Json(await session.LiveSnapshot(),Json));
         app.MapPost("/ui/render",async()=>{await session.Start();return Results.Accepted();});

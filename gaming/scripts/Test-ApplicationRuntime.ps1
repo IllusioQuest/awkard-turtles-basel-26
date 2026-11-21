@@ -28,11 +28,11 @@ try {
     if($observed -cne $literal){throw 'Application argv did not round-trip literally'}
     & docker --context $context exec $id test ! -e /tmp/injected
     if($LASTEXITCODE -ne 0){throw 'Shell metacharacters were executed'}
-    & docker --context $context exec -d --user nobody $id flock -n /tmp/digitalheat-xonotic.lock sleep 30
+    & docker --context $context exec -d --user nobody $id flock -n /tmp/digitalheat-desktop.lock sleep 30
     if($LASTEXITCODE -ne 0){throw 'Could not dispatch legacy lock holder'}
     $held=$false
     for($attempt=0;$attempt -lt 30;$attempt++){
-        & docker --context $context exec --user nobody $id flock -n /tmp/digitalheat-xonotic.lock true
+        & docker --context $context exec --user nobody $id flock -n /tmp/digitalheat-desktop.lock true
         if($LASTEXITCODE -eq 1){$held=$true;break}; Start-Sleep -Milliseconds 100
     }
     if(!$held){throw 'Legacy lock holder did not become ready'}

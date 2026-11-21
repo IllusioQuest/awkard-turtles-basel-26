@@ -3,4 +3,5 @@
   <ItemGroup><ProjectReference Include="../DigitalHeat.Orchestration/DigitalHeat.Orchestration.csproj" /><ProjectReference Include="../DigitalHeat.Network/DigitalHeat.Network.csproj" /></ItemGroup>
   <ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App" /></ItemGroup>
   <ItemGroup><InternalsVisibleTo Include="DigitalHeat.Orchestration.Tests" /></ItemGroup>
+  <ItemGroup><Content Include="../../web/src/index.css" Link="dashboard.css" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
 </Project>
