@@ -1,6 +1,7 @@
 # 0018: Two job types: sovereign AI services (Type 1) and batch compute filler (Type 2)
 
-- **Status:** proposed; hardware split ("Type 2 on CPU") superseded by 0019
+- **Status:** proposed; hardware split ("Type 2 on CPU") superseded by 0019; Type 1 contents
+  (transcription) and Type 2 example (Monte Carlo) superseded by 0020
 - **Date:** 2026-11-21
 - **Decided by:** Ennio; team confirmation pending. This is the job model inside business model v2 (T-34).
 

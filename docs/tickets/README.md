@@ -39,7 +39,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
 | [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | PR #11 open |
-| [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: interruptible batch compute (Monte Carlo), measured | 2 Pitch | T-03; decision 0018 | anyone with a laptop | | open |
+| [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | | open |
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-33-local-llm-job`) |
@@ -64,7 +64,9 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 
 | [T-36](T-36-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | in review (PR #19; depends on #12) |
-| [T-34](T-34-business-model-v2.md) | Business model v2: sovereign GPU cloud that heats homes profitably | 2 Pitch | T-14, T-35, T-11/T-12 | team lead + Claude | Team lead / Claude | in progress |
+| [T-34](T-34-business-model-v2.md) | Business model v2: sovereign GPU cloud that heats homes profitably | 2 Pitch | T-14, T-35, T-11/T-12 | team lead + Claude | Team lead / Claude | in progress (provisionally fixed: decision 0020, docs/business-model.md) |
 
 
 | [T-38](T-38-hybrid-service-review.md) | Review hybrid GPU/CPU service proposal | Nikita / Codex | done: analysis only; implementation awaits user choice |
+
+| [T-39](T-39-intel-browser-gaming.md) | Intel browser gaming compatibility experiment | Nikita / Codex | in progress: stack choice pending |
