@@ -142,6 +142,59 @@ that much audio, so `base`-quality transcription alone cannot fill a house's hea
 heavier jobs per unit of value, or a mix of services, or we state "unlimited jobs" (the case
 allows it) together with this caveat.
 
+## Larger model: `large-v3`
+
+**Why:** `base` gets roughly one German word in five wrong. Published German word error rates
+(WER, Whisper paper [arXiv 2212.04356](https://arxiv.org/abs/2212.04356), appendix, accessed
+2026-11-21):
+
+| Model | MLS | Common Voice 9 | VoxPopuli | FLEURS |
+|---|---|---|---|---|
+| base | 17.7 % | 24.5 % | 20.6 % | 17.9 % |
+| small | 10.5 % | 13.0 % | 14.8 % | 10.2 % |
+| medium | 7.4 % | 8.5 % | 12.4 % | 6.5 % |
+| large-v2 | 5.5 % | 6.4 % | 11.2 % | 4.5 % |
+
+On Swiss German, `large-v3` without fine-tuning reaches 23 % WER on SwissDial and STT4SG-350 and
+29.5 % on the Swiss Parliaments Corpus, writing Standard German text
+([arXiv 2404.19310](https://arxiv.org/html/2404.19310v2), accessed 2026-11-21). Models fine-tuned on
+Swiss German report 12–26 % on their own test sets. Those test sets differ, so the figures are not
+directly comparable. No Swiss German figures were found for the smaller models.
+
+**Measured** (`ggml-large-v3.bin`, 3,095,033,483 bytes, SHA1
+`ad82bf6a9043ceed055076d0fd39f5f186ff8062` as in the whisper.cpp models README, checked). Same
+image, `MODEL=/models/ggml-large-v3.bin`, first 10 chunks (5.0 audio min), 3 runs. The charger was
+connected, so the battery meter was not valid and only the CPU package is measured.
+
+| Per audio minute | `base` | `large-v3` | Ratio |
+|---|---|---|---|
+| Runtime | 4.62 s | **70.3 s** (sd 0.9) | 15.2× |
+| Energy, CPU package, gross | 0.0291 Wh | **0.477 Wh** (sd 0.010) | 16.4× |
+| Energy, CPU package, net | 0.0254 Wh | 0.368 Wh (sd 0.011) | 14.5× |
+
+This matches the published CPU encoder timings, where large is about 15–19× slower than base
+([whisper.cpp issue #89](https://github.com/ggml-org/whisper.cpp/issues/89)). The CPU package
+idle power was 5.5 W during this run (3.0 W before), likely because the battery was charging.
+whisper-cli reloads the 3 GB model for every chunk; that overhead is included. A production
+runner would keep the model loaded.
+
+**Scaling to 1 kW:**
+
+```
+CPU package only:                          1000 Wh ÷ 0.477 Wh ≈ 2,100 audio min ≈ 35 audio hours per server-hour
+whole machine (× 1.31, the laptop/package
+ratio measured with base; an estimate):    1000 Wh ÷ 0.625 Wh ≈ 1,600 audio min ≈ 27 audio hours per server-hour
+```
+
+At CHF 0.13–0.30 per audio hour, that is CHF 3.5–8 of market value per server-hour, still far
+above the CHF 0.23 break-even. The reference house (22,661 server-hours) would need about
+**600,000 audio hours per year**. That is better than `base`'s 9.9 million, but demand is still
+the bottleneck.
+
+**Quality, by eye:** clearly better than `base`. Sentences are correct German, with an occasional
+wrong name ("Ennschenkreises"). Some chunks come out in lower case without punctuation, a known
+`large-v3` habit; post-processing or a fine-tuned model would be needed for customer output.
+
 ## Limits
 
 - One laptop, one night, one audio file (read-aloud standard German). A server CPU and a GPU will
