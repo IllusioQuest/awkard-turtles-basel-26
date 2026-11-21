@@ -1,4 +1,4 @@
-# T-33: Professional pitch video
+# T-37: Professional pitch video
 
 - **Tier:** 2 Pitch  ·  **Area:** Presentation / video
 - **Depends on:** T-21 storyboard, T-25 house animation, T-02 real-job recording

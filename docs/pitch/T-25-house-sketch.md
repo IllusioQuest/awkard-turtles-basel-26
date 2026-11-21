@@ -2,7 +2,7 @@
 
 Approved as a sensible direction by the user on 2026-11-21; team-lead pitch feedback is pending.
 One landscape screen, sized for a projected pitch and usable from a local browser file. This is
-a wireframe, not a simulated result. T-33 tracks the requested professional final video.
+a wireframe, not a simulated result. T-37 tracks the requested professional final video.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐

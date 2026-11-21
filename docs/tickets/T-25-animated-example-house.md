@@ -37,4 +37,4 @@ Draft implementation (PR #17): `prototypes/animated-house/index.html`, generated
 `python scripts/build_animated_house.py` from the committed T-13 result bundle. The selected
 days do not naturally pause the servers; only an imported LiveRun log can show an actual pause.
 Visual browser review and team-lead pitch feedback are pending. The user approved the sketch;
-T-33 tracks the requested professional final video.
+T-37 tracks the requested professional final video.
