@@ -143,3 +143,5 @@ whole laptop), January/July LiveRun with forced pause through the shared schedul
 meter `scripts/measure_job_windows_battery.ps1`. 40 .NET tests pass. No shared interface changed.
 
 T-39 Dozen milestone: source build succeeded, hardware Vulkan identifies Intel Iris Xe (API 1.2.335), vkcube succeeds headlessly and in separate Selkies desktop C (18883), A/B untouched. Experimental/non-conformant; VAAPI still unavailable, no CS2 claim. User cube-stream confirmation and storage choice pending; current C: ~20 GB versus Valve's 85 GB requirement.
+
+T-39 latest: user confirmed C login. Selected Xonotic original FPS instead of CS2. Official archive checksum passed; game runs on C with Intel OpenGL, assets and stereo audio startup verified; user browser gameplay/input check pending. Uniform background applied. Code 81644fd pushed to PR #22. Automatic game launch/preemption/stream routing after reservation remains pending; no measured FPS/energy claim.
