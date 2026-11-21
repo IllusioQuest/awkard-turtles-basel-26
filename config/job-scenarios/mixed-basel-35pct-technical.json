@@ -1,0 +1,51 @@
+{
+  "mode": "mixed",
+  "excessHeatPolicy": "wait",
+  "source": "Technical mixed-queue sensitivity, not a pitch scenario: finite Basel transcription fixture plus research-simulation filler with 0.35 sold capacity; see docs/research/filler-demand.md and decision 0020.",
+  "jobTypes": [
+    {
+      "id": "medical-dictation-basel",
+      "workUnit": "audio minute",
+      "interruptible": true,
+      "arrivalsPerDay": {
+        "value": 428,
+        "unit": "jobs/day",
+        "source": "docs/research/job-demand.md: 1,269 practising physicians in Basel-Stadt (415 primary-care physicians = 32.7 % of all, Jan 2024, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf, search snippet, accessed 2026-11-21) x 66.71 audio min per physician per month (median, Bax et al. 2011, Health Econ Rev 1:8, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/, abstract, accessed 2026-11-21) x 12/365 months per day / 6.5 audio min per job = 428.2, rounded down"
+      },
+      "workUnitsPerJob": {
+        "value": 6.5,
+        "unit": "work units/job",
+        "source": "Bax et al. 2011, Health Econ Rev 1:8: median dictation length 6.5 min per letter, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/ (abstract, accessed 2026-11-21)"
+      },
+      "workUnitsPerServerHour": {
+        "value": 26178,
+        "unit": "work units/server-hour",
+        "source": "Own measurement (T-02, branch feat/T-02-transcription-job: config/jobs/transcription-whisper-base.json, docs/jobs/transcription.md): 1000 Wh per 1 kW server-hour / 0.0382 Wh per audio minute (whisper.cpp base, whole-laptop gross) = 26,178 audio min, assuming equal energy per audio minute on the server"
+      },
+      "deadlineHours": {
+        "value": 24,
+        "unit": "hours",
+        "source": "Rev standard human transcription: estimated turnaround up to 24 h maximum, https://support.rev.com/hc/en-us/articles/18859196207629 (search snippet, accessed 2026-11-21); GoTranscript one-day tier, https://sonix.ai/resources/gotranscript-pricing/ (search snippet, accessed 2026-11-21)"
+      },
+      "priceChfPerServerHour": {
+        "value": 0.66,
+        "unit": "CHF/server-hour",
+        "source": "docs/research/computing-price.md: team-lead pinned CHF 0.66 per server-hour on 2026-11-21; technical capacity-price fixture, not a Type 1 LLM price"
+      }
+    }
+  ],
+  "filler": {
+    "id": "research-simulation",
+    "workUnit": "server-hour",
+    "priceChfPerServerHour": {
+      "value": 0.66,
+      "unit": "CHF/server-hour",
+      "source": "docs/research/computing-price.md and decision 0020: pinned CHF 0.66 per server-hour; technical filler price"
+    },
+    "soldCapacityShare": {
+      "value": 0.35,
+      "unit": "fraction",
+      "source": "docs/research/filler-demand.md: sourced marketplace fill-rate central value 0.35, treated here as a per-hour sold-capacity share sensitivity"
+    }
+  }
+}

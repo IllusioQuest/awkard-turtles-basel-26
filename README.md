@@ -40,7 +40,7 @@ The last command reads the committed Basel 2025 hourly weather CSV, checks the
 configured electricity price against the ElCom 2026 Basel H4 snapshot, and writes
 `results/reference-house/hourly.csv` and `summary.json`. Pass another repository
 root as the first argument when running from elsewhere. An optional second argument
-selects a sourced finite job scenario; the default is
+selects a finite or mixed job scenario; the default is
 [`config/job-scenarios/unlimited.json`](config/job-scenarios/unlimited.json).
 Results are generated and
 git-ignored; rerunning the command reproduces them. The parameter file is
@@ -57,8 +57,17 @@ The default output marks missed deadlines as `not modelled yet` because unlimite
 work has no finite job count. A finite scenario reports arrivals, completed jobs,
 backlog, processed work and the percentage of jobs due within the simulated year
 that missed their deadline. See [`docs/model/job-queue.md`](docs/model/job-queue.md).
-Sourced job arrivals and throughput from T-01/T-02 are still needed for scored
-deadline figures.
+The T-31 mixed-run example below is a technical queue fixture. Decision 0020 excludes medical
+transcription as a home-site product; sourced finite arrivals for the pitch's public-document
+LLM Type 1 are still missing.
+
+```bash
+dotnet run --project src/DigitalHeat.YearRun -- . config/job-scenarios/mixed-basel-technical.json --output results/t31-mixed-basel
+```
+
+Open `results/t31-mixed-basel/jobs.json` for per-type server-hours and income. The old
+`summary.json` export stays at schema v1. The method, a 35% sold-capacity sensitivity, sources
+and a worked hour are in [`docs/model/mixed-job-queue.md`](docs/model/mixed-job-queue.md).
 Electricity, used-heat value and case break-even exclude hardware and operating
 costs, so the result is not a full-cost profitability claim.
 
