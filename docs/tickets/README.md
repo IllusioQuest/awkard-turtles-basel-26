@@ -79,3 +79,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-43](T-43-universal-workloads.md) | Universal resource-aware workload placement | Nikita / Codex | done (code integrated into main with T-44 on user request) |
 
 | [T-44](T-44-minecraft-server.md) | Minecraft persistent server workload integration | Nikita / Codex | code integrated; gameplay test pending; measured heat gate blocked |
+| [T-46](T-46-monitor-value-labels.md) | Explain console monitoring values | Nikita / Codex | in progress |

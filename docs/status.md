@@ -9,6 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
+| Nikita / Codex | feat/T-46-monitor-value-labels | Clarify console labels, units and model/observation boundary | renderer only; no shared interfaces | in progress; checked T-45 protocol, T-14 economics and T-18 dashboard overlap |
 | Nikita / Codex | feat/T-44-minecraft-server | Minecraft world server plus browser client on Node A | T-43 / PR #33; existing desktop runtime, no new shared interfaces | code integrated into main by user request; gameplay unverified; rejected battery measurement blocks heat placement |
 | Nikita / Codex | `fix/T-42-monitor-integration` | Review/clarify new gaming console; integrate author monitor under T-42 (T-41 already taken) | Existing Core/placement unchanged; read-only resource probe and console controls | PR #32 ready; 36 gaming/46 Core/20 Network tests and clean build; original author checkout preserved; gaming-monitor-review.md |
 | Jona / Codex | `docs/T-06-final-results` | T-06 reference-house price and cost sensitivity | none | PR #21 open |
