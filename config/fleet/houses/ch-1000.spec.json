@@ -1,9 +1,0 @@
-{
-  "description": "Generator spec (docs/model/fleet-simulation.md section 4.2): 1,000 houses across Switzerland, proportional to single-family buildings per 10 km grid cell. count is a scenario value, labelled; everything else defaults from the case (config/reference-house.json).",
-  "count": 1000,
-  "distribution": "proportional_to_single_family",
-  "design_heating_kw": "cell_median",
-  "design_heating_spread": 0,
-  "electricity_price": { "mode": "per_municipality", "category": "H4" },
-  "seed": 20261121
-}

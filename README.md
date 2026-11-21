@@ -132,9 +132,9 @@ Many houses with servers, jobs arriving over a year, a pluggable scheduler and p
 
 ```bash
 dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/reference.json
-dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/ch-1000.json
-dotnet run --project src/DigitalHeat.FleetRun -- generate-houses config/fleet/houses/ch-1000.spec.json -o config/fleet/houses/ch-1000.csv
-dotnet run --project src/DigitalHeat.FleetRun -- post data/derived/fleet/reference --hardware config/hardware/gpu-inference-l4.json
+dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/ch-100.json
+dotnet run --project src/DigitalHeat.FleetRun -- generate-houses config/fleet/houses/ch-100.spec.json -o config/fleet/houses/ch-100.csv
+dotnet run --project src/DigitalHeat.FleetRun -- post data/derived/fleet/reference
 dotnet test src/DigitalHeat.Fleet.Tests
 # read-only results API for the dashboard (port 5080; endpoints in docs/model/fleet-api.md)
 dotnet run -c Release --project src/DigitalHeat.FleetApi -- --runs data/derived/fleet --port 5080

@@ -21,7 +21,7 @@ scheduler input and what can be tuned. Design and algorithms: [`model/fleet-simu
 | Dictation length and volume | Bax et al. 2011, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/ | study value | same | 6.5 min per dictation, 66.71 min per physician-month |
 | LLM token volume | OpenRouter, via https://fourweekmba.com/ai-openrouters-run-rate-tops-10-quadrillion-tokens-up-6-7x/ | week ending 2026-10-26 | `data/raw/market/compute-demand.csv` (`cd-t1-openrouter-week`) | LLM volume |
 | Research compute volume | sciCORE Basel, `docs/research/demand.md` | per year | `data/raw/market/compute-demand.csv` (`cd-d-scicore-sh-energy`) | research volume |
-| Energy per work unit | L4 Whisper benchmark (`config/hardware/gpu-inference-l4.json`); RTX 4090 vLLM (`data/raw/market/hardware.csv`, `pe-rtx4090-vllm-iog-qps8`); own laptop measurement 2026-11-21 (`config/jobs/research-sim-montecarlo.json`, CPU placeholder) | per unit | job-type files | work rate of a server |
+| Energy per work unit | L4 Whisper benchmark (`config/hardware/gpu-inference-l4.json`); L4 LLM throughput 25 M tokens/server-h (`gpu-inference-l4.json` `LlmTokensPerServerHour`, `docs/research/l4-throughput.md`); own laptop measurement 2026-11-21 (`config/jobs/research-sim-montecarlo.json`, CPU placeholder) | per unit | job-type files | work rate of a server |
 | Type 1 prices | Infomaniak / kvant Whisper V3; Public AI Apertus 8B (`docs/research/compute-demand-traces.md` §3) | 2026 list prices | job-type files | income |
 | Type 2 reference price, elasticity | CSCS, Baughman 2019, Jin 2026 et al. (`docs/research/compute-price-elasticity.md`) | — | scenario `pricing` | Type 2 acceptance |
 | Case constants | `docs/case/challenge.md` | — | `config/reference-house.json` | 1 kW, 0.8, 10 kW, 25.6, 12 °C, 12 kWh/day, 35 kWh, ÷ 2.5 |
@@ -72,6 +72,7 @@ Scenario file (`config/fleet/scenarios/*.json`); defaults = code defaults (`Cont
 | `run.seed` | 20261121 | all random draws |
 | `houses.file` / `houses.generate` | — (required) | house list or generator spec |
 | `servers.policy` | `fixed` (`n`: 4 in all shipped scenarios) | or `share_of_peak` (`f`), `from_file` |
+| `servers.hardware_profile` | `config/hardware/gpu-inference-l4.json` in all shipped scenarios | source of the GPU job types' energy per unit (checked by a test) and of capex/ops in `post` |
 | `servers.max_electric_kw`, `heat_recovery_share` | 1.0, 0.8 (case) | per server |
 | `demand.volume_scale` | 1 per type (`reference`: 0.1) | multiplies job volume |
 | `demand.from_file` | null | replay a `jobs-input.csv` |
@@ -86,7 +87,7 @@ Scenario file (`config/fleet/scenarios/*.json`); defaults = code defaults (`Cont
 | `scheduler.chunk_target_s` | 3600 | chunk size at load 1 |
 | `logging.house_timeseries` | `hourly` | `none` / `daily` / `hourly` / `events` |
 
-House generator spec (`config/fleet/houses/*.spec.json`): `count` (100 / 1,000), `cantons` (all; `basel-region-100`: BS, BL; only BL cells exist, so all its houses are in BL),
+House generator spec (`config/fleet/houses/*.spec.json`): `count` (100), `cantons` (all; `basel-region-100`: BS, BL; only BL cells exist, so all its houses are in BL),
 `distribution` `proportional_to_single_family`, `design_heating_kw` `cell_median` (or `fixed: 10`),
 `design_heating_spread` 0, `electricity_price` `per_municipality` H4 (or `fixed`), `seed` 20261121.
 
@@ -94,7 +95,7 @@ Job types (`config/fleet/job-types/*.json`):
 
 | | transcription (T1) | LLM (T1) | research (T2) |
 |---|---|---|---|
-| energy per unit | 3.55e-5 kWh/audio min | 5.83e-8 kWh/token | 4.09e-6 kWh/task (CPU placeholder) |
+| energy per unit | 3.55e-5 kWh/audio min | 4.0e-8 kWh/token | 4.09e-6 kWh/task (CPU placeholder) |
 | price | CHF 0.006/audio min | CHF 8.9e-8/token | dynamic |
 | batch, `max_chunks` | 1, 1 | 1,000 requests, 8 | 1, 4 |
 | volume knobs | 428 jobs/day | Swiss share 0.01, market share 0.01 | 80,000 server-h/yr |
@@ -106,6 +107,10 @@ Job types (`config/fleet/job-types/*.json`):
 
 ```bash
 dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/reference.json
+dotnet run -c Release --project src/DigitalHeat.FleetRun -- post data/derived/fleet/reference   # full cost, same hardware profile
 ```
+
+`margin_chf` in `houses-summary.csv` is income + heat value − electricity, **without hardware**; the
+net result after capex and ops is `net_after_hardware_chf` in `houses-fullcost.csv` (from `post`).
 
 Output in `data/derived/fleet/<scenario>/` (`run.json` records the resolved scenario, seeds and commit).

@@ -120,6 +120,8 @@ internal sealed class JobState(int index, JobRequest request, JobType type) : IJ
     /// <summary>Current contribution to the committed-kWh Fenwick tree and class sums.</summary>
     public double Contribution;
     public int LastCheckpointHouse = -1;
+    /// <summary>House that last started a chunk of this job (deadline attribution), -1 if never started.</summary>
+    public int LastHouse = -1;
     public double KwhPerUnit => TypeValue.EnergyKwhPerWorkUnit.Value;
 
     public JobId Id => new(Index);
