@@ -112,3 +112,5 @@ Hosting ticket was renumbered from T-29 to T-36 to avoid the separately started 
 Final repeat: all eight Docker scenarios passed on the final gateway image. An earlier repeat could not observe drain before the six-second request ended; the test failed rather than claiming coverage. The demo request duration is now a configurable 20 seconds, and the repeated test observed drain successfully. No production timeout was relaxed.
 
 Code review: PR #19 (https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/19), branch feat/T-36-hosting-scheduler. Depends on unmerged component-isolation PR #12. Documentation is on main; code is awaiting human review/merge.
+
+Additional stopped-replica check: killed the inner webhosting-component on api-c with docker kill. The controller restarted it automatically; /health returned api-c/api, DOCKER-USER still jumped to WH-APP-FWD, and the stable gateway URL served api-c again. Restart rechecks IPv6-disabled bridge and reinstalls firewall rules before docker start.
