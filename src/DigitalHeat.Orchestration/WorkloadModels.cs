@@ -13,6 +13,33 @@ public static class WorkloadJson
         WriteIndented = true
     };
     public static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value, Options), Options)!;
+    // Explicit hot-path copies: records contain immutable scalars/records, but arrays remain caller-owned.
+    // Add any future mutable member here; generic journal/runtime-record copying remains unchanged.
+    public static WorkloadRequest Copy(WorkloadRequest r)
+    {
+        ArgumentNullException.ThrowIfNull(r);
+        return r with
+        {
+            PlacementPolicy = r.PlacementPolicy is null ? null! : r.PlacementPolicy with { AllowedCountryCodes = r.PlacementPolicy.AllowedCountryCodes?.ToArray() },
+            RequiredCapabilities = r.RequiredCapabilities?.ToArray()!, LatencyLimits = r.LatencyLimits?.ToArray()!
+        };
+    }
+    public static WorkloadInventory Copy(WorkloadInventory i)
+    {
+        ArgumentNullException.ThrowIfNull(i);
+        return i with
+        {
+            Sites = i.Sites?.ToArray()!,
+            Domains = i.Domains?.Select(d => d is null ? null! : d with { Gpus = d.Gpus?.ToArray()! }).ToArray()!,
+            Nodes = i.Nodes?.Select(n => n is null ? null! : n with
+            {
+                Capabilities = n.Capabilities?.ToArray()!, GpuDeviceIds = n.GpuDeviceIds?.ToArray()!,
+                StorageIds = n.StorageIds?.ToArray()!, Latencies = n.Latencies?.ToArray()!
+            }).ToArray()!,
+            ExternalAllocations = i.ExternalAllocations?.ToArray()!
+        };
+    }
+    public static AllocationView[] Copy(AllocationView[] claims) => claims.Select(c => c is null ? null! : c with { Request = Copy(c.Request) }).ToArray();
     public static string Identity<T>(T value) => JsonSerializer.Serialize(value, Options);
 }
 
