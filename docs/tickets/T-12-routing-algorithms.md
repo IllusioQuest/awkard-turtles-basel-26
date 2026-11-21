@@ -11,6 +11,8 @@ Implement and compare scheduling/routing strategies on the same interface.
 ## Tasks
 
 - [ ] Baseline A: always on (dump surplus). Baseline B: local greedy heat-following (exists). Baseline C: greedy network routing (send work to the eligible site with the highest heat need within its deadline/latency).
+- [ ] Apply T-24 `JobPlacement.IsEligible` before considering a site in every routing strategy;
+      no heat or price objective may override a denied job location.
 - [ ] Optimiser: rolling-horizon solver from T-11.
 - [ ] All behind one interface (extend `IScheduler` or add `IRouter`, per T-11 ADR); same code path for simulation and live executor.
 - [ ] Benchmark harness: same scenario, same jobs, output table (coverage, dump, utilisation, missed deadlines, surplus, runtime of the algorithm).
@@ -22,6 +24,7 @@ Implement and compare scheduling/routing strategies on the same interface.
 
 ## Read first
 
+- `docs/model/routing-complexity.md` (complexity, LP formulation, effort estimate)
 - `docs/model/routing-optimisation.md (T-11)`
 
 ## Rules

@@ -1,4 +1,5 @@
 using DigitalHeat.JobRuntime;
+using DigitalHeat.Core;
 using System.Globalization;
 using Xunit;
 
@@ -36,6 +37,59 @@ public sealed class JobRuntimeTests
         var executor = new DockerJobExecutor(control, "id", 1, true);
         Assert.Throws<ArgumentOutOfRangeException>(() => executor.ApplyTargetLoad(double.NaN));
         Assert.Empty(control.Calls);
+    }
+
+    [Fact]
+    public void PlacementRequiresDataOriginSiteForSiteBoundJobs()
+    {
+        var policy = new JobPlacementPolicy("origin-site", "customer data agreement", null);
+        Assert.True(JobPlacement.IsEligible(policy, new("customer-a", "customer-a", null)));
+        Assert.False(JobPlacement.IsEligible(policy, new("customer-a", "customer-b", null)));
+        Assert.False(JobPlacement.IsEligible(policy, new(null, "customer-a", null)));
+        Assert.False(JobPlacement.IsEligible(policy, new("customer-a", null, null)));
+    }
+
+    [Fact]
+    public void PlacementRequiresAllowedExecutionCountry()
+    {
+        var policy = new JobPlacementPolicy("country-allowlist", "customer data agreement", ["CH"]);
+        Assert.True(JobPlacement.IsEligible(policy, new(null, null, "CH")));
+        Assert.False(JobPlacement.IsEligible(policy, new(null, null, "DE")));
+        Assert.False(JobPlacement.IsEligible(policy, new(null, null, null)));
+        Assert.False(JobPlacement.IsEligible(policy, new(null, null, "ch")));
+    }
+
+    [Fact]
+    public void UnrestrictedPlacementNeedsExplicitSourcedPolicy()
+    {
+        Assert.True(JobPlacement.IsEligible(new("anywhere", "customer authorization test fixture", null),
+            new(null, null, null)));
+        Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
+            new("anywhere", "TODO(source)", null), new(null, null, null)));
+        Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
+            new("unknown", "customer authorization test fixture", null), new(null, null, null)));
+        Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
+            new("country-allowlist", "customer authorization test fixture", []), new(null, null, "CH")));
+        Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
+            new("country-allowlist", "customer authorization test fixture", ["CH", "CH"]), new(null, null, "CH")));
+    }
+
+    [Fact]
+    public void DescriptorLoaderRejectsMissingPolicy()
+    {
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllText(path, """{"id":"test","containerImage":"example","interruptible":true,"supportedControlLevels":["freeze"],"workUnit":"batch"}""");
+            Assert.Throws<InvalidDataException>(() => JobDescriptorLoader.Load(path));
+            File.WriteAllText(path, """{"id":"test","containerImage":"example","interruptible":true,"supportedControlLevels":["freeze"],"workUnit":"batch","placementPolicy":{"mode":"origin-site","source":"customer data agreement"}}""");
+            Assert.Equal("origin-site", JobDescriptorLoader.Load(path).PlacementPolicy.Mode);
+            File.WriteAllText(path, """{"id":"test","containerImage":"example","interruptible":true,"supportedControlLevels":["freeze"],"workUnit":"batch","placementPolicy":{"mode":"country-allowlist","allowedCountryCodes":["CH"],"source":"customer data agreement"}}""");
+            Assert.Equal("CH", Assert.Single(JobDescriptorLoader.Load(path).PlacementPolicy.AllowedCountryCodes!));
+            File.WriteAllText(path, """{"id":"test","containerImage":"example","interruptible":true,"supportedControlLevels":["freeze"],"workUnit":"batch","placementPolicy":{"mode":"anywhere","source":"customer data agreement","allowedSiteIds":["customer-a"]}}""");
+            Assert.Throws<System.Text.Json.JsonException>(() => JobDescriptorLoader.Load(path));
+        }
+        finally { File.Delete(path); }
     }
 
     private sealed class FakeControl : IContainerControl

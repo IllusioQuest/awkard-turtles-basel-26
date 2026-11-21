@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core / jobs
 - **Depends on:** T-00
-- **Suggested owner:** Codex or anyone  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex or anyone  ·  **Owner:** Team lead / Claude  ·  **Status:** blocked: waiting for Nikita's decision on always-on representation (then Claude implements the schema)
 
 ## Goal
 
@@ -33,3 +33,28 @@ Describe job types as data, so the scheduler and the year simulation can use any
 ## Notes
 
 Runtime/energy of the laptop job come from T-02; leave TODO(source) until then.
+T-24 owns the separate job data-locality field and validation; coordinate its shape before
+changing `config/jobs/job.schema.json` or `JobDescriptorLoader` for the broader catalog.
+
+## Decision needed from Nikita (2026-11-21, team lead's instruction)
+
+The two job types for the draft are **transcription** (T-02, Ennio) and **webhosting** (T-23,
+Nikita). `config/jobs/job.schema.json` and `JobDescriptorLoader` (decision 0009) only allow
+interruptible jobs with freeze support, so the always-on webhosting service from
+`docs/webhosting-heat-runtime.md` cannot be described honestly yet.
+
+**Nikita decides the representation; Claude then implements only the schema/loader/test change**
+(Nikita writes the webhosting descriptor in T-23). Options:
+
+- **A. One catalog, extended:** new field `serviceMode: "batch" | "always-on"`; `interruptible: false`
+  and an empty control-level list allowed only for `always-on`; optional `idlePowerKw` /
+  `loadedPowerKw`. All job types for must-have 1 stay in one place. (Claude's recommendation.)
+- **B. Two catalogs:** batch jobs stay in `config/jobs/`, always-on services get
+  `config/services/*.json` with their own schema.
+
+For the draft, webhosting goes **only into the catalog**, not into the year simulation (scored
+figures stay stable); the constant base load in the simulation comes after the draft in its own
+ticket, agreed with Jona (T-05/T-06).
+
+Please write the decision here (or in PR #7) with a decision record number; the next free one is
+on `main` in `docs/decisions/README.md`.

@@ -1,0 +1,6 @@
+{
+  "mode": "unlimited",
+  "excessHeatPolicy": "wait",
+  "source": "docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
+  "jobTypes": []
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "sites": [
+    {
+      "site_id": "reference-house",
+      "hourly_path": "sites/reference-house/hourly.csv",
+      "summary": {
+        "server_count": 4,
+        "heating_days": 206,
+        "hours": 8760,
+        "space_heat_demand_kwh": 26850.546875,
+        "hot_water_demand_kwh": 4380,
+        "total_heat_demand_kwh": 31230.546875,
+        "server_heat_used_kwh": 18128.82031250067,
+        "backup_heat_kwh": 13101.726562499332,
+        "dumped_heat_kwh": 0,
+        "server_hours": 22661.025390625,
+        "utilisation": 0.6467187611479738,
+        "coverage": 0.5804836010416698,
+        "electricity_cost_chf": 7534.790942382813,
+        "heat_value_chf": 2411.133101562589,
+        "computing_income_chf": 6798.3076171875,
+        "break_even_chf_per_server_hour": 0.22609999999999608,
+        "missed_deadlines": "not modelled yet",
+        "job_demand_assumption": "unlimited jobs; excess heat policy: wait; source: docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
+        "profitability_note": "Case break-even covers electricity minus used-heat value only. Hardware, integration and operations are excluded; this is not a full-cost profitability claim.",
+        "jobs": null
+      }
+    }
+  ]
+}

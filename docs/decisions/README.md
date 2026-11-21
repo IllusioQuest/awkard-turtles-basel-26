@@ -20,4 +20,9 @@ later.
 | [0005](0005-csharp-core.md) | Shared C# scheduler and executor boundary | accepted (PR #2 merged) |
 | [0006](0006-linux-host-network-ingress.md) | Linux host-network ingress crash experiment | proposed; experiment approved by user, reviewed with changes; full HA pending |
 | [0007](0007-whole-container-pause-recovery.md) | Two Linux managers for paused gateway containers | proposed; reviewed with changes, awaiting user approval |
+| [0008](0008-site-heat-state.md) | Per-site heat state and forecast interface | proposed |
 | [0009](0009-generic-job-control.md) | Generic Docker job control through the shared scheduler | proposed (code merged to main; renumbered from 0006) |
+| [0010](0010-job-queue-year-simulation.md) | Finite job queue in the yearly heat simulation | proposed |
+| [0011](0011-result-export-contract.md) | Versioned snake_case result export | proposed; review pending |
+| [0012](0012-hosting-component-isolation.md) | Separate frontend and API node pools | proposed; review pending |
+| [0013](0013-job-data-locality.md) | Job data-locality eligibility | proposed |

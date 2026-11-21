@@ -21,5 +21,9 @@
     "unit": "kWh/work unit",
     "source": "Own measurement 2026-11-21, AMD Ryzen 7 250 laptop, 8 threads, 5 runs x 14.98 audio min; docs/jobs/transcription.md, data/raw/measurements/transcription-whisper-base/energy-2026-11-21 (whole laptop, gross, battery meter)"
   },
-  "progressFile": "data/external/transcription/work/progress.json"
+  "progressFile": "data/external/transcription/work/progress.json",
+  "placementPolicy": {
+    "mode": "anywhere",
+    "source": "Demo workload only: public-domain LibriVox recording (docs/jobs/transcription.md), no personal data and no customer contract. A real customer job must carry the policy from its contract (decision 0013)."
+  }
 }

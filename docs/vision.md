@@ -117,6 +117,24 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
+## Under consideration: filler load sold as spot capacity (2026-11-21)
+
+Real demand for our premium service (confidential transcription) fills only a tiny share of a
+house's server capacity: about 436 audio hours per 1 kW server-hour (T-02) against 428 dictation
+jobs/day from all doctors in Basel-Stadt, which gives 0.1 % heat coverage instead of 58 %
+(`research/job-demand.md`). We are therefore considering a **two-tier load model**:
+
+- **Premium load:** sensitive batch jobs with deadlines (transcription, document AI), priced per
+  work unit, high margin, served first.
+- **Filler load:** remaining capacity sold as **interruptible spot compute** at the market price,
+  paused or released whenever the heat is not needed. It produces most of the heat.
+
+Prices: CHF 0.66 per server-hour fixed for the scored figures (Hetzner-equivalent), with the
+self-updating Azure-based value (0.687 on 2026-11-21, T-28) shown as a live cross-check
+(`research/computing-price.md`). Open: who buys interruptible home capacity (no source yet for
+willingness to pay without service guarantees); queue support for mixing finite premium jobs with
+unlimited filler (T-05 extension); team confirmation with Ennio (T-26).
+
 ## Open questions
 
 - What a host pays or receives in each ownership model (heat fee? free heat? commission?).

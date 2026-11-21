@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Presentation
 - **Depends on:** T-00
-- **Suggested owner:** team lead + Claude  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** team lead + Claude  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress (storyboard direction agreed: docs/pitch/storyboard.md)
 
 ## Goal
 
