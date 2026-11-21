@@ -1,6 +1,6 @@
 # Hosting privacy and component isolation (T-27)
 
-Status: four-node prototype verified on feat/T-27-hosting-isolation; PR pending. Current commands/results: [runtime guide](webhosting-isolation-runtime.md). Do not use real personal data.
+Status: four-node prototype verified on feat/T-27-hosting-isolation; PR #12 ready for review. Current commands/results: [runtime guide](webhosting-isolation-runtime.md). Do not use real personal data.
 User approved component isolation first on 2026-11-21; confidentiality from node operators is
 outside this increment. See decision 0012.
 
@@ -85,4 +85,5 @@ DROP counters in INPUT/DOCKER-USER chains. Full pool/failure checks subsequently
 Application restart policy is no: after engine failure, Start-IsolatedNetwork.ps1 reapplies
 rules before starting the app. The other pool replica serves traffic during manual recovery.
 No automatic node re-provisioning is claimed.
+
 

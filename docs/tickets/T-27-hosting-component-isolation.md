@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch · **Area:** Webhosting privacy prototype
 - **Depends on:** existing hosting gateway and nested-engine lab
-- **Owner:** Nikita / Codex · **Status:** in progress (verified; PR pending)
+- **Owner:** Nikita / Codex · **Status:** in progress (verified; PR #12 ready for review)
 
 User approved component isolation first, with node-operator access limits documented.
 Build a separate opt-in four-engine Linux lab: two frontend replicas and two API replicas.
@@ -17,3 +17,9 @@ Progress: separate frontend/API Linux images build. Internal bridge experiment b
 published-port ingress, so firewall revision was then approved and passed full rollout tests.
 See docs/webhosting-privacy.md. No privacy/failover completion is claimed.
 
+
+
+PR #12: https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/12
+All four final isolation checks pass; 17 hosting tests; both Linux images build.
+Four node kills and active-gateway pause recovered at the same URL, with interruptions measured
+in docs/webhosting-isolation-runtime.md. Keep open until the code PR is merged.
