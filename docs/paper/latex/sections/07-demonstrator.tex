@@ -6,14 +6,14 @@ The annual run and the laptop demonstration use the same control boundary:
 \texttt{SchedulerController.Apply} sends it to an \texttt{IExecutor}. The simulated executor
 settles the annual heat balance; \texttt{DockerJobExecutor} pauses, resumes or throttles a
 running container. The network adapter commits an hourly decision through this path and rejects
-a changed heat signal (decisions 0005, 0009 and 0024). A successful pause/resume demonstrates
+a changed heat signal. A successful pause/resume demonstrates
 control of a process, not thermal recovery from the laptop.
 
 The proposed Type~1 service is batch summarisation of non-personal documents with Apertus 8B.
 On an eight-thread laptop CPU, a 14.98-minute transcript (3,310 input and 319 output tokens)
 took a mean \qty{133.3}{s} in three runs. Its gross CPU-package energy was approximately
 \qty{0.92}{Wh} per document; the battery meter was invalid with the charger connected
-(\texttt{docs/jobs/llm-summary.md}). No L4 throughput or whole-machine power can be inferred
+(measurement log in Appendix~\ref{app:repro}). No L4 throughput or whole-machine power can be inferred
 without an additional measurement.
 
 The Type~2 representative is a checkpointable 2D Ising Monte Carlo parameter sweep. On a
@@ -21,7 +21,7 @@ separate laptop, a steady-state run completed 320 tasks in \qty{274.4}{s}, consu
 \qty{1.3089}{Wh} of gross whole-laptop battery energy, or about \qty{0.00409}{Wh} per task.
 The battery meter updates slowly; a shorter run was discarded for this reason. Completed task
 files are written atomically so a restart repeats only unfinished tasks. The same heat scheduler
-controlled this container in a \texttt{LiveRun} replay (\texttt{docs/jobs/research-sim.md}).
+controlled this container in a \texttt{LiveRun} replay (Appendix~\ref{app:repro}).
 Both jobs establish executable workload types and interruption behaviour. Their laptop energy
 figures cannot validate the abstract \qty{1}{kW} server, a liquid-cooled L4 build or a paying
 customer workload.

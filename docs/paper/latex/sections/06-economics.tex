@@ -9,9 +9,9 @@ electricity cost net of heat value is $0.3325-0.8(0.133)=\text{CHF}~0.2261$ per 
 For the four-server reference run, the same calculation is
 $(\text{CHF}~7{,}534.79-\text{CHF}~2{,}411.13)/22{,}661.03
 =\text{CHF}~0.2261$ per sold server-hour
-(\texttt{docs/results/reference-house.md}). This number excludes equipment and operation.
+(Appendix~\ref{app:repro}). This number excludes equipment and operation.
 
-\paragraph{Operator and host.} In the provisional operator model (decision 0020), DigitalHeat
+\paragraph{Operator and host.} In the provisional operator model, DigitalHeat
 owns the hardware, sells the computing and pays or reimburses its electricity. The homeowner
 receives the useful heat and retains a backup heat source. With free heat, the host's potential
 avoided heat-pump expense is $Q_{\mathrm{use}}v$, while DigitalHeat's cash balance is computing
@@ -20,7 +20,7 @@ value in the four-server run belongs to the host; it is not also operator income
 a fee $h$ per useful kWh, $Q_{\mathrm{use}}h$ transfers from host to operator without changing
 combined surplus. A positive combined surplus alone does not establish a viable offer for both.
 
-\paragraph{Four-server cost boundary.} The proposed L4 profile in T-14 uses a normalised
+\paragraph{Four-server cost boundary.} The modelled L4 profile uses a normalised
 \qty{1}{kW} server, not a quoted installable chassis. The later card-price sensitivity implies
 CHF~44,179 per such server; with six-year depreciation and CHF~708 yearly operations per server,
 the four-server, all-sold, free-heat operator needs an average realised compute price of
@@ -34,22 +34,22 @@ approximately
 The calculation still excludes installation, cooling, financing, platform fees, idle power and
 wear. The earlier CHF~0.956 consumer-GPU threshold was a lower-cost sensitivity, not an operator
 threshold for a deployable L4 system. Consumer-card deployment is excluded from the proposed
-architecture pending licence clarification (\texttt{docs/research/free-heat-viability.md}).
+architecture pending licence clarification; the cost ledger is identified in
+Appendix~\ref{app:repro}.
 
-T-14's hypothetical L4 throughput yields CHF~1.81 per server-hour at an 8B competitor's list
+The hypothetical L4 throughput yields CHF~1.81 per server-hour at an 8B competitor's list
 token price, but only about CHF~0.90 at its batch price. Neither is a DigitalHeat sale: the
 throughput transfers a benchmark for a different model and GPU, and no recurring Type~1 order is
-documented. At the later L4 purchase price, T-14's four-server, all-Type~1 list-price row leaves
-about CHF~1,172 per year before wear and installation. T-35's central wear sensitivity of
+documented. At the later L4 purchase price, the four-server, all-Type~1 list-price scenario leaves
+about CHF~1,172 per year before wear and installation. A central wear sensitivity of
 CHF~0.473 per sold hour would subtract roughly CHF~10,719, changing that row to about
-$-\text{CHF}~9{,}547$ (\texttt{docs/research/free-heat-viability.md}). The wear allowance is an
+$-\text{CHF}~9{,}547$ (Appendix~\ref{app:repro}). The wear allowance is an
 extrapolation, not an observed L4 replacement bill. The CPU-only measured research kernel is
 also not evidence of a full-power, billable GPU filler workload. Hence the favourable mixed
 Type~1/Type~2 rows remain technical price scenarios.
 
-\paragraph{Market comparison.} The earlier T-16 comparison
-(\texttt{docs/research/price-comparison.md};
-\texttt{python3 scripts/price\_comparison.py}) provides a dated screening test, not a sales
+\paragraph{Market comparison.} The dated price comparison in Appendix~\ref{app:repro}
+provides a screening test, not a sales
 forecast. At the older L4 hardware cost, full heat credit and \qty{64.7}{\percent} assumed
 sold hours, it estimates CHF~0.054 per million 8B-class tokens; at \qty{35}{\percent} sold
 hours, CHF~0.093. A listed Swiss 8B offer was CHF~0.034 per million tokens on the same
@@ -65,7 +65,7 @@ Dell's documented four-card limit; the existing host estimate plus card TDP give
 $12/24=\qty{0.5}{kW}$ hot-water demand. At continuous operation the variant could deliver at
 most \qty{3157}{kWh} useful heat, worth about CHF~420/year to the host at the case's heat-pump
 comparison. These are estimated physical quantities, not measured wall power or installed heat
-recovery (\texttt{docs/research/profitable-home-path.md}). The fixed scored reference house and
+recovery (Appendix~\ref{app:repro}). The fixed reference house and
 its abstract \qty{1}{kW} server remain unchanged.
 
 At a retail comparison price of CHF~0.2924 per GPU-hour, four billable GPUs, the estimated

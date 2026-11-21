@@ -3,16 +3,16 @@
 The case weather and price inputs have \texttt{SOURCE} files in \texttt{data/raw/}.
 The reference-house export repeats with identical SHA-256 output hashes
 (\texttt{scripts/export\_reference\_house.py}); network experiment rows record their
-command lines and fixed seeds. Economic sensitivities reproduce only from the versioned
-T-14 snapshot and the arithmetic stated in Section~\ref{sec:economics}; the unmerged
-actor-model branch is a release dependency for a self-contained archive.
+command lines and fixed seeds. The operator and small-node economic sensitivities are
+worked calculations from versioned input ledgers; no single command currently regenerates
+their full cash-flow table. Section~\ref{sec:economics} states the arithmetic and its limits.
 Network outputs live in \texttt{data/derived/network/experiments/}. The greedy and LP
 files are, respectively, \texttt{A\_type1\_share.csv} / \texttt{A\_type1\_share-lp.csv},
 \texttt{D\_network\_mix.csv} / \texttt{D\_network\_mix-lp.csv}, and
 \texttt{E\_transfer\_delay.csv} / \texttt{E\_transfer\_delay-lp.csv}.
 Experiment B uses \texttt{B\_phi.csv}; experiment C uses
-\texttt{C\_forecast\_error-lp.csv}. The reservation comparison comes from
-\texttt{docs/decisions/0029-type1-heat-budget-reservation.md}.
+\texttt{C\_forecast\_error-lp.csv}. The reservation comparison is included in
+\texttt{A\_type1\_share.csv}.
 
 \begin{table}[ht]
   \centering
@@ -36,11 +36,14 @@ Experiment B uses \texttt{B\_phi.csv}; experiment C uses
       \texttt{dotnet run -{}-project src/DigitalHeat.YearRun -{}- . config/job-scenarios/mixed-basel-technical.json}
       and \texttt{mixed-basel-35pct-technical.json}; see \texttt{docs/model/mixed-job-queue.md} \\
     Operator and small-node sensitivities (Section~\ref{sec:economics}) &
-      T-14 snapshot and arithmetic in \texttt{docs/research/free-heat-viability.md} and
-      \texttt{docs/research/profitable-home-path.md}; T-14 remains on PR~27 \\
+      Worked arithmetic and input ledgers in \texttt{docs/research/free-heat-viability.md} and
+      \texttt{docs/research/profitable-home-path.md}; no full automated rerun yet \\
     Market price screen (Section~\ref{sec:economics}) &
       \texttt{python3 scripts/price\_comparison.py}; inputs and limits in
       \texttt{docs/research/price-comparison.md} \\
+    Measured laptop jobs (Section~\ref{sec:demonstrator}) &
+      Logs and commands in \texttt{docs/jobs/llm-summary.md} and
+      \texttt{docs/jobs/research-sim.md} \\
     Tests &
       \texttt{dotnet test src/DigitalHeat.sln} \\
     \bottomrule

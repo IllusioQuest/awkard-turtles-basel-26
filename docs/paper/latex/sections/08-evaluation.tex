@@ -11,7 +11,7 @@ record their exact command lines.
 \label{sec:eval-house}
 
 Four servers cover \qty{58.0}{\percent} of the house's heat demand with no dumped heat at
-\qty{64.7}{\percent} utilisation (Table~\ref{tab:house-sizes}). Four is the draft presentation
+\qty{64.7}{\percent} utilisation (Table~\ref{tab:house-sizes}). Four is the reference
 baseline, chosen because two independent implementations reproduce it; it is \emph{not} an
 optimised server count. Three and five servers are shown for comparison.
 
@@ -70,7 +70,7 @@ for the forecast world and its plan can be slightly worse in reality.
 \label{sec:eval-sizing}
 
 The marginal-value sizing sweep runs the shared C\# year model for each count from zero
-through full heat coverage (T-70; \texttt{docs/results/server-sizing.md}).
+through full heat coverage (Appendix~\ref{app:repro}).
 Its $n$th server adds progressively fewer heat-feasible hours: \num{7631} for the first,
 \num{4882} for the fourth, \num{3796} for the sixth, and only \num{5} for the thirteenth.
 These are upper bounds on sold hours because the sweep assumes unlimited buyers. In the
@@ -92,14 +92,13 @@ coverage and zero dumping. At a cap of 0.35, achieved work falls to \num{9759.35
 server-hours and coverage to \qty{25.00}{\percent}, still with zero dumping. The cap applies
 to installed capacity each hour; the resulting Type~2 hours are \num{9720.56}, not 35\% of
 the heat-led hours. Both runs complete the fixture's \num{156220} jobs without missed
-deadlines (\texttt{docs/model/mixed-job-queue.md}; reproduce with its two
-\texttt{DigitalHeat.YearRun} commands). The result demonstrates demand sensitivity and queue
+deadlines. The commands are listed in Appendix~\ref{app:repro}. The result demonstrates demand sensitivity and queue
 accounting, not a forecast of sold public-document work.
 
 \subsection{Strategy comparison on a Swiss test network}
 \label{sec:eval-network}
 
-The test network (\texttt{config/network/switzerland-test.json}) has 33 sites in nine Swiss cities:
+The test network has 33 sites in nine Swiss cities:
 the reference house, single- and multi-family houses, nine hotels with spa and five indoor pools.
 Locations and sizes are \emph{synthetic test data}; heat demand comes from the case formula
 (houses) or from the profiles named in the scenario file. All results in this subsection are
@@ -171,7 +170,7 @@ send less work away.
 
 \begin{table}[ht]
   \centering
-  \caption{Local timing versus moving work (decision 0029).
+  \caption{Local timing versus moving work.
     Type~1 share \qty{30}{\percent}, $\varphi=1$, 33 synthetic sites.}
   \label{tab:reserve}
   \begin{tabular}{lrrrr}
@@ -187,7 +186,7 @@ send less work away.
 \end{table}
 
 \paragraph{Transfer delay.} The results above move work without friction. Experiment~E
-(decision 0030) lets moved work start at the destination only $\delta$ hours after the cohort's
+lets moved work start at the destination only $\delta$ hours after the cohort's
 arrival (``data staged at arrival'', a lower bound on friction). The delays are an assumption
 sweep; no sourced delay exists. Even $\delta = \qty{12}{h}$ costs no deadline: B2 stays at
 \qty{0}{\percent} missed (Table~\ref{tab:exp-e}), because the year-round sinks have enough free

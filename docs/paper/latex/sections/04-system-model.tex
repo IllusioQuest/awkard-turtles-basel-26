@@ -1,9 +1,8 @@
 \section{System model}
 \label{sec:model}
 
-This section states the model compactly; the full parameter tables with units and sources are in
-\texttt{docs/model/routing-optimisation.md} (decision 0014), and the implemented variant in
-\texttt{docs/model/network-scheduler.md} (decisions 0024, 0025).
+This section states the model compactly. Appendix~\ref{app:repro} identifies the full parameter
+tables, implementation and input files.
 
 \paragraph{Sites and hours.} A network consists of sites $s \in \Sites$ (houses, hotels with spa,
 indoor pools). Time runs in hourly steps $t$, local time Europe/Zurich. Site $s$ has $N_s$ servers,
@@ -18,12 +17,12 @@ covers demand, then charges the tank, and only the rest is dumped; the tank disc
 remaining demand, and the backup heater covers what is still missing. There is no second heat
 model: the year simulation, the network simulation and the tests share this function.
 
-\paragraph{Work.} We use two job types (decision 0020). \emph{Type~1} is paid batch LLM work
+\paragraph{Work.} We use two job types. \emph{Type~1} is paid batch LLM work
 (for example summarising public documents); it arrives in \emph{cohorts} $c \in \Coh$, one per
 origin site $o_c$ and day, at local 00:00, with an exclusive deadline $d_c$ \qty{24}{h} later and a
 remaining amount $W_c$ server-hours. Its volume in our experiments is a labelled scenario: a share
 of the origin's yearly heat-led server-hours, because no sourced arrival rate exists. Type~1 may
-run only at eligible sites $E_c \subseteq \Sites$, which the data-locality rules (decision 0013)
+run only at eligible sites $E_c \subseteq \Sites$, which the data-locality rules
 determine before any optimisation; no price or heat term can override them. \emph{Type~2} is
 \emph{filler}: research simulation with checkpoints and no deadline, available up to
 $F_{s,t} = \varphi N_s$ server-hours per hour. $\varphi = 1$ is the case-permitted ``unlimited
@@ -46,7 +45,7 @@ sweep with $\rho=0.8$ rather than interpreting it as forecast skill.
 
 \paragraph{Planning model.} At hour $\tau$ the scheduler plans
 $\Win = \{\tau,\ldots,\tau+H-1\}$, where $H=48$, and executes only the first decision
-(rolling horizon, decision 0014 \S6.2). It knows the actual tank content $S^0_s$ and
+(rolling horizon). It knows the actual tank content $S^0_s$ and
 unfinished cohorts already arrived, but no future arrivals. The decision variables are
 non-negative and continuous: load $u$, Type~1 processing $x$, filler $f$, direct heat $q^{\mathrm{dir}}$,
 charge $q^{\mathrm{ch}}$, discharge $q^{\mathrm{dis}}$, backup $b$, dumped heat $z$, stored heat
@@ -77,7 +76,7 @@ Here $m_c$ is \emph{missed server-hours}; the reported fraction of missed jobs i
 separate output metric.
 For the current hour $\hat D_{s,\tau}$ is the measured demand. Eligibility, deadlines and
 locality are enforced by which $x_{c,s,t}$ exist, not by penalties. Work processed at $s \ne o_c$
-counts as \emph{moved}. A uniform transfer delay $\delta$ (whole hours, default 0; decision 0030)
+counts as \emph{moved}. A uniform transfer delay $\delta$ (whole hours, default 0)
 models friction under the assumption ``data staged at arrival'': the cohort's data starts copying to
 the eligible sites when it arrives, so $x_{c,s,t}$ with $s \ne o_c$ exists only for
 $\alpha_c + \delta \le t < d_c$, where $\alpha_c$ is the arrival hour. This is a lower bound on
@@ -87,7 +86,7 @@ server-hours instead. The objective is lexicographic and is given in Section~\re
 
 \paragraph{Why an LP.} The problem is a flow in a time-expanded network with nodes $(s,t)$: work
 waits at a site until its deadline, moves to an eligible site, or is computed; heat is a second
-commodity that is used, stored or dumped, coupled to work by \eqref{eq:produce}
-(\texttt{docs/model/routing-optimisation.md}~\S6.1). With divisible work and part load it stays a
+commodity that is used, stored or dumped, coupled to work by \eqref{eq:produce}.
+With divisible work and part load it stays a
 linear programme. Integer servers, indivisible or non-preemptive jobs, start-up costs or
 all-or-nothing payments make it a MILP (future work, Section~\ref{sec:limits}).
