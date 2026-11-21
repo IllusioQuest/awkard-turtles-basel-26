@@ -120,7 +120,7 @@ public sealed class RunStore
         var t = CsvTable.Read(Path.Combine(m.Dir, "houses-summary.csv"));
         var specs = new Dictionary<string, HouseSpec>();
         if (m.HouseFile.Length > 0)
-            foreach (var h in HouseFiles.Read(_repoRoot is { } && Path.IsPathRooted(m.HouseFile) ? m.HouseFile : Path.Combine(_repoRoot, m.HouseFile)).Houses)
+            foreach (var h in HouseFiles.Read(Path.IsPathRooted(m.HouseFile) ? m.HouseFile : Path.Combine(_repoRoot, m.HouseFile)).Houses)
                 specs[h.HouseId] = h;
         var grid = _grid.Value;
         var list = new List<HouseInfo>(t.Rows.Count);
