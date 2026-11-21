@@ -26,3 +26,8 @@ One export format that all dashboards and the paper read, so nothing recomputes 
 
 - Follow AGENTS.md: agree the approach with your human first (§10), build on the shared C# core and data (§9a), every number with a source (§5), update `docs/status.md`.
 
+
+Implementation and showcase are ready for review in PR #10:
+https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/10
+29 tests pass; reference hourly output and coverage match legacy output. Keep in progress until
+merged. Contract and generation details: docs/model/data-contract.md.

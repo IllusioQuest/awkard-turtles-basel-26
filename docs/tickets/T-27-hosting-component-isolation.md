@@ -12,3 +12,7 @@ Test a failed node in each pool; do not claim zero downtime or host-operator con
 Keep the existing lab usable. T-24 owns data-locality policy; no parallel policy implementation.
 Completion requires reproducible tests, code PR, and docs with topology and limitations.
 
+
+Progress: separate frontend/API Linux images build. Internal bridge experiment blocked required
+published-port ingress, so full rollout is paused for the user's firewall-policy choice.
+See docs/webhosting-privacy.md. No privacy/failover completion is claimed.

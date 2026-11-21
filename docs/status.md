@@ -74,3 +74,4 @@ not invent a competing country/site policy. T-01 always-on catalog decision rema
 T-27: user approved frontend/API component isolation with documented operator limits; four-engine opt-in lab, decision 0012. T-13 exporter implementation underway; no shared input schema changes.
 
 T-13: 29 tests pass; 8,760-row showcase generated from clean 8651786, legacy hourly/coverage comparison exact. T-27 renumbered from T-25 after concurrent team animated-house ticket collision; no files from that task changed.
+T-13 ready for review in PR #10 (29 tests, exact hourly legacy comparison). T-27 images build; internal bridge ingress failed. Awaiting user choice on per-node firewall rules before network rollout. Existing hosting lab left running; privacy research and topology in docs/webhosting-privacy.md.
