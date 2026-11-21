@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data
 - **Depends on:** T-26 (price method), T-06 (config)
-- **Suggested owner:** Claude  ·  **Owner:**  ·  **Status:** proposed (waiting for team lead's go)
+- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress (go from team lead 2026-11-21; branch `feat/T-28-price-updater`)
 
 ## Goal
 
