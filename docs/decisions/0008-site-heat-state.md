@@ -1,6 +1,6 @@
 # 0008: Per-site heat state and forecast (T-09)
 
-- Status: proposed; scope approval pending, T-00 remains open
+- Status: proposed; user authorized ticket implementation on 2026-11-21; T-00 team choices remain open
 - Date: 2026-11-21
 - Owner: Nikita / Codex
 
@@ -42,4 +42,4 @@ annual tests must remain unchanged and pass. Units remain kWh per hourly step, d
 
 ## Review
 
-Verdict: go with changes. Add the optional forecast-aware entry point while preserving IScheduler/IExecutor; specify provenance and indexing; validate hardware and arithmetic. Defer collection identity checks until a collection exists. Forecast metadata: kind, sourceSeriesId, sourceIndex, local hour label under the existing Europe/Zurich 24-values-per-day convention. Current and forecast demands are gross site demand, not net of tank discharge. Synthetic error formula: max(0, actualKwh * (1 + fractionalError)); errors must be finite and >= -1, lengths must match, outputs and derived capacities must remain finite. Hardware values must be finite and positive. Implementation awaits scope approval; T-00 remains open.
+Verdict: go with changes. Add the optional forecast-aware entry point while preserving IScheduler/IExecutor; specify provenance and indexing; validate hardware and arithmetic. Defer collection identity checks until a collection exists. Forecast metadata: kind, sourceSeriesId, sourceIndex, local hour label under the existing Europe/Zurich 24-values-per-day convention. Current and forecast demands are gross site demand, not net of tank discharge. Synthetic error formula: max(0, actualKwh * (1 + fractionalError)); errors must be finite and >= -1, lengths must match, outputs and derived capacities must remain finite. Hardware values must be finite and positive. User authorized proceeding with ticket work on 2026-11-21. T-09 introduces no new hardware/service choice; T-00 remains open.
