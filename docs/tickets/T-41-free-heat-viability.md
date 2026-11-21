@@ -31,4 +31,6 @@ All numbers need a calculation path and source. Prices and possible demand are n
 paid orders. Follow AGENTS.md §§5, 9a and 10.
 
 First version: [`docs/research/free-heat-viability.md`](../research/free-heat-viability.md).
+User-requested follow-up: [candidate profitable private-home path](../research/profitable-home-path.md),
+covering case interpretation, a physically sized base-load node and a paid-capacity contract boundary.
 Keep this ticket in review until the team accepts the business conclusion; T-14 remains in PR #27.

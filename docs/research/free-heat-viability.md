@@ -1,5 +1,8 @@
 # Free heat: paid demand versus operator revenue (T-41)
 
+Follow-up: [a candidate profitable private-home path](profitable-home-path.md) checks a smaller,
+physically sized GPU node and reserved capacity sales. It is conditional, not a verified profit.
+
 **Status:** conditional audit, 2026-11-21. Three read-only subagent audits independently checked
 demand, achievable revenue and costs. This note does not change the case model, T-14 economics
 code or the provisional business model. Its numerical T-14 snapshot is [PR #27](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/27)
