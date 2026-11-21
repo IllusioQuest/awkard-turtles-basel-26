@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Runtime / integration
 - **Depends on:** T-03
-- **Suggested owner:** Nikita  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Nikita  ·  **Owner:** Nikita / Codex · **Status:** in progress
 
 ## Goal
 
