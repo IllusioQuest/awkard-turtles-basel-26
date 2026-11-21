@@ -4,11 +4,13 @@ $labRoot=Split-Path -Parent $PSScriptRoot
 $reportRoot=Join-Path $labRoot 'TestResults'
 New-Item -ItemType Directory -Force $reportRoot | Out-Null
 $ids=@(& docker ps -aq --filter label=com.docker.compose.project=digitalheat-gaming --filter "label=digitalheat.gaming.node=$Node")
-if ($ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') { throw 'Expected exactly one lab node' }
+if ($LASTEXITCODE -ne 0 -or $ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') { throw 'Expected exactly one lab node' }
 $probe=@'
 set +e
 printf '%s\n' '=== Device paths ==='
-ls -l /dev/dri /dev/dxg /usr/lib/wsl/lib
+for device_path in /dev/dri /dev/dxg /usr/lib/wsl/lib; do
+    if [ -e "$device_path" ]; then ls -ld "$device_path"; else printf 'Not exposed: %s\n' "$device_path"; fi
+done
 printf '\n=== Driver libraries ===\n'
 find /usr/lib -name '*d3d12*' -o -name '*dzn*' -o -name '*vulkan*' 2>/dev/null | head -30
 printf '\n=== OpenGL renderer ===\n'
@@ -20,7 +22,12 @@ if command -v vainfo >/dev/null; then timeout 15 vainfo; else echo 'vainfo unava
 printf '\n=== Encoder tools ===\n'
 command -v ffmpeg || true
 '@
-$output=$probe | & docker exec -i --user ubuntu --env DISPLAY=:20 $ids[0] sh 2>&1 | Out-String
+# Merge diagnostics INSIDE Linux. Windows PowerShell 5.1 otherwise promotes native stderr
+# (including expected vainfo failures) to terminating NativeCommandError under Stop.
+# Strip CR from the Windows pipeline before feeding the probe to the Linux shell.
+$output=$probe | & docker exec -i --user ubuntu --env DISPLAY=:20 $ids[0] sh -c 'exec 2>&1; tr -d ''\r'' | sh' | Out-String
+$probeExitCode=$LASTEXITCODE
 $output | Set-Content (Join-Path $reportRoot "$Node-graphics.txt")
+if ($probeExitCode -ne 0) { throw "Docker probe failed (exit $probeExitCode). See $reportRoot/$Node-graphics.txt" }
 Write-Output $output
 Write-Output 'Capability enumeration does not prove a successful game or hardware encode.'
