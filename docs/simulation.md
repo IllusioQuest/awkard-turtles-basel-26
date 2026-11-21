@@ -1,0 +1,111 @@
+# Fleet simulation: data, inputs, parameters
+
+What the fleet simulation (`src/DigitalHeat.Fleet`) reads, where it comes from, how it becomes
+scheduler input and what can be tuned. Design and algorithms: [`model/fleet-simulation.md`](model/fleet-simulation.md).
+
+## 1. Data used
+
+| Data | Source (link) | Period / granularity | Repo file | Used for |
+|---|---|---|---|---|
+| Weather, reference house | Open-Meteo Historical Weather API, https://open-meteo.com/en/docs/historical-weather-api; 47.56 N 7.59 E | 2025-01-01 – 2025-12-31, hourly, Europe/Zurich (24 values per local day) | `data/raw/open-meteo/basel-2025-hourly.csv` | heat demand of `reference` |
+| Weather, Swiss grid | same API, 409 points on a 10 km LV95 grid + 26 canton capitals (`cap-bs` = case point) | 2025, hourly, Europe/Zurich | `data/raw/swiss-grid/weather-2025-hourly.csv.gz`, `grid-10km.csv` | heat demand per generated house |
+| Grid points, municipality | geo.admin.ch identify / search API, https://api3.geo.admin.ch/rest/services/api/MapServer/identify | current boundaries (retrieved 2026-11-21) | `data/raw/swiss-grid/grid-10km.csv` | cell → BFS municipality, canton |
+| Temperature forecasts | Open-Meteo Previous Runs API, https://open-meteo.com/en/docs/previous-runs-api | 2025, hourly, lead 1/2/3 days | `data/raw/swiss-grid/forecast-2025-hourly-lead0-3.csv.gz` | forecasts for scheduler and pricing |
+| Electricity price, reference | ElCom, https://www.strompreis.elcom.admin.ch; IWB Basel, H4, total | tariff year 2026, one flat price | `data/raw/elcom/iwb-basel-h4-2026.json` | 0.3325 CHF/kWh |
+| Electricity price, all municipalities | same API, categories H1–H8 | tariff year 2026, per municipality | `data/raw/elcom/municipalities-2026/*.json` | price per generated house |
+| Buildings | BFS building register GWR, https://www.housing-stat.ch/ (extract https://public.madd.bfs.admin.ch/ch.zip) | export 2026-11-20, per building | not committed (`data/external/`) | house locations, single-family counts |
+| Residential heat demand | BFE heat demand map, https://www.bfe.admin.ch/waerme-kaeltenachfrage-wohnen-und-dl | base data 2014 (layer 2022), per hectare, MWh/a | not committed (`data/external/`) | design heating power per cell |
+| LLM request trace | Azure LLM inference trace 2024, https://github.com/Azure/AzurePublicDataset/blob/master/AzureLLMInferenceDataset2024.md | 2024-05-12 – 05-18 (one week), per request | not committed | arrival shape (LLM, transcription proxy), tokens per request |
+| GPU cluster trace | Alibaba PAI 2020, https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2020 | July–Aug 2020 (9.9 weeks), per task | not committed | arrival shape and job sizes (research) |
+| Physicians, Basel-Stadt | Grosser Rat BS, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf | Jan 2024 | `config/fleet/job-types/transcription-whisper-large-v3.json` | transcription volume |
+| Dictation length and volume | Bax et al. 2011, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/ | study value | same | 6.5 min per dictation, 66.71 min per physician-month |
+| LLM token volume | OpenRouter, via https://fourweekmba.com/ai-openrouters-run-rate-tops-10-quadrillion-tokens-up-6-7x/ | week ending 2026-10-26 | `data/raw/market/compute-demand.csv` (`cd-t1-openrouter-week`) | LLM volume |
+| Research compute volume | sciCORE Basel, `docs/research/demand.md` | per year | `data/raw/market/compute-demand.csv` (`cd-d-scicore-sh-energy`) | research volume |
+| Energy per work unit | L4 Whisper benchmark (`config/hardware/gpu-inference-l4.json`); RTX 4090 vLLM (`data/raw/market/hardware.csv`, `pe-rtx4090-vllm-iog-qps8`); own laptop measurement 2026-11-21 (`config/jobs/research-sim-montecarlo.json`, CPU placeholder) | per unit | job-type files | work rate of a server |
+| Type 1 prices | Infomaniak / kvant Whisper V3; Public AI Apertus 8B (`docs/research/compute-demand-traces.md` §3) | 2026 list prices | job-type files | income |
+| Type 2 reference price, elasticity | CSCS, Baughman 2019, Jin 2026 et al. (`docs/research/compute-price-elasticity.md`) | — | scenario `pricing` | Type 2 acceptance |
+| Case constants | `docs/case/challenge.md` | — | `config/reference-house.json` | 1 kW, 0.8, 10 kW, 25.6, 12 °C, 12 kWh/day, 35 kWh, ÷ 2.5 |
+
+Solar irradiance is downloaded but not used.
+
+## 2. From data to scheduler input
+
+1. **Houses.** `reference`: the case house, hand-written (`config/fleet/houses/reference.json`).
+   Generated fleets (`generate-houses`): grid cells drawn multinomially, weighted by GWR single-family
+   count per cell; position = cell centre ± 5 km. Per house:
+   - `design_heating_kw` (`cell_median`) = 10 kW × (median modelled single-family heat demand of the cell,
+     BFE split onto GWR buildings by floor area) ÷ (case-formula space heat of a 10 kW house on the cell's weather).
+   - `electricity_price_chf_per_kwh` = ElCom 2026 H4 total of the cell's municipality (coverage-weighted mean over operators).
+   - `formula_divisor_c` 25.6, hot water 12 kWh/day, tank 35 kWh (start 0): case values.
+2. **Heat demand.** Core `HeatDemand.Build` (the same code as the year simulation): space heat
+   `max(0, design_kW × (20 − T) ÷ 25.6)` on days with mean T < 12 °C, plus 12 ÷ 24 kWh hot water per hour.
+   Hourly values, held constant within the hour.
+3. **Servers.** `servers.policy` sets the count; each server is one load in [0, 1]:
+   electricity = load × 1 kW, recoverable heat = 0.8 × electricity.
+4. **Jobs** (generated before the run, seeded, written to `jobs-input.csv`):
+   - Jobs/day: transcription 428 (1,269 physicians × 66.71 min/month × 12/365 ÷ 6.5 min);
+     LLM 194 × 10¹² tokens/week × Swiss share × market share ÷ mean tokens per request ÷ 1,000 requests
+     per job (≈ 1,566); research 80,000 server-h/yr ÷ mean job size (≈ 135). Each × `volume_scale`.
+   - Per hour: count ~ Poisson(jobs/day ÷ 24 × hour-of-week shape), times uniform within the hour.
+   - Per job: size (transcription 6.5 min fixed; LLM empirical Azure tokens; research Alibaba duration
+     at 1 kW), deadline uniform 2 h – 3 d, origin (transcription: a canton capital, weighted by
+     single-family count, must stay in CH).
+5. **Pricing on arrival.** Type 1: fixed price, always accepted. Type 2: price = p_min + (p_max − p_min) × u^γ,
+   u = committed work ÷ forecast heat-led capacity in the job's window; accepted with probability
+   min(1, (price ÷ p_ref)^ε), p_ref with weekly noise.
+6. **Forecasts.** Every hour, per house: forecast temperature = archive temperature + (lead-N forecast − lead-0),
+   N = 1–3 days → same demand formula.
+7. **What the scheduler sees** (`IFleetView`): time; per house current demand kW, tank kWh, servers with
+   load and chunk; forecast demand; queued and running jobs with size, deadline, origin, lifecycle
+   rules. It reacts to events (hour start, arrival, chunk end, tank thresholds, deadlines).
+8. **Heat balance** per segment: Core `HeatBalance.Step` (direct → tank → dump; deficit from tank, then
+   backup). Heat value = used heat × house price ÷ 2.5.
+
+## 3. Tunable parameters and defaults
+
+Scenario file (`config/fleet/scenarios/*.json`); defaults = code defaults (`Contracts/Scenario.cs`):
+
+| Key | Default | Meaning |
+|---|---|---|
+| `run.start_local` / `end_local` | 2025-01-01T00:00 / 2026-01-01T00:00 | window, Europe/Zurich |
+| `run.mode`, `tick_ms` | `event`, 1000 | exact event engine, or fixed ticks |
+| `run.seed` | 20261121 | all random draws |
+| `houses.file` / `houses.generate` | — (required) | house list or generator spec |
+| `servers.policy` | `fixed` (`n`: 4 in all shipped scenarios) | or `share_of_peak` (`f`), `from_file` |
+| `servers.max_electric_kw`, `heat_recovery_share` | 1.0, 0.8 (case) | per server |
+| `demand.volume_scale` | 1 per type (`reference`: 0.1) | multiplies job volume |
+| `demand.from_file` | null | replay a `jobs-input.csv` |
+| `pricing.p_min_chf` | 0.226 CHF/server-h | case break-even |
+| `pricing.p_max_chf` | 1.20 | |
+| `pricing.gamma` | 1 | price curve shape |
+| `pricing.p_ref_chf`, `p_ref_noise_sd` | 0.82, 0.079 | competitor price, weekly relative noise |
+| `pricing.elasticity` | −0.8 | |
+| `forecast.kind` | `archived` | or `perfect`, `persistence` |
+| `scheduler.low_share`, `high_share` | 0.3, 0.9 | tank hysteresis (share of 35 kWh) |
+| `scheduler.urgent_margin_s` | 3600 | Type 1 runs regardless of heat below this slack |
+| `scheduler.chunk_target_s` | 3600 | chunk size at load 1 |
+| `logging.house_timeseries` | `hourly` | `none` / `daily` / `hourly` / `events` |
+
+House generator spec (`config/fleet/houses/*.spec.json`): `count` (100 / 1,000), `cantons` (all; `basel-region-100`: BS, BL; only BL cells exist, so all its houses are in BL),
+`distribution` `proportional_to_single_family`, `design_heating_kw` `cell_median` (or `fixed: 10`),
+`design_heating_spread` 0, `electricity_price` `per_municipality` H4 (or `fixed`), `seed` 20261121.
+
+Job types (`config/fleet/job-types/*.json`):
+
+| | transcription (T1) | LLM (T1) | research (T2) |
+|---|---|---|---|
+| energy per unit | 3.55e-5 kWh/audio min | 5.83e-8 kWh/token | 4.09e-6 kWh/task (CPU placeholder) |
+| price | CHF 0.006/audio min | CHF 8.9e-8/token | dynamic |
+| batch, `max_chunks` | 1, 1 | 1,000 requests, 8 | 1, 4 |
+| volume knobs | 428 jobs/day | Swiss share 0.01, market share 0.01 | 80,000 server-h/yr |
+| deadline | uniform 2 h – 3 d | same | same |
+| placement | CH only, origin canton capitals | anywhere | anywhere |
+| pause / checkpoint / `min_load` / overheads | yes / yes / 0 / 0 s (`TODO(source)`) | same | same |
+
+## 4. Run
+
+```bash
+dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/reference.json
+```
+
+Output in `data/derived/fleet/<scenario>/` (`run.json` records the resolved scenario, seeds and commit).
