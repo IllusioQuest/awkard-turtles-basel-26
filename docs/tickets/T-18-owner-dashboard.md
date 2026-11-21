@@ -24,6 +24,8 @@ What a homeowner sees: current load, temperature and heat rate, heat delivered, 
 
 ## First version for review
 
+Draft PR #28: https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/28.
+
 `prototypes/owner-dashboard/` opens the committed T-13 showcase and accepts another result-bundle
 folder. It shows annual heat coverage, useful heat, regular heating, modelled heat value, hourly
 server load, useful heat rate and tank energy. It has no live telemetry, authentication or measured
