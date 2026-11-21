@@ -1,0 +1,12 @@
+{
+  "_note": "100 houses drawn from the 10 km grid cells of BS and BL. The 10 km grid has no cell inside Basel-Stadt, so all houses are in Basel-Landschaft (BL).",
+  "run": { "start_local": "2025-01-01T00:00", "end_local": "2026-01-01T00:00", "mode": "event", "tick_ms": 1000, "seed": 20261121 },
+  "houses": { "file": "config/fleet/houses/basel-region-100.csv" },
+  "servers": { "policy": "fixed", "n": 4 },
+  "jobTypes": ["config/fleet/job-types/transcription-whisper-large-v3.json", "config/fleet/job-types/llm-inference-apertus-8b.json", "config/fleet/job-types/research-sim-montecarlo.json"],
+  "demand": { "from_file": null },
+  "pricing": { "id": "mock-load", "p_min_chf": 0.226, "p_max_chf": 1.20, "gamma": 1, "p_ref_chf": 0.82, "p_ref_noise_sd": 0.079, "elasticity": -0.8 },
+  "forecast": { "kind": "archived" },
+  "scheduler": { "id": "mock-heat-led", "low_share": 0.3, "high_share": 0.9, "urgent_margin_s": 3600, "chunk_target_s": 3600 },
+  "logging": { "house_timeseries": "daily", "out_dir": "data/derived/fleet" }
+}

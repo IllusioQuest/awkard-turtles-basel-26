@@ -1,0 +1,37 @@
+{
+  "spec": {
+    "description": "The case reference house, unchanged (docs/case/challenge.md). Not generated; hand-written.",
+    "sources": {
+      "position": "docs/case/challenge.md and data/raw/swiss-grid/SOURCE.md: Basel reference coordinates 47.56 N, 7.59 E",
+      "cell_id": "cap-bs: identical to the case weather in all 8,760 hours (data/raw/swiss-grid/SOURCE.md); used for forecasts",
+      "bfs_municipality_nr": "2701 Basel, data/raw/swiss-grid/grid-10km.csv",
+      "weather_ref": "data/raw/open-meteo/basel-2025-hourly.csv (data/raw/open-meteo/SOURCE.md)",
+      "design_heating_kw": "docs/case/challenge.md: 10 kW (config/reference-house.json)",
+      "formula_divisor_c": "docs/case/challenge.md: 20 minus 2025 coldest hourly temperature = 25.6 (config/reference-house.json)",
+      "hot_water_kwh_per_day": "docs/case/challenge.md: 12 kWh/day (config/reference-house.json)",
+      "tank_kwh": "docs/case/challenge.md: 35 kWh (config/reference-house.json)",
+      "tank_initial_kwh": "0: tank starts empty as in Core",
+      "electricity_price_chf_per_kwh": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh (config/reference-house.json)",
+      "server_count": "null: decided by the server-count policy of the scenario"
+    }
+  },
+  "seed": null,
+  "houses": [
+    {
+      "house_id": "reference",
+      "lat_deg": 47.56,
+      "lon_deg": 7.59,
+      "cell_id": "cap-bs",
+      "bfs_municipality_nr": 2701,
+      "canton": "BS",
+      "weather_ref": "data/raw/open-meteo/basel-2025-hourly.csv",
+      "design_heating_kw": 10,
+      "formula_divisor_c": 25.6,
+      "hot_water_kwh_per_day": 12,
+      "tank_kwh": 35,
+      "tank_initial_kwh": 0,
+      "electricity_price_chf_per_kwh": 0.3325,
+      "server_count": null
+    }
+  ]
+}
