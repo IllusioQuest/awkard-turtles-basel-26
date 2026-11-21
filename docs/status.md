@@ -150,3 +150,5 @@ Decision 0024 (reviewed). New projects `DigitalHeat.Network` (no third-party dep
 (OR-Tools GLOP), `DigitalHeat.NetworkRun`, `DigitalHeat.Network.Tests`; `HeatBalance.Step` and `WeatherCsv` moved into Core
 (scored outputs bit-identical). Step 1: B0/B1/rolling-horizon LP/UB on the reference house, B1 = UB. Next: jobs with
 deadlines (step 2), Swiss multi-site dataset and map export (step 3). `docs/model/network-scheduler.md`.
+
+T-39 cleanup in progress on featur-gaming: user confirmed playable Xonotic and requested explanation/cleanup first. Refactor gaming reservation readability and repeated script container lookup; preserve commands and runtime behavior. Live automatic distribution remains deferred.
