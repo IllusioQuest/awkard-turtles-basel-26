@@ -179,4 +179,75 @@ public class WorkModelTests
         Assert.Empty(r.Work!.Flows);
         Assert.Equal(3, r.Work.Type1.Missed); // 1 of 2.5 server-hours done → ⌈1.5 / 0.5⌉ = 3 jobs missed
     }
+
+    // Like Site(), but with valid local timestamps beyond 24 hours (for multi-day tests).
+    private static NetworkSite MultiDaySite(string id, double[] demandKwh, double servers, double tankKwh) =>
+        new(id, id, 0, 0, "CH", servers, 1, 1, tankKwh, 0, 1, 0.3, 0.1,
+            demandKwh.Select((d, i) => new DemandHour(new DateTime(2025, 7, 1).AddHours(i)
+                .ToString("yyyy-MM-dd'T'HH:mm", System.Globalization.CultureInfo.InvariantCulture), 0, false, d, 0)).ToArray());
+
+    [Fact]
+    public void ReserveKeepsTankRoomForTheNextType1Cohort()
+    {
+        // Summer-like site (decision 0029): drain 0.2 kWh/h = 4.8 server-hours/day, 8 jobs/day of 1 server-hour,
+        // 24 h deadline, 10 kWh tank, unlimited filler. Reserve = min(10, 1 × (8 − 4.8)) = 3.2 kWh.
+        // B1 fills the tank with filler after day 1's work and misses ⌈8 − 4.8⌉ = 4 jobs on days 2 and 3.
+        // B1-reserve keeps 3.2 kWh free, so day 2 fits exactly (3.2 + 4.8 = 8); day 2's Type 1 work then fills
+        // the tank, so day 3 misses 4 jobs too: when daily Type 1 exceeds the drain, local timing only delays
+        // the shortfall by one cohort. Lasting relief needs other sites (B2).
+        double[] demand = Enumerable.Repeat(0.2, 72).ToArray();
+        NetworkResult Run(INetworkScheduler s)
+        {
+            var site = MultiDaySite("h", demand, servers: 5, tankKwh: 10);
+            return NetworkSimulation.Run([site], s, new PerfectForesightForecasts(), 1,
+                work: new WorkLedger([site], [new Type1Spec(8, 1, 24, Anywhere)], [1.0], 72, 24));
+        }
+        var b1 = Run(new LocalGreedyJobsScheduler());
+        var reserve = Run(new LocalGreedyJobsScheduler(reserveForType1: true));
+        Assert.Equal(8, b1.Work!.Type1.Missed);
+        Assert.Equal(4, reserve.Work!.Type1.Missed);
+        Assert.Equal(0, reserve.Work.MissedServerHoursBySite[0].Take(48).Sum(), 6); // day 2 fits
+        Assert.Equal(b1.Sites[0].Summary.Coverage, reserve.Sites[0].Summary.Coverage, 9);
+        Assert.Equal(0, reserve.Sites[0].Summary.DumpedHeatKwh, 9);
+        Assert.Empty(reserve.Work.Flows);
+    }
+
+    [Fact]
+    public void ReserveIsInactiveWhenTheDrainCoversType1()
+    {
+        // Winter-like site: drain 3 kWh/h = 72 server-hours/day far above 8 server-hours/day of Type 1, so the
+        // reserve is 0 and B1-reserve must equal B1 hour by hour.
+        double[] demand = Enumerable.Repeat(3.0, 72).ToArray();
+        NetworkResult Run(INetworkScheduler s)
+        {
+            var site = MultiDaySite("h", demand, servers: 5, tankKwh: 10);
+            return NetworkSimulation.Run([site], s, new PerfectForesightForecasts(), 1,
+                work: new WorkLedger([site], [new Type1Spec(8, 1, 24, Anywhere)], [1.0], 72, 24));
+        }
+        var b1 = Run(new LocalGreedyJobsScheduler());
+        var reserve = Run(new LocalGreedyJobsScheduler(reserveForType1: true));
+        Assert.Equal(b1.Sites[0].Hours.Select(h => h.ActualLoadPerServer), reserve.Sites[0].Hours.Select(h => h.ActualLoadPerServer));
+        Assert.Equal(b1.Work!.Type1.Missed, reserve.Work!.Type1.Missed);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 1)]
+    [InlineData(1, 3, 0)]
+    public void TransferDelayBlocksMovesUntilDataIsStaged(int delayHours, int expectedMissed, int expectedFlows)
+    {
+        // Same toy as above (decision 0030): 2.5 server-hours due in 1 h, 1 at home. With d = 0 the excess
+        // 1.5 moves to the pool; with d = 1 it may not run elsewhere before the due hour, so
+        // ⌈1.5 / 0.5⌉ = 3 jobs are missed. Checked for B2 and the LP.
+        foreach (INetworkScheduler scheduler in new INetworkScheduler[]
+                 { new NetworkGreedyJobsScheduler(transferDelayHours: delayHours),
+                   new DigitalHeat.Network.Lp.RollingHorizonWorkLpScheduler(delayHours) })
+        {
+            var sites = new[] { Site("h", [1], servers: 5), Site("p", [3], servers: 5), Site("x", [2], servers: 5) };
+            var ledger = new WorkLedger(sites, [new Type1Spec(5, 0.5, 1, Anywhere), null, null], [1.0, 1.0, 1.0], 1, 24);
+            var r = NetworkSimulation.Run(sites, scheduler, new PerfectForesightForecasts(), 1, work: ledger);
+            Assert.Equal(expectedMissed, r.Work!.Type1.Missed);
+            Assert.Equal(expectedFlows, r.Work.Flows.Count);
+            Assert.All(r.Sites, s => Assert.Equal(0, s.Summary.DumpedHeatKwh, 9));
+        }
+    }
 }

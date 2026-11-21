@@ -1,0 +1,31 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Heat-reusing compute companies.} Several companies have sold computing whose heat warms
+buildings. Qarnot started with room radiators and moved to ``digital boilers'' that feed hot water
+and heating networks; its radiators were discontinued because of seasonality
+\cite{qarnot_techcrunch2023}, and its HPC activities were acquired by Scaleway in 2026
+\cite{qarnot_scaleway2026}. Heata places a server at a domestic hot-water cylinder and has run a
+trial with British Gas \cite{heata_centrica2025}. Deep Green heats public swimming pools with
+data-centre heat \cite{deepgreen_exmouth2023,deepgreen_register2024}. Leafcloud places servers in
+buildings with a year-round hot-water demand \cite{leafcloud_heatreuse}. Cloud\&Heat began with
+servers in homes and moved to data centres \cite{cloudandheat_history}; Nerdalize, which heated
+Dutch homes with servers, went bankrupt \cite{nerdalize_bankruptcy}. Our reading of these cases
+(\texttt{docs/research/competitors.md}, from press snippets, confidence per row noted there): the
+residential failures sized for the winter peak, ran always on and lacked demand.
+
+\paragraph{Swiss projects.} In Basel, IWB ran a pilot with Neutral-IT in which a mini data centre
+in an oil bath heats a rental building with six flats, with gas kept as backup
+\cite{iwb_neutralit}. IWB and DeepSquare reported a decentralised-cloud proof of concept with
+immersion cooling \cite{deepsquare_epfl}. Infomaniak's D4 data centre in Geneva feeds district
+heating via heat pumps \cite{infomaniak_d4}, and EPFL's Heating Bits project studies data-centre
+heat for campus district heating with second-life servers \cite{epfl_heatingbits}
+(\texttt{docs/research/digitalheat-company.md}~\S4).
+
+\paragraph{Scheduling.} \todo{academic references: data-centre heat reuse into district heating;
+demand response and carbon-aware scheduling of data centres; spot and preemptible capacity markets;
+scheduling on parallel machines with inventory and deadlines. TODO(source): none collected yet.}
+
+\paragraph{Data used.} Hourly weather comes from Open-Meteo \cite{openmeteo}, the electricity price
+from ElCom \cite{elcom}. The case points to MLPerf Inference for energy per job \cite{mlperf} and to
+the Alibaba GPU cluster trace as inspiration for job durations \cite{alibaba_trace}.

@@ -1,0 +1,25 @@
+\section{Limits and threats to validity}
+\label{sec:limits}
+
+\paragraph{When it does not pay off.} Commodity compute prices do not cover full cost: below
+CHF~0.956 per sold server-hour the RTX~4090 profile loses money, and Type~2 market prices
+(CHF~0.57--0.84) are below that. Sensitive data stays out of homes, so Type~1 competes with batch
+APIs; it pays only if the optimistic batched GPU throughput holds, which is not yet measured. Token
+and compute prices fall about 25--29\,\% a year, so over a six-year life nothing pays at commodity
+prices without fixed multi-year contracts or a shorter payback. NVIDIA's consumer driver licence
+excludes ``datacenter deployment''; if a home network counts as one, professional cards raise the
+break-even. Water blocks, heat exchanger, installation, the house's electrical connection, upload
+bandwidth and maintenance visits are not yet priced (\texttt{docs/business-model.md}).
+
+\paragraph{Simplifications from the case.} Lossless tank, \qty{80}{\percent} heat recovery, no heat
+pump on the server side, an abstract \qty{1}{kW} server and one flat electricity price.
+
+\paragraph{Simplifications of our model.} Demand forecasts are perfect foresight unless a synthetic
+error is set, and the error parameters are not sourced. Work is ``unlimited'' ($\varphi = 1$) unless
+stated, and the Type~1 volume is a share, not a sourced demand. The transfer delay is one uniform
+assumption counted from arrival (a lower bound on friction), with no distance model, and transfer
+cost is not modelled, so B2 and the LP remain optimistic for distant sites. Persistence estimates (B2, reserves) assume daily
+cohorts. The LP knows arrived work only. Sites of the test network are synthetic.
+
+\paragraph{Measurements and inputs.} Marketplace fill rates come from search snippets; laptop
+measurements are scaled linearly to \qty{1}{kW}. \todo{complete after the demonstrator section}

@@ -1,0 +1,29 @@
+\section{Case and reference house}
+\label{sec:case}
+
+All scored figures use the reference house exactly as defined in the case text
+(\texttt{docs/case/challenge.md}); other houses and sites appear only as labelled variants.
+
+\paragraph{Weather and heat demand.} Hourly air temperature $T$ for Basel (47.56\,N, 7.59\,E),
+1~January to 31~December 2025, local time Europe/Zurich, comes from the Open-Meteo historical
+weather API \cite{openmeteo}. A heating day is a local calendar day whose mean hourly temperature is
+below \qty{12}{\celsius}. On heating days the space-heating demand per hour is
+\begin{equation}
+  D^{\mathrm{space}}_t = \max\!\left(0,\ \qty{10}{kW} \cdot \frac{20 - T_t}{25.6}\right)\cdot \qty{1}{h},
+  \label{eq:heating}
+\end{equation}
+where $25.6 = 20 - (-5.6)$ and \qty{-5.6}{\celsius} is the coldest hour of 2025. Hot water adds
+\qty{12}{kWh} per day, all year. With the 2025 weather this gives 206 heating days,
+\qty{26850.55}{kWh} of space heat and \qty{4380}{kWh} of hot water, i.e.\ \qty{31230.55}{kWh} of heat
+demand (\texttt{docs/results/reference-house.md}).
+
+\paragraph{Storage, server and prices.} The house has one lossless tank with \qty{35}{kWh} usable
+capacity. A server draws \qty{1}{kW} at full load, of which \qty{80}{\percent} is recoverable, i.e.\
+\qty{0.8}{kWh} of heat per server-hour (\qty{19.2}{kWh} per server-day). Electricity costs
+CHF~0.3325 per kWh (ElCom 2026, IWB Basel, category H4, one flat price \cite{elcom}). Used server
+heat is valued at the price of the heat pump it replaces, electricity price $\div$ 2.5, i.e.\
+CHF~0.133 per kWh of heat. Heat that the servers do not cover comes from a backup heater.
+
+\paragraph{The central tension.} The coldest hour needs $\qty{10}{kW} \div \qty{0.8}{kW} \approx 12.5$
+servers; summer hot water needs $\qty{12}{kWh} \div \qty{19.2}{kWh} \approx 0.6$ servers
+(\texttt{docs/case/key-figures.md}).

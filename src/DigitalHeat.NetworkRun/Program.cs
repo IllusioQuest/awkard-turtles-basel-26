@@ -11,10 +11,21 @@ using DigitalHeat.Network.Lp;
 //    Writes results/network/reference-house-comparison.json (generated, git-ignored).
 // 2) Scenario run with Type 1 work and filler (decision 0025):
 //    NetworkRun [root] --scenario config/network/<file>.json [--strategy B1,B2,LP] [--type1-share X]
-//               [--phi Y] [--horizon H] [--export]
+//               [--phi Y] [--horizon H] [--export] [--start HOUR --hours N]
+//    --transfer-delay H moved Type 1 work may run away from its origin only from arrival + H (decision 0030).
+//    --summary-json FILE appends one JSON line per strategy (metrics, parameters) for experiment scripts.
+//    --exclude-kinds a,b drops site kinds (e.g. hotel-spa,indoor-pool) for network-mix experiments.
+//    --sigma24 S (scenario mode, LP only) plans on AR(1) forecast errors (rho, seed) instead of perfect foresight.
+//    --start/--hours run a partial year (probe or experiment window). Type 1 volumes are still derived
+//    from the full year; results are labelled as a partial-year window, not yearly figures.
 //    --export writes results/network/<scenario>/<strategy>/ (map export contract, decision 0025 §7).
 string? rootArg = null, scenarioArg = null;
-int horizon = 48, seed = 20251121;
+int horizon = 48, seed = 20251121, startHour = 0;
+int? windowHours = null;
+string[] excludeKinds = [];
+string? summaryJson = null;
+int transferDelay = 0;
+bool sigmaGiven = false;
 double rho = 0.8, phi = 1.0;
 double? type1Share = null;
 bool export = false;
@@ -28,12 +39,18 @@ for (int i = 0; i < args.Length; i++)
         case "--rho": rho = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--seed": seed = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--sigma24":
-            sigmas = args[++i].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray(); break;
+            sigmas = args[++i].Split(',').Select(x => double.Parse(x, CultureInfo.InvariantCulture)).ToArray();
+            sigmaGiven = true; break;
+        case "--exclude-kinds": excludeKinds = args[++i].Split(','); break;
+        case "--summary-json": summaryJson = args[++i]; break;
+        case "--transfer-delay": transferDelay = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--scenario": scenarioArg = args[++i]; break;
         case "--strategy": strategyIds = args[++i].Split(','); break;
         case "--type1-share": type1Share = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--phi": phi = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
         case "--export": export = true; break;
+        case "--start": startHour = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
+        case "--hours": windowHours = int.Parse(args[++i], CultureInfo.InvariantCulture); break;
         default:
             if (args[i].StartsWith("--", StringComparison.Ordinal) || rootArg is not null)
                 throw new ArgumentException("Usage: NetworkRun [root] [--horizon H] [--rho R] [--sigma24 a,b] [--seed N] " +
@@ -45,7 +62,8 @@ string root = rootArg is not null ? Path.GetFullPath(rootArg) : FindRepositoryRo
 if (scenarioArg is not null)
 {
     RunScenario(root, Path.GetFullPath(scenarioArg, root), strategyIds, type1Share, phi, horizon, export,
-        string.Join(' ', args));
+        string.Join(' ', args), startHour, windowHours, excludeKinds,
+        sigmaGiven ? new Ar1ErrorForecasts(sigmas[0], rho, seed) : null, summaryJson, transferDelay);
     return;
 }
 var p = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
@@ -104,38 +122,66 @@ File.WriteAllText(Path.Combine(output, "reference-house-comparison.json"), JsonS
 Console.WriteLine($"Wrote {Path.Combine(output, "reference-house-comparison.json")}");
 
 static void RunScenario(string root, string scenarioPath, string[] strategyIds, double? type1Share, double phi,
-    int horizon, bool export, string command)
+    int horizon, bool export, string command, int startHour, int? windowHours, string[] excludeKinds,
+    IForecastProvider? lpForecast, string? summaryJson, int transferDelay)
 {
     var scenario = NetworkScenarioLoader.Load(scenarioPath, root);
-    var specs = NetworkScenarioLoader.Type1Specs(scenario, type1Share);
-    var sites = scenario.NetworkSites;
+    if (excludeKinds.Length > 0)
+    {
+        var keep = scenario.Sites.Select((s, i) => (s, i)).Where(t => !excludeKinds.Contains(t.s.Kind)).Select(t => t.i).ToArray();
+        scenario = scenario with { Sites = keep.Select(i => scenario.Sites[i]).ToArray(),
+            NetworkSites = keep.Select(i => scenario.NetworkSites[i]).ToArray() };
+        Console.WriteLine($"EXCLUDED KINDS: {string.Join(',', excludeKinds)} ({keep.Length} sites left).");
+    }
+    var specs = NetworkScenarioLoader.Type1Specs(scenario, type1Share); // volumes from the full year
+    IReadOnlyList<NetworkSite> sites = scenario.NetworkSites;
+    if (windowHours is int wh)
+    {
+        if (startHour < 0 || wh < 1 || startHour + wh > sites[0].Demand.Count)
+            throw new ArgumentOutOfRangeException(nameof(windowHours), "--start/--hours outside the year.");
+        sites = sites.Select(s => s with { Demand = s.Demand.Skip(startHour).Take(wh).ToList() }).ToList();
+        Console.WriteLine($"PARTIAL-YEAR WINDOW: hours {startHour}..{startHour + wh - 1} (not yearly figures).");
+    }
     Console.WriteLine($"Scenario {scenario.Id}: {sites.Count} sites, {sites[0].Demand.Count} h, phi={phi:R}, " +
         $"Type 1 jobs/day: {string.Join(", ", specs.Select((s, i) => $"{sites[i].Id}={s?.JobsPerDay.ToString() ?? "-"}"))}");
-    Console.WriteLine("strategy coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
+    Console.WriteLine("strategy   coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
     foreach (var id in strategyIds)
     {
         INetworkScheduler scheduler = id switch
         {
             "B1" => new LocalGreedyJobsScheduler(),
-            "B2" => new NetworkGreedyJobsScheduler(),
-            "LP" => new RollingHorizonWorkLpScheduler(),
-            _ => throw new ArgumentException($"Unknown strategy {id} (B1, B2, LP).")
+            "B2" => new NetworkGreedyJobsScheduler(transferDelayHours: transferDelay),
+            "B1-reserve" => new LocalGreedyJobsScheduler(reserveForType1: true),
+            "B2-reserve" => new NetworkGreedyJobsScheduler(reserveForType1: true, transferDelayHours: transferDelay),
+            "LP" => new RollingHorizonWorkLpScheduler(transferDelay),
+            _ => throw new ArgumentException($"Unknown strategy {id} (B1, B1-reserve, B2, B2-reserve, LP).")
         };
         var ledger = new WorkLedger(sites, specs, sites.Select(_ => phi).ToArray(), sites[0].Demand.Count,
             NetworkScenarioLoader.HoursPerDay);
         var sw = Stopwatch.StartNew();
         // Greedy strategies ignore the forecast; the LP plans on perfect foresight of demand here
         // (labelled), with pending work only (decision 0025 §4).
-        var result = NetworkSimulation.Run(sites, scheduler, new PerfectForesightForecasts(),
+        IForecastProvider forecast = id == "LP" && lpForecast is not null ? lpForecast : new PerfectForesightForecasts();
+        var result = NetworkSimulation.Run(sites, scheduler, forecast,
             id == "LP" ? horizon : 1, work: ledger);
         var n = NetworkExport.Network(result);
         var t1 = result.Work!.Type1;
-        Console.WriteLine($"{id,-8} {n.Coverage,8:P2} {n.DumpedHeatKwh,11:F1} {n.ServerHours,9:F0} {n.Utilisation,7:P2} " +
+        Console.WriteLine($"{id,-10} {n.Coverage,8:P2} {n.DumpedHeatKwh,11:F1} {n.ServerHours,9:F0} {n.Utilisation,7:P2} " +
             $"{(t1.MissedDeadlinePercent is double m ? m.ToString("F2", CultureInfo.InvariantCulture) : "n/a"),12} " +
             $"{t1.MovedServerHours,18:F1} {sw.Elapsed.TotalSeconds,7:F1}s");
+        if (summaryJson is not null)
+            File.AppendAllText(Path.GetFullPath(summaryJson, root), JsonSerializer.Serialize(new
+            {
+                scenario = scenario.Id, strategy = id, forecast = result.ForecastLabel, horizonHours = id == "LP" ? horizon : 1,
+                phi, type1Share, excludeKinds, startHour, windowHours, transferDelayHours = transferDelay, sites = sites.Count,
+                coverage = n.Coverage, dumpedHeatKwh = n.DumpedHeatKwh, serverHours = n.ServerHours,
+                utilisation = n.Utilisation, type1MissedDeadlinePercent = t1.MissedDeadlinePercent,
+                type1Arrived = t1.Arrived, type1Missed = t1.Missed, type1MovedServerHours = t1.MovedServerHours,
+                runtimeSeconds = sw.Elapsed.TotalSeconds, command = "NetworkRun " + command
+            }) + Environment.NewLine);
         if (export)
             Console.WriteLine("  exported to " + NetworkExport.Write(root, scenario, result,
-                new NetworkRunInfo(phi, type1Share, specs, "NetworkRun " + command)));
+                new NetworkRunInfo(phi, type1Share, specs, "NetworkRun " + command, transferDelay)));
     }
 }
 
