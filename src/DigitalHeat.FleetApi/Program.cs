@@ -28,6 +28,13 @@ app.MapGet("/api/runs/{id}/network", (string id) => Guard(() => store.Network(id
 app.MapGet("/api/runs/{id}/snapshots", (string id, int? from, int? to) =>
     from is null || to is null ? Results.Text("from and to are required.", statusCode: 400) : Guard(() => store.Snapshots(id, from.Value, to.Value)));
 app.MapGet("/api/runs/{id}/houses/{houseId}/series", (string id, string houseId) => Guard(() => store.HouseSeries(id, houseId)));
+app.MapGet("/api/live-household", () =>
+{
+    string path = Path.Combine(repoRoot, "data", "external", "live-household", "current.json");
+    if (!File.Exists(path)) return Results.NotFound();
+    try { return Results.Content(File.ReadAllText(path), "application/json"); }
+    catch (IOException) { return Results.StatusCode(503); }
+});
 app.MapGet("/api/runs/{id}/houses/{houseId}/job-events", (string id, string houseId, long? fromMs, long? toMs) =>
     fromMs is null || toMs is null ? Results.Text("fromMs and toMs are required.", statusCode: 400) : Guard(() => store.JobEvents(id, houseId, fromMs.Value, toMs.Value)));
 app.MapGet("/api/weather/points", () => Guard(() => store.WeatherPoints()));
