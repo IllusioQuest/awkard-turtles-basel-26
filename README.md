@@ -117,9 +117,14 @@ Laptop A opens `http://127.0.0.1:5087/?nodes=1-4`. On laptop B open
 four rooms. The browser's `+ job` and slider on either screen reach the same scheduler. The node
 agent requires the token on every request. Allow inbound TCP 5088 on B and 5087 on A through the
 Windows firewall if prompted. `Test-NetConnection <laptop-B-IPv4> -Port 5088` on A checks the
-connection. Stop A and B with Ctrl+C; each stops its own four containers. This route has been
-checked with two processes and eight containers on one machine; a physical two-laptop rehearsal is
-still required. Task time was calibrated on A, so measure B before claiming equal task throughput.
+connection. Stop A and B with Ctrl+C, then verify `docker ps`; if demo containers remain, run
+`docker compose -f compose.live-demo.yml down` on A and
+`docker compose -f compose.live-demo-peer.yml down` on B. This route has been checked with two
+processes and eight containers on one machine, including a simulated peer outage; a physical
+two-laptop rehearsal is still required. Eight containers overloaded the single test laptop and one
+32-task job missed its synthetic deadline by eight tasks. That is not evidence about two-laptop
+throughput. Task time was calibrated in isolation on A, so measure B and concurrent throughput
+before claiming equal model server-hour capacity on both CPUs.
 
 **Measured workload and scale:** one job is a technical 32-task Ising parameter scan, with 5,000
 measurement and 500 thermalisation sweeps per task: 180,224,000 spin updates are actually executed.

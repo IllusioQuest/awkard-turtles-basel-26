@@ -67,4 +67,7 @@ measurement plus 500 thermalisation sweeps. The median 4.007 s is within 0.2% of
 2 s/hour. All 32 tasks of the documented technical batch run physically (180,224,000 spin updates),
 while only the model time axis is compressed. The 20-hour deadline remains synthetic. The manifest
 `config/live-demo-scale.json` records the calculation and the live process rejects contradictory
-config values. Other laptops require recalibration.
+config values. Other laptops require recalibration. Isolated timing does not guarantee concurrent
+fleet throughput: with eight containers on this one laptop, one 32-task job missed the synthetic
+deadline with eight tasks unfinished. The physical two-laptop run must measure the actual throughput
+before presenting deadline performance as validated.

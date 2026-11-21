@@ -239,12 +239,13 @@ sealed class LiveCoordinator
     {
         if (!files.MoveQueue(m.FromNode, m.ToNode, m.TaskId + ".json")) return;
         var job = jobs[m.Job];
-        double heat = state.States[m.FromNode].Signal.DemandKwh / cal.RecoverableKwhPerStep;
+        double heat = state.States[m.FromNode].Signal.DemandKwh
+            / (cal.RecoverableKwhPerStep * cal.ServersPerNode);
         int left = job.DueStep - step;
         var cohort = state.Work!.Pending.First(c => c.Id == LiveNetwork.CohortId(m.Job, m.FromNode, ids.Length));
         string why = scheduler is RollingHorizonWorkLpScheduler
             ? "the LP plan places it there"
-            : $"{Label(m.FromNode)} wants {heat:P0} heat, so it can do only {heat * left:0.#} of {cohort.RemainingServerHours:0.#} server-hours in the {left} h left";
+            : $"{Label(m.FromNode)} wants {heat:P0} heat, so it can do only {heat * cal.ServersPerNode * left:0.#} of {cohort.RemainingServerHours:0.#} server-hours in the {left} h left";
         Add("move", m.Job, m.FromNode, m.ToNode, $"Job {m.Job}: task {m.TaskId[^2..]} → {Label(m.ToNode)}, because {why}", m.TaskId);
     }
 
