@@ -1,0 +1,171 @@
+{
+  "Summary": {
+    "ServerCount": 4,
+    "HeatingDays": 206,
+    "Hours": 8760,
+    "SpaceHeatDemandKwh": 26850.546875,
+    "HotWaterDemandKwh": 4380,
+    "TotalHeatDemandKwh": 31230.546875,
+    "ServerHeatUsedKwh": 31.03155321244776,
+    "BackupHeatKwh": 31199.515321787552,
+    "DumpedHeatKwh": 0,
+    "ServerHours": 38.78944151577706,
+    "Utilisation": 0.0011070046094685234,
+    "Coverage": 0.000993628236375472,
+    "ElectricityCostChf": 12.897489303995872,
+    "HeatValueChf": 4.127196577255552,
+    "ComputingIncomeChf": 25.601031400412857,
+    "BreakEvenChfPerServerHour": 0.2261000000005962,
+    "MissedDeadlines": "0% of jobs due within the simulated year",
+    "JobDemandAssumption": "finite jobs; excess heat policy: wait; source: docs/research/job-demand.md: base case, all medical dictations of the private-practice physicians of canton Basel-Stadt routed to one reference house (deliberately generous customer base); heat-led wait policy as in unlimited.json. Scenario variant, not a case requirement.",
+    "ProfitabilityNote": "Case break-even covers electricity minus used-heat value only. Hardware, integration and operations are excluded; this is not a full-cost profitability claim. Finite-job computing income assumes all achieved server-hours are billable, including work on jobs that later miss deadlines; penalties are not modelled.",
+    "Jobs": {
+      "Arrived": 156220,
+      "DueWithinHorizon": 156220,
+      "Completed": 156220,
+      "Missed": 0,
+      "Backlog": 0,
+      "MissedDeadlinePercent": 0,
+      "ByType": [
+        {
+          "Id": "medical-dictation-basel",
+          "WorkUnit": "audio minute",
+          "Arrived": 156220,
+          "DueWithinHorizon": 156220,
+          "Completed": 156220,
+          "Missed": 0,
+          "Backlog": 0,
+          "WorkUnitsProcessed": 1015430,
+          "BacklogWorkUnits": 0
+        }
+      ]
+    }
+  },
+  "Parameters": {
+    "HoursPerDay": {
+      "Value": 24,
+      "Unit": "hours/day",
+      "Source": "docs/case/challenge.md: 24 hourly values per local day"
+    },
+    "HoursPerStep": {
+      "Value": 1,
+      "Unit": "hours",
+      "Source": "docs/case/challenge.md: hourly time steps"
+    },
+    "DesignHeatingKw": {
+      "Value": 10,
+      "Unit": "kW",
+      "Source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "BaseTemperatureC": {
+      "Value": 20,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "FormulaDivisorC": {
+      "Value": 25.6,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: 20 minus 2025 coldest hourly temperature"
+    },
+    "HeatingDayThresholdC": {
+      "Value": 12,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: daily mean strictly below 12 °C"
+    },
+    "HotWaterKwhPerDay": {
+      "Value": 12,
+      "Unit": "kWh/day",
+      "Source": "docs/case/challenge.md: four-person household hot water"
+    },
+    "TankCapacityKwh": {
+      "Value": 35,
+      "Unit": "kWh",
+      "Source": "docs/case/challenge.md: approximate usable storage, no losses"
+    },
+    "ServerElectricKw": {
+      "Value": 1,
+      "Unit": "kW/server",
+      "Source": "docs/case/challenge.md: rack-server reference"
+    },
+    "HeatRecoveryShare": {
+      "Value": 0.8,
+      "Unit": "fraction",
+      "Source": "docs/case/challenge.md: 80 percent recoverable into water"
+    },
+    "HeatPumpEfficiency": {
+      "Value": 2.5,
+      "Unit": "kWh heat/kWh electricity",
+      "Source": "docs/case/challenge.md: heat-value divisor"
+    },
+    "ServerCount": {
+      "Value": 4,
+      "Unit": "servers",
+      "Source": "prototypes/year-explorer/index.html: four-server comparison scenario, not a case requirement"
+    },
+    "MinimumLoadShare": {
+      "Value": 0,
+      "Unit": "fraction/server",
+      "Source": "prototypes/year-explorer/index.html: zero-minimum-load comparison scenario"
+    },
+    "ElectricityPriceChfPerKwh": {
+      "Value": 0.3325,
+      "Unit": "CHF/kWh",
+      "Source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100"
+    },
+    "ComputePriceChfPerServerHour": {
+      "Value": 0.66,
+      "Unit": "CHF/server-hour",
+      "Source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract."
+    }
+  },
+  "JobScenario": {
+    "Mode": "finite",
+    "ExcessHeatPolicy": "wait",
+    "Source": "docs/research/job-demand.md: base case, all medical dictations of the private-practice physicians of canton Basel-Stadt routed to one reference house (deliberately generous customer base); heat-led wait policy as in unlimited.json. Scenario variant, not a case requirement.",
+    "JobTypes": [
+      {
+        "Id": "medical-dictation-basel",
+        "WorkUnit": "audio minute",
+        "Interruptible": true,
+        "ArrivalsPerDay": {
+          "Value": 428,
+          "Unit": "jobs/day",
+          "Source": "docs/research/job-demand.md: 1,269 practising physicians in Basel-Stadt (415 primary-care physicians = 32.7 % of all, Jan 2024, https://grosserrat.bs.ch/dokumente/100406/000000406995.pdf, search snippet, accessed 2026-11-21) x 66.71 audio min per physician per month (median, Bax et al. 2011, Health Econ Rev 1:8, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/, abstract, accessed 2026-11-21) x 12/365 months per day / 6.5 audio min per job = 428.2, rounded down"
+        },
+        "WorkUnitsPerJob": {
+          "Value": 6.5,
+          "Unit": "work units/job",
+          "Source": "Bax et al. 2011, Health Econ Rev 1:8: median dictation length 6.5 min per letter, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3402968/ (abstract, accessed 2026-11-21)"
+        },
+        "WorkUnitsPerServerHour": {
+          "Value": 26178,
+          "Unit": "work units/server-hour",
+          "Source": "Own measurement (T-02, branch feat/T-02-transcription-job: config/jobs/transcription-whisper-base.json, docs/jobs/transcription.md): 1000 Wh per 1 kW server-hour / 0.0382 Wh per audio minute (whisper.cpp base, whole-laptop gross) = 26,178 audio min, assuming equal energy per audio minute on the server"
+        },
+        "DeadlineHours": {
+          "Value": 24,
+          "Unit": "hours",
+          "Source": "Rev standard human transcription: estimated turnaround up to 24 h maximum, https://support.rev.com/hc/en-us/articles/18859196207629 (search snippet, accessed 2026-11-21); GoTranscript one-day tier, https://sonix.ai/resources/gotranscript-pricing/ (search snippet, accessed 2026-11-21)"
+        }
+      }
+    ]
+  },
+  "Inputs": {
+    "Weather": "data/raw/open-meteo/basel-2025-hourly.csv",
+    "Electricity": "data/raw/elcom/iwb-basel-h4-2026.json",
+    "Config": "config/reference-house.json",
+    "JobScenario": "config\\job-scenarios\\transcription-basel.json",
+    "VariantConfig": "config/reference-house-results.json"
+  },
+  "Variant": {
+    "Id": "transcription-basel-finite-only",
+    "Role": "finite-only demand diagnostic",
+    "Status": "not the agreed mixed Type 1 plus Type 2 scored scenario",
+    "Purpose": "Sourced, finite Type 1 transcription demand shown separately from the unlimited-work heat comparison; not the agreed Type 1 plus Type 2 mixed queue of T-31",
+    "ServerCount": {
+      "value": 4,
+      "unit": "servers",
+      "source": "prototypes/year-explorer/index.html: four-server comparison scenario, not a case requirement"
+    }
+  }
+}

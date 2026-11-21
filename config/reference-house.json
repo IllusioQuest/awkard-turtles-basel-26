@@ -13,5 +13,5 @@
   "ServerCount": { "value": 4, "unit": "servers", "source": "prototypes/year-explorer/index.html: four-server comparison scenario, not a case requirement" },
   "MinimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "prototypes/year-explorer/index.html: zero-minimum-load comparison scenario" },
   "ElectricityPriceChfPerKwh": { "value": 0.3325, "unit": "CHF/kWh", "source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100" },
-  "ComputePriceChfPerServerHour": { "value": 0.30, "unit": "CHF/server-hour", "source": "prototypes/year-explorer/index.html: illustrative slider value only; TODO(source) for market-backed compute income" }
+  "ComputePriceChfPerServerHour": { "value": 0.66, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md A3: Hetzner AX162-S dedicated-server equivalent; team lead adopted 2026-11-21 for the draft scenario. Assumes every offered server-hour is sold; no customer contract." }
 }

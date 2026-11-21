@@ -85,7 +85,7 @@ td:nth-child(2) { font-family: var(--mono); white-space: nowrap }
       <div class="ctl"><label for="price">Electricity price <output id="o-price"></output></label>
         <input type="range" id="price" min="0.10" max="0.60" step="0.005" value="0.3325"><small>ElCom 2026, IWB Basel, H4: 0.3325 CHF/kWh</small></div>
       <div class="ctl"><label for="compute">Computing price <output id="o-compute"></output></label>
-        <input type="range" id="compute" min="0" max="1.5" step="0.01" value="0.30"><small>Example input per server-hour sold; sourced prices are being researched. Assumes unlimited jobs.</small></div>
+        <input type="range" id="compute" min="0" max="1.5" step="0.01" value="0.66"><small>Draft scenario: CHF 0.66 per server-hour sold (Hetzner AX162-S equivalent; see docs/research/computing-price.md). Assumes unlimited paid jobs; no customer contract.</small></div>
       <div class="ctl"><label for="hw">Hardware cost <output id="o-hw"></output></label>
         <input type="range" id="hw" min="0" max="2000" step="50" value="0"><small>Per server and year. Not in the case formula; 0 until our cost research is in.</small></div>
     </aside>
@@ -147,7 +147,7 @@ const P = {
   heatPumpCop:           { v: 2.5,  src: "Case: value of heat = electricity price ÷ 2.5" },
   hoursPerDay:           { v: 24,   src: "Data: 24 hourly values per local day" },
 };
-const S = { servers: 4, minload: 0, tank: 35, price: 0.3325, compute: 0.30, hw: 0 };
+const S = { servers: 4, minload: 0, tank: 35, price: 0.3325, compute: 0.66, hw: 0 };
 let D = null;           // hourly demand
 let selDay = 0, metric = "load", last = null;
 
