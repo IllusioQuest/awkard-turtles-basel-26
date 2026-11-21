@@ -1,0 +1,31 @@
+{
+  "mode": "Existing PR35 local API, not pure scheduler",
+  "source_code": "fe1737b8ff79a67459b5890e425a52b24dcd966b",
+  "method": "HttpClient request through complete response read; parsing and forced cache expiry wait excluded. Two fresh and two warm attempts; not a percentile distribution. No Docker writes.",
+  "measurements": [
+    {
+      "request_index": 0,
+      "elapsed_ms": 3117.6825,
+      "cache_refreshed_during_request": true,
+      "observation_age_ms": 73.2761
+    },
+    {
+      "request_index": 1,
+      "elapsed_ms": 2.9547,
+      "cache_refreshed_during_request": false,
+      "observation_age_ms": 93.6758
+    },
+    {
+      "request_index": 2,
+      "elapsed_ms": 3099.8341,
+      "cache_refreshed_during_request": true,
+      "observation_age_ms": 6.8238
+    },
+    {
+      "request_index": 3,
+      "elapsed_ms": 4.1544,
+      "cache_refreshed_during_request": false,
+      "observation_age_ms": 17.9798
+    }
+  ]
+}
