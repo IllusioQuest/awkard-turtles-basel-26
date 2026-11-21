@@ -34,6 +34,7 @@ later.
 | [0020](0020-business-model-operator-two-job-types.md) | Business model (provisional): operator model, Type 1 = batch LLM on non-personal documents, Type 2 = research simulations | proposed (Jona); partly supersedes 0018; reviewed (go with changes); team confirmation pending |
 | [0025](0025-economics-per-actor.md) | Economics per actor: system surplus, split, levers, win-win grid (T-14) | proposed; reviewed (go with changes, applied) |
 | [0024](0024-network-scheduler-engine.md) | Network scheduler engine: INetworkScheduler, DigitalHeat.Network(.Lp), OR-Tools GLOP, shared HeatBalance | proposed (Jona); reviewed (go with changes, applied) |
+| [0025](0025-network-work-allocation-and-map-export.md) | Network work allocation (Type 1 cohorts, filler, simulated moves), strategies B1-jobs/B2/LP, map export contract, Swiss test dataset rule | proposed (Jona); reviewed (go with changes, applied) |
 
 | [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
 
