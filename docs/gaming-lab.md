@@ -36,8 +36,7 @@ Docker Desktop 4.94.0, Linux engine 29.8.2, WSL2; Windows Intel Iris Xe driver 3
 
 - Both containers healthy; anonymous HTTP 401, authenticated HTML 200. Separate home volumes
   and localhost-only ports checked. These checks do not establish browser video/input.
-- Browser automation unavailable in this chat. User has been asked to verify video, keyboard
-  and mouse through the actual browser. No successful end-to-end stream claim yet.
+- Browser automation unavailable in this chat. User supplied a screenshot of the streamed desktop and confirmed keyboard/input work on 2026-11-21. This verifies the user-observed desktop path, not CS2 gameplay or measured latency.
 - Software baseline: OpenGL llvmpipe, Accelerated no; Vulkan CPU llvmpipe.
 - Intel experiment: map /dev/dxg, mount /usr/lib/wsl/lib AND /usr/lib/wsl/drivers read-only,
   set LD_LIBRARY_PATH, GALLIUM_DRIVER=d3d12 and Intel adapter selection. Actual glxinfo -B
@@ -97,3 +96,41 @@ Sources checked 2026-11-21: https://docs.selkies.io/latest/start/,
 https://docs.selkies.io/latest/settings/, https://docs.mesa3d.org/drivers/d3d12.html,
 https://devblogs.microsoft.com/commandline/d3d12-gpu-video-acceleration-in-the-windows-subsystem-for-linux-now-available/.
 Decision: decisions/0021-selkies-gaming-lab.md, fresh-context verdict go with changes.
+
+## User-confirmed browser test and summer placement (2026-11-21)
+
+User supplied an actual browser screenshot and reported working keyboard/input. Browser desktop
+smoke is now user-verified. The screenshot's black wallpaper area looked mis-sized. Requested
+PCManFM-Qt wallpaper mode stretch live on A; it accepted/persisted the setting without restarting
+the session. Visual correction awaits user confirmation. Repeat if needed:
+
+    .\gaming\scripts\Repair-SessionWallpaper.ps1 -Node session-a
+
+Summer policy clarification: the gamer and compute/heat site are distinct. A gamer at home can
+stream a game executing at a hotel/spa where hot water is needed, even if no hotel guests game.
+Place NEW sessions on ready, locality-permitted nodes with real capacity and useful heat demand;
+also enforce measured network reachability/latency eligibility. Geography/site type alone does
+not establish low latency or useful heat. There must be provisioned computing hardware and a
+working heat-recovery system at that site. Do not invent a hotel/spa heat profile or hardware.
+The laptop lab will use explicitly synthetic home/hotel/spa signals until sourced data exists.
+
+```mermaid
+flowchart LR
+    Player[Player at home: browser] <-->|Video and input over network| Spa[Spa compute node: original game and Selkies]
+    Spa -->|Recovered heat| Water[Spa water heating]
+    Home[Home site: no summer heat demand] --> Placement[New-session placement]
+    Demand[Spa/hotel: heat demand and free capacity] --> Placement
+    Placement --> Spa
+```
+
+Existing sessions retain their node until session end, even if heat preference changes; batch
+work is preempted first, with observed release before new-session launch. Subsequent sessions
+can move to hotels/spas. This is placement of compute before admission, not transport of heat
+between buildings or live game-state migration. Batch work can be checkpointed/requeued only
+where its declared executor supports it. If every eligible site lacks useful heat or capacity,
+the system cannot guarantee useful heat: user choice between waiting/rejection and explicit
+waste-heat operation remains pending. The user's hotel/spa answer resolves preferred remote
+placement but does not specify this exhausted-capacity fallback.
+
+Controller implementation remains pending; these paragraphs record agreed behavior and test
+requirements, not completed remote-node orchestration. GPU/Vulkan/CS2 gates remain unchanged.
