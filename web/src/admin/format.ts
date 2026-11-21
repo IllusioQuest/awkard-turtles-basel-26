@@ -23,6 +23,8 @@ export const dateTime = new Intl.DateTimeFormat('de-CH', {
   minute: '2-digit',
 })
 export const dayTick = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })
+export const dayHourTick = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+export const hourTick = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })
 export const monthTick = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', month: 'short', year: '2-digit' })
 
 /** Last run hour the timeline can select: the start of the final period. */

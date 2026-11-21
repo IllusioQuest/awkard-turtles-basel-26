@@ -43,6 +43,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
   figures keep the case's abstract 1 kW server.
 - **Computing price:** CHF 0.66 per server-hour adopted for the draft (range 0.25–1.80,
   `docs/research/computing-price.md`); T-06 updates `config/reference-house.json`.
+- **Site rank (T-67 Ennio -> Nikita T-62/T-64/T-65):** decision 0056 replaces Core `HeatPlacementRank` with `HeatShareRank` (free share of the hourly heat budget, then free kWh, then IDs) in Fleet, `HeatFirstNetworkScheduler`, `FederatedOffers` and `WorkloadPlacement` (and so in the peer mesh and gaming). Six Orchestration tests and one gaming test were updated to the new rule; see the PR. Rebase open scheduler branches onto it.
 - **Demand model (T-26 ↔ Ennio):** options in `docs/tickets/T-26-sourced-job-demand.md`; Ennio
   answers there.
 - **Business model:** decision 0020 (operator model; Type 1 = batch LLM on non-personal documents,

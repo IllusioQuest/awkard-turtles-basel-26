@@ -46,7 +46,9 @@ public class PeerMeshTests : IDisposable
 
     [Fact] public void EveryOriginCanReachEveryPeerAndHeatWinsInsideLatencyLimit()
     {
-        var a = Add("a", 1); var b = Add("b", 8); var c = Add("c", 6); Publish();
+        // Decision 0056: an idle eligible peer outranks a busy one, so a and c get too little heat
+        // (0.5 kWh < 0.8 kWh per job) to run the work themselves; b must be reached from both origins.
+        var a = Add("a", .5); var b = Add("b", 8); var c = Add("c", .5); Publish();
         string id = a.Submit(Request("a") with { LatencyLimits = [new("player", 25)] }, CoordinatorTests.Profile.Id);
         a.Tick(); Assert.Equal("b", a.Jobs().Single().Target); Assert.Equal(id, b.Attempts().Single().Attempt.Request.Id);
         c.Submit(Request("c", "other"), CoordinatorTests.Profile.Id); c.Tick();
@@ -135,7 +137,8 @@ public class PeerMeshTests : IDisposable
 
     [Fact] public void PeerHeatUpdatePausesBatchThroughSharedControllerButProtectsGame()
     {
-        var a = Add("a", 1); var b = Add("b", 8); Publish();
+        // a cannot host 0.8 kWh jobs, so both go to b even though b is already busy (decision 0056).
+        var a = Add("a", .5); var b = Add("b", 8); Publish();
         var batch = Request("a", "batch") with { Kind = "batch", Lifecycle = new(true, true, false) };
         a.Submit(batch, CoordinatorTests.Profile.Id); a.Tick();
         b.Update(Inventory("b", 0, 2)); Assert.Equal("paused", b.Attempts().Single().Phase);
