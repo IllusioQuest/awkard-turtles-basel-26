@@ -12,6 +12,14 @@ services and which scheduling, for the host of the servers *and* for DigitalHeat
 The case owner wants a working business idea, not only a demonstrator. Our answer must show
 where the model works, for whom, and where it does not.
 
+## Residential houses must pay off (meta-insight, 2026-11-21)
+
+DigitalHeat has not worked with single-family houses yet, but chose a simple residential house as
+the case reference and speaks of homes throughout. Competitors failed or retreated exactly there
+(`research/competitors.md`). Our task is therefore to **make residential houses profitable**, not to
+move away from them. Business model v2 (ticket T-34): sovereign Swiss GPU cloud that heats homes,
+sized for year-round heat, refurbished hardware, compute-heavy premium AI, routing instead of dumping.
+
 ## Who must win
 
 | Actor | Example | Wins when ... |
