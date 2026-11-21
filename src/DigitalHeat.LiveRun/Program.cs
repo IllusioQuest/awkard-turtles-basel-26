@@ -8,6 +8,7 @@ try
     string root = FindRepositoryRoot();
     var parameters = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
     var job = JobDescriptorLoader.Load(options["--job"]);
+    JobDescriptorLoader.RequireBatchControl(job); // Before Docker construction and its Release cleanup path.
     var placement = new JobPlacementContext(
         options.GetValueOrDefault("--data-origin-site-id"),
         options.GetValueOrDefault("--execution-site-id"),

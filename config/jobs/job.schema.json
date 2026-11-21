@@ -5,14 +5,14 @@
   "additionalProperties": false,
   "required": ["id", "interruptible", "supportedControlLevels", "workUnit", "placementPolicy"],
   "properties": {
+    "serviceMode": { "type": "string", "enum": ["batch", "always-on"], "default": "batch" },
     "id": { "type": "string", "minLength": 1 },
     "containerImage": { "type": ["string", "null"] },
     "command": { "type": ["array", "null"], "items": { "type": "string" }, "minItems": 1 },
-    "interruptible": { "const": true },
+    "interruptible": { "type": "boolean" },
     "supportedControlLevels": {
-      "type": "array", "minItems": 1, "uniqueItems": true,
-      "items": { "enum": ["freeze", "throttle", "checkpoint"] },
-      "contains": { "const": "freeze" }
+      "type": "array", "uniqueItems": true,
+      "items": { "enum": ["freeze", "throttle", "checkpoint"] }
     },
     "deadlineHours": { "$ref": "#/$defs/hoursOrMissing" },
     "workUnit": { "type": "string", "minLength": 1 },
@@ -25,6 +25,18 @@
     { "required": ["containerImage"], "properties": { "containerImage": { "type": "string", "minLength": 1 } } },
     { "required": ["command"], "properties": { "command": { "type": "array", "minItems": 1 } } }
   ],
+  "allOf": [{
+    "if": { "required": ["serviceMode"], "properties": { "serviceMode": { "const": "always-on" } } },
+    "then": { "properties": {
+      "interruptible": { "const": false },
+      "supportedControlLevels": { "maxItems": 0 },
+      "deadlineHours": { "type": "null" }
+    }},
+    "else": { "properties": {
+      "interruptible": { "const": true },
+      "supportedControlLevels": { "minItems": 1, "contains": { "const": "freeze" } }
+    }}
+  }],
   "$defs": {
     "placementPolicy": {
       "type": "object", "additionalProperties": false,
@@ -33,7 +45,7 @@
         "mode": { "enum": ["anywhere", "origin-site", "country-allowlist"] },
         "source": { "type": "string", "minLength": 1, "not": { "pattern": "TODO\\(source\\)" } },
         "allowedCountryCodes": {
-          "type": "array", "minItems": 1, "uniqueItems": true,
+          "type": "array", "uniqueItems": true,
           "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
         }
       },

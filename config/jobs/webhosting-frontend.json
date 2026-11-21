@@ -1,0 +1,19 @@
+{
+  "interruptible": false,
+  "workUnit": "frontend service-hour",
+  "id": "webhosting-frontend",
+  "containerImage": "webhosting-frontend:local",
+  "placementPolicy": {
+    "source": "User-approved synthetic local hosting lab; docs/webhosting-scheduler.md; no customer payloads",
+    "mode": "country-allowlist",
+    "allowedCountryCodes": [
+      "CH"
+    ]
+  },
+  "supportedControlLevels": [],
+  "serviceMode": "always-on",
+  "deadlineHours": null,
+  "energyKwhPerWorkUnit": null,
+  "runtimeSecondsPerWorkUnit": null,
+  "progressFile": null
+}
