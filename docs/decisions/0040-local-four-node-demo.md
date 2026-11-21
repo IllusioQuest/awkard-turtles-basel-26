@@ -6,7 +6,7 @@
 
 ## Context
 
-T-51 needs four separate laptop containers to behave as heat-network nodes while processing one
+T-54 needs four separate laptop containers to behave as heat-network nodes while processing one
 real workload. The existing Ising task grid consists of independent seeded simulation tasks. A
 per-container copy of the old runner would duplicate the whole queue and make pause behavior hard
 to demonstrate.

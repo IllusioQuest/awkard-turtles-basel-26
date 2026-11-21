@@ -27,3 +27,10 @@ and resolved endpoint; restrict fixed GET routes/validated IDs; refresh failed c
 consecutive counters for CPU or return null; label sampling/memory accounting; propagate cancellation
 and sanitize diagnostics. Match process listings transiently, including CLI top fallback, without
 retaining arguments/raw errors. No public daemon port or container exec mutation.
+
+Applied in PR #40 (depends on #35): explicit local transport, API negotiation, fixed GET routes,
+bounded concurrency/responses/CLI output, failure eviction after sibling reads finish, cancellation
+and sanitized errors. Process listings include PID because the daemon requires it. Paused nodes
+lose old CPU baselines. 57 tests, clean API build, frontend build/lint, real read-only Docker and
+HTTP/browser checks pass. Actual first/reused fresh observations: 531.20/170.65 ms versus previous
+3117.68/3099.83 ms; see `docs/performance/docker-observation-improvement.md` for limits and raw data.

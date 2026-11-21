@@ -1,0 +1,121 @@
+series,hour_local_source,requests,requests_rel
+ChatGPT / API log,0,187522,0.9508
+ChatGPT / API log,1,138753,0.7035
+ChatGPT / API log,2,146561,0.7431
+ChatGPT / API log,3,190852,0.9677
+ChatGPT / API log,4,149886,0.7600
+ChatGPT / API log,5,115555,0.5859
+ChatGPT / API log,6,125925,0.6385
+ChatGPT / API log,7,116953,0.5930
+ChatGPT / API log,8,116954,0.5930
+ChatGPT / API log,9,120786,0.6124
+ChatGPT / API log,10,146017,0.7404
+ChatGPT / API log,11,226350,1.1477
+ChatGPT / API log,12,238282,1.2082
+ChatGPT / API log,13,255392,1.2950
+ChatGPT / API log,14,258840,1.3124
+ChatGPT / API log,15,252509,1.2803
+ChatGPT / API log,16,264385,1.3406
+ChatGPT / API log,17,256412,1.3001
+ChatGPT / API log,18,255179,1.2939
+ChatGPT / API log,19,260013,1.3184
+ChatGPT / API log,20,231858,1.1756
+ChatGPT / API log,21,250752,1.2714
+ChatGPT / API log,22,229149,1.1619
+ChatGPT / API log,23,198409,1.0060
+ChatGPT / Conversation log,0,3359,0.5278
+ChatGPT / Conversation log,1,2280,0.3583
+ChatGPT / Conversation log,2,1347,0.2117
+ChatGPT / Conversation log,3,743,0.1167
+ChatGPT / Conversation log,4,356,0.0559
+ChatGPT / Conversation log,5,314,0.0493
+ChatGPT / Conversation log,6,262,0.0412
+ChatGPT / Conversation log,7,297,0.0467
+ChatGPT / Conversation log,8,1497,0.2352
+ChatGPT / Conversation log,9,8124,1.2765
+ChatGPT / Conversation log,10,12757,2.0045
+ChatGPT / Conversation log,11,12274,1.9286
+ChatGPT / Conversation log,12,4989,0.7839
+ChatGPT / Conversation log,13,7138,1.1216
+ChatGPT / Conversation log,14,11830,1.8589
+ChatGPT / Conversation log,15,14542,2.2850
+ChatGPT / Conversation log,16,15900,2.4984
+ChatGPT / Conversation log,17,11414,1.7935
+ChatGPT / Conversation log,18,6502,1.0217
+ChatGPT / Conversation log,19,7296,1.1464
+ChatGPT / Conversation log,20,8201,1.2886
+ChatGPT / Conversation log,21,8518,1.3385
+ChatGPT / Conversation log,22,7160,1.1251
+ChatGPT / Conversation log,23,5637,0.8858
+GPT-4 / API log,0,11378,1.1870
+GPT-4 / API log,1,11236,1.1721
+GPT-4 / API log,2,10135,1.0573
+GPT-4 / API log,3,8018,0.8364
+GPT-4 / API log,4,4972,0.5187
+GPT-4 / API log,5,3198,0.3336
+GPT-4 / API log,6,3445,0.3594
+GPT-4 / API log,7,2378,0.2481
+GPT-4 / API log,8,1042,0.1087
+GPT-4 / API log,9,3069,0.3202
+GPT-4 / API log,10,8476,0.8842
+GPT-4 / API log,11,18725,1.9534
+GPT-4 / API log,12,15436,1.6103
+GPT-4 / API log,13,13233,1.3805
+GPT-4 / API log,14,13699,1.4291
+GPT-4 / API log,15,16420,1.7129
+GPT-4 / API log,16,8643,0.9016
+GPT-4 / API log,17,8907,0.9292
+GPT-4 / API log,18,10884,1.1354
+GPT-4 / API log,19,11073,1.1551
+GPT-4 / API log,20,10730,1.1194
+GPT-4 / API log,21,14266,1.4882
+GPT-4 / API log,22,11959,1.2476
+GPT-4 / API log,23,8739,0.9117
+GPT-4 / Conversation log,0,2100,0.6960
+GPT-4 / Conversation log,1,1346,0.4461
+GPT-4 / Conversation log,2,637,0.2111
+GPT-4 / Conversation log,3,430,0.1425
+GPT-4 / Conversation log,4,260,0.0862
+GPT-4 / Conversation log,5,192,0.0636
+GPT-4 / Conversation log,6,137,0.0454
+GPT-4 / Conversation log,7,204,0.0676
+GPT-4 / Conversation log,8,559,0.1853
+GPT-4 / Conversation log,9,2823,0.9356
+GPT-4 / Conversation log,10,5089,1.6866
+GPT-4 / Conversation log,11,4936,1.6359
+GPT-4 / Conversation log,12,2231,0.7394
+GPT-4 / Conversation log,13,3207,1.0629
+GPT-4 / Conversation log,14,5268,1.7459
+GPT-4 / Conversation log,15,6794,2.2517
+GPT-4 / Conversation log,16,7157,2.3720
+GPT-4 / Conversation log,17,5453,1.8072
+GPT-4 / Conversation log,18,3076,1.0195
+GPT-4 / Conversation log,19,3829,1.2690
+GPT-4 / Conversation log,20,4550,1.5080
+GPT-4 / Conversation log,21,4393,1.4559
+GPT-4 / Conversation log,22,4176,1.3840
+GPT-4 / Conversation log,23,3568,1.1825
+all,0,204359,0.9453
+all,1,153615,0.7106
+all,2,158680,0.7340
+all,3,200043,0.9253
+all,4,155474,0.7192
+all,5,119259,0.5516
+all,6,129769,0.6003
+all,7,119832,0.5543
+all,8,120052,0.5553
+all,9,134802,0.6235
+all,10,172339,0.7972
+all,11,262285,1.2132
+all,12,260938,1.2070
+all,13,278970,1.2904
+all,14,289637,1.3397
+all,15,290265,1.3427
+all,16,296085,1.3696
+all,17,282186,1.3053
+all,18,275641,1.2750
+all,19,282211,1.3054
+all,20,255339,1.1811
+all,21,277929,1.2856
+all,22,252444,1.1677
+all,23,216353,1.0008

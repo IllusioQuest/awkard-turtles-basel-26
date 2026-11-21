@@ -56,7 +56,7 @@ personal data, no model download); details in [`docs/jobs/research-sim.md`](docs
 
    Clean up afterwards with `docker rm -f research-sim`.
 
-## Four-node live demo (T-51 pilot)
+## Four-node live demo (T-54 pilot)
 
 This runs four real Docker containers as independent node workers on one laptop. The containers
 claim distinct, seeded Ising tasks from a shared local folder. The browser view controls each one
