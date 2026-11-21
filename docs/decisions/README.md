@@ -5,7 +5,7 @@ model, larger UI choices). They make our reasoning traceable for the jury and fo
 later.
 
 - File name: `NNNN-short-title.md` (next free number). Copy [`0000-template.md`](0000-template.md).
-- Keep it short: 10–30 lines. Link to code or docs instead of copying them.
+- Keep it short: 10â€“30 lines. Link to code or docs instead of copying them.
 - A decision is **accepted** when the team agrees. The review by a fresh-context subagent (see
   `AGENTS.md`) is recorded in the file.
 - Do not rewrite an accepted decision. To change it, write a new record that supersedes it and set
@@ -35,7 +35,7 @@ later.
 | [0026](0026-profile-driven-gaming-runtime.md) | Profile-driven C# gaming runtime and retirement of webhosting | proposed; user authorized, reviewed with changes, implemented PR #22; team acceptance pending |
 | 0027, 0028 | L4 GPU basis, economics per actor | reserved on unmerged branch `feat/T-14-economics`; not on `main` |
 | [0029](0029-type1-heat-budget-reservation.md) | Reserve heat-led capacity for Type 1 (B1-reserve/B2-reserve control; LP-persist dropped) | accepted as control experiment (T-12) |
-| [0030](0030-transfer-delay.md) | Transfer delay for moved Type 1 work (amends 0025 §3; data staged at arrival) | proposed; reviewed with changes (T-12) |
+| [0030](0030-transfer-delay.md) | Transfer delay for moved Type 1 work (amends 0025 Â§3; data staged at arrival) | proposed; reviewed with changes (T-12) |
 | [0031](0031-mixed-job-queue.md) | Finite jobs and sold filler capacity in one C# year run | proposed; user approved T-31, reviewed with changes |
 
 | [0032](0032-gaming-monitor-presentation.md) | Read-only gaming console and model/observation boundaries | proposed; reviewed with corrections, T-42 |
@@ -63,10 +63,8 @@ later.
 | [0053](0053-mixed-render-frame-devices.md) | Configurable mixed CPU/GPU frame jobs | user approved 80/20; reviewed with changes; T-66 follow-up |
 | [0054](0054-failed-render-cancellation.md) | Cancel only a failed render comparison, retain data | user approved; reviewed with changes; T-66 |
 
-- [0055 � Verified Eevee rendering for Intel WSL graphics](0055-eevee-intel-render.md): proposed; user-approved capability test, reviewed with changes.
+- [0055 — Verified Eevee rendering for Intel WSL graphics](0055-eevee-intel-render.md): proposed; user-approved capability test, reviewed with changes.
 
-<<<<<<< HEAD
-- [0056 � Portable Linux render worker packaging](0056-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
-=======
 | [0056](0056-free-heat-share-rank.md) | Rank eligible sites by free share of hourly heat budget | proposed; user approved; reviewed; replaces HeatPlacementRank in Fleet, Network, Orchestration; T-67 |
->>>>>>> origin/main
+
+- [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.

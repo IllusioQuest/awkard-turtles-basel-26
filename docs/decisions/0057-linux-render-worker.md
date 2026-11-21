@@ -1,4 +1,4 @@
-# 0056 — Portable Linux render worker packaging
+# 0057 â€” Portable Linux render worker packaging
 
 Status: proposed. User chose a compatible Linux GPU worker on 2026-11-21;
 no GPU machine is available yet. T-66 / PR #54.
