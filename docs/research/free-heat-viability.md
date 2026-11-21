@@ -99,8 +99,14 @@ the list proxy is CHF 1.81/h, only just above the four-server threshold.
 
 T-35's **modelled** CHF 0.473 wear per sold L4 server-hour would subtract another CHF 10,719
 from the four-server, all-Type-1 list row, turning its later-price **+CHF 1,172** into roughly
-**−CHF 9,547/year**. It is a sensitivity, not a measured failure bill. Integration, liquid
-cooling, insurance, financing, platform fees, idle power and price decline remain unpriced or
+**−CHF 9,547/year**. It is a sensitivity, not a measured failure bill: T-35 extrapolates its
+9% GPU annual failure rate from Meta's H100-training [job interruptions](https://ar5iv.labs.arxiv.org/html/2407.21783),
+which do not count L4 replacements. T-35's lower 3% sensitivity reduces the wear allowance to
+about CHF 0.178 per sold hour; the same four-server case is still about **−CHF 2,862/year**
+(`1,172 − 22,661.03 × (0.473 − 0.295)`), before installation. For that list-price case to stay
+above zero, wear would need to fall below about CHF 0.052/hour, an 89% reduction from T-35's
+central allowance. At the batch-API price, even zero wear does not make the operator profitable.
+Integration, liquid cooling, insurance, financing, platform fees, idle power and price decline remain unpriced or
 unmeasured. Each can only reduce the operator margin shown here.
 
 ## Demand gap and next proof
