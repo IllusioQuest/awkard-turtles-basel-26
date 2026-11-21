@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Results / docs
 - **Depends on:** T-05
-- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** draft PR #8 (scenario and job inputs pending)
+- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** draft PR #8 (finite job inputs pending)
 
 ## Goal
 
@@ -10,7 +10,7 @@ Produce the official key figures for the reference house, with every assumption 
 
 ## Tasks
 
-- [x] Run `YearRun` for three sourced comparison counts; the team's main server count is still pending.
+- [x] Run `YearRun` for 3, 4 and 5 server comparisons plus 1 and 13 as bounds; use 4 as the draft presentation baseline after user delegation, without claiming an optimized installation.
 - [x] Write `docs/results/reference-house.md` with all currently computable key figures, an explicitly undefined missed-deadline rate, a hardware-only sensitivity and the full-cost formula with missing inputs.
 - [x] List assumptions in `docs/assumptions.md` and the conditions under which the model does not pay off.
 - [x] Generate small result JSON files through `scripts/export_reference_house.py` under `data/derived/`.
@@ -31,7 +31,8 @@ Produce the official key figures for the reference house, with every assumption 
 
 ## Integration status
 
-The result page and reproducible files are ready on `docs/T-06-reference-results`. The official
-single-scenario headline and a finite-job missed-deadline percentage await the team server-count
-decision and sourced T-01/T-02 inputs. The WP2 hardware anchor is an illustrative sensitivity,
-not a full-cost installation quote. Keep this ticket in progress until those gaps are resolved.
+The result page and reproducible files are ready on `docs/T-06-reference-results`. The user
+delegated the draft presentation choice; 4 servers is the baseline because both C# and the
+year explorer reproduce it. A finite-job missed-deadline percentage awaits sourced T-01/T-02
+inputs. The WP2 hardware anchor is a user-approved illustrative example, not a full-cost
+installation quote. Keep this ticket in progress until the data gap is resolved.

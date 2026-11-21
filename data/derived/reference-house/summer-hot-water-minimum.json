@@ -114,7 +114,9 @@
   },
   "Variant": {
     "Id": "summer-hot-water-minimum",
-    "Status": "illustrative, not team-selected",
+    "Role": "comparison variant",
+    "Status": "not an optimized or purchased installation",
+    "SelectionSource": "docs/case/challenge.md: ceil(12 kWh/day hot water / (0.8 kW recovered per server x 24 hours/day)); illustrative design variant, not a team choice",
     "ServerCount": {
       "value": 1,
       "unit": "servers",
@@ -123,7 +125,7 @@
   },
   "HardwareIllustration": {
     "Status": "illustrative partial cost, not a full-cost result",
-    "Purpose": "Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
+    "Purpose": "User approved this clearly labelled example on 2026-11-21. Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
     "PurchaseCost": {
       "RowId": "cost-server-dell-r570",
       "ValueChfPerServer": 8248.03,

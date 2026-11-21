@@ -1,6 +1,8 @@
 # Reference house: year balance for the draft
 
-**Status: comparison variants, not a team-selected design.** Basel 2025 hourly weather and the
+**Draft presentation baseline: 4 servers.** The user delegated this choice on 2026-11-21;
+we use 4 because the C# core and independent JavaScript explorer both reproduce it. This is
+**not an optimized server count or a hardware purchase decision**. Basel 2025 hourly weather and the
 case's fixed house yield 206 heating days, 26,850.55 kWh space heat plus 4,380 kWh hot water,
 or **31,230.55 kWh heat demand**. The case uses a 1 kW electric server, 80% recoverable heat,
 a lossless 35 kWh tank and the ElCom IWB Basel H4 2026 price of CHF 0.3325/kWh. Sources and
@@ -8,7 +10,7 @@ units are in [`config/reference-house.json`](../../config/reference-house.json),
 [`docs/assumptions.md`](../assumptions.md), the [weather source](../../data/raw/open-meteo/SOURCE.md)
 and the [ElCom snapshot](../../data/raw/elcom/SOURCE.md).
 
-| Year result | 3 servers | 4 servers | 5 servers |
+| Year result | 3 servers | **4 servers: draft baseline** | 5 servers |
 |---|---:|---:|---:|
 | Heat demand covered by server heat | 45.5% | 58.0% | 69.9% |
 | Backup heat, kWh | 17,007 | 13,102 | 9,410 |
@@ -21,8 +23,8 @@ and the [ElCom snapshot](../../data/raw/elcom/SOURCE.md).
 | Computing income at illustrative CHF 0.30/server-hour, CHF | 5,334 | 6,798 | 8,183 |
 | **Case break-even, CHF/server-hour** | **0.2261** | **0.2261** | **0.2261** |
 
-The team asked to compare 3 and 5; 4 is the existing explorer scenario and a regression check,
-**not an optimum**. None is approved as the installation. Exact values:
+The user asked to compare 3 and 5; 4 is the existing explorer scenario and a regression check,
+**not an optimum**. All three remain visible, and none is approved as the installation. Exact values:
 [3 servers](../../data/derived/reference-house/three-server-comparison.json),
 [4 servers](../../data/derived/reference-house/explorer-default.json),
 [5 servers](../../data/derived/reference-house/five-server-comparison.json).
@@ -43,8 +45,9 @@ its income assumes unlimited billable work and no missed jobs.
 The case break-even omits hardware, heating integration and operations. The true full-cost
 break-even is `(electricity − used-heat value + annual hardware depreciation + annual operations
 + annualized installation) / sold server-hours`; it is **unknown** because a compatible,
-installed heat-recovering server and its ongoing costs have not been sourced. As a sensitivity
-only, a [Dell R570 offer](../../data/raw/market/costs.csv) at CHF 8,248.03/server and a separate
+installed heat-recovering server and its ongoing costs have not been sourced. The user approved
+one clearly labelled example: as a sensitivity only, a
+[Dell R570 offer](../../data/raw/market/costs.csv) at CHF 8,248.03/server and a separate
 [six-year accounting-life observation](../../data/raw/market/costs.csv) would add the following
 annual straight-line depreciation. These are WP2 rows `cost-server-dell-r570` and
 `lifetime-microsoft-server-accounting`, accessed 2026-11-20. The air-cooled Dell product is **not
@@ -75,7 +78,8 @@ the command produced identical SHA-256 hashes for all five outputs. The year mod
 JavaScript explorer agree on the 4-server comparison (58.0%, zero dump, 22,661 server-hours,
 CHF 0.2261/h).
 
-**Open for the scored draft:** team-selected server count; sourced T-01/T-02 arrivals,
+**Open for the scored draft:** sourced T-01/T-02 arrivals,
 throughput and deadlines (the present unlimited scenario cannot yield a missed-deadline rate);
-a comparable complete hardware and heating-system quote; operations/insurance; and the chosen
+a comparable complete hardware and heating-system quote; operations/insurance; the team's actual
+server deployment decision; and the chosen
 host/operator payment split. Do not present this page as a full-cost profitability claim.

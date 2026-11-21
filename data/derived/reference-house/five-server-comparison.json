@@ -114,7 +114,9 @@
   },
   "Variant": {
     "Id": "five-server-comparison",
-    "Status": "illustrative, not team-selected",
+    "Role": "comparison variant",
+    "Status": "not an optimized or purchased installation",
+    "SelectionSource": "Team member requested a 5-server comparison on 2026-11-21; illustrative design variant, not a selected installation",
     "ServerCount": {
       "value": 5,
       "unit": "servers",
@@ -123,7 +125,7 @@
   },
   "HardwareIllustration": {
     "Status": "illustrative partial cost, not a full-cost result",
-    "Purpose": "Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
+    "Purpose": "User approved this clearly labelled example on 2026-11-21. Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
     "PurchaseCost": {
       "RowId": "cost-server-dell-r570",
       "ValueChfPerServer": 8248.03,

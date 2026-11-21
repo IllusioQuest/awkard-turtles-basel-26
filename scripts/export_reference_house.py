@@ -51,6 +51,10 @@ def main():
     report_config = read_json(ROOT / "config/reference-house-results.json")
     variants = [{"id": "explorer-default", "serverCount": base_parameters["ServerCount"]}]
     variants.extend(report_config["variants"])
+    main_variant = report_config["draftMainVariant"]
+    if (main_variant.get("id") not in {v["id"] for v in variants}
+            or not main_variant.get("source")):
+        raise ValueError("Draft main variant needs a valid ID and selection source")
     if len({v["id"] for v in variants}) != len(variants):
         raise ValueError("Variant IDs must be unique")
     if len({v["serverCount"]["value"] for v in variants}) != len(variants):
@@ -103,8 +107,14 @@ def main():
                 summary["ComputingIncomeChf"] + summary["HeatValueChf"]
                 - summary["ElectricityCostChf"] - annual_depreciation_chf,
         }
-        result["Variant"] = {"Id": variant["id"], "Status": "illustrative, not team-selected",
-                             "ServerCount": variant["serverCount"]}
+        is_main = variant["id"] == main_variant["id"]
+        result["Variant"] = {
+            "Id": variant["id"],
+            "Role": "draft presentation baseline" if is_main else "comparison variant",
+            "Status": "not an optimized or purchased installation",
+            "SelectionSource": main_variant["source"] if is_main else variant["serverCount"]["source"],
+            "ServerCount": variant["serverCount"],
+        }
         result["Inputs"]["VariantConfig"] = "config/reference-house-results.json"
         result["Inputs"]["HardwareCostResearch"] = "data/raw/market/costs.csv"
         result["HardwareIllustration"] = illustration
