@@ -1,6 +1,6 @@
 # T-43: Universal resource-aware workload placement
 
-Owner: Nikita / Codex. Status: in progress (design; awaiting user choices).
+Owner: Nikita / Codex. Status: in progress (implementation approved).
 Planned code branch: feat/T-43-universal-workloads, created from current main after decisions.
 
 ## Request and scope
@@ -14,9 +14,9 @@ and physical-resource inventory, atomic admission, shared heat ranking, Docker-c
 explicit lifecycle observations and deterministic offline tests. Same admission decision path for
 fake and real executors. Existing heat physics and scored year calculations remain unchanged.
 
-## Pending user decisions (asked in chat)
+## User decisions (approved in chat)
 
-1. C# + Docker contexts and snake_case profiles (recommended), or evaluate Kubernetes first.
+1. C# + Docker contexts and snake_case profiles.
 2. First end-to-end example: Minecraft server + browser client, existing Xonotic + batch
    (recommended for first proof), or a scheduler-only dry run.
 3. Minecraft persistent worlds: node-local storage plus explicit backup/restore (recommended),
@@ -39,3 +39,5 @@ RAM/GPU reclamation distinguished; no duplicate launch after retries; release on
 observation. Use fake adapters for failures and an isolated real Docker smoke; preserve the active
 game. Document sourced estimates and missing power/latency measurements. One original game
 process remains on one node, and one Minecraft world is not automatically sharded.
+
+Implementation milestone: shared generic admission extracted with the legacy gaming adapter delegating to it (all 36 existing gaming tests pass). Added atomic physical-domain CPU/RAM/GPU claims, stale inventory gates, journalled single-host coordinator and ownership-scoped Docker adapter. New failure/resource tests under construction; no running game mutated. No new packages.

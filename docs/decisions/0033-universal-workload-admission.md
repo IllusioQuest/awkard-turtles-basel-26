@@ -1,6 +1,6 @@
 # 0033: Universal workload admission above shared heat placement
 
-Status: proposed; user approved general direction, concrete choices pending. T-43.
+Status: proposed; user approved C#/Docker, Xonotic+batch first and local backups; implementation authorized. T-43.
 
 ## Proposal
 
@@ -85,3 +85,7 @@ Smaller first delivery recommended by reviewer: fixed trusted inventory, one coo
 conservative GPUs, local storage, reserve/start/observe/stop/release for isolated workloads.
 Checkpointing, replication, HA and automatic resource reclamation can be deferred; user choices
 still determine the example and storage scope. The first milestone must document these limits.
+
+## Approved first implementation detail
+
+One trusted controller host/operator uses a stable per-fleet OS file lock (including across different journal directories), flushed atomic local JSON journal, deterministic container names and fleet/attempt/spec ownership labels. Startup discovers unknown owned containers and fails closed; uncertain missing starts keep their claims. This is not cross-host fencing or HA, and operators must not run competing controllers under different OS users/hosts. GPU admission is exclusive per declared physical device; cooperative external accounting is required. The running Xonotic stays external/protected.
