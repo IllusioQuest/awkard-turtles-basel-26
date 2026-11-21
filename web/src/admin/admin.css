@@ -505,3 +505,16 @@
 .panel .more:hover {
   background: var(--accent);
 }
+
+.head-controls {
+  flex: none;
+}
+
+.page-head .note {
+  display: block;
+  max-width: 760px;
+}
+
+.page-head .segmented.compact button {
+  white-space: nowrap;
+}
