@@ -37,7 +37,12 @@ public sealed record MonitorMetric(double? Value, string Unit, string Kind, stri
 public sealed record MonitorNodeSnapshot(string NodeId, string SiteId, string ObservationStatus,
     bool? ContainerRunning, bool? ApplicationRunning, string ObservationDetail, DateTimeOffset? ObservedAtUtc,
     string? CpuPercent, string? MemoryUsedAndLimit, bool ReadyForNewClaims, string ReadinessReason,
-    MonitorMetric PlannedSessions, MonitorMetric SessionSlots, MonitorMetric PlannedHeatKwhPerHour);
+    MonitorMetric PlannedSessions, MonitorMetric SessionSlots, MonitorMetric PlannedHeatKwhPerHour)
+{
+    public DateTimeOffset? ResourcesObservedAtUtc { get; init; }
+    public double? CpuSampleIntervalSeconds { get; init; }
+    public string ObservationSource { get; init; } = "unavailable";
+}
 public sealed record MonitorSiteSnapshot(string SiteId, string Name, MonitorMetric HeatNeededKwh,
     MonitorMetric PlannedHeatKwh, MonitorMetric TankStoredKwh, MonitorMetric TankCapacityKwh,
     MonitorMetric HeatHeadroomKwh, MonitorMetric WastedHeatKwh, MonitorMetric BackupHeatKwh,
@@ -94,11 +99,13 @@ public static class MonitorSnapshotBuilder
                 !inputs.ObserveDocker ? "disabled" : d is null ? "unavailable" : error ? "error" : "observed",
                 observed ? d!.ContainerRunning : null, observed ? d!.ApplicationRunning : null,
                 inputs.ObserveDocker ? d?.Detail ?? "No observation available" : "Docker disabled",
-                inputs.ObserveDocker ? observedAtUtc : null, observed ? d!.CpuPercent : null, observed ? d!.MemoryUsage : null,
+                inputs.ObserveDocker ? d?.ObservedAtUtc ?? observedAtUtc : null, observed ? d!.CpuPercent : null, observed ? d!.MemoryUsage : null,
                 n.Ready, reasons[n.Node.NodeId],
                 Metric(n.Sessions.Count, "sessions", "Planned in-memory claims; not connected players", "Existing SessionPlacement"),
                 Metric(n.Node.SessionSlots, "slots", "Configured simultaneous desktop slots, not measured throughput", setup.Config.Nodes.Single(x => x.NodeId == n.Node.NodeId).SessionSlotsSource, "assumption"),
-                Metric(n.GenerationKwh, "kWh/h", "Planned recoverable heat rate, not measured heat", setup.Config.SessionHeatKwhPerHour.Source));
+                Metric(n.GenerationKwh, "kWh/h", "Planned recoverable heat rate, not measured heat", setup.Config.SessionHeatKwhPerHour.Source))
+            { ResourcesObservedAtUtc = observed ? d!.ResourcesObservedAtUtc : null, CpuSampleIntervalSeconds = observed ? d!.CpuSampleIntervalSeconds : null,
+                ObservationSource = inputs.ObserveDocker ? d?.ObservationSource ?? "unavailable" : "disabled" };
         }).ToArray();
         var sites = engine.SiteViews().Select(v => new MonitorSiteSnapshot(v.Site.Id, v.Site.Name,
             Metric(v.Hour.Demand.TotalHeatKwh, "kWh", "Space heating plus hot water for this hour", v.Hour.DemandSource),

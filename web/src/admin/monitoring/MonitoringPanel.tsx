@@ -95,11 +95,13 @@ export default function MonitoringPanel() {
       {changed && <p className="monitor-pending" role="status">Inputs changed. Values below still belong to the previous snapshot; select Update preview.</p>}
       <details className="monitor-warnings" open><summary>Model boundaries & data quality</summary><ul>{snapshot.warnings.map(w => <li key={w}>{w}</li>)}</ul><p>Assumed heat per session: <MetricValue metric={snapshot.session_heat_kwh_per_hour} />. Not measured Minecraft/Xonotic power.</p></details>
       <h3>Docker observations</h3>
-      <p className="monitor-help">CPU: 100% means one core; multiple cores can exceed 100%. RAM: Docker-reported used / limit. Unavailable is not zero. App process checks only {snapshot.application_id}, not the Minecraft server. Status is a snapshot, not a live feed.</p>
+      <p className="monitor-help">CPU: 100% means one core; multiple cores can exceed 100%. Local API readings need two fresh samples; refresh after the observation cache expires. RAM: used / limit, excluding reported inactive file cache on Linux. Unavailable is not zero. App process checks only {snapshot.application_id}, not the Minecraft server. Status is a snapshot, not a live feed.</p>
       <div className="monitor-scroll"><table><caption>Desktop container observations and planned claims</caption><thead><tr><th scope="col">Node / site</th><th scope="col">Container</th><th scope="col">App process</th><th scope="col">CPU used</th><th scope="col">RAM used / limit</th><th scope="col">Planned / slots</th><th scope="col">New-claim precheck</th></tr></thead><tbody>{snapshot.nodes.map(n => <tr key={n.node_id}>
         <th scope="row">{n.node_id}<small>{snapshot.sites.find(s => s.site_id === n.site_id)?.name ?? n.site_id}</small></th>
         <td><span title={n.observation_detail}>{n.observation_status !== 'observed' ? n.observation_status : n.container_running ? 'Running' : 'Stopped / paused'}</span><small>{n.observed_at_utc ? new Date(n.observed_at_utc).toLocaleTimeString() : 'Not observed'}</small></td>
-        <td>{n.application_running === null ? 'Unknown' : n.application_running ? 'Detected' : 'Not detected'}</td><td>{n.cpu_percent ?? 'Unavailable'}</td><td>{n.memory_used_and_limit ?? 'Unavailable'}</td>
+        <td>{n.application_running === null ? 'Unknown' : n.application_running ? 'Detected' : 'Not detected'}</td>
+        <td>{n.cpu_percent ?? 'Unavailable'}<small>{n.cpu_sample_interval_seconds != null ? `Over ${number.format(n.cpu_sample_interval_seconds)} s` : n.observation_source === 'local_engine_api' && n.container_running ? 'Needs 2 valid samples' : ''}</small></td>
+        <td>{n.memory_used_and_limit ?? 'Unavailable'}<small>{n.resources_observed_at_utc ? new Date(n.resources_observed_at_utc).toLocaleTimeString() : ''}</small></td>
         <td title={`${explain(n.planned_sessions)}\n${explain(n.session_slots)}`}>{display(n.planned_sessions)} / {display(n.session_slots)}</td>
         <td><strong>{n.ready_for_new_claims ? 'Passes prechecks' : 'Not ready'}</strong><small>{n.readiness_reason}</small></td>
       </tr>)}</tbody></table></div>
