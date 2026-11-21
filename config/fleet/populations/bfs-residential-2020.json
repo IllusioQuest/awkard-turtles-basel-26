@@ -1,0 +1,14 @@
+{
+  "schema": "residential_composition_profile_v1",
+  "description": "2020 residential buildings, Switzerland excluding ZH and VS. Composition only: not a runnable heat scenario or physical server inventory.",
+  "calibration_csv": "data/derived/buildings/bfs-ownership-2020.csv",
+  "source_manifest": "data/raw/bfs-building-ownership-2020/source.json",
+  "region": "CH",
+  "node_count": 1000,
+  "count_source": "Operator scenario size matching the existing ch-1000 fleet example; not an observed count of DigitalHeat hosts.",
+  "allocation": "largest_remainder_building_counts_then_normalized_conditional_owner_percentages",
+  "tie_break": "source category order, then source owner-column order",
+  "nodes_output": "data/derived/fleet/populations/bfs-residential-2020-covered-1000.nodes.json",
+  "summary_output": "data/derived/fleet/populations/bfs-residential-2020-covered-1000.summary.csv",
+  "thermal_integration": "Not assigned. Requires sourced category-specific heat, hot-water, storage and spatial mapping. Keep existing SFH scenarios separate."
+}
