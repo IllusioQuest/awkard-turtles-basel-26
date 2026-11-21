@@ -25,14 +25,15 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new files only; reference house keeps the case's 1 kW server | in progress |
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none; decision 0014 proposes `INetworkScheduler`/`NetworkState`/`NetworkDecision` and an allocation-aware queue for T-12 (own ADR there) | draft ready for team review; 3 team questions in model §11 |
 | team lead / Claude (subagent) | `data/T-35-refurbished-hardware` | T-35: refurbished/second-life hardware (lever D): prices, wear model, `config/hardware/*-refurbished.json`, `docs/research/refurbished-hardware.md` | new profile files only; reuses T-15 `HardwareProfile` loader and schema | in progress |
-| Ennio / Claude | `docs/two-job-types-strategy` | Decision 0017 (two job types: Type 1 transcription + batch LLM, Type 2 CPU batch compute filler with heat-led price), tickets T-30 to T-32 | none (docs only) | PR #16 |
+| team lead / Claude (subagent) | `feat/T-14-economics` | T-14: economics per actor in the C# core (system surplus with premium + filler income, heat value per alternative, hardware profile, operator and host-owned split, case vs full-cost break-even, lever scenarios A/B/D/G, win-win grid export) | extends Core with a new economics module and config file; scored case figures unchanged; reads `config/hardware/*.json` (T-35 profiles plug in) | in progress |
+| Ennio / Claude | `docs/two-job-types-strategy` | Decision 0018 (two job types: Type 1 transcription + batch LLM, Type 2 CPU batch compute filler with heat-led price), tickets T-30 to T-32 | none (docs only) | PR #16 |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Open coordination
 
 - **Jona (T-06), hardware cost:** T-15 found that one Dell R570 draws ≈ 0.16 kW, not 1 kW; a 1 kW reference server is ≈ 6.15 R570s (CHF 50,743). The hardware depreciation sensitivity in T-06 (A-017: one R570 per server) is therefore ≈ 6× too low. See `docs/research/hardware.md`.
 - **Team lead decision (2026-11-21):** GPU inference server (L4 profile, `config/hardware/`) is the main hardware scenario for the pitch, with the three-profile comparison on one slide; scored reference-house figures keep the case's abstract 1 kW server.
-- **Ennio (decision 0017):** two job types as the job model of T-34: Type 1 = transcription + batch LLM (GPU in the pitch, CPU measured for scored figures), Type 2 = CPU batch compute filler, own broker, heat-led price, no unpaid work. Mixed queue: T-31.
+- **Ennio (decision 0018):** two job types as the job model of T-34: Type 1 = transcription + batch LLM (GPU in the pitch, CPU measured for scored figures), Type 2 = CPU batch compute filler, own broker, heat-led price, no unpaid work. Mixed queue: T-31.
 - **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
 - **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
 - **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).
@@ -51,7 +52,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
   laptop runtime and power/energy measurements (or a visible `TODO(source)`), then test pause,
   resume and throttle using the shared scheduler. No job protocol is imposed by this branch.
 - `data/raw/` with its `SOURCE` files (on `main`).
-- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006), 0014 (routing optimisation model, T-11), 0017 (two job types).
+- Decision numbers taken: 0003 (webhosting), 0004 (Windows ingress, withdrawn), 0005 (C# core), 0006 (Linux ingress experiment), 0007 (whole-container pause proposal), 0008 (site heat state), 0009 (generic job control, renumbered from 0006), 0014 (routing optimisation model, T-11), 0018 (two job types).
 
 ## Known integration risks
 
@@ -96,3 +97,13 @@ schema files are claimed. T-01 owner: user has been asked to choose one batch/al
 versus separate catalogs; no approval is implied until that reply is recorded.
 T-29 decision 0015 reviewed (go with changes): mandatory pre-selection locality filtering, whole-set fallback for incomplete telemetry, controlled-demo traffic only. User routing/catalog choices pending; runtime unchanged. T-27 PR #12 is still a code dependency outside main at this check.
 T-29: Nikita approved six-node automatic stateless replica move/pause and common batch/always-on catalog. T-01 decision is now recorded in its ticket; schema/loader implementation remains Claude-owned. Lifecycle decision 0016 under review; gateway controller reuses shared scheduler and locality, scored model unchanged.
+T-29 implementation on feat/T-29-hosting-scheduler (stacked on unmerged T-27): shared scheduler + locality + synchronized admission/drain lifecycle; 43 tests pass. Six-node Linux build/integration running. T-01 catalog approval recorded; no competing schema edits.
+
+Hosting scheduler ticket renumbered to T-36 because Ennio has a separate remote branch
+feat/T-29-local-llm-job. No LLM files changed. Runtime code branch is now feat/T-36-hosting-scheduler.
+Eight real Docker checks passed including actual pause states, heat swap, request drain,
+stale/partial heat, locality denial and active-gateway kill after observing pause phase.
+T-23/T-01 handoff: no unmerged implementation exists on feat/T-01-job-catalog (triple-dot diff
+against main empty). Nikita now implements the narrow approved serviceMode loader/schema guard
+and frontend/API catalog descriptors to finish the requested integration; Claude retains broader
+catalog/research ownership. No new economic or measurement values are invented.

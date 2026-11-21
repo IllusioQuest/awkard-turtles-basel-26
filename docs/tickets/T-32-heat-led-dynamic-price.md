@@ -1,7 +1,7 @@
 # T-32: Heat-led dynamic price for Type 2 compute
 
 - **Tier:** 3 Pitch stretch  ·  **Area:** Economics / market
-- **Depends on:** T-31, T-26, T-28; decision 0017
+- **Depends on:** T-31, T-26, T-28; decision 0018
 - **Suggested owner:** anyone  ·  **Owner:**  ·  **Status:** open
 
 ## Goal

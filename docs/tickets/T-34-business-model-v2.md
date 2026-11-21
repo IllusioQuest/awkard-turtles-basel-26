@@ -34,7 +34,7 @@ for the host and for DigitalHeat.
 | **F** Host- or investor-owned hardware | variant | no precedent found |
 | Filler as spot capacity | under consideration | fill rate ≈ 0.35 (range 0.2–0.6) |
 
-**Job model (Ennio, decision 0017, proposed):** Type 1 = sovereign AI services (mainly transcription + batch LLM, OCR later) = lever B; Type 2 = CPU batch compute filler (Monte Carlo, simulations) via our own broker at a heat-led price = the filler lever. No unpaid work.
+**Job model (Ennio, decision 0018, proposed):** Type 1 = sovereign AI services (mainly transcription + batch LLM, OCR later) = lever B; Type 2 = CPU batch compute filler (Monte Carlo, simulations) via our own broker at a heat-led price = the filler lever. No unpaid work.
 
 ## Tasks
 

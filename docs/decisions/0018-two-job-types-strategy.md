@@ -1,4 +1,4 @@
-# 0017: Two job types: sovereign AI services (Type 1) and batch compute filler (Type 2)
+# 0018: Two job types: sovereign AI services (Type 1) and batch compute filler (Type 2)
 
 - **Status:** proposed
 - **Date:** 2026-11-21

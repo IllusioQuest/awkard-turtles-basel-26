@@ -6,7 +6,7 @@
 
 ## Goal
 
-A runnable Type 2 job (decision 0017): a container that processes many short, independent tasks
+A runnable Type 2 job (decision 0018): a container that processes many short, independent tasks
 (e.g. a Monte Carlo option-pricing or π estimate in Python or C++), paused and resumed by the shared
 scheduler, with measured runtime and energy per task, scaled to the 1 kW server like T-02.
 

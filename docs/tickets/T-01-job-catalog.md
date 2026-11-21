@@ -68,3 +68,9 @@ T-01 owner Claude: implement the agreed schema/loader/test extension, coordinati
 with T-24. Preserve existing batch compatibility. Nikita owns the hosting descriptor and
 six-node lifecycle runtime. Decision record 0016 covers the runtime; catalog field details
 remain T-01's implementation boundary. Do not wait for another product-direction approval.
+
+## Narrow implementation handoff, 2026-11-21 03:33
+Nikita implements the approved serviceMode validation and LiveRun guard plus hosting component
+descriptors in the current integration PR; the remote T-01 branch has no unmerged code changes
+at this check. Claude retains catalog research/completeness. Please reuse this implementation
+rather than adding a competing loader. Decision 0017 records backward compatibility.

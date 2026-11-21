@@ -125,9 +125,9 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
-**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability. **Per job type (decision 0017):** Type 1 (AI services) on GPU, Type 2 (batch compute) on CPU; scored reference-house figures use the CPU values measured on the laptop.
+**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability. **Per job type (decision 0018):** Type 1 (AI services) on GPU, Type 2 (batch compute) on CPU; scored reference-house figures use the CPU values measured on the laptop.
 
-## Two job types (proposed, decision 0017, 2026-11-21)
+## Two job types (proposed, decision 0018, 2026-11-21)
 
 The job model of business model v2 (T-34); makes the "filler load" below concrete.
 
@@ -141,7 +141,7 @@ The job model of business model v2 (T-34); makes the "filler load" below concret
 
 ## Under consideration: filler load sold as spot capacity (2026-11-21)
 
-> Made concrete as Type 2 by decision 0017 (proposed); kept here as background.
+> Made concrete as Type 2 by decision 0018 (proposed); kept here as background.
 
 Real demand for our premium service (confidential transcription) fills only a tiny share of a
 house's server capacity: about 436 audio hours per 1 kW server-hour (T-02) against 428 dictation
