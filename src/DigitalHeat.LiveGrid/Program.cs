@@ -107,6 +107,15 @@ _ = Task.Run(async () =>   // the scheduler clock
         catch (Exception e) { Console.Error.WriteLine($"step failed: {e.Message}"); }
     }
 });
+_ = Task.Run(async () =>   // event-driven decisions between hour ticks
+{
+    while (!stop.IsCancellationRequested)
+    {
+        try { if (coordinator.NeedsDecision()) coordinator.Step(newHour: false); }
+        catch (Exception e) { Console.Error.WriteLine($"decision failed: {e.Message}"); }
+        try { await Task.Delay(TimeSpan.FromMilliseconds(250), stop.Token); } catch (OperationCanceledException) { break; }
+    }
+});
 _ = Task.Run(async () =>   // batched CPU observation, never on the request path
 {
     while (!stop.IsCancellationRequested)

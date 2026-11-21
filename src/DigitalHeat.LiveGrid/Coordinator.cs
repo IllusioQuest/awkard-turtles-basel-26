@@ -32,6 +32,27 @@ sealed class LiveCoordinator
     private long nextEvent = 1;
     private bool autoSpawn;
     private DateTime lastStepUtc = DateTime.UtcNow;
+    private readonly object stepLock = new();
+    private bool dirty;
+    private (int Done, int Running, int Waiting) signature;
+
+    /// <summary>True when the scheduler should decide again now: a request changed the input, a task finished
+    /// or started, or work arrived. Cheap: three directory listings.</summary>
+    public bool NeedsDecision()
+    {
+        lock (gate) return dirty || Signature() != signature;
+    }
+
+    private (int, int, int) Signature()
+    {
+        int running = 0, waiting = 0;
+        for (int i = 0; i < ids.Length; i++)
+        {
+            running += Directory.GetFiles(Dir("running", i), "j*.json", SearchOption.AllDirectories).Length;
+            waiting += Directory.GetFiles(Dir("queue", i), "j*.json").Length;
+        }
+        return (Directory.GetFiles(Path.Combine(work, "done"), "j*.json").Length, running, waiting);
+    }
 
     public Func<string, double?>? ActualLoad { get; set; }
 
@@ -67,7 +88,7 @@ sealed class LiveCoordinator
     {
         int i = Array.IndexOf(ids, id);
         if (i < 0) return false;
-        lock (gate) targetC[i] = temperatureC;
+        lock (gate) { targetC[i] = temperatureC; dirty = true; }
         return true;
     }
 
@@ -75,7 +96,7 @@ sealed class LiveCoordinator
     {
         int i = Array.IndexOf(ids, id);
         if (i < 0) return null;
-        lock (gate) return SpawnLocked(i, tasks ?? (int)cfg.TasksPerJob.Value, "button");
+        lock (gate) { dirty = true; return SpawnLocked(i, tasks ?? (int)cfg.TasksPerJob.Value, "button"); }
     }
 
     public void SetAutoSpawn(bool on)
@@ -145,20 +166,36 @@ sealed class LiveCoordinator
 
     // ---- the step ----------------------------------------------------------------------------------
 
-    /// <summary>One scheduler hour. Docker calls happen outside the lock so requests never wait for them.</summary>
-    public void Step()
+    /// <summary>
+    /// A scheduler decision. <paramref name="newHour"/> = true on the clock tick: the hour advances, deadlines
+    /// are checked, auto-spawn may add a job. Between ticks the same decision is re-run whenever something
+    /// changes (job arrives, a server becomes free, a slider moves), like the event-driven admission in
+    /// DigitalHeat.Orchestration: the heat budget stays per hour, decisions are not tied to the hour.
+    /// Docker calls happen outside the state lock so requests never wait for them.
+    /// </summary>
+    public void Step(bool newHour = true)
     {
+        lock (stepLock)
+        {
         NetworkState state;
         NetworkDecision decision;
         lock (gate)
         {
-            step++;
-            lastStepUtc = DateTime.UtcNow;
+            dirty = false;
+            if (newHour)
+            {
+                step++;
+                lastStepUtc = DateTime.UtcNow;
+            }
             CollectResults();
-            Expire();
-            if (autoSpawn && step % (int)cfg.AutoSpawnEverySteps.Value == 0)
-                SpawnLocked(rng.Next(ids.Length), (int)cfg.TasksPerJob.Value, "auto-spawn");
+            if (newHour)
+            {
+                Expire();
+                if (autoSpawn && step % (int)cfg.AutoSpawnEverySteps.Value == 0)
+                    SpawnLocked(rng.Next(ids.Length), (int)cfg.TasksPerJob.Value, "auto-spawn");
+            }
             var tasks = Observe();
+            signature = Signature();
             state = LiveNetwork.BuildState(step, ids, ids.Select((_, i) => HeatShare(i)).ToArray(), tasks, cal);
             decision = scheduler.Decide(state);
             foreach (var m in planner.Plan(tasks, decision.Allocations ?? []))
@@ -183,6 +220,7 @@ sealed class LiveCoordinator
                 }
             }
         });
+        }
     }
 
     private void Move(LiveMove m, NetworkState state)

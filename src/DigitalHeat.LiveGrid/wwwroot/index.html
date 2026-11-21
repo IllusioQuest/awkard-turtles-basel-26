@@ -81,7 +81,7 @@ footer b{color:var(--paper);font-weight:600}
 <div id="help"><div>
   <h2>How to read it</h2>
   Each panel is a house with three servers (three tasks can run at once). The slider sets the room temperature the house wants
-  (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Every hour (a few seconds here) the network scheduler sets each server's load
+  (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Whenever something changes (a job arrives, a server becomes free, a slider moves) and at least once per hour (2 s here), the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
   <br><br>Circles in the middle: the tasks running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
   Small circles: waiting tasks. Number = job, colour = house the job came from.
@@ -230,7 +230,7 @@ let busy=false;
 async function poll(){if(busy)return;busy=true;
   try{render(await api(`/api/state?since=${st.since}`));$("#offline").classList.remove("show");}
   catch(e){$("#offline").classList.add("show");}finally{busy=false;}}
-(function tick(){if(st.built)$("#next").textContent=`· next decision in ${(Math.max(0,st.nextAt-performance.now())/1000).toFixed(0)} s`;
+(function tick(){if(st.built)$("#next").textContent=`· next hour in ${(Math.max(0,st.nextAt-performance.now())/1000).toFixed(0)} s · decisions on every change`;
   setTimeout(tick,250);})();
 const nextSched=()=>{const o=["B2","LP","B1"],c=document.querySelector('[data-sched][aria-pressed="true"]')?.dataset.sched;
   api("/api/scheduler",{id:o[(o.indexOf(c)+1)%o.length]}).then(poll);};

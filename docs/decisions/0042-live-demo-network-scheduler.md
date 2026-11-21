@@ -18,8 +18,10 @@ state polling also needed, and polling repainted the panels with stale server va
 1. **Ownership:** every node has its own queue directory (`queue/<node>/`). A worker claims only from
    its own queue by atomic rename into `running/<node>/` and publishes results to `done/`. A task file is
    always in exactly one place, so the view shows where each task is.
-2. **The real scheduler decides:** a coordinator in `DigitalHeat.LiveGrid` runs fixed steps (one step =
-   one scheduler hour, slowed to a few seconds, configurable). Each step it builds a `NetworkState` from
+2. **The real scheduler decides:** a coordinator in `DigitalHeat.LiveGrid` keeps an hour clock (one hour =
+   2 s, configurable) for deadlines and the heat budget, and calls the scheduler on every tick **and whenever
+   something changes** (job arrives, a task starts or finishes, a slider moves; checked every 250 ms), like
+   the event-driven admission in `DigitalHeat.Orchestration` (`WorkloadPlacement.TryReserve`). Each step it builds a `NetworkState` from
    the four sliders (heat demand), a persistence forecast (current demand repeated) and the open jobs as
    Type 1 cohorts (remaining tasks × server-hours per task, deadline in steps), and calls the existing
    `INetworkScheduler` (B2 `NetworkGreedyJobsScheduler` by default, the rolling-horizon LP selectable).
