@@ -8,7 +8,9 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--lab',required=True)
 parser.add_argument('--frames',type=int,default=12)
 parser.add_argument('--order',default='3,1,2,2,1,3')
+parser.add_argument('--timeout-seconds',type=float,default=300)
 args=parser.parse_args()
+if not 0<args.timeout_seconds<=600:raise ValueError('Timeout must be within (0,600] seconds')
 lab=pathlib.Path(args.lab).resolve()
 configs=[json.loads(p.read_text(encoding='utf-8-sig')) for p in lab.glob('*/config.json')]
 origin=next(c for c in configs if c['serve_ui'])
@@ -37,7 +39,7 @@ def sample(count,frames,label):
     for i in range(frames):
         local=prefix+'-'+label+'-'+str(i);ids.append(origin['id']+'.'+local);report['job_ids'].append(ids[-1]);checkpoint()
         request(base+'/frames',{'job_id':local,'frame':i+1,'backend':'EEVEE','pinned_node':selected[i%count]+'-worker','scene_sha256':scene})
-    deadline=time.monotonic()+300
+    deadline=time.monotonic()+args.timeout_seconds
     while time.monotonic()<deadline:
         peers=[request(origin['peers'][w]+'/status') for w in selected]
         if any(p.get('error') for p in peers):raise RuntimeError('Peer error; inspect retained lab logs')
