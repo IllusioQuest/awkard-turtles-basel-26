@@ -1,6 +1,6 @@
 # Status: work map
 
-Last updated: 2026-11-21 02:35 Europe/Zurich. Every agent updates its row when it starts, when it
+Last updated: 2026-11-21 07:30 Europe/Zurich. Every agent updates its row when it starts, when it
 changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Who works on what
@@ -34,6 +34,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Open coordination
 
+- **Jona (0020, `business-model.md`) and Ennio (0019, T-37/T-33), hardware basis changed (2026-11-21, team lead):** consumer GeForce cards are not permitted (NVIDIA GeForce driver licence §2.8: "not licensed for datacenter deployment"; a DigitalHeat-operated fleet counts as one). Decision 0027 makes L4 the basis; refurbished L4/T4 are variants. On branch `feat/T-14-economics` (PR #27): `business-model.md` numbers switched to L4 (changed rows marked; structure and wording kept): full cost CHF 25,661/yr and full-cost break-even CHF 1.358 per sold server-hour (was 16,532 and 0.956); Type 1 on L4 = 14.36 M tokens/server-hour (RTX 4090 energy per token from T-37 as proxy) × CHF 0.126 per 1M = CHF 1.81 (batch-API 0.90). T-14 now uses the 0020 job model (Type 1/Type 2, pinned 0.66, fill rate 1 with 0.35 as sensitivity; economics decision renumbered 0026 → 0028). Result: operator win-win from a Type 1 share of 67 % (4 servers) or 39 % (1 server); never at batch-API prices. **Please confirm:** Jona: the L4 wording in `business-model.md` and list price as base (0020 expects batch-API level); Ennio: the RTX 4090 → L4 energy-per-token proxy, and whether T-37 can measure an L4 (cloud g6 instance) and the newer L4 card price (44,179 vs 34,244 CHF/kW).
 - **Jona (T-06), hardware cost:** T-15 found that one Dell R570 draws ≈ 0.16 kW, not 1 kW; a 1 kW reference server is ≈ 6.15 R570s (CHF 50,743). The hardware depreciation sensitivity in T-06 (A-017: one R570 per server) is therefore ≈ 6× too low. See `docs/research/hardware.md`.
 - **Team lead decision (2026-11-21):** GPU inference server (L4 profile, `config/hardware/`) is the main hardware scenario for the pitch, with the three-profile comparison on one slide; scored reference-house figures keep the case's abstract 1 kW server.
 - **Ennio (decision 0018):** two job types as the job model of T-34: Type 1 = transcription + batch LLM (GPU in the pitch, CPU measured for scored figures), Type 2 = CPU batch compute filler, own broker, heat-led price, no unpaid work. Mixed queue: T-31.

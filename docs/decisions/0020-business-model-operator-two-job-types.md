@@ -1,6 +1,7 @@
 # 0020: Business model (provisional): operator model with two job types
 
-- **Status:** proposed (provisionally fixed by Jona on 2026-11-21; team confirmation pending)
+- **Status:** proposed (provisionally fixed by Jona on 2026-11-21; team confirmation pending). The job
+  model stays; the RTX 4090 numbers are superseded by decision 0027 (L4 basis, `docs/business-model.md`).
 - **Date:** 2026-11-21
 - **Decided by:** Jona (IllusioQuest). Builds on decisions 0018 and 0019 and partly supersedes 0018
   (contents of Type 1). Closes the ownership question left open in `docs/vision.md`.

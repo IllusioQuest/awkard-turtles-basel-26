@@ -1,6 +1,7 @@
-# 0026: Economics per actor: system surplus, split, levers and win-win grid
+# 0028: Economics per actor: system surplus, split, levers and win-win grid
 
-- **Status:** proposed (renumbered from 0017 and 0025, which main took meanwhile)
+- **Status:** proposed (renumbered from 0017, 0025 and 0026, which main took meanwhile); terminology
+  and parameters aligned with decisions 0020 and 0027 on 2026-11-21 (see "Alignment" below)
 - **Date:** 2026-11-21
 - **Decided by:** team lead / Claude (subagent), ticket T-14; team confirms later
 
@@ -50,10 +51,33 @@ scored case figures unchanged (§5.1), output in the T-13 bundle conventions.
    exist, which then plug in via `config/hardware/*.json`).
 5. **Lever table + win-win grid** written by `DigitalHeat.YearRun --economics <config> --output
    <dir>`: `run.json` (T-13 provenance), `levers.csv` (profile × server count (A) × premium share
-   (B) × policy heat-led/always-on (G) × heat alternative), `required-premium.csv`, `win-win.csv`
+   (B) × policy heat-led/always-on (G) × heat alternative), `required-type1.csv`, `win-win.csv`
    (filler price × electricity price × fill rate, both models), `parameters.json`. The legacy and
    v1 `summary.json` are not touched.
    Parameters: `config/economics/reference-house.json`, every value `{value, unit, source}`.
+
+## Alignment with decisions 0020 and 0027 (2026-11-21)
+
+The first version used its own terms ("premium sovereign AI at CHF 3.55 per server-hour",
+"filler spot at CHF 1.42 with fill rate 0.35") and let RTX 4090 compete. It now uses the job model
+of decision 0020 and the hardware rule of decision 0027; the mechanics above (cap, premium-first =
+Type 1 first, surplus, split, break-evens) are unchanged.
+
+- **Premium → Type 1** (batch LLM, priced per token, served first). Its price per server-hour is
+  `tokens per server-hour × price per token` with tokens per server-hour per price set
+  (`Type1MillionTokensPerServerHour`): L4 14.36 M (RTX 4090 energy per token of T-37 as a labelled
+  proxy, `TODO(source)` measured L4), T4 0.4 × L4, CPU 3.94 M (T-33 measured). Token prices are a
+  lever axis: list CHF 0.126 per 1M (base) and batch-API CHF 0.063.
+- **Filler → Type 2** (research simulations) at the pinned CHF 0.66 per server-hour for all
+  profiles. Fill rate: base 1 ("unlimited jobs", decision 0020), 0.35 as sensitivity in every table.
+- **Hardware:** L4 default; refurbished L4 and T4 as variants (T4 price set added); profiles whose id
+  starts with `gpu-consumer` are listed as **not permitted (licence)** in `NotPermittedHardware`
+  and `run.json` and never evaluated.
+- Renamed outputs: `required-type1.csv` → `required-type1.csv`, columns `premium_*` → `type1_*`,
+  `filler_*` → `type2_*`; new columns for the Type 1 token price and Type 1 CHF per server-hour.
+- Result (reference house, L4, list price, φ = 1): operator win-win from a Type 1 share of 0.39
+  (1 server) or 0.67 (4 servers, draft scenario); at the batch-API price never
+  (`docs/model/economics.md` §3).
 
 ## Alternatives considered
 
