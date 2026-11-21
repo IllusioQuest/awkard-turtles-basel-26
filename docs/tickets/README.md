@@ -52,5 +52,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 ## Hosting follow-up
 | ID | Title | Owner | Status |
 |---|---|---|---|
-| [T-25](T-25-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | in progress |
+| [T-27](T-27-hosting-component-isolation.md) | Component isolation across hosting nodes | Nikita / Codex | in progress |
 T-24 is reserved by Jona on feat/T-24-job-data-locality; do not reuse its ID.
+

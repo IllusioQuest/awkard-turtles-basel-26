@@ -29,4 +29,5 @@ Do not invent storage replication before a workload/storage design is approved.
 T-24 eligibility must be reused before future heat-based placement; routing is still static.
 
 ## Review
-Pending fresh-context review.
+Verdict: go with changes. Verify restricted inner-network reachability before scaling; use distinct backend ports and scoped monitor selectors; test frontend, API and paused gateway separately. Recovery covers individual component failures only; requests may fail during recovery.
+
