@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data / model
 - **Depends on:** T-15
-- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress
+- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in review (PR #26)
 
 ## Goal
 

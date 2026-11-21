@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data / model
 - **Depends on:** T-00
-- **Suggested owner:** anyone  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in review (PR open)
+- **Suggested owner:** anyone  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** done (PR #14 merged)
 
 ## Goal
 
