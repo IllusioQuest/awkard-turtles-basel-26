@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core / jobs
 - **Depends on:** T-00
-- **Suggested owner:** Codex or anyone  ·  **Owner:** Team lead / Claude  ·  **Status:** blocked: waiting for Nikita's decision on always-on representation (then Claude implements the schema)
+- **Suggested owner:** Codex or anyone  ·  **Owner:** Team lead / Claude  ·  **Status:** in progress: common catalog approved; Nikita implements the narrow always-on schema/loader handoff in T-36, broader catalog remains with Claude
 
 ## Goal
 
