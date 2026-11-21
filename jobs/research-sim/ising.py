@@ -48,6 +48,7 @@ N_SEEDS = int(os.environ.get("N_SEEDS", "2"))
 BASE_SEED = int(os.environ.get("BASE_SEED", "20251115"))
 NODE_ID = os.environ.get("NODE_ID", "local")
 CLAIM_LEASE_SECONDS = float(os.environ.get("CLAIM_LEASE_SECONDS", "60"))
+LIVE_LOOP = os.environ.get("LIVE_LOOP", "0").lower() in {"1", "true", "yes"}
 
 WORK_UNIT = "simulation task"
 ONSAGER_TC = 2.0 / math.log(1.0 + math.sqrt(2.0))
@@ -234,7 +235,15 @@ def _run_node(tasks: list[dict], out_root: Path) -> None:
     write_node_progress(pass_no, done, len(tasks))
     while True:
         if all((out / f"{task['id']}.json").exists() for task in tasks):
-            return
+            if not LIVE_LOOP:
+                return
+            # The live fleet is a continuous workload: once one shared pass is complete,
+            # all nodes observe the same finished pass and race safely for the next one.
+            pass_no += 1
+            out = out_root / f"pass_{pass_no:03d}"
+            out.mkdir(exist_ok=True)
+            write_node_progress(pass_no, 0, len(tasks))
+            continue
         task = next((t for t in tasks if not (out / f"{t['id']}.json").exists()
                      and not _claim_is_live(t["id"], pass_no)
                      and _claim_task(t["id"], pass_no) is not None), None)

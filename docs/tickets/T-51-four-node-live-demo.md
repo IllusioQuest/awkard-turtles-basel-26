@@ -21,15 +21,18 @@ each.
   scheduler path for load decisions.
 - Use the Funkenläufer animation as a visual encoding of actual task units, not a substitute for
   work.
-- A UI target temperature is only a demo input mapped to a heat-demand signal. Label it as an
-  illustrative mapping, separate from measured CPU temperature.
+- A UI target temperature is only a demo input mapped to a heat-demand signal; it is not a room
+  sensor reading. The node view stays deliberately minimal: four edge-to-edge room-color panels,
+  one gradient temperature slider and animated work in each, with no dashboard header or prose.
 
 ## Implementation notes
 
 - Four-node local task claims and result commits are described in decision
   [0040](../decisions/0040-local-four-node-demo.md).
-- `DigitalHeat.LiveGrid` is the local full-screen UI/API; every slider change goes through the
-  existing core scheduler and Docker executor.
+- `DigitalHeat.LiveGrid` is the local full-screen UI/API; slider input immediately updates the room
+  color and is serialized through the existing core scheduler and Docker executor.
+- The four Ising workers run continuous queue passes. A finite one-pass container exits as soon as
+  the initial demo queue is complete and cannot demonstrate live pause/resume.
 - Ising simulation tasks are indivisible work units. A paused node leaves its current unit in place
   unless its lease expires; peers claim subsequent units from the shared queue. Do not claim a task
   is subdivided.

@@ -62,8 +62,10 @@ This runs four real Docker containers as independent node workers on one laptop.
 claim distinct, seeded Ising tasks from a shared local folder. The browser view controls each one
 through `GreedyHeatScheduler` → `SchedulerController.Apply` → `DockerJobExecutor`, the same C# path
 used by the other live runner. CPU load and completed tasks are observed live. This is a local
-single-laptop pilot; it does not yet connect two computers. The slider is labelled as an illustrative
-temperature-to-heat input; it is not a room sensor, and laptop power or delivered heat is not measured.
+single-laptop pilot; it does not yet connect two computers. The view is four edge-to-edge node panels:
+each room color follows its gradient temperature slider, and the animated work fades or moves with
+the scheduler's load. Temperature is an illustrative heat-demand input, not a room-sensor reading;
+laptop power and delivered heat are not measured.
 
 Run these commands in **PowerShell** from the repository root. Docker Desktop must be running with
 Linux containers and the .NET 8 SDK installed. Run once to build the image; later starts can skip
@@ -79,7 +81,8 @@ dotnet run --project src/DigitalHeat.LiveGrid
 ```
 
 Open [http://127.0.0.1:5087](http://127.0.0.1:5087), press **F11**, and move one node's vertical
-slider. The middle value (20 °C) starts each node at half of the reference heat request; move it to
+color-gradient slider. The room changes color while dragging, and each new target is sent to the
+scheduler immediately. The middle value (20 °C) requests half of the reference heat; move it to
 15 °C to pause that container, or raise it to let its scheduler run faster. Other containers keep
 claiming the next independent tasks. Spark movement follows newly recorded task completions; a task
 already in flight stays with its node unless its claim lease expires. Press **Ctrl+C** in the console,
