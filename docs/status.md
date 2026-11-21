@@ -63,3 +63,4 @@ No shared scheduler or scored formula changes. Export design uses decision 0011.
 Hosting component isolation requested separately; threat model awaiting user choice.
 Jona owns T-24 data-locality checks: hosting must reuse that rule when dynamic placement exists,
 not invent a competing country/site policy. T-01 always-on catalog decision remains pending.
+T-25: user approved frontend/API component isolation with documented operator limits; four-engine opt-in lab, decision 0012. T-13 exporter implementation underway; no shared input schema changes.
