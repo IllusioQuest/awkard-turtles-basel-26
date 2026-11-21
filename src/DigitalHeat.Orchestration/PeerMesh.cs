@@ -27,6 +27,7 @@ public sealed record ProposalOutcome(string Origin, string JobId, long Generatio
 public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes)
 {
     public bool OperatorHold { get; init; }
+    public string[] CancelledWorkloads { get; init; } = [];
 }
 
 /// <summary>
@@ -77,6 +78,21 @@ public sealed class MeshPeer : IDisposable
     public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
     public AttemptRecord[] Attempts() => coordinator.Attempts();
     public bool Held => journal.OperatorHold;
+    public void CancelBatchWorkloads(string[] ids)
+    {
+        if(!journal.OperatorHold)throw new InvalidOperationException("Hold peer before cancelling frame jobs");
+        if(journal.Jobs.Any(j=>ids.Contains(j.Request.Id,StringComparer.Ordinal)
+            &&(j.Request.Kind!="batch"||!j.Request.Lifecycle.AllowStop)))
+            throw new InvalidOperationException("Cannot cancel protected origin work");
+        var selected=coordinator.Attempts().Where(a=>ids.Contains(a.Attempt.Request.Id,StringComparer.Ordinal)&&a.Phase!="released").ToArray();
+        if(selected.Any(a=>a.Attempt.Request.Kind!="batch"||!a.Attempt.Request.Lifecycle.AllowStop))
+            throw new InvalidOperationException("Cannot cancel protected work");
+        journal=journal with{CancelledWorkloads=journal.CancelledWorkloads.Concat(ids).Distinct(StringComparer.Ordinal).ToArray(),
+            Jobs=journal.Jobs.Select(j=>ids.Contains(j.Request.Id,StringComparer.Ordinal)?j with{Status="cancelled"}:j).ToArray()};
+        Save(); // Tombstones precede stop/release and survive delayed proposal/reply delivery.
+        foreach(var row in selected)coordinator.StopAndRelease(row.Attempt.Request.Id);
+        Publish();
+    }
     /// <summary>Durable hold for a dedicated workload peer. Blocks dispatch and automatic heat resume.</summary>
     public void SetHold(bool hold)
     {
@@ -91,6 +107,7 @@ public sealed class MeshPeer : IDisposable
         if (request.OriginSiteId != Id) throw new InvalidDataException("Only an origin may submit its own job.");
         var global = request with { Id = Id + "." + request.Id };
         WorkloadPlacement.ValidateRequest(global);
+        if(journal.CancelledWorkloads.Contains(global.Id,StringComparer.Ordinal))return global.Id;
         var prior = journal.Jobs.SingleOrDefault(j => j.Request.Id == global.Id);
         if (prior is not null)
         {
@@ -153,7 +170,7 @@ public sealed class MeshPeer : IDisposable
         foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
             j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
-            if (job.Status == "accepted") continue;
+            if (job.Status is "accepted" or "cancelled") continue;
             if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
             if (!WorkloadPlacement.DeadlineOpen(job.Request, clock.GetUtcNow())) continue;
             var now = clock.GetUtcNow();
@@ -216,7 +233,7 @@ public sealed class MeshPeer : IDisposable
                 break;
             case PeerReply reply:
                 var job = journal.Jobs.SingleOrDefault(j => j.Request.Id == reply.JobId);
-                if (job is null || job.Target != from || job.Generation != reply.Generation
+                if (job is null || job.Status=="cancelled" || job.Target != from || job.Generation != reply.Generation
                     || Identity(job.Request, job.ProfileId) != reply.Identity) break;
                 if (reply.Status == "rejected") Put(job with { Target = null, Status = "waiting" });
                 else if (reply.Status == "accepted") Put(job with { Status = "accepted" });
@@ -228,6 +245,9 @@ public sealed class MeshPeer : IDisposable
     {
         if (proposal.Generation <= 0 || proposal.Request.OriginSiteId != origin
             || proposal.Identity != Identity(proposal.Request, proposal.ProfileId)) throw new InvalidDataException("Invalid proposal identity.");
+        if(journal.CancelledWorkloads.Contains(proposal.Request.Id,StringComparer.Ordinal)){
+            transport.Send(Id,origin,new PeerReply(proposal.Request.Id,proposal.Generation,proposal.Identity,"rejected"));return;
+        }
         var old = journal.Outcomes.SingleOrDefault(o => o.Origin == origin && o.JobId == proposal.Request.Id && o.Generation == proposal.Generation);
         if (old is not null)
         {

@@ -18,6 +18,7 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
 }
 internal sealed record FrameSubmit(string JobId, int Frame, string? PinnedNode, string Backend="CPU");
 internal sealed record RenderHold(bool Hold);
+internal sealed record RenderCancel(string[] JobIds);
 internal sealed record RenderArtifact(string JobId, string PeerId, JsonElement Metadata);
 internal sealed record RenderGpuStats(double UtilizationPercent,long UsedMib,long TotalMib,DateTimeOffset ObservedUtc,
     string Scope="Physical GPU totals, including any other workloads");
@@ -112,6 +113,7 @@ internal static class RenderNodeHost
             return inbox.Writer.TryWrite(()=>peer.Receive(packet.Sender,packet.Message))?Results.Accepted():Results.StatusCode(503);
         });
         app.MapPost("/hold",(RenderHold h)=>{lock(gate){peer.SetHold(h.Hold);Volatile.Write(ref published,CaptureStatus());return Results.Json(Status(),Json);}});
+        app.MapPost("/cancel",(RenderCancel c)=>{lock(gate){peer.CancelBatchWorkloads(c.JobIds);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
         app.MapPost("/frames",(FrameSubmit f)=>{
             if(f.Frame<1||f.Frame>cfg.Frames||!manifestBackends.Contains(f.Backend)||!System.Text.RegularExpressions.Regex.IsMatch(f.JobId,"^[a-z0-9-]{1,80}$"))return Results.BadRequest();
             if(Status().Held)return Results.Conflict(new {error="Origin held"});
@@ -139,6 +141,7 @@ internal static class RenderNodeHost
         app.MapPost("/ui/render",async()=>{await comparison.Start();return Results.Accepted();});
         app.MapPost("/ui/pause",()=>{comparison.RequestHold(true);return Results.Accepted();});
         app.MapPost("/ui/resume",()=>{comparison.RequestHold(false);return Results.Accepted();});
+        app.MapPost("/ui/cancel-failed",async()=>{await comparison.CancelFailed();return Results.Ok();});
         app.MapGet("/ui/image/{node}/{job}",async(string node,string job)=>{
             if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
             var bytes=await http.GetByteArrayAsync(url+"/image/"+job);return Results.File(bytes,"image/png");

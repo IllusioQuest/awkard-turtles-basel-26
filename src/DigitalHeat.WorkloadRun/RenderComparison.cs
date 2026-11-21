@@ -57,7 +57,7 @@ internal sealed class RenderComparison(RenderConfig cfg,HttpClient http)
     private string? pollingError;
     private Task? run;
     private bool CanStartNew(){
-        if(state.Phase is "idle" or "complete")return true;
+        if(state.Phase is "idle" or "complete" or "cancelled")return true;
         if(state.Phase is not ("failed" or "recovery-paused")||peers.Length!=cfg.Peers.Count)return false;
         string prefix=cfg.Id+"."+state.Id+"-";
         var jobs=peers.SelectMany(p=>p.Jobs).Where(j=>j.Request.Id.StartsWith(prefix,StringComparison.Ordinal)).ToArray();
@@ -68,8 +68,8 @@ internal sealed class RenderComparison(RenderConfig cfg,HttpClient http)
     private static ComparisonState Load(RenderConfig cfg){
         string p=Path.Combine(cfg.StateDirectory,"comparison.json");
         var s=File.Exists(p)?JsonSerializer.Deserialize<ComparisonState>(File.ReadAllText(p),RenderNodeHost.Json):null;
-        return s is null?new("","idle",true,[]):s with {Phase=s.Phase=="complete"?"complete":"recovery-paused",Held=true,Recovered=true,
-            Error=s.Phase=="complete"?null:"Owner restarted. Resume reconciles existing frame IDs; no replacement starts."};
+        return s is null?new("","idle",true,[]):s with {Phase=s.Phase is "complete" or "cancelled"?s.Phase:"recovery-paused",Held=true,Recovered=true,
+            Error=s.Phase is "complete" or "cancelled"?s.Error:"Owner restarted. Resume reconciles existing frame IDs; no replacement starts."};
     }
     private void Save(){string tmp=path+".tmp";File.WriteAllText(tmp,JsonSerializer.Serialize(state,RenderNodeHost.Json));File.Move(tmp,path,true);}
     public object Snapshot(){
@@ -92,6 +92,23 @@ internal sealed class RenderComparison(RenderConfig cfg,HttpClient http)
     public Task<object> LiveSnapshot()=>Task.FromResult(Snapshot());
     public async Task RefreshPeers(){try{peers=await ReadPeers();pollingError=null;}catch(Exception e){pollingError="Peer status delayed; showing last observation: "+e.Message;}}
     public void RequestHold(bool hold)=>_=Task.Run(async()=>{try{await Hold(hold);}catch(Exception e){pollingError="Control not confirmed: "+e.Message;}});
+    public async Task CancelFailed(){
+        await serial.WaitAsync();try{
+            if(run is {IsCompleted:false}||state.Phase is not ("failed" or "recovery-paused"))throw new InvalidOperationException("Only a stopped/failed comparison can be reset");
+            await SetPeersHold(true);peers=await ReadPeers();
+            string prefix=cfg.Id+"."+state.Id+"-";
+            var ids=peers.SelectMany(p=>p.Jobs.Select(j=>j.Request.Id).Concat(p.Attempts.Select(a=>a.Attempt.Request.Id)))
+                .Where(id=>id.StartsWith(prefix,StringComparison.Ordinal))
+                .Concat(from leg in Enumerable.Range(0,2) from frame in Enumerable.Range(1,state.FrameCount??cfg.Frames)
+                    select prefix+leg+"-"+frame.ToString("D3"))
+                .Distinct(StringComparer.Ordinal).ToArray();
+            foreach(var url in cfg.Peers.Values){using var reply=await http.PostAsJsonAsync(url+"/cancel",new RenderCancel(ids),RenderNodeHost.Json);reply.EnsureSuccessStatusCode();}
+            peers=await ReadPeers();
+            if(peers.SelectMany(p=>p.Attempts).Any(a=>ids.Contains(a.Attempt.Request.Id,StringComparer.Ordinal)&&a.Phase!="released"))
+                throw new IOException("Cancellation not confirmed released on every peer; keep held");
+            state=state with{Phase="cancelled",Held=true,Error="Failed comparison cancelled; images and logs retained. Ready for a new run."};Save();
+        }finally{serial.Release();}
+    }
     private string SelectedBackend()=>peers.SelectMany(p=>p.VerifiedBackends).Where(b=>b!="CPU")
         .GroupBy(b=>b).OrderByDescending(g=>g.Count()).ThenBy(g=>g.Key,StringComparer.Ordinal).Select(g=>g.Key).FirstOrDefault()??"CPU fallback";
     public async Task Start(){
@@ -118,6 +135,7 @@ internal sealed class RenderComparison(RenderConfig cfg,HttpClient http)
     }
     public async Task Hold(bool hold){
         await serial.WaitAsync();try{
+            if(!hold&&state.Phase=="cancelled")throw new InvalidOperationException("Cancelled comparison cannot resume; start a new run");
             state=state with {Held=true,Error=hold?"Confirming pause on every peer…":null};Save();
             try{await SetPeersHold(hold);}catch(Exception e){state=state with{Error="Hold uncertain: "+e.Message};Save();throw;}
             var now=DateTimeOffset.UtcNow;
