@@ -1,0 +1,23 @@
+{
+  "Id": "cpu-server",
+  "Label": "CPU rack server (Dell PowerEdge R570 class), scaled to 1 kW",
+  "Status": "variant: not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+  "Description": "One 'server' = 1 kW of electric load, like the case. Built from the cheapest sourced rack server (Dell R570, Xeon 6507P 8 cores, 32 GB). Its wall power is not measured, so the box count per kW is an estimate from CPU TDP plus memory.",
+  "TranscriptionModel": "whisper.cpp base (CPU), own laptop measurement scaled per kWh",
+  "UnitsPerServer": { "value": 6.152, "unit": "units/server", "source": "derived: ServerElectricKw / UnitElectricKw = 1 / 0.1625" },
+  "UnitElectricKw": { "value": 0.1625, "unit": "kW/unit", "source": "estimate: Xeon 6507P TDP 150 W (data/raw/market/hardware.csv hw-power-intel-xeon-6507p-tdp) + 32 GB x 0.392 W/GB (Cloud Carbon Footprint memory coefficient, docs/research/computing-price.md §2) = 162.5 W; fans, storage and PSU losses missing, TODO(source): measured wall power" },
+  "UnitPurchasePriceChf": { "value": 8248.03, "unit": "CHF/unit", "source": "data/raw/market/costs.csv cost-server-dell-r570 (accessed 2026-11-20, high; VAT treatment not shown)" },
+  "HostElectricKw": { "value": 0, "unit": "kW/server", "source": "no separate host: the units are complete servers" },
+  "HostPurchasePriceChf": { "value": 0, "unit": "CHF/server", "source": "no separate host: the units are complete servers" },
+  "ServerElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation" },
+  "IdleElectricKw": { "value": 0.205, "unit": "kW/server", "source": "derived: 1 kW x 0.71 / 3.46 W per vCPU, idle/max ratio of the Cloud Carbon Footprint SPECpower coefficients (data/raw/market/hardware.csv hw-power-ccf-aws-min-w-per-vcpu and -max-, medium); not measured on this server" },
+  "HeatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; the R570 offer is air-cooled)" },
+  "PurchasePriceChfPerServer": { "value": 50743.37, "unit": "CHF/server", "source": "derived: UnitsPerServer x UnitPurchasePriceChf + HostPurchasePriceChf = 6.152 x 8248.03; entry configuration, a denser CPU server is likely cheaper per kW: TODO(source) quote for a ~1 kW CPU server" },
+  "LifetimeYears": { "value": 6, "unit": "years", "source": "data/raw/market/costs.csv lifetime-microsoft-server-accounting (accounting life, not physical life)" },
+  "OpsChfPerServerYear": { "value": 4355.74, "unit": "CHF/server-year", "source": "derived: 6.152 boxes x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic, retail managed monitoring + patching per box); fleet-scale cost TODO(source); site internet (cost-ops-green-connect-s) excluded" },
+  "TranscriptionAudioHoursPerServerHour": { "value": 436, "unit": "audio hours/server-hour", "source": "own measurement, branch feat/T-02-transcription-job docs/jobs/transcription.md: whisper.cpp base, whole-laptop energy 0.0382 Wh per audio minute scaled to 1 kWh (572 with CPU-package meter); assumes a server CPU is as efficient per kWh as the laptop" },
+  "WebhostingSitesPerServer": { "value": null, "unit": "sites/server", "source": "TODO(source): no sourced webhosting throughput per kW yet (T-23)" },
+  "SpotPriceChfPerServerHour": { "value": 1.80, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md A2: Azure D32as v5 spot Switzerland North (cp-cpu-azure-d32as-v5-chn-spot) x 5.89 instances per kW; range 1.80-3.44" },
+  "OnDemandPriceChfPerServerHour": { "value": 7.10, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md A1: lowest Swiss-region on-demand 32-vCPU VM per kW; range 7.10-11.09" },
+  "HomeHostPriceChfPerServerHour": { "value": 0.68, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md C1 (lower end): cheapest Swiss spot x RunPod community/datacentre ratio 0.38; range 0.68-1.15 (GPU ratio applied to CPU: assumption)" }
+}
