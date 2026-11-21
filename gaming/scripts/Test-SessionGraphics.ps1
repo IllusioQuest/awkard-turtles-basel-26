@@ -1,0 +1,26 @@
+param([ValidateSet('session-a','session-b')][string]$Node='session-a')
+$ErrorActionPreference='Stop'
+$labRoot=Split-Path -Parent $PSScriptRoot
+$reportRoot=Join-Path $labRoot 'TestResults'
+New-Item -ItemType Directory -Force $reportRoot | Out-Null
+$ids=@(& docker ps -aq --filter label=com.docker.compose.project=digitalheat-gaming --filter "label=digitalheat.gaming.node=$Node")
+if ($ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') { throw 'Expected exactly one lab node' }
+$probe=@'
+set +e
+printf '%s\n' '=== Device paths ==='
+ls -l /dev/dri /dev/dxg /usr/lib/wsl/lib
+printf '\n=== Driver libraries ===\n'
+find /usr/lib -name '*d3d12*' -o -name '*dzn*' -o -name '*vulkan*' 2>/dev/null | head -30
+printf '\n=== OpenGL renderer ===\n'
+if command -v glxinfo >/dev/null; then timeout 15 glxinfo -B; else echo 'glxinfo unavailable'; fi
+printf '\n=== Vulkan devices ===\n'
+if command -v vulkaninfo >/dev/null; then timeout 20 vulkaninfo --summary; else echo 'vulkaninfo unavailable: Vulkan compatibility unverified'; fi
+printf '\n=== Video capabilities ===\n'
+if command -v vainfo >/dev/null; then timeout 15 vainfo; else echo 'vainfo unavailable: VAAPI compatibility unverified'; fi
+printf '\n=== Encoder tools ===\n'
+command -v ffmpeg || true
+'@
+$output=$probe | & docker exec -i --user ubuntu --env DISPLAY=:20 $ids[0] sh 2>&1 | Out-String
+$output | Set-Content (Join-Path $reportRoot "$Node-graphics.txt")
+Write-Output $output
+Write-Output 'Capability enumeration does not prove a successful game or hardware encode.'
