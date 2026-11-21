@@ -104,4 +104,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-69](T-69-render-node-visualization.md) | Explain render timing and visualize physical hosts/node contributions | Nikita / Codex | in review; PR #59; real paused run visually checked |
 | [T-70](T-70-server-sizing.md) | Optimise servers per household (reference house, marginal-value sizing) | Ennio / Claude | done; ADR 0062 |
 
-| [T-70](T-70-warm-gpu-worker.md) | Keep native GPU renderer warm across frame jobs | Nikita / Codex | in progress; user chose speed first; ADR 0062 review |
+| [T-71](T-71-warm-gpu-worker.md) | Keep native GPU renderer warm across frame jobs | Nikita / Codex | in progress; user chose speed first; ADR 0063 review |
