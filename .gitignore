@@ -24,4 +24,4 @@ __pycache__/
 # .NET and generated year results
 **/bin/
 **/obj/
-results/
+/results/
