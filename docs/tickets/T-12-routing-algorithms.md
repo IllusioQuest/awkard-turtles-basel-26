@@ -22,6 +22,7 @@ Implement and compare scheduling/routing strategies on the same interface.
 
 ## Read first
 
+- `docs/model/routing-complexity.md` (complexity, LP formulation, effort estimate)
 - `docs/model/routing-optimisation.md (T-11)`
 
 ## Rules
