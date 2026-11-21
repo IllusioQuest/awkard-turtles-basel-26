@@ -1,6 +1,6 @@
 namespace DigitalHeat.Core;
 
-/// <summary>Job-owner policy; the source must justify the chosen restriction.</summary>
+/// <summary>Customer- or contract-specified policy; Source identifies its authority.</summary>
 public sealed record JobPlacementPolicy(string Mode, string Source, string[]? AllowedCountryCodes)
 {
     public void Validate()

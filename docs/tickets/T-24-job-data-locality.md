@@ -37,6 +37,8 @@ the limitations of the current single-site runtime are documented.
 ## Rules
 
 - The user chose both locality modes selectable per job on 2026-11-21.
+- The user chose the customer or their contract as the authority for each real job's placement
+  rule. The provider records that rule; source text alone does not verify the permission.
 - T-01 owns the broader catalog and always-on representation. T-24 changes only location policy.
 - A country or site identifier must come from a trusted deployment inventory before this can be
   presented as a legal or security guarantee; the current CLI values are demo inputs only.

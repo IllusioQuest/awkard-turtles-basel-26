@@ -62,16 +62,16 @@ public sealed class JobRuntimeTests
     [Fact]
     public void UnrestrictedPlacementNeedsExplicitSourcedPolicy()
     {
-        Assert.True(JobPlacement.IsEligible(new("anywhere", "job owner declaration", null),
+        Assert.True(JobPlacement.IsEligible(new("anywhere", "customer authorization test fixture", null),
             new(null, null, null)));
         Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
             new("anywhere", "TODO(source)", null), new(null, null, null)));
         Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
-            new("unknown", "job owner declaration", null), new(null, null, null)));
+            new("unknown", "customer authorization test fixture", null), new(null, null, null)));
         Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
-            new("country-allowlist", "job owner declaration", []), new(null, null, "CH")));
+            new("country-allowlist", "customer authorization test fixture", []), new(null, null, "CH")));
         Assert.Throws<InvalidDataException>(() => JobPlacement.IsEligible(
-            new("country-allowlist", "job owner declaration", ["CH", "CH"]), new(null, null, "CH")));
+            new("country-allowlist", "customer authorization test fixture", ["CH", "CH"]), new(null, null, "CH")));
     }
 
     [Fact]
