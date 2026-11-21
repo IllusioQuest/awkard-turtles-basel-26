@@ -27,3 +27,5 @@ Milestone: two Selkies containers running, auth/volume/bind checks pass. Intel O
 Compatibility lab review: PR #22, https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/22. Not complete: browser smoke confirmation, accelerated Vulkan/CS2 and multi-node coordinator are pending. ADR renamed to 0021 to avoid collision with the team's business-model ADR 0020. Gaming remains a user-requested experiment, separate from the team business model.
 
 User confirmed actual streamed desktop and keyboard/input via screenshot. Applied live wallpaper stretch on A; visual follow-up pending. Summer placement explicitly prefers eligible hotel/spa heat sites independent of player location. All-sites-unavailable fallback still needs a choice. Non-disruptive repaint helper pushed d37beb2; see gaming-lab.md.
+
+Read linked live case. User requests largest available heat reserve for execution-site selection. Proposed definition and atomic per-site reservation accounting recorded in gaming-lab.md; await confirmation of headroom versus stored heat before changing interfaces. No numeric case parameters changed.

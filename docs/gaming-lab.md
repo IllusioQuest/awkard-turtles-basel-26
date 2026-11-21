@@ -134,3 +134,30 @@ placement but does not specify this exhausted-capacity fallback.
 
 Controller implementation remains pending; these paragraphs record agreed behavior and test
 requirements, not completed remote-node orchestration. GPU/Vulkan/CS2 gates remain unchanged.
+
+## Case-source clarification: available heat reserve (2026-11-21)
+
+User requests choosing the server whose infrastructure has the largest available heat reserve.
+Read the live sprintd case page (URL below); its summer use case explicitly permits moving jobs
+to hotels, spas, agriculture or businesses with heat demand. It does not define a ranking metric
+called reserved heat. Proposed interpretation awaiting confirmation: remaining useful heat
+absorption capacity over the next one-hour interval, not the amount of heat already in storage.
+
+available_heat_capacity_kwh = max(0, demand_kwh + tank_capacity_kwh - tank_stored_kwh
+    - already_committed_recoverable_heat_kwh).
+
+All terms must refer to the same site and interval. Commitments include running sessions and
+other scheduled heat sources; track them once per site, not once independently for every node.
+Rank eligible sites by this remaining amount; then choose a ready node with free compute capacity
+within the site, with stable ID ties. Recheck and reserve compute plus thermal capacity atomically.
+Do not count the full site reserve for every simultaneous admission. Existing shared heat
+scheduler supplies the demand/storage-based load target, but its clipped 0..1 return alone cannot
+rank absolute capacity after saturation. Any needed shared interface extension must be coordinated
+with T-11/T-12 and reviewed before implementation; do not copy the thermal model into gaming.
+
+A full tank has zero storage headroom, but current demand can still absorb heat. When every site's
+reserve is zero, descending ranking alone supplies no meaningful winner: queue versus explicit
+waste-heat execution remains a fallback choice. No queue/waste policy is silently inferred.
+
+Source accessed 2026-11-21:
+https://app.sprintd.org/events/sprintd-basel-greentech/cases/useful-load-useful-heat-can-your-computing-power-heat-a-home
