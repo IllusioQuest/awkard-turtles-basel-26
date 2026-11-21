@@ -1,0 +1,194 @@
+{
+  "source": "https://www.strompreis.elcom.admin.ch/api/graphql",
+  "query": "{ cantonMedianObservations(locale: \"de\", filters: {period: [\"2026\"], category: [\"H4\"], product: [\"standard\"]}) { period category canton cantonLabel total: value(priceComponent: total) } }",
+  "retrieved_at_utc": "2026-11-21T05:03:33+00:00",
+  "unit": "Rp./kWh (CHF cents per kWh); 'total' price component as published by ElCom (VAT treatment: verify on strompreis.elcom.admin.ch)",
+  "response": {
+    "data": {
+      "cantonMedianObservations": [
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "6",
+          "cantonLabel": "Obwalden",
+          "total": 26.529
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "16",
+          "cantonLabel": "Appenzell Innerrhoden",
+          "total": 27.57
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "9",
+          "cantonLabel": "Zug",
+          "total": 21.883
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "8",
+          "cantonLabel": "Glarus",
+          "total": 29.663
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "19",
+          "cantonLabel": "Aargau",
+          "total": 27.73
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "11",
+          "cantonLabel": "Solothurn",
+          "total": 30.419
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "18",
+          "cantonLabel": "Graubünden",
+          "total": 29.197
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "21",
+          "cantonLabel": "Tessin",
+          "total": 25.133
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "2",
+          "cantonLabel": "Bern",
+          "total": 29.347
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "26",
+          "cantonLabel": "Jura",
+          "total": 27.896
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "3",
+          "cantonLabel": "Luzern",
+          "total": 25.414
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "17",
+          "cantonLabel": "St. Gallen",
+          "total": 29.7995
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "13",
+          "cantonLabel": "Basel-Landschaft",
+          "total": 31.977
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "20",
+          "cantonLabel": "Thurgau",
+          "total": 29.43
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "4",
+          "cantonLabel": "Uri",
+          "total": 25.069
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "15",
+          "cantonLabel": "Appenzell Ausserrhoden",
+          "total": 28.741
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "5",
+          "cantonLabel": "Schwyz",
+          "total": 28.155
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "14",
+          "cantonLabel": "Schaffhausen",
+          "total": 32.197
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "1",
+          "cantonLabel": "Zürich",
+          "total": 24.758
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "23",
+          "cantonLabel": "Wallis",
+          "total": 26.867
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "22",
+          "cantonLabel": "Waadt",
+          "total": 30.416
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "10",
+          "cantonLabel": "Freiburg",
+          "total": 27.279
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "24",
+          "cantonLabel": "Neuenburg",
+          "total": 30.014
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "12",
+          "cantonLabel": "Basel-Stadt",
+          "total": 33.25
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "7",
+          "cantonLabel": "Nidwalden",
+          "total": 22.063
+        },
+        {
+          "period": "2026",
+          "category": "H4",
+          "canton": "25",
+          "cantonLabel": "Genf",
+          "total": 24.88
+        }
+      ]
+    }
+  }
+}
