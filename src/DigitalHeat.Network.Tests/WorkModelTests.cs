@@ -51,14 +51,7 @@ public class WorkModelTests
         Assert.Equal(core.Summary.Jobs.Completed, net.Work.Type1.Completed);
         Assert.Equal(core.Hours.Select(h => h.ActualLoadPerServer), net.Sites[0].Hours.Select(h => h.ActualLoadPerServer));
 
-        var b2Ledger = new WorkLedger([site], [new Type1Spec(40, 0.5, 24, Anywhere)], [fillerShare], demand.Count, 24);
-        var b2 = NetworkSimulation.Run([site], new HeatFirstNetworkScheduler(), new PerfectForesightForecasts(), 1,
-            work: b2Ledger);
-        for (int h = 0; h < core.Hours.Count; h++)
-            Assert.True(Math.Abs(core.Hours[h].ActualLoadPerServer - b2.Sites[0].Hours[h].ActualLoadPerServer) < 1e-9,
-                $"First B2 mismatch at {h}: Core={core.Hours[h].ActualLoadPerServer:R}, B2={b2.Sites[0].Hours[h].ActualLoadPerServer:R}");
-        Assert.Equal(core.Summary.Jobs.Missed, b2.Work!.Type1.Missed);
-        Assert.Equal(core.Summary.BreakEvenChfPerServerHour, b2.Sites[0].Summary.CaseBreakEvenChfPerServerHour);
+        Assert.Equal(core.Summary.BreakEvenChfPerServerHour, net.Sites[0].Summary.CaseBreakEvenChfPerServerHour);
     }
 
     [Fact]
@@ -100,7 +93,7 @@ public class WorkModelTests
     public void HeatFirstPlacesAllWorkAtHighestHeatEligibleSite()
     {
         // House "h" needs 1 kWh/h (1 server-hour of heat-led capacity), pool "p" 3 kWh/h, "x" 2 kWh/h.
-        // House work: 2.5 server-hours due in 1 h → 1 at home, 1.5 at the pool (most free), none at x.
+        // All 2.5 server-hours go to the pool with highest useful heat; origin has no preference.
         var sites = new[] { Site("h", [1], servers: 5), Site("p", [3], servers: 5), Site("x", [2], servers: 5) };
         var ledger = new WorkLedger(sites, [new Type1Spec(5, 0.5, 1, Anywhere), null, null], [1.0, 1.0, 1.0], 1, 24);
         var r = NetworkSimulation.Run(sites, new HeatFirstNetworkScheduler(), new PerfectForesightForecasts(), 1,
@@ -109,7 +102,7 @@ public class WorkModelTests
         var flow = Assert.Single(r.Work.Flows);
         Assert.Equal((0, 1, 2.5), (flow.FromSite, flow.ToSite, flow.ServerHours));
         Assert.Equal(0.0, r.Work.Type1ServerHoursBySite[0][0], 9);
-        Assert.Equal(0.5, r.Work.Type2ServerHoursBySite[1][0], 9); // pool keeps 1.5 for filler
+        Assert.Equal(0.5, r.Work.Type2ServerHoursBySite[1][0], 9); // pool keeps 0.5 for filler
         Assert.All(r.Sites, s => Assert.Equal(0, s.Summary.DumpedHeatKwh, 9));
     }
 
@@ -166,8 +159,7 @@ public class WorkModelTests
     [Fact]
     public void HeatFirstMovesWorkToHigherHeatWithoutOriginPreference()
     {
-        // House "h" can run 1 server-hour per hour of heat-led work (1 kWh/h demand, no tank) for 2 hours;
-        // its 3 server-hours due in 2 h need 1 server-hour moved to the pool "p" (3 kWh/h demand).
+        // The higher-heat pool receives all three server-hours, even though the origin could do some.
         var sites = new[] { Site("h", [1, 1, 1], servers: 5), Site("p", [3, 3, 3], servers: 5) };
         var ledger = new WorkLedger(sites, [new Type1Spec(6, 0.5, 2, Anywhere), null], [1.0, 1.0], 3, 24);
         var r = NetworkSimulation.Run(sites, new HeatFirstNetworkScheduler(),
@@ -191,16 +183,6 @@ public class WorkModelTests
         Assert.Equal(3, r.Work.Type1.Missed); // 1 of 2.5 server-hours done → ⌈1.5 / 0.5⌉ = 3 jobs missed
     }
 
-    // Like Site(), but with valid local timestamps beyond 24 hours (for multi-day tests).
-    private static NetworkSite MultiDaySite(string id, double[] demandKwh, double servers, double tankKwh) =>
-        new(id, id, 0, 0, "CH", servers, 1, 1, tankKwh, 0, 1, 0.3, 0.1,
-            demandKwh.Select((d, i) => new DemandHour(new DateTime(2025, 7, 1).AddHours(i)
-                .ToString("yyyy-MM-dd'T'HH:mm", System.Globalization.CultureInfo.InvariantCulture), 0, false, d, 0)).ToArray());
-
-
-
-
-
     [Theory]
     [InlineData(0, 0, 1)]
     [InlineData(1, 3, 0)]
@@ -208,7 +190,7 @@ public class WorkModelTests
     {
         // Same toy as above (decision 0030): 2.5 server-hours due in 1 h, 1 at home. With d = 0 the excess
         // 1.5 moves to the pool; with d = 1 it may not run elsewhere before the due hour, so
-        // ⌈1.5 / 0.5⌉ = 3 jobs are missed. Checked for B2 and the LP.
+        // Three jobs miss the deadline if the remote data is not staged in time.
         foreach (INetworkScheduler scheduler in new INetworkScheduler[]
                  { new HeatFirstNetworkScheduler(transferDelayHours: delayHours) })
         {

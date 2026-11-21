@@ -40,6 +40,8 @@ for (int i = 0; i < args.Length; i++)
             rootArg = args[i]; break;
     }
 }
+if (strategyIds.Length != 1 || strategyIds[0] != "mesh-heat-first")
+    throw new ArgumentException("Only mesh-heat-first is supported; historical scheduler modes are retired.");
 string root = rootArg is not null ? Path.GetFullPath(rootArg) : FindRepositoryRoot();
 if (scenarioArg is not null)
 {

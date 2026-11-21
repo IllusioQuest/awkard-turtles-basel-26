@@ -5,9 +5,12 @@ x-node: &node
   cpus: 0.75
   mem_limit: 1024m
   pids_limit: 512
+  # PID files/sockets must not outlive a stopped daemon; engine data stays in the named volume.
+  tmpfs: ['/run']
   environment:
     MESH_TOKEN: ${MESH_TOKEN:?Run Start-MeshLab.ps1}
     MESH_JOB_IMAGE: ${MESH_JOB_IMAGE:?Run Start-MeshLab.ps1}
+    TINI_SUBREAPER: '1'
   networks: [mesh]
 services:
   home:

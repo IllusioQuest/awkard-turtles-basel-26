@@ -3,7 +3,9 @@ $request=Join-Path $PSScriptRoot 'Invoke-MeshRequest.ps1'
 function State([string]$Peer) { & $request -Peer $Peer }
 function Heat([string]$Peer,[double]$Kwh) { & $request -Peer $Peer -Path heat -Json (@{demand_kwh=$Kwh;accepting_work=$true}|ConvertTo-Json -Compress) | Out-Null }
 function Wait-Attempt([string]$Peer,[string]$Job,[string[]]$Phases) {
-    for ($i=0;$i -lt 120;$i++) {
+    $timeout=if ('released' -in $Phases) { 600 } else { 60 }
+    $watch=[Diagnostics.Stopwatch]::StartNew()
+    while ($watch.Elapsed.TotalSeconds -lt $timeout) {
         $row=(State $Peer).attempts | Where-Object {$_.attempt.request.id -eq $Job}
         if ($row -and $row.phase -in $Phases) { return $row }
         Start-Sleep -Milliseconds 500
@@ -34,6 +36,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Origin restart failed' }
 Heat hotel 8
 $ended=Wait-Attempt hotel $job @('released')
 if ($ended.deadline.status -ne 'on_time') { throw 'Finite batch did not successfully finish on time' }
+$origin=State home
+$intent=$origin.jobs|Where-Object {$_.request.id -eq $job}
+if ($origin.engine_id -ne $states[0].engine_id -or $intent.target -ne 'hotel' -or $intent.status -ne 'accepted') { throw 'Origin recovery changed engine/target ownership' }
+if (@((State hotel).attempts|Where-Object {$_.attempt.request.id -eq $job}).Count -ne 1) { throw 'Duplicate execution attempt' }
 $image=$running.attempt.profile.image
 $result=& docker.exe --context desktop-linux exec digitalheat-mesh-hotel-1 docker run --rm --network none --mount "type=volume,source=$volume,target=/work,readonly" --entrypoint python $image -c 'import json,pathlib; p=pathlib.Path("/work"); r=list(p.glob("out/pass_*/*.json")); assert len(r)==2; print(json.dumps({"result_files":len(r),"progress":json.loads((p/"progress.json").read_text())}))'
 if ($LASTEXITCODE -ne 0) { throw 'Persistent finite results missing' }

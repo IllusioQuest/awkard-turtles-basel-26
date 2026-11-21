@@ -58,9 +58,8 @@ public sealed class NodeFeedbackOwner
         manifestIdentity = WorkloadJson.Identity(manifest.Workloads);
         nodesIdentity = WorkloadJson.Identity(manifest.RuntimeNodes);
         // The accepted manifest is immutable. Sort once; do not repeat this on every notification.
-        admissionOrder = manifest.Workloads.OrderBy(w => w.Request.Kind == "interactive" ? 0 : 1)
-            .ThenBy(w => w.Request.Deadline?.DueAtUtc ?? DateTimeOffset.MaxValue)
-            .ThenBy(w => w.Request.Id, StringComparer.Ordinal).ToArray();
+        admissionOrder = manifest.Workloads.OrderBy(w => new JobPriority(
+            w.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, w.Request.Id)).ToArray();
         foreach (var prior in coordinator.Attempts())
         {
             var entry = manifest.Workloads.SingleOrDefault(w => w.Request.Id == prior.Attempt.Request.Id);
