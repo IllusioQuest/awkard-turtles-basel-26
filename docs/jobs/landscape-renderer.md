@@ -170,3 +170,12 @@ overhead. These are local samples, not an SLA or directly comparable probes. Raw
 ../performance/render-status-responsiveness-2026-11-21.json. The exact user-failed comparison
 9ba15c1288a1 was cancelled after explicit approval; its completed hotel PNG and logs remain.
 A clean Run comparison is permitted only after cancellation is confirmed on all render peers.
+
+Post-fix real follow-up also passed: two frames completed on hotel in the single-node leg and
+two completed across hotel/spa in the multiple-node leg, including confirmed pause/resume.
+Active wall times were 148.4079 s and 40.3939 s; the single leg also had 4.0231 s confirmed
+pause. These include observed queue/control delays on the loaded laptop and must not be called
+a stable speedup or scaled into a 48-frame SLA. Evidence:
+../performance/render-followup-node-split-2026-11-21.json. The user-facing comparison is left
+cancelled/held with Run comparison enabled; diagnostic frames are separate IDs. Refresh the
+browser to load the repaired polling code. GPU remains unverified/unavailable on this laptop.

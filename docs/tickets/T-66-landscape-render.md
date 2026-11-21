@@ -11,3 +11,5 @@ Keep docs on main. Verify pause/resume, frame completeness and comparison math; 
 limits and benchmark settings. No fabricated GPU acceleration or physical-node speedup claim.
 
 Implementation: PR #54, feat/T-66-landscape-render. Ready for review; 76 orchestration tests, clean WorkloadRun build, real two-frame-per-leg/pause verification and visual preview pass. Full 48-frame benchmark and real GPU execution not measured. See docs/jobs/landscape-renderer.md and docs/performance/landscape-render-verification-2026-11-21.json. Do not mark done before merge.
+
+Reported timeout repaired and node split reverified: 84 tests pass; status stays responsive during rendering and paused-peer warning; user-approved 80/20 frame allocation and failed-comparison cancellation implemented. Actual follow-up uses hotel then hotel/spa. See docs/performance/render-followup-node-split-2026-11-21.json. PR #54 updated; GPU hardware test/full 48-frame run remain separate.

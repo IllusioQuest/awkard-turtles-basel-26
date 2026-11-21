@@ -1,0 +1,91 @@
+{
+  "mode": "real_two_frames_per_leg_verification_not_48_frame_benchmark",
+  "pause_verified": true,
+  "source": "Follow-up after timeout fix and approved failed-comparison cancellation; real CPU frames on shared laptop. Two frames per leg, not the full 48-frame benchmark. One deliberate pause; headline speedup suppressed. Active wall time includes actual queue/control delays.",
+  "image": "sha256:d618f2e326638a9993f059a26bf9d0e8b1036e6d74497e4bf6fcfee99ab4abc2",
+  "legs": [
+    {
+      "mode": "single",
+      "completed": 2,
+      "started_utc": "2026-11-21T18:46:57.361101+01:00",
+      "finished_utc": "2026-11-21T18:49:29.792079+01:00",
+      "elapsed_seconds": 152.430978,
+      "active_seconds": 148.4078771,
+      "paused_seconds": 4.0231009,
+      "frames": [
+        {
+          "job_id": "home.dfc3eddf6693-0-001",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 1,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 23.298130055998627,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        },
+        {
+          "job_id": "home.dfc3eddf6693-0-002",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 2,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 26.304464291999466,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        }
+      ]
+    },
+    {
+      "mode": "multiple",
+      "completed": 2,
+      "started_utc": "2026-11-21T18:49:29.7926687+01:00",
+      "finished_utc": "2026-11-21T18:50:10.1865844+01:00",
+      "elapsed_seconds": 40.3939157,
+      "active_seconds": 40.3939157,
+      "paused_seconds": 0,
+      "frames": [
+        {
+          "job_id": "home.dfc3eddf6693-1-001",
+          "peer_id": "hotel",
+          "metadata": {
+            "frame": 1,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 28.22951039000327,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        },
+        {
+          "job_id": "home.dfc3eddf6693-1-002",
+          "peer_id": "spa",
+          "metadata": {
+            "frame": 2,
+            "backend": "CPU",
+            "device": "CPU fallback",
+            "blender": "3.4.1",
+            "render_seconds": 20.569722727996123,
+            "width": 640,
+            "height": 360,
+            "samples": 32,
+            "seed": 66
+          }
+        }
+      ]
+    }
+  ],
+  "speedup": null
+}
