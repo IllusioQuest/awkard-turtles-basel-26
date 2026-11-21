@@ -33,3 +33,10 @@ Read linked live case. User requests largest available heat reserve for executio
 User confirmed remaining useful heat capacity definition. Implemented shared helper and gaming-only atomic reservation model/demo in 540bbd7 (PR #22 updated). 14 gaming tests and 40 main-based Core tests pass, including legacy-output cross-check. This is reservation accounting only: actual batch preemption, launch/reconciliation and stream routing remain pending. ADR 0022 reviewed go with changes.
 
 Fixed user-reported Windows PowerShell 5.1 NativeCommandError in graphics probe, b5bb9a3, PR #22. Tested in actual PS5.1 and PS7 with absent device paths and expected VAAPI failure; both complete. Hardware/Vulkan support unchanged.
+
+User approved isolated Dozen build experiment after seeing CPU-only Vulkan. ADR 0023 reviewed
+go with changes. Build uses official Mesa 26.0.8 source pinned by locally computed SHA256,
+separate /opt prefix and pinned Selkies base; no Windows changes or desktop replacement.
+C: free space is about 21 GB versus official CS2 requirement of 85 GB, so driver experiment
+can proceed but a fresh CS2 install needs another storage decision. Existing Steam manifest
+is not evidence of a usable Linux installation and will not be modified automatically.
