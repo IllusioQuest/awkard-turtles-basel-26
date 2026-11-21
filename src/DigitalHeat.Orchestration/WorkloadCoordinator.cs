@@ -88,11 +88,12 @@ public sealed class WorkloadCoordinator : IDisposable
         lock (gate)
         {
             if (!retainHourlyHeat) { placement.Update(inventory, nowUtc); currentInventory = WorkloadJson.Copy(inventory); return; }
-            // Validate before changing the retained accounting state.
-            new WorkloadPlacement().Update(inventory, nowUtc);
-            if (currentInventory is {} old && (inventory.Revision <= old.Revision || inventory.IntervalStartUtc < old.IntervalStartUtc))
+            // Copy caller-owned arrays before validation; do not build a throwaway placement index.
+            var copy = WorkloadJson.Copy(inventory);
+            WorkloadPlacement.ValidateInventory(copy, nowUtc);
+            if (currentInventory is {} old && (copy.Revision <= old.Revision || copy.IntervalStartUtc < old.IntervalStartUtc))
                 throw new InvalidDataException("Cannot regress feedback inventory revision/hour.");
-            currentInventory = WorkloadJson.Copy(inventory);
+            currentInventory = copy;
             foreach (var claim in placement.Allocations().Where(a => !a.Paused)) CommitHeat(claim.Request.Id);
             RefreshHeatBudget(nowUtc);
         }
@@ -118,16 +119,20 @@ public sealed class WorkloadCoordinator : IDisposable
     private WorkloadSite[] BudgetSites(string? resuming = null, bool previewBatchPause = false)
     {
         var basis = currentInventory!;
-        var active = placement.Allocations();
+        // Group once instead of scanning the entire history for every site. GroupBy preserves
+        // per-site record order: changing summation order can change boundary admission decisions.
+        var committedBySite = records.Where(r => r.CommittedHeatIntervalsUtc?.Contains(basis.IntervalStartUtc) == true)
+            .GroupBy(r => r.Attempt.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Attempt.Reservation.RecoverableHeatKwhPerHour), StringComparer.Ordinal);
+        var heldBySite = placement.Allocations().Where(a => (!a.Paused || a.Request.Id == resuming)
+                && !(previewBatchPause && a.Request.Kind == "batch" && a.Request.Lifecycle.AllowPause))
+            .GroupBy(a => a.Reservation.SiteId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Request.RecoverableHeatKwhPerHour), StringComparer.Ordinal);
         return basis.Sites.Select(site =>
         {
-            double committed = records.Where(r => r.Attempt.Reservation.SiteId == site.Id
-                && r.CommittedHeatIntervalsUtc?.Contains(basis.IntervalStartUtc) == true).Sum(r => r.Attempt.Reservation.RecoverableHeatKwhPerHour);
             // Active reservations are already subtracted by WorkloadPlacement. Do not count them twice.
-            double held = active.Where(a => a.Reservation.SiteId == site.Id && (!a.Paused || a.Request.Id == resuming)
-                && !(previewBatchPause && a.Request.Kind == "batch" && a.Request.Lifecycle.AllowPause))
-                .Sum(a => a.Request.RecoverableHeatKwhPerHour);
-            return site with { ExternalCommittedHeatKwh = site.ExternalCommittedHeatKwh + Math.Max(0, committed - held) };
+            double retainedHeat = Math.Max(0, committedBySite.GetValueOrDefault(site.Id) - heldBySite.GetValueOrDefault(site.Id));
+            return site with { ExternalCommittedHeatKwh = site.ExternalCommittedHeatKwh + retainedHeat };
         }).ToArray();
     }
 
@@ -377,9 +382,7 @@ public sealed class WorkloadCoordinator : IDisposable
     {
         WorkloadPlacement.ValidateRequest(request);
         var inventory = currentInventory ?? throw new InvalidOperationException("Update inventory before admission.");
-        foreach (var group in nodes.GroupBy(n => n.DockerContext))
-            if (inventory.Nodes.Where(n => group.Any(r => r.NodeId == n.Id)).Select(n => n.DomainId).Distinct().Count() > 1)
-                throw new InvalidDataException("One Docker context cannot be assigned independent physical resource pools.");
+        WorkloadConfiguration.ValidateRuntimeDomains(inventory, nodes);
         foreach (var node in inventory.Nodes.Where(n => n.Ready && n.NetworkEligible &&
             (request.PinnedNodeId is null || request.PinnedNodeId == n.Id) && (request.StorageId is null || n.StorageIds.Contains(request.StorageId)) &&
             !request.RequiredCapabilities.Except(n.Capabilities).Any()))
