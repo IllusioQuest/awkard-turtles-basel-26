@@ -15,6 +15,8 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | Ennio / Claude | `feat/T-02-transcription-job` | T-02: whisper.cpp (base) transcription container, laptop runtime and energy measurement (RAPL + battery), scaling to 1 kW | Supplies `config/jobs/transcription-whisper.json` (schema from decision 0009) and a running container for `DigitalHeat.LiveRun` | in progress |
 | team lead / Claude | `exp/year-explorer-transparency` | Browser year explorer prototype for the reference house, `METHOD.md`, `verify.py` | own JavaScript model (must match the C# core) | prototype; review findings pending: example computing price drives the surplus headline, verdict ignores hardware, offline demo, heatmap legend |
 | team lead / Claude | `feat/T-01-job-catalog` | T-01: schema change for always-on services (webhosting) once Nikita has decided the representation; transcription descriptor comes from T-02 | `config/jobs/job.schema.json`, `JobDescriptorLoader` (decision 0009) | blocked: waiting for Nikita's decision (options in T-01) |
+| team lead / Claude | `docs/T-07-draft-submission` | T-07: fresh-clone check and must-have checklist (`docs/submission/draft-checklist.md`); README demo section once T-02 is merged | none | in progress |
+| team lead / Claude (research subagents) | `data/job-demand-scenario`, `data/computing-price` | T-26: sourced transcription demand scenario (`config/job-scenarios/transcription-basel.json`) and computing-price recommendation; values go to T-06 (Jona) after the team lead decides | new scenario file only; default scenario unchanged | in progress |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Shared interfaces

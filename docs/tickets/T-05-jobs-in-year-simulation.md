@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core
 - **Depends on:** T-01
-- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** PR #6 open (T-01 input pending)
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** done (PR #6, decision 0010); sourced finite scenario: T-26
 
 ## Goal
 

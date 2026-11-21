@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Runtime / demo
 - **Depends on:** T-03
-- **Suggested owner:** same person as T-03  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** same person as T-03  ·  **Owner:** Jona / Codex  ·  **Status:** done (PR #3: DigitalHeat.LiveRun day replay)
 
 ## Goal
 
