@@ -138,7 +138,8 @@ def main():
     for relative, content in outputs.items():
         path = ROOT / relative
         if args.check:
-            if not path.exists() or path.read_bytes() != content:
+            # Git may check text out as CRLF on Windows; compare reproducible text, not line endings.
+            if not path.exists() or path.read_text(encoding="utf-8") != content.decode("utf-8"):
                 raise ValueError(f"Derived file is missing or out of date: {relative}")
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
