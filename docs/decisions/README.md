@@ -50,3 +50,4 @@ later.
 | [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation transport | proposed; user approved; reviewed with changes; PR #40 depends on #35 |
 | 0040 | Local four-node demo | reserved on `feat/T-51-four-node-live-demo` |
 | [0041](0041-cs16-linux-compatibility.md) | Isolated CS 1.6 Linux compatibility trial | proposed; user approved two-node Wine trial; reviewed with changes; T-53 |
+| [0043](0043-gaming-gpu-eligibility.md) | Gaming GPU eligibility with existing heat ranking | proposed; user approved; T-55 |

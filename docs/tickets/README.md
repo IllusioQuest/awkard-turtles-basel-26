@@ -88,3 +88,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-51](T-51-swiss-grid-data.md) | Data for the Swiss-wide simulation: weather grid + forecasts, buildings and heat demand, ElCom per municipality, compute demand and prices | Ennio / Claude | in review |
 | [T-52](T-52-reborn-compatibility.md) | Assess ReBorn replacement and multiplayer compatibility | Nikita / Codex | assessment complete; user declined proposed setup; no runtime changes |
 | [T-53](T-53-cs16-linux-compatibility.md) | CS 1.6 Linux compatibility and scheduler regression check | Nikita / Codex | draft PR #42; desktop/background checks pass; installer/multiplayer pending; ADR 0041 |
+| [T-55](T-55-gaming-gpu-eligibility.md) | Preserve heat and speed with GPU eligibility | Nikita / Codex | in progress; ADR 0043; unused E probe only |
