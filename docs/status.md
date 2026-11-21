@@ -128,3 +128,5 @@ T-39 update: browser desktop/input now confirmed by user screenshot/test. Summer
 ## Paper skeleton (2026-11-21, Jona / Claude)
 T-22: `docs/paper/outline.md` with title, draft abstract, candidate contributions, sections, figure list
 (which run produces each figure) and team questions. Docs only.
+
+T-39 interface coordination: user approved largest remaining useful heat capacity. Proposed ADR 0022 factors the existing GreedyHeatScheduler numerator into a shared helper (valid results unchanged), adds a gaming-only in-memory reservation model/demo; does not implement T-11/T-12 network optimisation or alter IScheduler/IExecutor. Runtime launch/preemption remains separate.
