@@ -1,43 +1,57 @@
 # T-43: Universal resource-aware workload placement
 
-Owner: Nikita / Codex. Status: in progress (implementation approved).
-Planned code branch: feat/T-43-universal-workloads, created from current main after decisions.
+Owner: Nikita / Codex. Status: implementation complete; final integration checks/PR in progress.
+Code branch: `feat/T-43-universal-workloads`. Design: ADR 0033.
 
-## Request and scope
+## Approved scope
 
-User approved the direction of reusable workload placement rather than transparent distribution
-of an unchanged game's internal calculations. Ask for important choices, and commit/push docs
-directly to main. Existing running game, author worktrees and browser-only access must be preserved.
+User selected the recommended C# + Docker contexts, existing Xonotic/batch first, and local
+storage with backup/restore. Whole workloads are distributed; an unchanged game's internal
+simulation is not sharded. Current Xonotic and author worktrees stay protected. Markdown
+documentation is committed/pushed directly to main; code goes through a PR.
 
-Proposed milestone: structured CPU/RAM/GPU/heat/locality/lifecycle requirements, node capability
-and physical-resource inventory, atomic admission, shared heat ranking, Docker-context executor,
-explicit lifecycle observations and deterministic offline tests. Same admission decision path for
-fake and real executors. Existing heat physics and scored year calculations remain unchanged.
+## Delivered
 
-## User decisions (approved in chat)
+- `DigitalHeat.Orchestration`: one atomic heat/CPU/RAM/slot/whole-GPU admission engine. Optional
+  GPU VRAM, capabilities, locality, per-peer latency and node-local storage constraints fail closed.
+- `SessionPlacement` delegates to this engine through a compatibility adapter. Public gaming
+  contracts stay unchanged; legacy slots do not imply new CPU/RAM/GPU isolation guarantees.
+- Single-host/operator per-fleet OS lock, flushed local journal, immutable attempt/spec identity,
+  labelled runtime discovery and positive observations before resource release. Uncertain missing
+  starts block admission and never blindly relaunch. Confirmed created containers can continue or
+  cancel, with freshness/resource checks before recovery start.
+- Docker contexts, enforced CPU/RAM/shared-memory limits, cached images only, non-root workloads,
+  explicit device/volume bindings, loopback-only ports and independent readiness probes.
+- Owner-authorized batch preemption only when pausing can help. Paused RAM/GPU/slots remain held.
+  Batch heat control uses shared `GreedyHeatScheduler`, `SchedulerController.Apply`, `IExecutor`
+  and `DockerJobExecutor`, as the yearly/live path does. Games never enter the pause path.
+- Cold backup of the released attempt's own claimed volume; restore into a new fleet-namespaced
+  volume, preserving private application files/ownership. No replicated storage or live snapshot.
+- CLI for sourced offline planning and explicit start/status/heat/pause/resume/stop/backup/restore.
+  Historical examples use existing Swiss scenario data; current game GPU is externally allocated.
 
-1. C# + Docker contexts and snake_case profiles.
-2. First end-to-end example: Minecraft server + browser client, existing Xonotic + batch
-   (recommended for first proof), or a scheduler-only dry run.
-3. Minecraft persistent worlds: node-local storage plus explicit backup/restore (recommended),
-   or design replicated storage before implementation.
+## Verification and review
 
-Previously agreed: protect active matches; heat-rank new placements; pause batch first;
-server failure may require reconnecting, with no seamless active-match migration promise.
-Minecraft Java entitlement/browser client and server EULA details must be established before
-installing/starting Minecraft if that example is selected. Never request account passwords.
+29 orchestration and 36 gaming tests pass. Shared Core (46) and Network (20) regressions pass;
+Release solution builds cleanly. Isolated Docker smoke verifies actual batch pause/resume,
+idempotent starts, CPU re-admission while RAM remains held, protected interactive capacity,
+positive termination/release and private-file cold backup/restore. Exact random test fleets and
+temporary volumes only; no user images, volumes, game or desktop were removed/restarted.
 
-## Design and acceptance
+Independent implementation review findings applied: preflight before preemption, no pointless
+pause for a retained-memory/GPU deficit, recovery/cancellation of created attempts, and backup
+authorization tied to the attempt's claimed storage. New regression tests cover those cases.
 
-ADR 0033 is proposed, not accepted. No new dependency, DTO boundary or lifecycle behavior is
-implemented while the above choices are pending. Coordinator durability/HA and exact GPU
-allocation policy must also be agreed before claiming fault-tolerant automated operation.
+## Explicit limits and handoff
 
-Acceptance: invalid/unknown resources fail closed; resource and heat claims are atomic; concurrent
-last-capacity admission tested; pinned workload/locality/storage/latency guards; CPU versus
-RAM/GPU reclamation distinguished; no duplicate launch after retries; release only after positive
-observation. Use fake adapters for failures and an isolated real Docker smoke; preserve the active
-game. Document sourced estimates and missing power/latency measurements. One original game
-process remains on one node, and one Minecraft world is not automatically sharded.
+This is an operator-driven prototype, not continuous telemetry/control or HA. Operators supply
+fresh, trusted physical/external-allocation inventory and invoke heat updates. The file lock is
+for one host/OS operator, not cross-host fencing. Current game remains external; the managed
+Xonotic template is not a newly gameplay-tested stream and requires private env configuration
+and a genuinely free eligible GPU. NVIDIA/remote engines are not tested on the Intel laptop.
 
-Implementation milestone: shared generic admission extracted with the legacy gaming adapter delegating to it (all 36 existing gaming tests pass). Added atomic physical-domain CPU/RAM/GPU claims, stale inventory gates, journalled single-host coordinator and ownership-scoped Docker adapter. New failure/resource tests under construction; no running game mutated. No new packages.
+Minecraft, automatic relocation, checkpointing, replication, GPU sharing and controller HA are
+outside this approved first milestone. No new package, scored house formula or economic model.
+
+Setup, commands, calculation path, architecture graph and code map:
+[universal workloads](../universal-workloads.md).
