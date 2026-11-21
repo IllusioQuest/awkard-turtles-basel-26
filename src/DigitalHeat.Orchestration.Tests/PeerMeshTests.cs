@@ -46,7 +46,7 @@ public class PeerMeshTests : IDisposable
 
     [Fact] public void EveryOriginCanReachEveryPeerAndHeatWinsInsideLatencyLimit()
     {
-        // Decision 0053: an idle eligible peer outranks a busy one, so a and c get too little heat
+        // Decision 0056: an idle eligible peer outranks a busy one, so a and c get too little heat
         // (0.5 kWh < 0.8 kWh per job) to run the work themselves; b must be reached from both origins.
         var a = Add("a", .5); var b = Add("b", 8); var c = Add("c", .5); Publish();
         string id = a.Submit(Request("a") with { LatencyLimits = [new("player", 25)] }, CoordinatorTests.Profile.Id);
@@ -137,7 +137,7 @@ public class PeerMeshTests : IDisposable
 
     [Fact] public void PeerHeatUpdatePausesBatchThroughSharedControllerButProtectsGame()
     {
-        // a cannot host 0.8 kWh jobs, so both go to b even though b is already busy (decision 0053).
+        // a cannot host 0.8 kWh jobs, so both go to b even though b is already busy (decision 0056).
         var a = Add("a", .5); var b = Add("b", 8); Publish();
         var batch = Request("a", "batch") with { Kind = "batch", Lifecycle = new(true, true, false) };
         a.Submit(batch, CoordinatorTests.Profile.Id); a.Tick();

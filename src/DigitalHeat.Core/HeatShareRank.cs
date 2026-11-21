@@ -1,6 +1,6 @@
 namespace DigitalHeat.Core;
 
-/// <summary>Heat-first site order with load balancing (decision 0053): the site with the larger free
+/// <summary>Heat-first site order with load balancing (decision 0056): the site with the larger free
 /// share of its hourly heat budget ranks higher, then more free heat in kWh, then lower ordinal IDs.
 /// Work therefore fills sites to an equal share of their heat need instead of all going to the
 /// largest site. Only sites with free heat may be candidates; the share is never a reason to exceed it.</summary>

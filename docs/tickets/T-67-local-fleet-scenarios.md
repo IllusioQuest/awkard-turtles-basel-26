@@ -25,7 +25,7 @@ dotnet run -c Release --project src/DigitalHeat.FleetRun -- post data/derived/fl
 
 - `HouseFiles.Validate` accepts `design_heating_kw = 0` (a site with only flat heat demand, e.g. a pool).
 
-## Load balancing (decision 0053)
+## Load balancing (decision 0056)
 
 The fleet's heat-first scheduler now ranks sites by free share of their hourly heat budget (Core
 `HeatShareRank`) instead of absolute free kWh. Results with the pool (2025, same inputs): the

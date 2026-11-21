@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
-import { householdSeries, resolution } from '../household/series'
+import { householdSeries } from '../household/series'
 import { chf, dateTime, dec1, num, pct } from './format'
 
 const pctSmall = new Intl.NumberFormat('de-CH', { style: 'percent', maximumSignificantDigits: 2 })
@@ -14,14 +14,13 @@ interface Props {
   t: number
   fromMs: number // selected window [fromMs, toMs) in wall ms, as on the admin page
   toMs: number
-  rangeLabel: string
   onMore: () => void
   onClose: () => void
 }
 
 const HOURS_PER_DAY = 24
 
-export default function SitePanel({ run, house, state, series, t, fromMs, toMs, rangeLabel, onMore, onClose }: Props) {
+export default function SitePanel({ run, house, state, series, t, fromMs, toMs, onMore, onClose }: Props) {
   const daily = run.periodHours === HOURS_PER_DAY
 
   // Load over the selected window, bucketed like the household view.
@@ -29,7 +28,6 @@ export default function SitePanel({ run, house, state, series, t, fromMs, toMs, 
     () => householdSeries(run, house, series ?? [], fromMs, toMs).map((b) => ({ t: b.t, load: b.load })),
     [run, house, series, fromMs, toMs],
   )
-  const { unit } = resolution(toMs - fromMs, run.periodHours)
 
   // Hourly runs: the 24 hours up to t; daily runs: the day starting at t.
   const day = useMemo(() => {

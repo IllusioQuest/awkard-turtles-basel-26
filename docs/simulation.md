@@ -82,7 +82,7 @@ Scenario file (`config/fleet/scenarios/*.json`); defaults = code defaults (`Cont
 | `pricing.p_ref_chf`, `p_ref_noise_sd` | 0.82, 0.079 | competitor price, weekly relative noise |
 | `pricing.elasticity` | −0.8 | |
 | `forecast.kind` | `archived` | or `perfect`, `persistence` |
-| `scheduler.id` | `mesh-heat-first` | the only scheduler (`HeatFirstFleetScheduler`); no tank hysteresis, no urgent override (the old `low_share`, `high_share`, `urgent_margin_s` keys were removed in commit b1b7803). Sites are ranked by the free share of their hourly heat budget, then free kWh, then ID (`HeatShareRank`, decision 0053); a site that can run a server at full load goes before one with only a partial budget |
+| `scheduler.id` | `mesh-heat-first` | the only scheduler (`HeatFirstFleetScheduler`); no tank hysteresis, no urgent override (the old `low_share`, `high_share`, `urgent_margin_s` keys were removed in commit b1b7803). Sites are ranked by the free share of their hourly heat budget, then free kWh, then ID (`HeatShareRank`, decision 0056); a site that can run a server at full load goes before one with only a partial budget |
 | `scheduler.chunk_target_s` | 3600 | chunk size at load 1 |
 | `logging.house_timeseries` | `hourly` | `none` / `daily` / `hourly` / `events` |
 

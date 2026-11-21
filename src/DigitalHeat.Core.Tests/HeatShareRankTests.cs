@@ -3,7 +3,7 @@ using Xunit;
 
 namespace DigitalHeat.Core.Tests;
 
-/// <summary>Decision 0053: free share first, then free kWh, then stable IDs.</summary>
+/// <summary>Decision 0056: free share first, then free kWh, then stable IDs.</summary>
 public sealed class HeatShareRankTests
 {
     [Fact]

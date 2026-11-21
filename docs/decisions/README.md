@@ -59,4 +59,10 @@ later.
 
 | [0051](0051-one-heat-first-policy.md) | One heat-first policy; retire competing modes | proposed; user approved; reviewed with changes; T-65; PR #52 |
 
-| [0053](0053-free-heat-share-rank.md) | Rank eligible sites by free share of hourly heat budget | proposed; user approved; reviewed; replaces HeatPlacementRank in Fleet, Network, Orchestration; T-67 |
+| [0052](0052-landscape-render.md) | Landscape frame render benchmark | proposed; user approved; T-66 |
+| [0053](0053-mixed-render-frame-devices.md) | Configurable mixed CPU/GPU frame jobs | user approved 80/20; reviewed with changes; T-66 follow-up |
+| [0054](0054-failed-render-cancellation.md) | Cancel only a failed render comparison, retain data | user approved; reviewed with changes; T-66 |
+
+- [0055 — Verified Eevee rendering for Intel WSL graphics](0055-eevee-intel-render.md): proposed; user-approved capability test, reviewed with changes.
+
+| [0056](0056-free-heat-share-rank.md) | Rank eligible sites by free share of hourly heat budget | proposed; user approved; reviewed; replaces HeatPlacementRank in Fleet, Network, Orchestration; T-67 |

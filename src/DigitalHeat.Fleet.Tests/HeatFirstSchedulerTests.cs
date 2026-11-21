@@ -28,7 +28,7 @@ public class HeatFirstSchedulerTests
     }
     [Fact] public void FreeHeatShareSpreadsWorkInsteadOfFillingTheLargestSite()
     {
-        // Decision 0053. Budgets 8 kWh (demand 7 + tank 1) and 2 kWh (1 + 1), 0.8 kWh per chunk.
+        // Decision 0056. Budgets 8 kWh (demand 7 + tank 1) and 2 kWh (1 + 1), 0.8 kWh per chunk.
         // The first job goes to the larger site (both at share 1.0); afterwards the large site has
         // 7.2 / 8 = 0.9 free and the small one 1.0, so the second job goes to the small site.
         var fleet = new FakeFleet();
@@ -41,7 +41,7 @@ public class HeatFirstSchedulerTests
     }
     [Fact] public void TinyBudgetDoesNotWinOverAFullLoadSite()
     {
-        // Decision 0053 review: a 0.3 kWh site has share 1.0 but cannot run a server at full load
+        // Decision 0056 review: a 0.3 kWh site has share 1.0 but cannot run a server at full load
         // (0.8 kWh); the partly filled large site still can, so it gets the work at load 1.
         var fleet = new FakeFleet();
         fleet.AddHouse(2, cap: 1, tank: 1, demandKw: 2); fleet.AddHouse(1, cap: 1, tank: 1, demandKw: .3);

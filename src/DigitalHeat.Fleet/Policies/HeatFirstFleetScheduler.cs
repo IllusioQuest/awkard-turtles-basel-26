@@ -4,7 +4,7 @@ namespace DigitalHeat.Fleet;
 
 /// <summary>Event-driven chunk adapter. Core owns heat load/rank and EDF order; the engine owns
 /// work, physical tank settlement and lifecycle. A completion never reopens committed hourly heat.
-/// Sites are ranked by free share of their hourly heat budget (decision 0053, Core HeatShareRank).</summary>
+/// Sites are ranked by free share of their hourly heat budget (decision 0056, Core HeatShareRank).</summary>
 public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetScheduler
 {
     private const double Epsilon = 1e-9;
@@ -71,7 +71,7 @@ public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetSch
             if (!queue.Contains(key)) continue;
             while (job.UnassignedUnits > Epsilon && job.ActiveChunks.Count < job.Type.MaxChunks)
             {
-                // Decision 0053: prefer the best-ranked site that can run a server at full load, so
+                // Decision 0056: prefer the best-ranked site that can run a server at full load, so
                 // small budgets do not fragment work into low-load chunks; only then partial budgets.
                 int best = -1, partial = -1;
                 foreach (var rank in candidates.Reverse())

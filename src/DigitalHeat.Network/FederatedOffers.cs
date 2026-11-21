@@ -52,7 +52,7 @@ public static class FederatedOfferSelection
         HeatShareRank bestRank = default;
         foreach (var candidate in candidates)
         {
-            var rank = candidate.Rank; // decision 0053
+            var rank = candidate.Rank; // decision 0056
             if (best is not null && rank.CompareTo(bestRank) <= 0) continue;
             best = candidate.Offer;
             bestRank = rank;

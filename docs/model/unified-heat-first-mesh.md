@@ -11,7 +11,7 @@ Core owns these rules:
 1. Pending jobs use earliest deadline, then stable ordinal job ID (`JobPriority`).
 2. Eligibility excludes insufficient resources, forbidden locations, stale capacity,
    expired deadlines and, where required, unsuitable latency. Lower RTT is not a ranking bonus.
-3. Eligible sites rank by free share of their hourly heat budget, then free kWh, then ordinal site/node ID (`HeatShareRank`, decision 0053).
+3. Eligible sites rank by free share of their hourly heat budget, then free kWh, then ordinal site/node ID (`HeatShareRank`, decision 0056).
 4. `HeatFirstScheduler` derives load from the same `HeatCapacity` used by placement.
 
 The adapter names are not selectable policies: Network represents hourly cohorts/filler;

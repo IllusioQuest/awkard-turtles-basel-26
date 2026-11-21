@@ -22,7 +22,7 @@ public class PlacementTests
 
     [Fact] public void FreeHeatShareRanksSitesAndOwnedHeatIsSharedPerSite()
     {
-        // Decision 0053. Budgets: home 1 + 2 = 3 kWh, spa 4 + 10 = 14 kWh. Both start at share 1.0, so the
+        // Decision 0056. Budgets: home 1 + 2 = 3 kWh, spa 4 + 10 = 14 kWh. Both start at share 1.0, so the
         // tie goes to more free kWh (spa). Then spa has 13.2 / 14 = 0.94 free and home 1.0, so home is next.
         var p = Start(); Assert.Equal("b", p.TryReserve(Request(), Now)!.NodeId);
         var second = p.TryReserve(Request("two"), Now)!;

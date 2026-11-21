@@ -33,7 +33,7 @@ public sealed class HeatFirstNetworkScheduler(int transferDelayHours = 0) : INet
                         || i != job.OriginSite && state.HourIndex < job.ArrivalHour + transferDelayHours) continue;
                     var site = state.Sites[i];
                     double usedHeat = assigned[i] * site.RecoverableKwhPerServerHour / site.HoursPerStep;
-                    // Decision 0053: free share of the hour's heat budget, then free kWh, then site ID.
+                    // Decision 0056: free share of the hour's heat budget, then free kWh, then site ID.
                     var rank = HeatShareRank.From(HeatCapacity.RemainingKwh(state.States[i].Signal), usedHeat, site.Id);
                     if (best >= 0 && rank.CompareTo(bestRank) <= 0) continue;
                     best = i; bestRank = rank;

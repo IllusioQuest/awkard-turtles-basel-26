@@ -1,0 +1,54 @@
+{
+  "observed_date": "2026-11-21",
+  "hardware": "Intel Iris Xe",
+  "windows_driver": "31.0.101.4146",
+  "cycles": {
+    "blender": "3.4.1 Debian",
+    "compiled_backends": [
+      "CUDA",
+      "HIP"
+    ],
+    "devices": []
+  },
+  "eevee_opengl": {
+    "blender": "5.0.1 Ubuntu",
+    "mesa": "26.0.8",
+    "renderer": "D3D12 (Intel(R) Iris(R) Xe Graphics)",
+    "accelerated": true,
+    "opengl_version": "4.1",
+    "completed_render": false,
+    "failure": "Blender requires OpenGL 4.3; context initialization aborted"
+  },
+  "eevee_vulkan": {
+    "blender": "5.0.1 Ubuntu",
+    "mesa_dozen": "26.0.8",
+    "completed_render": false,
+    "missing_features": [
+      "logical operations",
+      "dual source blending",
+      "multi viewport",
+      "VK_EXT_provoking_vertex"
+    ]
+  },
+  "scope": "Bounded isolated Linux containers with /dev/dxg and read-only WSL libraries. Blender 5.3.0 official archive checksum verified. Neither game containers nor active comparison changed. Mesa 26.3.0 source checked, not compiled. No successful hardware Eevee render.",
+  "diagnostic_fix_commit": "931912c",
+  "validation": "WorkloadRun clean build; 84 orchestration tests pass; corrected probe reports compiled backends. Fix not deployed over active comparison.",
+  "eevee_latest_vulkan": {
+    "blender": "5.3.0",
+    "blender_hash": "02f0899d78e3",
+    "archive_sha256": "dacb8264197a3f7fda6001285a5a506fc97ee943881261c2c3bd63c882f22e05",
+    "mesa_dozen": "26.0.8",
+    "completed_render": false,
+    "missing_features": [
+      "dual source blending"
+    ],
+    "failure": "No Vulkan device meets minimum requirements; Blender segfaulted after rejecting device"
+  },
+  "newer_driver_source_check": {
+    "version": "Mesa 26.3.0",
+    "url": "https://gitlab.freedesktop.org/mesa/mesa/-/raw/mesa-26.3.0/src/microsoft/vulkan/dzn_device.c",
+    "line": 679,
+    "source": ".dualSrcBlend = false,",
+    "method": "Read upstream source; newer driver not rebuilt"
+  }
+}

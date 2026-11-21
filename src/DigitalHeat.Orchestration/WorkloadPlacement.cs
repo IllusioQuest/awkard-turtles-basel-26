@@ -76,7 +76,7 @@ public sealed class WorkloadPlacement
                 throw new InvalidDataException("Workload ID is already externally allocated.");
             WorkloadReservation? best = null;
             HeatShareRank bestRank = default;
-            // Heat is the ranking priority (decision 0053: free share of the site's hourly heat budget,
+            // Heat is the ranking priority (decision 0056: free share of the site's hourly heat budget,
             // then free kWh, then IDs). Latency is only a configured eligibility limit in Candidates;
             // a faster eligible node must not outrank one with more useful heat.
             var budgets = inventory!.Sites.ToDictionary(s => s.Id, s => s.Heat, StringComparer.Ordinal);

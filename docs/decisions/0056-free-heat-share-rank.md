@@ -1,4 +1,4 @@
-# 0053: Rank eligible sites by free share of their hourly heat budget
+# 0056: Rank eligible sites by free share of their hourly heat budget
 
 - **Status:** proposed (user approved rule and scope, 2026-11-21)
 - **Date:** 2026-11-21

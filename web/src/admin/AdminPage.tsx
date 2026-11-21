@@ -74,7 +74,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const [heatLayer, setHeatLayer] = useState<HeatLayer>('none')
   const [showWeather, setShowWeather] = useState(false)
   const [rangeId, setRangeId] = useState<RangeId>('24h')
-  const { hours: rangeHours, label: rangeLabel } = RANGES.find((r) => r.id === rangeId)!
+  const { hours: rangeHours } = RANGES.find((r) => r.id === rangeId)!
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const id = params.get('house')
     return houses.some((h) => h.id === id) ? id : null
@@ -289,7 +289,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
             t={t}
             fromMs={wallMs(run, fromH)}
             toMs={wallMs(run, toH)}
-            rangeLabel={rangeLabel}
             onMore={() => navigate(`/admin/${encodeURIComponent(run.id)}/houses/${encodeURIComponent(selected.id)}?h=${t}`)}
             onClose={() => setSelectedId(null)}
           />
