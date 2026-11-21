@@ -29,6 +29,14 @@ public class FederationBoundaryTests
         Assert.False(FederatedClaimGate.CanStart(Evidence(Claim(2)), "basel", Epoch, TimeSpan.Zero));
 
     [Fact]
+    public void GenerationGapCannotSkipUnobservedAttempt()
+    {
+        var generationOne = Claim(1);
+        var reported = new PreviousAttempt(generationOne, true, true, null);
+        Assert.False(FederatedClaimGate.CanStart(Evidence(Claim(3), reported), "basel", Epoch, TimeSpan.Zero));
+    }
+
+    [Fact]
     public void MalformedPreviousAttemptCannotBeBypassedByTerminationFlag()
     {
         var prior = new PreviousAttempt(Claim() with { ValidUntil = Epoch.AddSeconds(-101) }, true, true, null);

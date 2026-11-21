@@ -44,7 +44,7 @@ public static class FederatedClaimGate
         if (prior is null) return claim.Generation == 1;
         if (prior.Claim is null || prior.Claim.ValidFrom >= prior.Claim.ValidUntil
             || prior.Claim.Generation < 1 || string.IsNullOrWhiteSpace(prior.Claim.OwnerSiteId)
-            || prior.Claim.JobId != claim.JobId || prior.Claim.Generation >= claim.Generation)
+            || prior.Claim.JobId != claim.JobId || prior.Claim.Generation != claim.Generation - 1)
             return false;
         if (prior.TerminationConfirmed) return true;
         // Interruptibility alone proves no stop deadline. A trusted bound must include watchdog,
