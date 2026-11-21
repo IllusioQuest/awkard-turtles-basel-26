@@ -24,7 +24,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-10](T-10-multi-site-network.md) | Generic sites and network model | 2 Pitch | T-09 | Codex | | open |
 | [T-11](T-11-routing-optimisation-model.md) | Routing as an optimisation problem: formal model | 2 Pitch | T-09, T-10 | team + Claude (needs discussion) | | open |
 | [T-12](T-12-routing-algorithms.md) | Routing baselines and optimiser | 2 Pitch | T-11, T-05 | Codex | | open |
-| [T-13](T-13-results-datasets-contract.md) | Result datasets and data contract for UIs and paper | 2 Pitch | T-05 | Codex | | open |
+| [T-13](T-13-results-datasets-contract.md) | Result datasets and data contract for UIs and paper | 2 Pitch | T-05 | Codex | Nikita / Codex | in progress |
 | [T-14](T-14-economics-actors.md) | Economics per actor, ownership models, heating-cost alternatives | 2 Pitch | T-15 | Codex or Jona | | open |
 | [T-15](T-15-hardware-profiles.md) | Hardware profiles: CPU vs GPU | 2 Pitch | T-00 | anyone | | open |
 | [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | | open |
@@ -45,3 +45,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
       ├─ T-15 ─ T-14 ─ T-16, T-19               T-11 + T-13 ─ T-22
       └─ T-21 (pitch)
 ```
+

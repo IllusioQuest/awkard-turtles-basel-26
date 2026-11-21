@@ -54,3 +54,10 @@ then the tier-1 tickets T-01 to T-07 for the draft at 15:00.
 
 - Nikita and Ennio: publish job descriptors, measured work-unit data and the runnable container
   IDs/commands; test each with the shared heat signal (`feat/job-runtime` is now on main).
+
+## Nikita handoff: T-13 and hosting privacy (2026-11-21)
+T-13 claimed on feat/T-13-result-export: opt-in snake_case result bundles from the existing model.
+No shared scheduler or scored formula changes. Export design uses decision 0011.
+Hosting component isolation requested separately; threat model awaiting user choice.
+Jona owns T-24 data-locality checks: hosting must reuse that rule when dynamic placement exists,
+not invent a competing country/site policy. T-01 always-on catalog decision remains pending.

@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data
 - **Depends on:** T-05
-- **Suggested owner:** Codex  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex  ·  **Owner:** Nikita / Codex  ·  **Status:** in progress
 
 ## Goal
 
@@ -25,3 +25,4 @@ One export format that all dashboards and the paper read, so nothing recomputes 
 ## Rules
 
 - Follow AGENTS.md: agree the approach with your human first (§10), build on the shared C# core and data (§9a), every number with a source (§5), update `docs/status.md`.
+
