@@ -52,3 +52,4 @@ The film's first slate covers the six mandated annual key figures. The following
 - Lock one scored result bundle with a valid missed-deadline figure before rendering the six-figure slate.
 - Confirm which real process and network transfer the live demonstration can reliably show; cut any film beat that overclaims it.
 - Confirm whether the paper is a draft, preprint or submitted work at pitch time.
+- A Basel-only year export with real B2/LP flows is not yet identified. `docs/model/network-map-data.md` describes a synthetic nine-city Swiss test network and a mock export; filtering its Basel rows would not produce an independently optimised Basel scenario. Produce a labelled Basel run before rendering factual flow lines.
