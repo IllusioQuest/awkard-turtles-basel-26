@@ -1,6 +1,6 @@
 # T-43: Universal resource-aware workload placement
 
-Owner: Nikita / Codex. Status: in review, [PR #33](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/33).
+Owner: Nikita / Codex. Status: done; code integrated into main with T-44 on explicit user request (2026-11-21). Original review: [PR #33](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/33).
 Code branch: `feat/T-43-universal-workloads`. Design: ADR 0033.
 
 ## Approved scope

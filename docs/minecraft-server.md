@@ -1,8 +1,7 @@
 # Minecraft server and browser client lab (T-44)
 
-Status: implemented locally on `feat/T-44-minecraft-server`, dependent on T-43 / PR #33.
-User requested testing before pushing/merging to main. This guide and the current code remain
-local pending that test. Nothing here claims verified authenticated gameplay or useful heat.
+Status: integrated into main with its T-43 runtime dependency on user request (2026-11-21).
+Authenticated gameplay remains unverified and heat-based startup remains blocked.
 
 ## What runs where
 

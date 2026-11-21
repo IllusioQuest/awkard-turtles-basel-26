@@ -1,6 +1,6 @@
 # T-44: Integrate Minecraft as a protected persistent workload
 
-Owner: Nikita / Codex. Status: implemented locally; user gameplay test pending.
+Owner: Nikita / Codex. Status: code integrated into main; gameplay test and valid heat measurement remain pending.
 Branch: feat/T-44-minecraft-server. Dependency: T-43 / PR #33.
 
 ## Agreed scope
@@ -28,12 +28,10 @@ Scheduled heat-based startup remains blocked, calibration server available on lo
 ## Handoff
 
 See [Minecraft guide](../minecraft-server.md) for the diagram, exact browser/client connection,
-commands, measurement calculation and limitations. User requested testing before pushing to main;
-code and new docs remain local until the user confirms. Do not mark merged/done or claim browser
-gameplay/physical multi-node redundancy from service readiness alone.
+commands, measurement calculation and limitations. User explicitly requested publication to main on 2026-11-21. Code and documentation are integrated with the required T-43 runtime. This request does not establish successful gameplay. Do not mark the complete integration done or claim browser gameplay/physical multi-node redundancy from service readiness alone.
 
 ## Remaining
 
 - User signs in inside Node A, installs Java 26.3 and joins host.docker.internal:25566.
-- Record observed gameplay result, then publish code and docs after user confirmation.
+- Record observed gameplay result; publication was explicitly authorized separately.
 - Valid electrical/useful-heat evidence and any separate recovery-model approval before scheduler admission.
