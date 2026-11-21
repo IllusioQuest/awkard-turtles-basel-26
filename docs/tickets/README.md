@@ -44,7 +44,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
 | [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-33-local-llm-job`) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | in progress |
-| [T-37](T-37-professional-pitch-video.md) | Professional pitch video | 2 Pitch | T-21, T-25, T-02 | Team lead / Claude with team | | proposed (short clip + live demo agreed) |
+| [T-39](T-39-professional-pitch-video.md) | Professional pitch video | 2 Pitch | T-21, T-25, T-02 | Team lead / Claude with team | | proposed (short clip + live demo agreed) |
 
 ## Dependency sketch
 

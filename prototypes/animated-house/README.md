@@ -28,6 +28,6 @@ runs fully, while summer still needs hot water at a low load.
 The layout sketch for team-lead review is
 [`docs/pitch/T-25-house-sketch.md`](../../docs/pitch/T-25-house-sketch.md).
 The user approved that direction. The polished final pitch video is a separate
-[`T-37`](../../docs/tickets/T-37-professional-pitch-video.md) deliverable. The real T-02
+[`T-39`](../../docs/tickets/T-39-professional-pitch-video.md) deliverable. The real T-02
 transcription logs in PR #15 were checked with this page's importer (24 hours per day, pause at
 12:00, resume at 13:00); their source branch is owned by Ennio.
