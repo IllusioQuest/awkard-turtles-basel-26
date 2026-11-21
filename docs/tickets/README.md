@@ -36,7 +36,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | | open |
 | [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | in progress |
 | [T-24](T-24-job-data-locality.md) | Enforce job data locality before execution | 1 Draft | T-01; T-10/T-12 for routing | Codex | Jona / Codex | in progress |
-| [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
+| [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | Jona / Codex | in progress (visual sketch for team lead) |
 | [T-26](T-26-sourced-job-demand.md) | Sourced job demand scenario and computing price | 1 Draft | T-02, T-05 | Claude | Team lead / Claude | research done (merged); price 0.66 decided; demand model: waiting for Ennio |
 | [T-28](T-28-price-updater.md) | Self-updating computing price (snapshotted) | 2 Pitch | T-26, T-06 | Claude | Team lead / Claude (subagent) | PR #11 open |
 

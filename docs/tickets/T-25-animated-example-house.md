@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** UI / presentation
 - **Depends on:** T-04 (LiveRun), T-13 (export format)
-- **Suggested owner:** anyone (Lovable possible)  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone (Lovable possible)  ·  **Owner:** Jona / Codex  ·  **Status:** in progress (visual sketch for team lead)
 
 ## Goal
 
