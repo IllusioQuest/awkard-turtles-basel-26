@@ -1,5 +1,6 @@
 param([switch]$Pull, [switch]$IntelWsl)
 $ErrorActionPreference='Stop'
+. "$PSScriptRoot/GamingLab.Common.ps1"
 $labRoot=Split-Path -Parent $PSScriptRoot
 $stateRoot=Join-Path $labRoot 'TestResults'
 New-Item -ItemType Directory -Force $stateRoot | Out-Null
@@ -26,7 +27,7 @@ try {
     foreach($port in @(18881,18882)) {
         $ready=$false
         for($attempt=0;$attempt -lt 30;$attempt++) {
-            try { $response=Invoke-WebRequest "http://localhost:$port" -SkipHttpErrorCheck -TimeoutSec 2; if($response.StatusCode -eq 401) { $ready=$true; break } } catch { }
+            try { if((Get-GamingHttpStatusCode -Url "http://localhost:$port" -TimeoutSeconds 2) -eq 401) { $ready=$true; break } } catch { }
             Start-Sleep -Seconds 1
         }
         if(-not $ready) { throw "Node on port $port did not become ready with authentication enabled" }

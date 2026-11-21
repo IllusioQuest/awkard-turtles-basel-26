@@ -1,11 +1,10 @@
 param([ValidateSet('session-a','session-b','session-c')][string]$Node='session-a')
 $ErrorActionPreference='Stop'
+. "$PSScriptRoot/GamingLab.Common.ps1"
 $labRoot=Split-Path -Parent $PSScriptRoot
 $reportRoot=Join-Path $labRoot 'TestResults'
 New-Item -ItemType Directory -Force $reportRoot | Out-Null
-$project=if($Node -eq 'session-c'){'digitalheat-dozen'}else{'digitalheat-gaming'}
-$ids=@(& docker ps -aq --filter "label=com.docker.compose.project=$project" --filter "label=com.docker.compose.service=$Node")
-if ($LASTEXITCODE -ne 0 -or $ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') { throw 'Expected exactly one lab node' }
+$containerId=Get-GamingContainerId -Node $Node -IncludeStopped
 $probe=@'
 set +e
 printf '%s\n' '=== Device paths ==='
@@ -26,7 +25,7 @@ command -v ffmpeg || true
 # Merge diagnostics INSIDE Linux. Windows PowerShell 5.1 otherwise promotes native stderr
 # (including expected vainfo failures) to terminating NativeCommandError under Stop.
 # Strip CR from the Windows pipeline before feeding the probe to the Linux shell.
-$output=$probe | & docker exec -i --user ubuntu --env DISPLAY=:20 $ids[0] sh -c 'exec 2>&1; tr -d ''\r'' | sh' | Out-String
+$output=$probe | & docker exec -i --user ubuntu --env DISPLAY=:20 $containerId sh -c 'exec 2>&1; tr -d ''\r'' | sh' | Out-String
 $probeExitCode=$LASTEXITCODE
 $output | Set-Content (Join-Path $reportRoot "$Node-graphics.txt")
 if ($probeExitCode -ne 0) { throw "Docker probe failed (exit $probeExitCode). See $reportRoot/$Node-graphics.txt" }

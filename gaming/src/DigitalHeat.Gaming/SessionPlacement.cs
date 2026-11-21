@@ -2,17 +2,6 @@ using DigitalHeat.Core;
 
 namespace DigitalHeat.Gaming;
 
-public sealed record GamingSite(string Id, string CountryCode, HeatSignal Heat,
-    double ExternalCommittedHeatKwh);
-// Allocatable slots exclude external workloads, but INCLUDE slots held by this coordinator.
-public sealed record GamingNode(string Id, string SiteId, bool Ready, bool NetworkEligible, int AllocatableSessionSlots);
-public sealed record GamingSnapshot(long Revision, DateTimeOffset IntervalStartUtc, DateTimeOffset IntervalEndUtc,
-    string Source, GamingSite[] Sites, GamingNode[] Nodes);
-public sealed record SessionRequest(string Id, string OriginSiteId, JobPlacementPolicy PlacementPolicy,
-    double RecoverableHeatKwhPerHour);
-public sealed record SessionReservation(string SessionId, string SiteId, string NodeId,
-    double RecoverableHeatKwhPerHour, double AvailableHeatKwhBeforeReservation);
-
 /// <summary>Local admission accounting only. A reservation does not launch or migrate a game.</summary>
 public sealed class SessionPlacement
 {
@@ -23,20 +12,7 @@ public sealed class SessionPlacement
 
     public void Update(GamingSnapshot next, DateTimeOffset nowUtc)
     {
-        ArgumentNullException.ThrowIfNull(next);
-        if (next.Revision < 0 || string.IsNullOrWhiteSpace(next.Source) || next.Sites is null || next.Nodes is null
-            || next.IntervalStartUtc.Offset != TimeSpan.Zero || next.IntervalEndUtc.Offset != TimeSpan.Zero
-            || next.IntervalEndUtc - next.IntervalStartUtc != TimeSpan.FromHours(HoursPerInterval)
-            || next.IntervalStartUtc.Ticks % TimeSpan.TicksPerHour != 0
-            || nowUtc < next.IntervalStartUtc || nowUtc >= next.IntervalEndUtc
-            || next.Sites.Any(s => s is null || string.IsNullOrWhiteSpace(s.Id)
-                || s.CountryCode is not { Length: 2 } || s.CountryCode.Any(c => c is < 'A' or > 'Z'))
-            || next.Sites.Select(s => s.Id).Distinct(StringComparer.Ordinal).Count() != next.Sites.Length
-            || next.Nodes.Any(n => n is null || string.IsNullOrWhiteSpace(n.Id) || n.AllocatableSessionSlots < 0
-                || !next.Sites.Any(s => s.Id == n.SiteId))
-            || next.Nodes.Select(n => n.Id).Distinct(StringComparer.Ordinal).Count() != next.Nodes.Length)
-            throw new InvalidDataException("Invalid hourly gaming inventory.");
-        foreach (var site in next.Sites) HeatCapacity.RemainingKwh(site.Heat, site.ExternalCommittedHeatKwh);
+        ValidateSnapshot(next, nowUtc);
         // Copy caller-owned arrays; input mutation must not bypass validation under the lock.
         var copy = next with { Sites = next.Sites.ToArray(), Nodes = next.Nodes.ToArray() };
         lock (gate)
@@ -70,27 +46,13 @@ public sealed class SessionPlacement
             }
             var current = snapshot;
             if (current is null || nowUtc < current.IntervalStartUtc || nowUtc >= current.IntervalEndUtc) return null;
-            var candidates = new List<(GamingSite Site, GamingNode Node, double Available)>();
-            foreach (var site in current.Sites)
-            {
-                if (!JobPlacement.IsEligible(request.PlacementPolicy,
-                    new JobPlacementContext(request.OriginSiteId, site.Id, site.CountryCode))) continue;
-                double ownedHeat = held.Values.Where(x => x.Reservation.SiteId == site.Id)
-                    .Sum(x => x.Reservation.RecoverableHeatKwhPerHour);
-                double commitments = site.ExternalCommittedHeatKwh + ownedHeat;
-                if (!double.IsFinite(commitments)) continue;
-                double available = HeatCapacity.RemainingKwh(site.Heat, commitments);
-                if (available < request.RecoverableHeatKwhPerHour) continue;
-                var node = current.Nodes.Where(n => n.SiteId == site.Id && n.Ready && n.NetworkEligible
-                        && held.Values.Count(x => x.Reservation.NodeId == n.Id) < n.AllocatableSessionSlots)
-                    .OrderBy(n => n.Id, StringComparer.Ordinal).FirstOrDefault();
-                if (node is not null) candidates.Add((site, node, available));
-            }
-            var best = candidates.OrderByDescending(x => x.Available)
-                .ThenBy(x => x.Site.Id, StringComparer.Ordinal).ThenBy(x => x.Node.Id, StringComparer.Ordinal).FirstOrDefault();
-            if (best.Site is null) return null;
+            // Selection and insertion share the lock: concurrent requests cannot claim the same reserve.
+            var best = FindCandidates(current, request).OrderByDescending(x => x.AvailableHeatKwh)
+                .ThenBy(x => x.Site.Id, StringComparer.Ordinal)
+                .ThenBy(x => x.Node.Id, StringComparer.Ordinal).FirstOrDefault();
+            if (best is null) return null;
             var reservation = new SessionReservation(request.Id, best.Site.Id, best.Node.Id,
-                request.RecoverableHeatKwhPerHour, best.Available);
+                request.RecoverableHeatKwhPerHour, best.AvailableHeatKwh);
             held.Add(request.Id, (request, reservation));
             return reservation;
         }
@@ -99,6 +61,49 @@ public sealed class SessionPlacement
     /// <summary>Call only after the runtime observes termination, or aborts an unlaunched claim.</summary>
     public bool Release(string sessionId) { lock (gate) return held.Remove(sessionId); }
     public SessionReservation[] Reservations() { lock (gate) return held.Values.Select(x => x.Reservation).ToArray(); }
+
+    // Only enumerate while holding gate; owned reservations participate in both capacity checks.
+    private IEnumerable<Candidate> FindCandidates(GamingSnapshot current, SessionRequest request)
+    {
+        foreach (var site in current.Sites)
+        {
+            var context = new JobPlacementContext(request.OriginSiteId, site.Id, site.CountryCode);
+            if (!JobPlacement.IsEligible(request.PlacementPolicy, context)) continue;
+
+            double ownedHeatKwh = held.Values.Where(x => x.Reservation.SiteId == site.Id)
+                .Sum(x => x.Reservation.RecoverableHeatKwhPerHour);
+            double committedHeatKwh = site.ExternalCommittedHeatKwh + ownedHeatKwh;
+            if (!double.IsFinite(committedHeatKwh)) continue;
+            double availableHeatKwh = HeatCapacity.RemainingKwh(site.Heat, committedHeatKwh);
+            if (availableHeatKwh < request.RecoverableHeatKwhPerHour) continue;
+
+            var node = current.Nodes.Where(n => n.SiteId == site.Id && n.Ready && n.NetworkEligible
+                    && held.Values.Count(x => x.Reservation.NodeId == n.Id) < n.AllocatableSessionSlots)
+                .OrderBy(n => n.Id, StringComparer.Ordinal).FirstOrDefault();
+            if (node is not null) yield return new Candidate(site, node, availableHeatKwh);
+        }
+    }
+
+    private static void ValidateSnapshot(GamingSnapshot next, DateTimeOffset nowUtc)
+    {
+        ArgumentNullException.ThrowIfNull(next);
+        if (next.Revision < 0 || string.IsNullOrWhiteSpace(next.Source) || next.Sites is null || next.Nodes is null
+            || next.IntervalStartUtc.Offset != TimeSpan.Zero || next.IntervalEndUtc.Offset != TimeSpan.Zero
+            || next.IntervalEndUtc - next.IntervalStartUtc != TimeSpan.FromHours(HoursPerInterval)
+            || next.IntervalStartUtc.Ticks % TimeSpan.TicksPerHour != 0
+            || nowUtc < next.IntervalStartUtc || nowUtc >= next.IntervalEndUtc
+            || next.Sites.Any(s => s is null || string.IsNullOrWhiteSpace(s.Id)
+                || s.CountryCode is not { Length: 2 } || s.CountryCode.Any(c => c is < 'A' or > 'Z'))
+            || next.Sites.Select(s => s.Id).Distinct(StringComparer.Ordinal).Count() != next.Sites.Length
+            || next.Nodes.Any(n => n is null || string.IsNullOrWhiteSpace(n.Id) || n.AllocatableSessionSlots < 0
+                || !next.Sites.Any(s => s.Id == n.SiteId))
+            || next.Nodes.Select(n => n.Id).Distinct(StringComparer.Ordinal).Count() != next.Nodes.Length)
+            throw new InvalidDataException("Invalid hourly gaming inventory.");
+        foreach (var site in next.Sites)
+            HeatCapacity.RemainingKwh(site.Heat, site.ExternalCommittedHeatKwh);
+    }
+
+    private sealed record Candidate(GamingSite Site, GamingNode Node, double AvailableHeatKwh);
 
     private static bool SameRequest(SessionRequest a, SessionRequest b) => a.Id == b.Id
         && a.OriginSiteId == b.OriginSiteId && a.RecoverableHeatKwhPerHour == b.RecoverableHeatKwhPerHour
