@@ -196,3 +196,14 @@ held remain pinned after demand or inventory changes. The component is in-memory
 restart reconciliation/durable ownership must precede actual game launching. No automatic
 Selkies routing, batch pause or game execution is claimed by this console demo. Independent
 remote-engine control remains an adapter integration task, not delivered by two local desktops.
+
+## Windows PowerShell diagnostic fix
+
+User's Windows PowerShell 5.1 stopped on native ls stderr for absent /dev/dri. Fixed in b5bb9a3:
+missing paths now print Not exposed; expected Linux graphics diagnostics are merged into stdout
+inside the container, avoiding PowerShell NativeCommandError promotion. CRLF input is normalized
+before Linux shell execution. Docker execution errors still fail explicitly, and reports are saved.
+Verified with actual Windows PowerShell 5.1 on Intel node A (/dev/dri absent, D3D12 OpenGL still
+works through /dev/dxg) and PowerShell 7 on software node B. Both complete and report Vulkan
+llvmpipe and unsuccessful VAAPI honestly. No device or driver installation is required to fix this
+script error. Rerun Test-SessionGraphics.ps1; missing DRM does not contradict the dxg OpenGL path.

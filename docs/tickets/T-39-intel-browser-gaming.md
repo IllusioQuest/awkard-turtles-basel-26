@@ -31,3 +31,5 @@ User confirmed actual streamed desktop and keyboard/input via screenshot. Applie
 Read linked live case. User requests largest available heat reserve for execution-site selection. Proposed definition and atomic per-site reservation accounting recorded in gaming-lab.md; await confirmation of headroom versus stored heat before changing interfaces. No numeric case parameters changed.
 
 User confirmed remaining useful heat capacity definition. Implemented shared helper and gaming-only atomic reservation model/demo in 540bbd7 (PR #22 updated). 14 gaming tests and 40 main-based Core tests pass, including legacy-output cross-check. This is reservation accounting only: actual batch preemption, launch/reconciliation and stream routing remain pending. ADR 0022 reviewed go with changes.
+
+Fixed user-reported Windows PowerShell 5.1 NativeCommandError in graphics probe, b5bb9a3, PR #22. Tested in actual PS5.1 and PS7 with absent device paths and expected VAAPI failure; both complete. Hardware/Vulkan support unchanged.
