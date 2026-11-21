@@ -25,3 +25,6 @@ __pycache__/
 **/bin/
 **/obj/
 results/
+
+# Agent worktrees (temporary)
+.claude/worktrees/
