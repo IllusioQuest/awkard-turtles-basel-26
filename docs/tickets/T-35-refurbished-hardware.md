@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Data / model
 - **Depends on:** T-15
-- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress
+- **Suggested owner:** Claude  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in review (PR open)
 
 ## Goal
 
@@ -12,16 +12,16 @@ and lower work per kWh than new generations.
 
 ## Tasks
 
-- [ ] Research with sources: purchase prices of refurbished/used datacentre servers and GPUs
+- [x] Research with sources: purchase prices of refurbished/used datacentre servers and GPUs
       (CH/EU), consumer GPUs used, refurbisher warranty terms.
-- [ ] Research wear: failure rates by age (fleet studies), effect of thermal cycling and of running
+- [x] Research wear: failure rates by age (fleet studies), effect of thermal cycling and of running
       hot (water heating at 50–70 °C), remaining lifetime, repair cost, efficiency old vs new.
-- [ ] Who already does it (Qarnot refurbished OCP servers, others).
-- [ ] Per 1 kW server (method of `docs/research/hardware.md`): CHF per sold server-hour incl.
+- [x] Who already does it (Qarnot refurbished OCP servers, others).
+- [x] Per 1 kW server (method of `docs/research/hardware.md`): CHF per sold server-hour incl.
       depreciation over the remaining life, expected failure/replacement cost, efficiency penalty;
       compare with the new profiles.
-- [ ] Profile(s) `config/hardware/*-refurbished.json` in the existing format; loader tests pass.
-- [ ] `docs/research/refurbished-hardware.md`: method, tables, wear model with formula, worked
+- [x] Profile(s) `config/hardware/*-refurbished.json` in the existing format; loader tests pass.
+- [x] `docs/research/refurbished-hardware.md`: method, tables, wear model with formula, worked
       example, recommendation, open `TODO(source)`.
 
 ## Done when
@@ -38,3 +38,11 @@ and lower work per kWh than new generations.
 
 - Follow AGENTS.md: every number with a source (§5), build on the T-15 profiles and loader (§9a),
   scored reference-house figures keep the case's abstract 1 kW server, update `docs/status.md`.
+
+## Result (first version)
+
+- Profiles `cpu-server-refurbished`, `gpu-inference-l4-refurbished`, `gpu-inference-t4-refurbished`
+  in `config/hardware/`; wear parameters `config/hardware/wear/refurbished-wear.json`; new raw rows
+  `hw-used-*` in `data/raw/market/hardware.csv`.
+- Comparison and wear model: `docs/research/refurbished-hardware.md`, reproduced by
+  `python3 scripts/refurbished_comparison.py`.
