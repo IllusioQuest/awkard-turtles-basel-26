@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "economics",
+  "timezone": "Europe/Zurich",
+  "step_hours": 1,
+  "git_commit": "7037fd67254e7bd8ef09be04ceeeefd4c9cf84ac",
+  "git_dirty": false,
+  "code_provenance": "clean_commit",
+  "seed": null,
+  "randomness": "none",
+  "command": [
+    "dotnet",
+    "run",
+    "--project",
+    "src/DigitalHeat.YearRun",
+    "--",
+    ".",
+    "--economics",
+    "config/economics/reference-house.json",
+    "--output",
+    "results/economics"
+  ],
+  "command_working_directory": "repository_root",
+  "inputs": [
+    {
+      "path": "config/reference-house.json",
+      "sha256": "a6dfa0dc9ae3a935f81976942489b37986c2672be97b60d3203cfe7f4c603bc9"
+    },
+    {
+      "path": "config/economics/reference-house.json",
+      "sha256": "69cd386dc7e83f946f538bc82abd95b790bf743d4e067347c93c2c1186f0360c"
+    },
+    {
+      "path": "data/raw/open-meteo/basel-2025-hourly.csv",
+      "sha256": "cbb6c144942a5704cb9fc1b45405750432b13ee8aaec52fffe9b25934c3535b3"
+    },
+    {
+      "path": "data/raw/elcom/iwb-basel-h4-2026.json",
+      "sha256": "66b4b1205c0f2472dbe009d2dd44a612be4f96145a127997dca0f66c2201b252"
+    },
+    {
+      "path": "config/hardware/cpu-server.json",
+      "sha256": "cd1862c455e7c16083b18e954d225a22e4a499751e78f5120edb3ffc4f10ea62"
+    },
+    {
+      "path": "config/hardware/gpu-consumer-rtx4090.json",
+      "sha256": "1c9eede3f576f941a86673957dc0eb6a5b0003ed7c46c70cc7e9ec111299074f"
+    },
+    {
+      "path": "config/hardware/gpu-inference-l4.json",
+      "sha256": "df19fe0127ca170c97504028c62d445c29a1779632b17324a5803936678fe35c"
+    }
+  ],
+  "files": [
+    "levers.csv",
+    "required-premium.csv",
+    "win-win.csv",
+    "parameters.json"
+  ],
+  "note": "Variant economics (decision 0026). Scored case figures are unchanged; case_break_even uses the case formula. Premium demand is TODO(source): premium shares are a sweep, not a forecast."
+}
