@@ -113,3 +113,5 @@ T-36/T-23: six-node real Docker lifecycle and failover checks pass; 45 hosting +
 
 ## Nikita: hybrid service review (T-38)
 Reviewed the user-supplied GPU/CPU engineering manual against shared scheduler and vendor docs. Findings and proposed scope: research/hybrid-gpu-cpu-review.md. No code or interface changes; implementation awaits user choice. T-36 remains in PR #19. T-37 was already occupied by profitability research, hence T-38.
+
+Nikita / Codex: T-39 on featur-gaming, Intel browser gaming discovery. Script pushed; host graphics paths exist but ordinary containers lack access. No Vulkan/encoding/CS2 support proven. Awaiting streaming-stack choice; see tickets/T-39-intel-browser-gaming.md. Shared scheduler interfaces unchanged.
