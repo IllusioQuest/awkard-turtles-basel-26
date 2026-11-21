@@ -21,7 +21,8 @@ main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2
 .server svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
 .server .track{fill:none;stroke:#0000001a;stroke-width:5}
 .server .arc{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
-.server .slot{position:absolute;inset:0;display:grid;place-items:center}
+.server .slot{position:absolute;inset:12%;display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;align-content:center}
+.slot .tok.big:not(:only-child){width:40px;height:40px;font-size:14px}
 .state{position:absolute;left:50%;top:calc(44% + clamp(54px,5.6vw,74px));transform:translateX(-50%);font-size:clamp(12px,1vw,15px);
   font-weight:600;opacity:.55;white-space:nowrap}
 .queue{position:absolute;left:22px;right:96px;bottom:62px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:84px;overflow:hidden}
@@ -79,10 +80,10 @@ footer b{color:var(--paper);font-weight:600}
 <svg id="flow" aria-hidden="true"></svg>
 <div id="help"><div>
   <h2>How to read it</h2>
-  Each panel is a house with one server. The slider sets the room temperature the house wants
+  Each panel is a house with three servers (three tasks can run at once). The slider sets the room temperature the house wants
   (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Every hour (a few seconds here) the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
-  <br><br>Big circle in the middle: the task running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
+  <br><br>Circles in the middle: the tasks running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
   Small circles: waiting tasks. Number = job, colour = house the job came from.
   1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
   <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help

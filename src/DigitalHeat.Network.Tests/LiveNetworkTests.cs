@@ -38,30 +38,39 @@ public class LiveNetworkTests
     }
 
     [Fact]
-    public void InfeasibleWorkMovesToTheNodeWithMostFreeHeatAndDoesNotComeBack()
+    public void InfeasibleWorkSpreadsToEveryNodeWithFreeHeatInOneStepAndDoesNotComeBack()
     {
         var b2 = new NetworkGreedyJobsScheduler();
         var planner = new LiveTaskPlanner(4, 1);
         var tasks = Job(7, 0, 3, 0, 4);                          // node 1 is cold: no heat, no progress
         double[] heat = [0, 1, 0.4, 0];
         var (_, first) = Step(b2, planner, 0, heat, tasks);
-        Assert.Equal([new LiveMove("j0007-t02", 7, 0, 1)], first);  // last task moves first, to the warmest node
-        var all = new List<LiveMove>(first);
-        for (int step = 1; step < 3; step++) all.AddRange(Step(b2, planner, step, heat, tasks).Moves);
-        Assert.All(all, m => Assert.Equal(0, m.FromNode));      // nothing moves back or onwards without a cause
-        Assert.Equal(3, all.Count);
+        // B2 fills the warmest node (1 server-hour), then the next (0.4): both get a task at once
+        Assert.Equal([new LiveMove("j0007-t02", 7, 0, 1), new LiveMove("j0007-t01", 7, 0, 2)], first);
+        var later = new List<LiveMove>();
+        for (int step = 1; step < 3; step++) later.AddRange(Step(b2, planner, step, heat, tasks).Moves);
+        Assert.All(later, m => Assert.Equal(0, m.FromNode));    // nothing moves back or onwards without a cause
     }
 
     [Fact]
-    public void FractionalAllocationsAccumulateIntoWholeTasks()
+    public void ASmallAllocationStillMovesAWholeTask()
     {
-        var b2 = new NetworkGreedyJobsScheduler();
-        var planner = new LiveTaskPlanner(4, 1);
         var tasks = Job(2, 0, 2, 0, 6);
-        double[] heat = [0, 0.4, 0, 0];                         // only 0.4 server-hours per step elsewhere
-        Assert.Empty(Step(b2, planner, 0, heat, tasks).Moves);
-        Assert.Empty(Step(b2, planner, 1, heat, tasks).Moves);
-        Assert.Single(Step(b2, planner, 2, heat, tasks).Moves); // 0.4 + 0.4 + 0.4 ≥ 1 task
+        var (_, moves) = Step(new NetworkGreedyJobsScheduler(), new LiveTaskPlanner(4, 1), 0, [0, 0.4, 0, 0], tasks);
+        Assert.Single(moves);                                   // 0.4 server-hours allocated → one task moves now
+    }
+
+    [Fact]
+    public void AHouseWithSeveralServersTakesSeveralTasksAtOnce()
+    {
+        var cal3 = Cal with { ServersPerNode = 3, ServerHoursPerTask = 2 };
+        var tasks = Job(9, 0, 6, 0, 20);
+        var decision = new NetworkGreedyJobsScheduler().Decide(LiveNetwork.BuildState(0, Nodes, [0, 1, 1, 0], tasks, cal3));
+        var moves = new LiveTaskPlanner(4, 2).Plan(tasks, decision.Allocations ?? []);
+        // each warm house has 3 free server-hours this step → ⌈3 / 2⌉ = 2 tasks each, at the same time
+        Assert.Equal(2, moves.Count(m => m.ToNode == 1));
+        Assert.Equal(2, moves.Count(m => m.ToNode == 2));
+        Assert.Equal(1, decision.PerSite[1].TargetLoadPerServer, 9);
     }
 
     [Fact]

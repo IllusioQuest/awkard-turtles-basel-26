@@ -29,7 +29,7 @@ import math
 import os
 import sys
 import time
-from multiprocessing import Pool
+from multiprocessing import Pool, Process
 from pathlib import Path
 import random
 
@@ -147,7 +147,16 @@ def write_progress(pass_no: int, done: int, total: int, units_done: int) -> None
 
 def run() -> None:
     if NODE_ID != "local":
-        _run_node(WORK / "out")
+        # One process per server slot (SLOTS, live demo: servers per house); claims are atomic renames.
+        slots = int(os.environ.get("SLOTS", "1"))
+        if slots == 1:
+            _run_node(WORK / "out", 0)
+            return
+        procs = [Process(target=_run_node, args=(WORK / "out", k)) for k in range(slots)]
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join()
         return
     tasks = [json.loads(p.read_text()) for p in sorted((WORK / "in").glob("task_*.json"))]
     if not tasks:
@@ -179,18 +188,18 @@ def run() -> None:
             pass_no += 1
 
 
-def _run_node(out_root: Path) -> None:
+def _run_node(out_root: Path, slot: int = 0) -> None:
     """Live-demo node (decision 0042): claim only from this node's own queue, one task at a time.
 
     $WORK/queue/<node>/<task>.json    waiting; the coordinator may move it to another node's queue
-    $WORK/running/<node>/<task>.json  claimed by this node (atomic rename; never moved)
+    $WORK/running/<node>/s<slot>/<task>.json  claimed by one server slot of this node (atomic rename; never moved)
     $WORK/done/<task>.json            result, written atomically; then the running file is removed
     $WORK/out/<node>.csv              task, job, start_unix_ns, end_unix_ns, node_id
     A rename that fails because the file is gone means the coordinator moved it first: skip it.
     Earliest deadline first (field due_step), then by file name.
     """
     queue = WORK / "queue" / NODE_ID
-    running = WORK / "running" / NODE_ID
+    running = WORK / "running" / NODE_ID / f"s{slot}"
     done = WORK / "done"
     for d in (queue, running, done, out_root):
         d.mkdir(parents=True, exist_ok=True)
@@ -210,27 +219,46 @@ def _run_node(out_root: Path) -> None:
         path = claimed[0]
         try:
             task = json.loads(path.read_text())
-        except (FileNotFoundError, json.JSONDecodeError):
-            path.unlink(missing_ok=True)
+        except (OSError, json.JSONDecodeError):
+            time.sleep(0.2)
             continue
         result, start, end = _calculate(task, lambda f, name=path.name: _write_progress(name, f))
+        _clear_progress(path.name)
         result["node_id"] = NODE_ID
         target = done / path.name
-        tmp = done / f".{path.name}.{NODE_ID}.part"
+        tmp = done / f".{path.name}.{NODE_ID}.s{slot}.part"
         tmp.write_text(json.dumps(result))
-        os.replace(tmp, target)
-        path.unlink(missing_ok=True)
-        with node_log.open("a") as f:
-            f.write(f"{task['id']},{task.get('job', '')},{start},{end},{NODE_ID}\n")
+        for attempt in range(50):  # the host may hold done/ or running/ files open for a moment (Windows)
+            try:
+                os.replace(tmp, target)
+                path.unlink(missing_ok=True)
+                break
+            except OSError:
+                time.sleep(0.1)
+        try:
+            with node_log.open("a") as f:
+                f.write(f"{task['id']},{task.get('job', '')},{start},{end},{NODE_ID}\n")
+        except OSError:
+            pass
 
 
 def _write_progress(task_name: str, fraction: float) -> None:
-    """$WORK/progress/<node>.json: share of the running task's sweeps done (the view shows it)."""
-    d = WORK / "progress"
-    d.mkdir(exist_ok=True)
-    tmp = d / f".{NODE_ID}.tmp"
-    tmp.write_text(json.dumps({"task": task_name.removesuffix(".json"), "fraction": round(fraction, 3)}))
-    os.replace(tmp, d / f"{NODE_ID}.json")
+    """$WORK/progress/<node>/<task>.json: share of the running task's sweeps done (the view shows it)."""
+    try:  # best effort: on Windows bind mounts the host may hold the file open for a moment
+        d = WORK / "progress" / NODE_ID
+        d.mkdir(parents=True, exist_ok=True)
+        tmp = d / f".{task_name}.tmp"
+        tmp.write_text(json.dumps({"task": task_name.removesuffix(".json"), "fraction": round(fraction, 3)}))
+        os.replace(tmp, d / task_name)
+    except OSError:
+        pass
+
+
+def _clear_progress(task_name: str) -> None:
+    try:
+        (WORK / "progress" / NODE_ID / task_name).unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 def _claim_next(queue: Path, running: Path) -> list[Path] | None:
@@ -239,14 +267,14 @@ def _claim_next(queue: Path, running: Path) -> list[Path] | None:
     for p in queue.glob("*.json"):
         try:
             waiting.append((json.loads(p.read_text()).get("due_step", 0), p.name, p))
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (OSError, json.JSONDecodeError):
             continue  # moved away or still being written by the coordinator
     for _, name, p in sorted(waiting):
         try:
             os.rename(p, running / name)
             return [running / name]
-        except FileNotFoundError:
-            continue  # the coordinator moved it first
+        except OSError:
+            continue  # the coordinator moved it first, or it is locked for a moment
     return None
 
 

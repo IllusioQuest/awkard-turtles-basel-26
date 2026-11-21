@@ -43,15 +43,17 @@ state polling also needed, and polling repainted the panels with stale server va
    work view from observed task files; pure, tested `LiveNetwork` (state builder) and `LiveTaskPlanner`
    (allocations → file moves) in `DigitalHeat.Network`.
 8. **Calibration (labelled demo settings, `config/live-demo-four-node.json`):** one node = one site with
-   `ServerCount = 1` (one worker, one task at a time) and `HoursPerStep = 1`; no tank (the slider is this
+   `ServerCount = 3` (three worker slots per container, 0.5 core each at full load) and `HoursPerStep = 1`
+   (one step = 2 s); no tank (the slider is this
    hour's demand); φ = 0, no filler, so a node without tasks pauses; 1 task = 1 server-hour, sized with
    `ising.py calibrate` to take about one step at one full core.
 9. **Ownership after a move:** cohorts are rebuilt every step per (job, node the files are on now), with
    that node as origin. Moved work therefore belongs to its new node, which is the one difference from
    the year simulation (where a cohort keeps its origin); a task moves on only if its new node cannot
-   finish it either. Allocations are server-hours for one hour; they accumulate per (job, from, to)
-   while the scheduler keeps allocating that pair, and a whole task moves once a task's worth has
-   accumulated (credit is dropped when the pair is no longer allocated). Running tasks count as one
+   finish it either. Allocations are server-hours for one hour; every allocation of a job to another
+   node moves ⌈server-hours ÷ server-hours per task⌉ waiting tasks there at once (at least one), so a job
+   spreads to all nodes the scheduler picked in the same step (a first version accumulated fractional
+   allocations, which made moves trickle one node after another). Running tasks count as one
    full task (progress is not observed) and never move.
 10. **Races and deadlines:** a failed rename on either side means the other side won (worker claimed it /
     coordinator moved it). Files are listed once per step. A job is missed when the step counter reaches

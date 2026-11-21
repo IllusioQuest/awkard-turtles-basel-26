@@ -51,7 +51,8 @@ if (config.ReferenceServerElectricKw.Value != reference.ServerElectricKw.Value
 
 var cal = new LiveCalibration(config.ReferenceServerElectricKw.Value, config.HeatRecoveryShare.Value,
     config.ServerHoursPerTask.Value, (int)config.ForecastHorizonSteps.Value,
-    reference.ElectricityPriceChfPerKwh.Value, reference.ElectricityPriceChfPerKwh.Value / reference.HeatPumpEfficiency.Value);
+    reference.ElectricityPriceChfPerKwh.Value, reference.ElectricityPriceChfPerKwh.Value / reference.HeatPumpEfficiency.Value,
+    (int)config.ServersPerNode.Value);
 var docker = new CachedDockerControl(new DockerCliContainerControl());
 double cores = config.AllowedCpuCoresPerContainer.Value;
 var executors = config.Nodes.Select(n => (IExecutor)new DockerJobExecutor(docker, n.Container, cores, supportsThrottle: true)).ToArray();
@@ -157,13 +158,13 @@ sealed record DemoConfig(Parameter MinimumLoadShare, Parameter AllowedCpuCoresPe
     Parameter ReferenceServerElectricKw, Parameter HeatRecoveryShare, Parameter TargetTemperatureMinC,
     Parameter TargetTemperatureMaxC, Parameter StepSeconds, Parameter ServerHoursPerTask, Parameter TaskLatticeSize,
     Parameter TaskSweeps, Parameter TasksPerJob, Parameter DeadlineSteps, Parameter ForecastHorizonSteps,
-    Parameter AutoSpawnEverySteps, Parameter Seed, string Scheduler, DemoNodeConfig[] Nodes)
+    Parameter AutoSpawnEverySteps, Parameter Seed, Parameter ServersPerNode, string Scheduler, DemoNodeConfig[] Nodes)
 {
     public void Validate()
     {
         foreach (var p in new[] { MinimumLoadShare, AllowedCpuCoresPerContainer, ReferenceServerElectricKw,
                      HeatRecoveryShare, TargetTemperatureMinC, TargetTemperatureMaxC, StepSeconds, ServerHoursPerTask,
-                     TaskLatticeSize, TaskSweeps, TasksPerJob, DeadlineSteps, ForecastHorizonSteps, AutoSpawnEverySteps, Seed })
+                     TaskLatticeSize, TaskSweeps, TasksPerJob, DeadlineSteps, ForecastHorizonSteps, AutoSpawnEverySteps, Seed, ServersPerNode })
             if (p is null || !double.IsFinite(p.Value) || string.IsNullOrWhiteSpace(p.Unit) || string.IsNullOrWhiteSpace(p.Source))
                 throw new InvalidDataException("Every demo parameter needs a finite value, unit and source.");
         if (Nodes.Length is < 2 or > 16 || Nodes.Select(n => n.Id).Distinct().Count() != Nodes.Length
@@ -171,7 +172,7 @@ sealed record DemoConfig(Parameter MinimumLoadShare, Parameter AllowedCpuCoresPe
             || MinimumLoadShare.Value != 0 || AllowedCpuCoresPerContainer.Value <= 0
             || TargetTemperatureMaxC.Value <= TargetTemperatureMinC.Value || StepSeconds.Value < 0.5
             || ServerHoursPerTask.Value <= 0 || TasksPerJob.Value < 1 || DeadlineSteps.Value < 1
-            || ForecastHorizonSteps.Value < 1 || AutoSpawnEverySteps.Value < 1)
+            || ForecastHorizonSteps.Value < 1 || AutoSpawnEverySteps.Value < 1 || ServersPerNode.Value is < 1 or > 8)
             throw new InvalidDataException("Invalid live demo configuration (the live sites assume minimumLoadShare 0).");
         LiveCoordinator.CreateScheduler(Scheduler);
     }

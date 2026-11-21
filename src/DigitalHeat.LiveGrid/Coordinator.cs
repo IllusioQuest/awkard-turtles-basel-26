@@ -112,7 +112,7 @@ sealed class LiveCoordinator
             for (int i = 0; i < ids.Length; i++)
             {
                 Directory.CreateDirectory(Dir(kind, i));
-                foreach (var f in Directory.GetFiles(Dir(kind, i), "*.json")) TryDelete(f);
+                foreach (var f in Directory.GetFiles(Dir(kind, i), "*.json", SearchOption.AllDirectories)) TryDelete(f);
             }
         Directory.CreateDirectory(Path.Combine(work, "done"));
         foreach (var f in Directory.GetFiles(Path.Combine(work, "done"))) TryDelete(f);
@@ -165,7 +165,8 @@ sealed class LiveCoordinator
                 Move(m, state);
             for (int i = 0; i < ids.Length; i++) targetLoad[i] = decision.PerSite[i].TargetLoadPerServer;
         }
-        for (int i = 0; i < ids.Length; i++)
+        // Docker CLI calls are slow on Docker Desktop; apply the nodes in parallel so a step stays short.
+        Parallel.For(0, ids.Length, i =>
         {
             var signal = state.States[i].Signal;
             try
@@ -181,7 +182,7 @@ sealed class LiveCoordinator
                     errors[i] = e.Message;
                 }
             }
-        }
+        });
     }
 
     private void Move(LiveMove m, NetworkState state)
@@ -212,7 +213,7 @@ sealed class LiveCoordinator
             int jobId = int.Parse(name[1..5]);
             if (!jobs.TryGetValue(jobId, out var job)) continue;
             string? nodeId = null;
-            try { nodeId = JsonDocument.Parse(File.ReadAllText(f)).RootElement.GetProperty("node_id").GetString(); }
+            try { nodeId = JsonDocument.Parse(ReadShared(f)).RootElement.GetProperty("node_id").GetString(); }
             catch (Exception) { }
             int node = Array.IndexOf(ids, nodeId);
             job.Done++;
@@ -243,7 +244,7 @@ sealed class LiveCoordinator
         var tasks = new List<LiveTask>();
         for (int i = 0; i < ids.Length; i++)
             foreach (var (kind, running) in new[] { ("queue", false), ("running", true) })
-                foreach (var f in Directory.GetFiles(Dir(kind, i), "j*.json"))
+                foreach (var f in Directory.GetFiles(Dir(kind, i), "j*.json", running ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
                 {
                     string name = Path.GetFileNameWithoutExtension(f);
                     if (!int.TryParse(name.AsSpan(1, 4), out int jobId) || !jobs.TryGetValue(jobId, out var job) || job.Missed)
@@ -253,15 +254,23 @@ sealed class LiveCoordinator
         return tasks;
     }
 
-    /// <summary>Share of the running task done, as the worker reports it (progress/&lt;node&gt;.json); null if unknown.</summary>
+    /// <summary>Share of a running task done, as the worker reports it (progress/&lt;node&gt;/&lt;task&gt;.json); null if unknown.</summary>
     private double? Progress(int node, string taskId)
     {
         try
         {
-            var root = JsonDocument.Parse(File.ReadAllText(Path.Combine(work, "progress", ids[node] + ".json"))).RootElement;
+            var root = JsonDocument.Parse(ReadShared(Path.Combine(work, "progress", ids[node], taskId + ".json"))).RootElement;
             return root.GetProperty("task").GetString() == taskId ? root.GetProperty("fraction").GetDouble() : null;
         }
         catch (Exception) { return null; }
+    }
+
+    /// <summary>Reads without blocking the worker: on Windows a plain read would stop it replacing the file.</summary>
+    private static string ReadShared(string path)
+    {
+        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        using var r = new StreamReader(fs);
+        return r.ReadToEnd();
     }
 
     private static bool TryDelete(string f)
@@ -346,13 +355,13 @@ sealed class CachedDockerControl(DockerCliContainerControl docker) : IContainerC
     private readonly Dictionary<string, double> limit = [];
 
     // Idempotent: a restarted LiveGrid finds containers still paused (or running) from the last run.
-    public void Pause(string id) => Tolerate(() => docker.Pause(id), "already paused");
+    public void Pause(string id) => Tolerate(() => docker.Pause(id), "already paused", "is not running", "is restarting");
     public void Unpause(string id) => Tolerate(() => docker.Unpause(id), "not paused");
 
-    private static void Tolerate(Action a, string harmless)
+    private static void Tolerate(Action a, params string[] harmless)
     {
         try { a(); }
-        catch (InvalidOperationException e) when (e.Message.Contains(harmless, StringComparison.OrdinalIgnoreCase)) { }
+        catch (InvalidOperationException e) when (harmless.Any(h => e.Message.Contains(h, StringComparison.OrdinalIgnoreCase))) { }
     }
 
     public void SetCpuLimit(string id, double cores)

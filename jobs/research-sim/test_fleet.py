@@ -6,6 +6,7 @@ node whose queue held the task when it was claimed. Run: python3 jobs/research-s
 import json
 import os
 import random
+import signal
 import subprocess
 import sys
 import tempfile
@@ -28,8 +29,9 @@ def main() -> None:
             task = {"id": f"j0001-t{k:02d}", "job": 1, "due_step": k, "temperature": 2.0 + k * 0.02,
                     "seed": 1000 + k, "lattice_size": 10, "sweeps": 60, "thermalisation_sweeps": 6}
             (q / f"{task['id']}.json").write_text(json.dumps(task))
-        env = os.environ | {"WORK": str(work), "LIVE_LOOP": "1"}
-        workers = [subprocess.Popen([sys.executable, str(SCRIPT), "run"], env=env | {"NODE_ID": n}) for n in NODES]
+        env = os.environ | {"WORK": str(work), "LIVE_LOOP": "1", "SLOTS": "2"}  # two server slots per node
+        workers = [subprocess.Popen([sys.executable, str(SCRIPT), "run"], env=env | {"NODE_ID": n},
+                                    start_new_session=True) for n in NODES]
         moved = lost_races = 0
         deadline = time.time() + 60
         try:
@@ -46,11 +48,14 @@ def main() -> None:
                         lost_races += 1  # a worker claimed it first: the coordinator skips it
                 time.sleep(0.01)
         finally:
-            for w in workers:
-                w.kill()
+            for w in workers:  # the slot processes share the worker's process group
+                if hasattr(os, "killpg"):
+                    os.killpg(w.pid, signal.SIGKILL)
+                else:  # Windows: kill the process tree
+                    subprocess.run(["taskkill", "/F", "/T", "/PID", str(w.pid)], capture_output=True)
                 w.wait()
         results = {p.stem: json.loads(p.read_text()) for p in (work / "done").glob("*.json")}
-        leftovers = list((work / "queue").glob("*/*.json")) + list((work / "running").glob("*/*.json"))
+        leftovers = list((work / "queue").glob("*/*.json")) + list((work / "running").glob("**/*.json"))
         logged = [line.split(",")[0] for n in NODES if (work / "out" / f"{n}.csv").exists()
                   for line in (work / "out" / f"{n}.csv").read_text().splitlines()[1:]]
         if len(results) != TASKS or leftovers or sorted(logged) != sorted(results):

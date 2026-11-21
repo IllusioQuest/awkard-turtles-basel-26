@@ -10,12 +10,12 @@ public sealed record LiveTask(string Id, int Job, int Node, bool Running, int Sp
 public sealed record LiveMove(string TaskId, int Job, int FromNode, int ToNode);
 
 /// <summary>
-/// Demo calibration of one live node (decision 0042). One node = one site with one worker that runs one
-/// task at a time, so <c>ServerCount = 1</c> and one scheduler step = one hour (<c>HoursPerStep = 1</c>).
+/// Demo calibration of one live node (decision 0042). One node = one site with <c>ServersPerNode</c>
+/// worker slots (each runs one task at a time) and one scheduler step = one hour (<c>HoursPerStep = 1</c>).
 /// No tank (the slider is the heat demand of that hour) and no filler (φ = 0: a node without tasks pauses).
 /// </summary>
 public sealed record LiveCalibration(double ServerElectricKw, double HeatRecoveryShare, double ServerHoursPerTask,
-    int ForecastHorizonSteps, double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh)
+    int ForecastHorizonSteps, double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh, int ServersPerNode = 1)
 {
     public double RecoverableKwhPerStep => ServerElectricKw * HeatRecoveryShare;
 }
@@ -51,7 +51,7 @@ public static class LiveNetwork
     }
 
     /// <summary>
-    /// Scheduler view of one step. Heat demand per node = slider share × recoverable heat at full load;
+    /// Scheduler view of one step. Heat demand per node = slider share × recoverable heat of all its servers at full load;
     /// the forecast is persistence (the current demand repeated), as the demo cannot know the future.
     /// </summary>
     public static NetworkState BuildState(int step, IReadOnlyList<string> nodeIds, IReadOnlyList<double> heatShares,
@@ -65,12 +65,12 @@ public static class LiveNetwork
         string Label(int k) => FirstStepLocal.AddHours(step + k).ToString("yyyy-MM-dd'T'HH:mm", CultureInfo.InvariantCulture);
         for (int i = 0; i < n; i++)
         {
-            double demand = heatShares[i] * cal.RecoverableKwhPerStep;
+            double demand = heatShares[i] * cal.RecoverableKwhPerStep * cal.ServersPerNode;
             var hours = Enumerable.Range(0, cal.ForecastHorizonSteps + 1)
                 .Select(k => new DemandHour(Label(k), 0, true, demand, 0)).ToArray();
-            sites[i] = new NetworkSite(nodeIds[i], nodeIds[i], 0, 0, "CH", 1, cal.ServerElectricKw,
+            sites[i] = new NetworkSite(nodeIds[i], nodeIds[i], 0, 0, "CH", cal.ServersPerNode, cal.ServerElectricKw,
                 cal.RecoverableKwhPerStep, 0, 0, 1, cal.ElectricityPriceChfPerKwh, cal.HeatValueChfPerKwh, hours);
-            var signal = new HeatSignal(demand, 0, 0, 1, cal.RecoverableKwhPerStep);
+            var signal = new HeatSignal(demand, 0, 0, cal.ServersPerNode, cal.RecoverableKwhPerStep);
             states[i] = new SiteHeatState(nodeIds[i], signal,
                 HeatForecast.Build(hours, $"live-{nodeIds[i]}", 0, cal.ForecastHorizonSteps));
         }
@@ -81,42 +81,32 @@ public static class LiveNetwork
 
 /// <summary>
 /// Turns allocations to other nodes into whole-task moves (decision 0042). An allocation is server-hours
-/// for one step, a file is a whole task, so allocated server-hours accumulate per (job, from, to) while
-/// the scheduler keeps allocating that pair in consecutive steps; a task moves once a whole task's worth
-/// has accumulated. A pair the scheduler stops allocating loses its credit (the cause is gone).
-/// Only waiting tasks move, the last in the queue first. One instance per demo run.
+/// for one step, a file is a whole task: every allocation of a job to another node moves
+/// ⌈server-hours ÷ server-hours per task⌉ waiting tasks there at once (at least one), so a job spreads to
+/// all nodes the scheduler picked in the same step. The moved task then belongs to its new node (see
+/// <see cref="LiveNetwork.BuildCohorts"/>), which may slightly over-commit it for that step. Only waiting
+/// tasks move, the last in the queue first.
 /// </summary>
 public sealed class LiveTaskPlanner(int nodeCount, double serverHoursPerTask)
 {
-    private const double Epsilon = 1e-9;
-    private Dictionary<(int Job, int From, int To), double> credit = [];
+    private const double MinimumServerHours = 1e-6;
 
     public IReadOnlyList<LiveMove> Plan(IReadOnlyList<LiveTask> tasks, IReadOnlyList<WorkAllocation> allocations)
     {
-        var next = new Dictionary<(int, int, int), double>();
-        foreach (var a in allocations)
-        {
-            var (job, from) = LiveNetwork.DecodeCohort(a.CohortId, nodeCount);
-            if (a.SiteIndex == from || a.ServerHours <= Epsilon) continue;
-            var key = (job, from, a.SiteIndex);
-            next[key] = next.GetValueOrDefault(key, credit.GetValueOrDefault(key)) + a.ServerHours;
-        }
         var moves = new List<LiveMove>();
         var waiting = tasks.Where(t => !t.Running).GroupBy(t => (t.Job, t.Node))
             .ToDictionary(g => g.Key, g => new Stack<LiveTask>(g.OrderBy(t => t.Id, StringComparer.Ordinal)));
-        foreach (var key in next.Keys.OrderBy(k => k.Item1).ThenBy(k => k.Item2).ThenBy(k => k.Item3).ToList())
+        var wanted = allocations
+            .Select(a => (Cohort: LiveNetwork.DecodeCohort(a.CohortId, nodeCount), a.SiteIndex, a.ServerHours))
+            .Where(a => a.SiteIndex != a.Cohort.Node && a.ServerHours > MinimumServerHours)
+            .GroupBy(a => (a.Cohort.Job, From: a.Cohort.Node, To: a.SiteIndex))
+            .OrderBy(g => g.Key.Job).ThenBy(g => g.Key.From).ThenBy(g => g.Key.To);
+        foreach (var g in wanted)
         {
-            var (job, from, to) = key;
-            while (next[key] + Epsilon >= serverHoursPerTask
-                   && waiting.TryGetValue((job, from), out var queue) && queue.Count > 0)
-            {
-                var t = queue.Pop();
-                moves.Add(new LiveMove(t.Id, job, from, to));
-                next[key] -= serverHoursPerTask;
-            }
-            if (!waiting.TryGetValue((job, from), out var left) || left.Count == 0) next[key] = 0;
+            int count = (int)Math.Ceiling(g.Sum(a => a.ServerHours) / serverHoursPerTask - 1e-9);
+            for (int k = 0; k < count && waiting.TryGetValue((g.Key.Job, g.Key.From), out var q) && q.Count > 0; k++)
+                moves.Add(new LiveMove(q.Pop().Id, g.Key.Job, g.Key.From, g.Key.To));
         }
-        credit = next;
         return moves;
     }
 }

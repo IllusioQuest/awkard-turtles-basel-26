@@ -90,11 +90,11 @@ dotnet run --project src/DigitalHeat.LiveGrid -- --replay data/derived/live-demo
 
 The recorder polls `/api/state` every 0.4 seconds. Use `--output` to choose another recording path.
 
-**Task size on a new laptop:** one task should take about one step (4 s) at one full core. Measure
+**Task size on a new laptop:** one step is 2 s; each house has 3 servers of 0.5 core, and one task should take about 4 s (two steps) on one server, i.e. 2 s on a full core. Measure
 once and put the printed `sweeps` into `taskSweeps` in `config/live-demo-four-node.json`:
 
 ```
-docker compose -f compose.live-demo.yml run --rm -e TARGET_SECONDS=4 node-1 calibrate
+docker compose -f compose.live-demo.yml run --rm -e TARGET_SECONDS=2 node-1 calibrate
 ```
 
 Queue check without Docker (four workers, a mover that keeps moving files):
