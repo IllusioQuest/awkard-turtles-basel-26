@@ -91,3 +91,4 @@ hosting adapter using existing IScheduler and JobPlacement, keeping both compone
 running; decision 0015 is pending user agreement/review. No T-10/T-12 network optimiser or shared
 schema files are claimed. T-01 owner: user has been asked to choose one batch/always-on catalog
 versus separate catalogs; no approval is implied until that reply is recorded.
+T-29 decision 0015 reviewed (go with changes): mandatory pre-selection locality filtering, whole-set fallback for incomplete telemetry, controlled-demo traffic only. User routing/catalog choices pending; runtime unchanged. T-27 PR #12 is still a code dependency outside main at this check.

@@ -28,3 +28,9 @@ commands/limits/results published to main/docs. Do not mark complete before merg
 ## Related work
 T-23 remains the hosting catalog/runtime handoff, blocked on the user's catalog choice requested
 again on 2026-11-21. T-01 owns schema implementation; T-24 owns locality eligibility.
+
+Review complete: go with changes recorded in decision 0015. Implementation must test forbidden
+sole destinations, empty eligibility and reload, plus whole-set fallback on partial heat input.
+Gate actual heat preference to controlled demo use; no serving-capacity claim.
+T-27 code is still absent from origin/main at this check; PR #12 must be merged or treated as an
+explicit stacked dependency. Do not silently merge it. User design choices remain pending.
