@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- T-42 terminal heat monitor. Spectre.Console: live tables/colours in the terminal (one well-known UI dependency, agreed with Nikita 2026-11-21). -->
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><RootNamespace>DigitalHeat.Gaming.Monitor</RootNamespace></PropertyGroup>
+  <ItemGroup><PackageReference Include="Spectre.Console" Version="0.49.1" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../src/DigitalHeat.Gaming/DigitalHeat.Gaming.csproj" />
+    <ProjectReference Include="../../src/DigitalHeat.Network/DigitalHeat.Network.csproj" />
+  </ItemGroup>
+</Project>
