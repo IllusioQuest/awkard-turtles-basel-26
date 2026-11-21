@@ -20,4 +20,6 @@ Sources checked 2026-11-21:
 
 Code discovery script committed/pushed ea9c491. No drivers installed, no host configuration changed, no game downloaded. Proposed stack is not yet accepted. Existing unrelated Properties directories in the original checkout were preserved; implementation uses a separate Git worktree.
 
-User approved Selkies and emphasized multi-server distribution. ADR 0020 reviewed: go with changes. Two session containers are the initial lab, with separate ports/homes/passwords and loopback access. New sessions/batch work distribute; one original CS2 process is not split across hosts. Streaming image downloading; Intel render node reports WSL faux_driver, hardware graphics remain unproven.
+User approved Selkies and emphasized multi-server distribution. ADR 0021 reviewed: go with changes. Two session containers are the initial lab, with separate ports/homes/passwords and loopback access. New sessions/batch work distribute; one original CS2 process is not split across hosts. Streaming image downloading; Intel render node reports WSL faux_driver, hardware graphics remain unproven.
+
+Milestone: two Selkies containers running, auth/volume/bind checks pass. Intel OpenGL accelerated after adding read-only host drivers mount; Vulkan CPU-only and VAAPI failed. CPU H.264 encode succeeded. Browser video/input awaits user; no CS2 claim. Reproduction and next decisions: docs/gaming-lab.md. Node-stop test blocked by execution policy before execution. Code f8b318c pushed on featur-gaming.

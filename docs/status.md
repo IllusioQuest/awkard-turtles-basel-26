@@ -122,3 +122,4 @@ documents, Type 2 = research simulations; transcription and webhosting out of th
 `docs/business-model.md`. Reviewed (go with changes, applied). Docs only; no code, interface or scored
 figure changed. Affects: T-30 (now a Monte Carlo research kernel), T-31 (Type 1 = LLM), T-14 (operator
 model as main case), T-21 storyboard money scene. Ennio: 0018/0019 status lines updated, please check.
+T-39 milestone: two healthy Selkies nodes, Intel OpenGL accelerated, CPU H.264 capture/encode proven; Vulkan CPU-only and VAAPI failed. Browser smoke and zero-heat admission choice pending. See gaming-lab.md. No session coordinator or CS2 gameplay claim.

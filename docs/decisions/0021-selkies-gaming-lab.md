@@ -1,4 +1,4 @@
-# 0020: Selkies browser gaming compatibility lab and node placement
+# 0021: Selkies browser gaming compatibility lab and node placement
 
 Status: proposed; user approved Selkies and multi-server distribution, 2026-11-21.
 Scope T-39. Browser-only clients; original games unchanged; Linux containers. First prove desktop video/input, then inspect real Intel graphics capabilities, then CS2 if feasible. No CS2 download or performance claim yet.

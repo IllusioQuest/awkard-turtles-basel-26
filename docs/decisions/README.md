@@ -32,3 +32,5 @@ later.
 | [0018](0018-two-job-types-strategy.md) | Two job types: sovereign AI services (Type 1) + batch compute filler (Type 2), job model of T-34 | proposed (Ennio); hardware split superseded by 0019; Type 1 contents superseded by 0020 |
 | [0019](0019-gpu-nodes-for-all-job-types.md) | GPU nodes for all job types, no CPU-only servers (Type 2 runs on Type 1 hardware) | proposed (Ennio); partly supersedes 0018; team confirmation pending |
 | [0020](0020-business-model-operator-two-job-types.md) | Business model (provisional): operator model, Type 1 = batch LLM on non-personal documents, Type 2 = research simulations | proposed (Jona); partly supersedes 0018; reviewed (go with changes); team confirmation pending |
+
+| [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
