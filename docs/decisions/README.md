@@ -38,3 +38,5 @@ later.
 | [0031](0031-mixed-job-queue.md) | Finite jobs and sold filler capacity in one C# year run | proposed; user approved T-31, reviewed with changes |
 
 | [0032](0032-gaming-monitor-presentation.md) | Read-only gaming console and model/observation boundaries | proposed; reviewed with corrections, T-42 |
+
+| [0033](0033-universal-workload-admission.md) | Universal resource-aware workload admission | proposed; reviewed with changes; user choices pending, T-43 |
