@@ -1,3 +1,5 @@
+> Completed prototype: user-verified Xonotic browser gameplay and Intel graphics experiment merged in PR #22 (56501a7). CS2 remains deferred, not verified. Reusable runtime follow-up completed in T-40; current guide: ../gaming-profiles.md. Historical milestones below retain their original pending states.
+
 # T-39: Intel browser gaming compatibility experiment
 
 Owner: Nikita / Codex. Branch: featur-gaming. Status: in progress, streaming stack choice pending.
