@@ -1,0 +1,11 @@
+{
+  "id": "webhosting-replica-control-probe",
+  "containerImage": "webhosting-sample:local",
+  "interruptible": true,
+  "supportedControlLevels": ["freeze", "throttle"],
+  "workUnit": "isolated replica control experiment",
+  "deadlineHours": null,
+  "runtimeSecondsPerWorkUnit": null,
+  "energyKwhPerWorkUnit": null,
+  "progressFile": null
+}

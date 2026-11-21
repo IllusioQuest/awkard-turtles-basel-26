@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Jobs / measurement
 - **Depends on:** T-00
-- **Suggested owner:** anyone with a laptop  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone with a laptop  ·  **Owner:** Ennio / Claude  ·  **Status:** in progress (branch feat/T-02-transcription-job: container, measurement, scaling to 1 kW)
 
 ## Goal
 

@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "site_id": "reference-house",
+  "reference_parameters": {
+    "hours_per_day": {
+      "value": 24,
+      "unit": "hours/day",
+      "source": "docs/case/challenge.md: 24 hourly values per local day"
+    },
+    "hours_per_step": {
+      "value": 1,
+      "unit": "hours",
+      "source": "docs/case/challenge.md: hourly time steps"
+    },
+    "design_heating_kw": {
+      "value": 10,
+      "unit": "kW",
+      "source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "base_temperature_c": {
+      "value": 20,
+      "unit": "\u00B0C",
+      "source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "formula_divisor_c": {
+      "value": 25.6,
+      "unit": "\u00B0C",
+      "source": "docs/case/challenge.md: 20 minus 2025 coldest hourly temperature"
+    },
+    "heating_day_threshold_c": {
+      "value": 12,
+      "unit": "\u00B0C",
+      "source": "docs/case/challenge.md: daily mean strictly below 12 \u00B0C"
+    },
+    "hot_water_kwh_per_day": {
+      "value": 12,
+      "unit": "kWh/day",
+      "source": "docs/case/challenge.md: four-person household hot water"
+    },
+    "tank_capacity_kwh": {
+      "value": 35,
+      "unit": "kWh",
+      "source": "docs/case/challenge.md: approximate usable storage, no losses"
+    },
+    "server_electric_kw": {
+      "value": 1,
+      "unit": "kW/server",
+      "source": "docs/case/challenge.md: rack-server reference"
+    },
+    "heat_recovery_share": {
+      "value": 0.8,
+      "unit": "fraction",
+      "source": "docs/case/challenge.md: 80 percent recoverable into water"
+    },
+    "heat_pump_efficiency": {
+      "value": 2.5,
+      "unit": "kWh heat/kWh electricity",
+      "source": "docs/case/challenge.md: heat-value divisor"
+    },
+    "server_count": {
+      "value": 4,
+      "unit": "servers",
+      "source": "prototypes/year-explorer/index.html: four-server comparison scenario, not a case requirement"
+    },
+    "minimum_load_share": {
+      "value": 0,
+      "unit": "fraction/server",
+      "source": "prototypes/year-explorer/index.html: zero-minimum-load comparison scenario"
+    },
+    "electricity_price_chf_per_kwh": {
+      "value": 0.3325,
+      "unit": "CHF/kWh",
+      "source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100"
+    },
+    "compute_price_chf_per_server_hour": {
+      "value": 0.3,
+      "unit": "CHF/server-hour",
+      "source": "prototypes/year-explorer/index.html: illustrative slider value only; TODO(source) for market-backed compute income"
+    }
+  },
+  "job_scenario": {
+    "mode": "unlimited",
+    "excess_heat_policy": "wait",
+    "source": "docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
+    "job_types": []
+  }
+}

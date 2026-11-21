@@ -23,3 +23,5 @@ later.
 | [0008](0008-site-heat-state.md) | Per-site heat state and forecast interface | proposed |
 | [0009](0009-generic-job-control.md) | Generic Docker job control through the shared scheduler | proposed (code merged to main; renumbered from 0006) |
 | [0010](0010-job-queue-year-simulation.md) | Finite job queue in the yearly heat simulation | proposed |
+| [0011](0011-result-export-contract.md) | Versioned snake_case result export | proposed; review pending |
+| [0012](0012-hosting-component-isolation.md) | Separate frontend and API node pools | proposed; review pending |
