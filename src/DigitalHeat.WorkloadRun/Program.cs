@@ -22,7 +22,7 @@ try
         Console.WriteLine($"Wrote historical PLAN example. UTC plan time: {example.Inventory.IntervalStartUtc:O}. This is not fresh runtime inventory.");
         return 0;
     }
-    if (args.Length < 2) throw new ArgumentException("Usage: WorkloadRun plan <config> [UTC-time] | status/start/pause/resume/heat/stop <config> <state-dir> [workload-id] | backup/restore-empty <config> <state-dir> <id> <storage-id> <backup-volume> <archive.tar.gz> <local-tool-image> [new-volume]");
+    if (args.Length < 2) throw new ArgumentException("Usage: WorkloadRun plan <config> [UTC-time] | status/start/pause/resume/heat/stop <config> <state-dir> [workload-id] | watch-feedback <config> <state-dir> <inbox-dir> <policy.json> | publish-feedback <inbox-dir> <report.json> | backup/restore-empty <config> <state-dir> <id> <storage-id> <backup-volume> <archive.tar.gz> <local-tool-image> [new-volume]");
     string command = args[0];
     var config = WorkloadConfiguration.Load(args[1]);
     if (command == "set-deadline")
@@ -52,7 +52,12 @@ try
     if (args.Length < 3) throw new ArgumentException("A persistent state directory is required.");
     if (command is not ("status" or "start" or "pause" or "resume" or "heat" or "stop" or "backup" or "restore-empty" or "watch-deadlines" or "watch-feedback")) throw new ArgumentException("Unknown command.");
     var docker = new DockerCommands();
-    using var coordinator = new WorkloadCoordinator(config.FleetId, args[2], new DockerWorkloadRuntime(docker), retainHourlyHeat: command == "watch-feedback");
+    bool retainedHeat = command == "watch-feedback";
+    string journalPath = Path.Combine(args[2], "journal.json");
+    if (File.Exists(journalPath)) retainedHeat |= JsonSerializer.Deserialize<CoordinatorState>(File.ReadAllText(journalPath), WorkloadJson.Options)?.RetainHourlyHeat == true;
+    if (retainedHeat && command is "start" or "resume" or "heat" or "watch-deadlines")
+        throw new InvalidOperationException("This fleet uses node feedback. Use watch-feedback for admission/resume; status, pause, stop and cold backup remain available after stopping its owner.");
+    using var coordinator = new WorkloadCoordinator(config.FleetId, args[2], new DockerWorkloadRuntime(docker), retainHourlyHeat: retainedHeat);
     if (command == "watch-feedback")
     {
         if (args.Length != 5) throw new ArgumentException("watch-feedback <config> <state-dir> <inbox-dir> <feedback-policy.json>");
