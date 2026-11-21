@@ -36,18 +36,12 @@ keep the format `| YYYY-MM-DD HH:MM | what | notes |` when you edit it.
 
 | When | What | Notes |
 |---|---|---|
-| 2026-11-21 15:00 | **Draft submission** (first version) | Required contents not defined yet; ask the team. |
+| 2026-11-21 15:00 | Draft submission (first version) | **Voluntary.** |
 | TBD (≈ 22 Nov, morning) | End of hackathon, final pitch | Exact time to be added by the team. |
 | TBD | Feature freeze | Team decides later. |
 
-Reminder rules:
-- At the start of a session, check the current time (`scripts/deadline-reminder.sh`, or `date`)
-  and state the time left to the next deadline in one line.
-- **Less than 6 h left:** end every reply with one line on the time left.
-- **Less than 2 h left:** say so prominently at the top of every reply, and suggest securing the
-  submission before any new work.
-- In Claude Code, hooks in `.claude/settings.json` run the script automatically (session start, and
-  on every prompt once a deadline is close). Other tools: run it yourself.
+No automatic reminders: the team tracks time itself. Do not state time left or push deadlines
+unless asked.
 
 ## 3. Where things are
 
@@ -208,8 +202,7 @@ Three people work in parallel with several agents. Keep the pieces fitting toget
 
 - **Reply in the user's language.** Everything in the repository (code, comments, docs, commits,
   PRs) is in English.
-- Keep reports short: what changed, how it was checked, open questions, and deadline status when a
-  deadline is close.
+- Keep reports short: what changed, how it was checked, open questions.
 - **Ask instead of deciding** when the choice belongs to the team: vision, stack, hardware, servers
   per house, business model, scope, anything a juror might ask about. Give a recommendation with
   reasons.

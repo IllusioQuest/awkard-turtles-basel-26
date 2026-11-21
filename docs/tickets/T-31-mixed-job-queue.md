@@ -1,7 +1,7 @@
 # T-31: Mixed queue: finite Type 1 jobs plus unlimited Type 2 filler in one year run
 
 - **Tier:** 2 Pitch (1 Draft if the team wants the two-type balance in the draft)  ·  **Area:** Core / year simulation
-- **Depends on:** T-05 (decision 0010), T-26 (Basel scenario), decision 0015
+- **Depends on:** T-05 (decision 0010), T-26 (Basel scenario), decision 0017
 - **Suggested owner:** Jona / Codex (owner of the queue)  ·  **Owner:**  ·  **Status:** open
 
 ## Goal

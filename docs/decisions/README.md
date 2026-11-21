@@ -26,4 +26,6 @@ later.
 | [0011](0011-result-export-contract.md) | Versioned snake_case result export | proposed; review pending |
 | [0012](0012-hosting-component-isolation.md) | Separate frontend and API node pools | proposed; review pending |
 | [0013](0013-job-data-locality.md) | Job data-locality eligibility | proposed |
-| [0015](0015-two-job-types-strategy.md) | Two job types: sovereign AI services (Type 1) + interruptible batch compute (Type 2) | proposed (Ennio); team confirmation pending. 0014 is taken by the T-11 branch |
+| [0015](0015-hosting-heat-routing.md) | Shared heat scheduler in hosting routing | proposed; approval/review pending |
+| [0016](0016-hosting-replica-lifecycle.md) | Six-node heat-guided hosting lifecycle | proposed; user approved scope, review pending |
+| [0017](0017-two-job-types-strategy.md) | Two job types: sovereign AI services (Type 1) + batch compute filler (Type 2), job model of T-34 | proposed (Ennio); team confirmation pending |
