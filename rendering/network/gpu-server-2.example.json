@@ -1,0 +1,36 @@
+{
+  "id": "gpu-server-2",
+  "physical_host_id": "gpu-server-2",
+  "serve_ui": false,
+  "image": "native-recipe-computed-at-startup",
+  "state_directory": "./state",
+  "peers": {
+    "cpu": "http://presentation-laptop.invalid:18910",
+    "gpu": "http://presentation-laptop.invalid:18911",
+    "gpu-server-1": "http://gpu-server-1.invalid:18911",
+    "gpu-server-2": "http://gpu-server-2.invalid:18911"
+  },
+  "prepared_scene_mode": true,
+  "heat_demand_kwh": 0,
+  "cpu_cores": 1,
+  "ram_mib": 1536,
+  "frame_heat_kwh": 0.8,
+  "frames": 48,
+  "deadline_seconds": 7200,
+  "source": "DEPLOYMENT TEMPLATE, not live capacity. Heat demand is zero until operator supplies a sourced heat signal. Abstract case 0.8kWh/server-hour commitment, NOT measured GPU/recovered heat. 1 CPU/1536MiB admission requests and 7200s expiry are inherited lab settings, not OS quotas or an SLA. Replace all .invalid addresses and paths before use.",
+  "gpu": {
+    "device_id": "gpu-server-2-gpu-0",
+    "nvidia_device_id": null,
+    "linux_devices": [],
+    "read_only_binds": []
+  },
+  "native": {
+    "executable": "REPLACE_WITH_BLENDER_EXECUTABLE",
+    "expected_version": "5.3.0",
+    "graphics_api": "opengl",
+    "scripts_directory": "REPLACE_WITH_RENDERING_DIRECTORY",
+    "assets_directory": "REPLACE_WITH_PRIVATE_SHARED_ASSETS_DIRECTORY",
+    "threads": 1,
+    "enable_gpu": true
+  }
+}

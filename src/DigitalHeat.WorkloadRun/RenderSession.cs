@@ -2,6 +2,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using DigitalHeat.Orchestration;
 
+internal sealed record RenderPeerConnection(string PeerId,string State,DateTimeOffset? CheckedUtc);
+
 internal sealed record RenderSessionState(string Id,string Phase,bool Held,RenderArtifact[] Frames,string? Error=null)
 {
     public PreparedScene? Scene { get; init; }
@@ -27,6 +29,8 @@ internal sealed class RenderSession
     private RenderSessionState state;
     private RenderPeerStatus[] peers=[];
     private string? pollingError;
+    private RenderPeerConnection[] connections=[];
+    private DateTimeOffset? peerSnapshotUtc;
     private Task? running;
     private volatile bool stopRequested;
     public RenderSession(RenderConfig cfg,HttpClient http)
@@ -41,10 +45,24 @@ internal sealed class RenderSession
     {
         if(!await poll.WaitAsync(0))return;
         try{
-            peers=await Task.WhenAll(cfg.Peers.Select(async p=>{
-                using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                return await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status",RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
-            }));pollingError=null;
+            // Planned peers are intentionally absent here: only runtime Peers are probed.
+            // Keep execution's all-or-nothing snapshot; independent probe results are UI facts.
+            var checkedPeers=await Task.WhenAll(cfg.Peers.Select(async p=>{
+                try{
+                    using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                    var status=await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status",RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
+                    if(status.PeerId!=p.Key)throw new IOException("Peer identity mismatch");
+                    return (Status:(RenderPeerStatus?)status,Connection:new RenderPeerConnection(p.Key,"reachable",DateTimeOffset.UtcNow));
+                }catch{
+                    return (Status:(RenderPeerStatus?)null,Connection:new RenderPeerConnection(p.Key,"unreachable",DateTimeOffset.UtcNow));
+                }
+            }));
+            connections=checkedPeers.Select(p=>p.Connection).ToArray();
+            if(checkedPeers.Any(p=>p.Status is null)){
+                pollingError="Waiting for configured peer(s): "+string.Join(", ",connections.Where(p=>p.State!="reachable").Select(p=>p.PeerId))+". No replacement work dispatched; work data is from the last complete snapshot.";
+                return;
+            }
+            peers=checkedPeers.Select(p=>p.Status!).ToArray();peerSnapshotUtc=DateTimeOffset.UtcNow;pollingError=null;
             // A frame may finish while Hold drains the GPU. Publish that output even though
             // the dispatch loop is paused, so the preview/count never waits for Resume.
             if(state.Id!=""&&state.Held){
@@ -61,6 +79,8 @@ internal sealed class RenderSession
         RenderSessionState s;lock(stateGate)s=state;
         var timing=Timing(s,DateTimeOffset.UtcNow);
         return new{s.Id,s.Phase,s.Held,s.Error,can_start_new=CanStart,configured_peers=cfg.Peers.Count,peer_connection_error=pollingError,
+            network=new{origin_peer_id=cfg.Id,configured_peer_ids=cfg.Peers.Keys.ToArray(),planned_gpu_peers=cfg.PlannedGpuPeers,
+                connections,peer_snapshot_utc=peerSnapshotUtc,work_data_stale=pollingError is not null},
             mode="multiple",frames_per_run=cfg.Frames,completed=s.Frames.Length,frames=s.Frames,width=640,height=360,samples=32,
             engine=cfg.PreparedSceneMode?"Eevee":"Cycles",device=cfg.PreparedSceneMode?"CPU scene preparation → verified GPU frames":"Capability-gated multi-node frame jobs",
             elapsed_seconds=timing.Elapsed,paused_seconds=timing.Paused,active_seconds=timing.Active,

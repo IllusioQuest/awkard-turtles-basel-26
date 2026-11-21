@@ -12,6 +12,8 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     Dictionary<string,string> Peers, double HeatDemandKwh, double CpuCores, long RamMib,
     double FrameHeatKwh, int Frames, double DeadlineSeconds, string Source)
 {
+    // Display-only deployment intent. Never used by MeshPeer or counted as live capacity.
+    public string[] PlannedGpuPeers { get; init; } = [];
     public NativeRenderOptions? Native { get; init; }
     public bool PreparedSceneMode { get; init; }
     public bool ServeUi { get; init; } = true; // Remote workers expose token-protected peer APIs only.
