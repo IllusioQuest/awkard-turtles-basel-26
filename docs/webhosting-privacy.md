@@ -1,6 +1,6 @@
 # Hosting privacy and component isolation (T-27)
 
-Status: implementation in progress on feat/T-27-hosting-isolation. Do not use real personal data.
+Status: four-node prototype verified on feat/T-27-hosting-isolation; PR pending. Current commands/results: [runtime guide](webhosting-isolation-runtime.md). Do not use real personal data.
 User approved component isolation first on 2026-11-21; confidentiality from node operators is
 outside this increment. See decision 0012.
 
@@ -29,12 +29,12 @@ each application receives; encryption and key custody are separate requirements.
 Do not automatically parse an arbitrary app into secure fragments. Developers must define
 frontend/API/storage boundaries and their explicit data contracts.
 
-## Current running lab versus new topology
-The original lab still runs: two Linux gateways route to identical combined HTML/API samples
+## Baseline lab and implemented topology
+The original fallback lab: two Linux gateways route to identical combined HTML/API samples
 on engine A/B. Engine C exists but is outside routing. Local watchdogs and two outer-engine
 monitors recover gateway failures. Shared heat scheduling only controls a disposable probe.
 
-New opt-in topology under development:
+Implemented opt-in topology (firewall revision and results below):
 ~~~mermaid
 flowchart TD
     browser["Windows browser: localhost:18080"] --> gateways["Linux gateways A/B"]
@@ -72,7 +72,7 @@ The network namespace had no default route and numeric internet access returned 
 unreachable. A hostname lookup failed; that is not proof of a working host-access firewall.
 
 Therefore internal-bridge configuration is NOT accepted as a working topology.
-Pending user approval: ordinary inner bridges plus per-engine firewall rules that admit inbound
+Historical next step (subsequently approved and verified below): ordinary inner bridges plus per-engine firewall rules that admit inbound
 HTTP and established replies but block new app-initiated connections to host, peer nodes and
 internet. No unrestricted-network fallback has been deployed. Full four-node routing and failure
 tests remain pending. Existing lab gateways were not stopped by the experiment.
@@ -81,7 +81,8 @@ tests remain pending. Existing lab gateways were not stopped by the experiment.
 User approved normal inner bridges with per-node firewall rules. Internal bridge proposal is
 superseded after the ingress failure. The frontend now returns HTTP 200 through its published
 port; app-namespace probes to the engine bridge host and internet timed out, with matching
-DROP counters in INPUT/DOCKER-USER chains. Full pool/failure checks are next.
+DROP counters in INPUT/DOCKER-USER chains. Full pool/failure checks subsequently passed; see the runtime guide for measured outcomes.
 Application restart policy is no: after engine failure, Start-IsolatedNetwork.ps1 reapplies
 rules before starting the app. The other pool replica serves traffic during manual recovery.
 No automatic node re-provisioning is claimed.
+

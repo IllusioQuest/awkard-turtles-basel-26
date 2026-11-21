@@ -68,3 +68,22 @@ Component isolation limits a compromised app's reach; it does not provide confid
 against node operators. Gateways see HTTP data. The laptop, Docker Desktop, engine administrators
 and outer-socket monitoring are trusted shared dependencies. This is synthetic-only local HTTP.
 T-24 owns future locality policy; shared heat-scheduler integration remains a separate T-23 probe.
+
+## Measured verification, 2026-11-21
+Both images built; 17 existing hosting tests passed; browser screenshot inspection showed a
+frontend-a page with separately changing API identities. All four nodes passed component-route,
+hardening, distinct-engine, peer positive-control and blocked-egress checks.
+
+| Failure injected | Seconds until five successful page/API probes | Failed probes |
+|---|---:|---:|
+| frontend-a killed | 2.392 | 2 |
+| frontend-b killed | 2.033 | 2 |
+| api-c killed | 5.281 | 1 |
+| api-d killed | 2.101 | 1 |
+| active gateway-b paused | 24.645 | 7 |
+
+Method: Test-IsolatedNetwork.ps1 -FailureTests, 250 ms between probe pairs, 3 s per HTTP request,
+75 s recovery timeout. Measurements are a local run, not a production availability guarantee.
+The timer starts after Docker returns from fault injection and ends on the fifth consecutive
+successful page/API pair. Restore time is excluded. Results contain only synthetic node identity.
+Both gateways and all four application nodes were restored after testing.

@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch · **Area:** Webhosting privacy prototype
 - **Depends on:** existing hosting gateway and nested-engine lab
-- **Owner:** Nikita / Codex · **Status:** in progress (architecture review pending)
+- **Owner:** Nikita / Codex · **Status:** in progress (verified; PR pending)
 
 User approved component isolation first, with node-operator access limits documented.
 Build a separate opt-in four-engine Linux lab: two frontend replicas and two API replicas.
@@ -14,5 +14,6 @@ Completion requires reproducible tests, code PR, and docs with topology and limi
 
 
 Progress: separate frontend/API Linux images build. Internal bridge experiment blocked required
-published-port ingress, so full rollout is paused for the user's firewall-policy choice.
+published-port ingress, so firewall revision was then approved and passed full rollout tests.
 See docs/webhosting-privacy.md. No privacy/failover completion is claimed.
+
