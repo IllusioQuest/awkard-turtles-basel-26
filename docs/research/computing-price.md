@@ -2,7 +2,9 @@
 
 > **Team decision (2026-11-21, team lead):** adopt **CHF 0.66 per server-hour** for the draft's scored
 > figures (computing income, margin), keep it adjustable (sensitivity 0.25–1.80). The config change
-> goes through T-06 (Jona). An automatic, snapshotted price update is proposed in T-28.
+> goes through T-06 (Jona). The self-updating Azure-based value (T-28, `data/derived/computing-price.json`,
+> 0.687 on 2026-11-21) is shown as a **live cross-check only**; 0.66 stays the pinned value (decided 2026-11-21).
+> Filler load sold as spot capacity is under consideration: see `docs/vision.md`.
 > **T-28:** `python3 scripts/fetch_data.py --prices` re-derives A1, A2 and C1 from a dated Azure
 > snapshot into `data/derived/computing-price.json` (2026-11-21: C1 = 0.687); A3 has no public API.
 

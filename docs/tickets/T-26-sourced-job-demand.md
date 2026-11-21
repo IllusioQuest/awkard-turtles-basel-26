@@ -45,6 +45,8 @@ T-02 measured about 436 audio hours per 1 kW server-hour. Demand, not capacity, 
 - **Team lead's decisions:** price **0.66**, adjustable (→ T-06 updates `config/reference-house.json`;
   automatic snapshotted update proposed in T-28). **Demand model: to be agreed with Ennio** (see below).
 
+**Recorded 2026-11-21:** filler load sold as spot capacity is under consideration (`docs/vision.md`, section "Under consideration"); price 0.66 pinned, 0.687 live cross-check (T-28).
+
 ## Question for Ennio / Ennio's agent (T-02 owner)
 
 The team lead asked to agree the demand model for the scored figures with you. Options:
