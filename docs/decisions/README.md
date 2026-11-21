@@ -14,6 +14,9 @@ later.
 | No. | Decision | Status |
 |---|---|---|
 | [0036](0036-monitor-ui-neutral-contract.md) | Keep monitor logic in place; transfer typed JSON to existing /admin via loopback API | proposed; user approved direction; fresh review go with changes |
+| [0037](0037-minute-live-job-deadlines.md) | Minute-level deadlines for bounded live batch jobs | proposed; T-48 |
+| [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; T-49 |
+| [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation connections | proposed; T-50 |
 | [0001](0001-data-storage.md) | Data storage layout (`data/raw`, `data/derived`, fetch script) | accepted |
 | [0002](0002-agent-guide.md) | Agent working guide (`AGENTS.md`), reviews, Git, deadlines | accepted |
 | [0003](0003-webhosting-prototype.md), [0004](0004-redundant-windows-ingress.md), [0006](0006-linux-host-network-ingress.md), [0007](0007-whole-container-pause-recovery.md), [0012](0012-hosting-component-isolation.md), [0015](0015-hosting-heat-routing.md), [0016](0016-hosting-replica-lifecycle.md), [0017](0017-always-on-catalog.md) | Webhosting prototype cluster (ingress, pause recovery, isolation, heat routing, replicas, always-on catalog) | superseded by 0026 (webhosting retired) |

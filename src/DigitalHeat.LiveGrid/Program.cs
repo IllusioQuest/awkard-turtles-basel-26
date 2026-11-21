@@ -25,25 +25,12 @@ builder.WebHost.UseUrls("http://127.0.0.1:5087");
 var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.MapGet("/api/state", () =>
+app.MapGet("/api/state", () => Results.Json(new
 {
-    try
-    {
-        var cpu = docker.ReadCpuPercents(nodes.Select(n => n.Config.Container).ToArray());
-        foreach (var node in nodes)
-            node.ObserveCpu(cpu[node.Config.Container]);
-    }
-    catch (Exception error)
-    {
-        foreach (var node in nodes) node.SetObservationError(error.Message);
-    }
-    return Results.Json(new
-    {
-        title = "One laptop · four independent worker nodes",
-        mapping = "Illustrative target temperature is translated to a reference heat signal; it is not a room sensor.",
-        nodes = nodes.Select(n => n.ReadState())
-    });
-});
+    title = "One laptop · four independent worker nodes",
+    mapping = "Illustrative target temperature is translated to a reference heat signal; it is not a room sensor.",
+    nodes = nodes.Select(n => n.ReadState())
+}));
 app.MapPost("/api/nodes/{id}/target", (string id, TargetRequest request) =>
 {
     var node = nodes.SingleOrDefault(n => n.Config.Id == id);
@@ -55,6 +42,25 @@ app.MapPost("/api/nodes/{id}/target", (string id, TargetRequest request) =>
     try { return Results.Json(node.SetTarget(request.TemperatureC)); }
     catch (Exception error) { return Results.Problem(error.Message, statusCode: 503); }
 });
+using var observationStop = new CancellationTokenSource();
+app.Lifetime.ApplicationStopping.Register(() => observationStop.Cancel());
+_ = Task.Run(async () =>
+{
+    while (!observationStop.IsCancellationRequested)
+    {
+        try
+        {
+            var cpu = docker.ReadCpuPercents(nodes.Select(n => n.Config.Container).ToArray());
+            foreach (var node in nodes) node.ObserveCpu(cpu[node.Config.Container]);
+        }
+        catch (Exception error)
+        {
+            foreach (var node in nodes) node.SetObservationError(error.Message);
+        }
+        try { await Task.Delay(TimeSpan.FromSeconds(2), observationStop.Token); }
+        catch (OperationCanceledException) { break; }
+    }
+}, observationStop.Token);
 app.Run();
 
 static string FindRoot()

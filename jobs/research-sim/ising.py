@@ -135,7 +135,6 @@ def _calculate(task: dict) -> tuple[dict, int, int]:
 
 
 def write_progress(pass_no: int, done: int, total: int, units_done: int) -> None:
-    # Each parallel node needs a unique temp name before the atomic replacement.
     tmp = WORK / f"progress.{NODE_ID}.{os.getpid()}.tmp"
     tmp.write_text(json.dumps({"work_unit": WORK_UNIT, "units_done": units_done,
                                "pass": pass_no, "tasks_done": done, "tasks_total": total}) + "\n")
@@ -231,6 +230,8 @@ def _run_node(tasks: list[dict], out_root: Path) -> None:
     node_log = out_root / f"{NODE_ID}.csv"
     if not node_log.exists():
         node_log.write_text("pass,task,start_unix_ns,end_unix_ns,node_id\n")
+    done = sum((out / f"{task['id']}.json").exists() for task in tasks)
+    write_node_progress(pass_no, done, len(tasks))
     while True:
         if all((out / f"{task['id']}.json").exists() for task in tasks):
             return
@@ -282,7 +283,7 @@ def _run_node(tasks: list[dict], out_root: Path) -> None:
             except (FileNotFoundError, json.JSONDecodeError):
                 pass
         done = sum((out / f"{t['id']}.json").exists() for t in tasks)
-        write_progress(pass_no, done, len(tasks), done)
+        write_node_progress(pass_no, done, len(tasks))
 
 
 def _claim_is_live(task_id: str, pass_no: int) -> bool:
@@ -291,6 +292,17 @@ def _claim_is_live(task_id: str, pass_no: int) -> bool:
         return owner.get("lease_until", 0) >= time.time()
     except (FileNotFoundError, json.JSONDecodeError):
         return False
+
+
+def write_node_progress(pass_no: int, done: int, total: int) -> None:
+    """Keep multi-node progress isolated; per-node files need no shared mutable counter."""
+    progress_dir = WORK / "progress"
+    progress_dir.mkdir(parents=True, exist_ok=True)
+    target = progress_dir / f"{NODE_ID}.json"
+    tmp = progress_dir / f"{NODE_ID}.{os.getpid()}.tmp"
+    tmp.write_text(json.dumps({"node_id": NODE_ID, "work_unit": WORK_UNIT, "pass": pass_no,
+                               "tasks_done": done, "tasks_total": total}) + "\n")
+    os.replace(tmp, target)
 
 
 def _renew_claim(claim: Path, node_id: str, token: str, stop: threading.Event) -> None:
