@@ -29,6 +29,11 @@ FILL_RATE_BASE = 0.35                     # docs/research/filler-demand.md §6 (
 FILL_RATE_LOW, FILL_RATE_HIGH = 0.20, 0.60
 LLM_INPUT_TOKENS, LLM_OUTPUT_TOKENS = 3310, 319  # docs/jobs/llm-summary.md, measured token mix
 BATCH_API_DISCOUNT = 0.5                  # mistral.ai/pricing, noted in ai-llm-mistral-ministral3-8b
+USD_TO_CHF = 0.8402                       # docs/research/ai-services.md (exchange-rate table)
+# Own laptop measurements (AMD Ryzen 7 250, CPU package, RAPL), docs/jobs/llm-summary.md and transcription.md
+LAPTOP_J_PER_INPUT_TOKEN = 0.45
+LAPTOP_J_PER_OUTPUT_TOKEN = 5.6
+LAPTOP_WH_PER_AUDIO_MIN_LARGE_V3 = 0.477
 MONTHS_PER_YEAR = 12
 SECONDS_PER_HOUR = 3600
 J_PER_KWH = 3.6e6
@@ -185,9 +190,61 @@ def main() -> None:
     for name, d in demand:
         print(f"| {name} | {d:,.0f} | {d / cap[0.01]:.2%} |")
 
+    # --- GPU vs CPU (decision 0019) ----------------------------------------------------------
+    # Energy per work unit: laptop CPU (own measurement, docs/jobs/*.md) vs GPU (CSV rows).
+    energy = [
+        ("LLM input token (J)", LAPTOP_J_PER_INPUT_TOKEN, j_in, "pe-rtx4090-llama7b-pp"),
+        ("LLM output token, batch 1 (J)", LAPTOP_J_PER_OUTPUT_TOKEN, j_out_b1, "pe-rtx4090-llama7b-tg"),
+        ("LLM token, batched, conservative (J)", LAPTOP_J_PER_OUTPUT_TOKEN, j_out_b16, "pe-rtx4090-vllm-iog-qps8"),
+        ("Whisper, Wh per audio minute (large-v3 CPU vs large-v3-turbo L4)", LAPTOP_WH_PER_AUDIO_MIN_LARGE_V3,
+         v("pe-l4-whisper-power") / v("pe-l4-whisper-rtfx") / 60, "pe-l4-whisper-power, -rtfx"),
+    ]
+    gpu_prof, cpu_prof = profiles["gpu-rtx4090 (2 desktops)"], profiles["cpu-dense (R6615, EPYC 9354P)"]
+    cpu_type2_needed = case_be + servers * cpu_prof["fixed_per_year"] / (sold_h * FILL_RATE_BASE)
+    gpu_type2_needed = case_be + servers * gpu_prof["fixed_per_year"] / (sold_h * FILL_RATE_BASE)  # dedicated GPU node
+    gpu_type2_market = [("pinned Type 2 price", TYPE2_PINNED_CHF_PER_SERVER_HOUR)] + [
+        (rid, rtx["UnitsPerServer"] * v(rid) * USD_TO_CHF) for rid in ("cp-mkt-runpod-4090-community", "cp-mkt-vast-4090-median")]
+
+    def type1_share_needed(p1: float, p2: float, fill2: float) -> float:
+        """Share x of heat-led hours sold as Type 1 so that the house breaks even, Type 2 filling a share
+        fill2 of the rest: N*fixed = S*[x(p1-b) + (1-x) fill2 (p2-b)]  ->  x."""
+        m1, m2 = p1 - case_be, fill2 * (p2 - case_be)
+        return (servers * gpu_prof["fixed_per_year"] / sold_h - m2) / (m1 - m2)
+
+    swiss_premium = v("cp-region-azure-ch-premium-median") / 100
+    needed_price = case_be + servers * gpu_prof["fixed_per_year"] / (sold_h * FILL_RATE_BASE)
+    type1_variants = [("batch 1, list price", tok_b1 / TOKENS_PER_MILLION * price_tok),
+                      ("batched (conservative), list price", tok_b16_cons / TOKENS_PER_MILLION * price_tok)]
+
+    print("\n| Energy per work unit | Laptop CPU (measured) | GPU | GPU advantage | GPU source |\n|---|---:|---:|---:|---|")
+    for name, cpu_val, gpu_val, src in energy:
+        print(f"| {name} | {cpu_val:.4g} | {gpu_val:.4g} | {cpu_val / gpu_val:.1f}x | `{src}` |")
+    print(f"\nType 2 alone on dedicated CPU servers, fill {FILL_RATE_BASE}: price needed CHF {cpu_type2_needed:.2f} per server-hour "
+          f"= {cpu_type2_needed / TYPE2_PINNED_CHF_PER_SERVER_HOUR:.1f}x the pinned CHF {TYPE2_PINNED_CHF_PER_SERVER_HOUR}; "
+          f"Swiss spot ceiling CHF {profile('cpu-server')['SpotPriceChfPerServerHour']}. "
+          f"Dedicated RTX 4090 node for Type 2 only: CHF {gpu_type2_needed:.2f} (RTX 4090 market 0.57-0.84).")
+    print("\n| Type 2 price on a GPU node | CHF/server-h | Contribution over case break-even | Per house/yr if all leftover hours sold |\n|---|---:|---:|---:|")
+    for name, p in gpu_type2_market:
+        print(f"| {name} | {p:.2f} | {p - case_be:.2f} | {sold_h * (p - case_be):,.0f} |")
+    avg_t, avg_c = lifetime_average(f_token, life), lifetime_average(f_compute, life)
+    print("\n| Type 1 on RTX 4090 | Prices | Type 1 CHF/server-h | Type 1 share needed, no Type 2 | Type 2 sells 35 % of the rest | Type 2 sells all of the rest |\n|---|---|---:|---:|---:|---:|")
+    for name, p1 in type1_variants:
+        for label, a1, a2 in (("year 1", 1.0, 1.0), ("lifetime average", avg_t, avg_c)):
+            cells = [type1_share_needed(p1 * a1, TYPE2_PINNED_CHF_PER_SERVER_HOUR * a2, f2) for f2 in (0, FILL_RATE_BASE, 1)]
+            print(f"| {name} | {label} | {p1 * a1:.2f} | " + " | ".join(f"{c:.2f}" for c in cells) + " |")
+    print(f"\nSwiss premium: same Azure VM costs {swiss_premium:.1%} more in Switzerland North than Frankfurt (median). "
+          f"Type 1 price needed at fill {FILL_RATE_BASE} without Type 2: CHF {needed_price:.2f} per server-hour.")
+    print("\n| Type 1 variant | Commodity CHF/server-h | Needed, year 1 | Needed over lifetime (falling prices) | With +10 % Swiss premium |\n|---|---:|---:|---:|---:|")
+    for name, p1 in type1_variants:
+        avg = lifetime_average(f_token, life)
+        print(f"| {name} | {p1:.2f} | {needed_price / p1:.2f}x | {needed_price / (p1 * avg):.2f}x | {1 + swiss_premium:.2f}x |")
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(dict(
         reference_house=dict(servers=servers, sold_server_hours=sold_h, case_break_even=case_be),
+        gpu_vs_cpu=dict(cpu_type2_price_needed=cpu_type2_needed, dedicated_gpu_type2_price_needed=gpu_type2_needed,
+                        type2_on_gpu_contribution={n: p - case_be for n, p in gpu_type2_market},
+                        type1_price_needed_fill_base=needed_price, swiss_region_premium=swiss_premium),
         profiles=profiles, options=results, basel_capacity=cap, demand=dict(demand),
         tokens_per_server_hour=dict(batch1=tok_b1, batched_conservative=tok_b16_cons, batched_optimistic=tok_b16),
         yearly_price_factor=dict(compute=f_compute, tokens=f_token), lifetime_years=life,

@@ -1,4 +1,4 @@
-# T-30: Type 2 job: interruptible batch compute (Monte Carlo), measured on a laptop
+# T-30: Type 2 job: interruptible batch compute (Monte Carlo) on a GPU node, measured
 
 - **Tier:** 2 Pitch (a measured extra job type also strengthens must-have 1 for the draft)  ·  **Area:** Jobs
 - **Depends on:** T-03 (generic executor, decision 0009)
@@ -6,15 +6,17 @@
 
 ## Goal
 
-A runnable Type 2 job (decision 0018): a container that processes many short, independent tasks
-(e.g. a Monte Carlo option-pricing or π estimate in Python or C++), paused and resumed by the shared
+A runnable Type 2 job (decisions 0018, 0019): a container that processes many short, independent tasks
+(e.g. a Monte Carlo option-pricing kernel with a GPU path (CUDA/CuPy) and a CPU fallback for the host CPU), paused and resumed by the shared
 scheduler, with measured runtime and energy per task, scaled to the 1 kW server like T-02.
 
 ## Tasks
 
 - [ ] Container with a task queue directory: one task = seconds to minutes of work, idempotent, one result file per task; a dropped task is re-queued.
 - [ ] Job descriptor per `config/jobs/job.schema.json` (interruptible yes, no hard deadline or a long one, `placementPolicy`, sources).
-- [ ] Measure runtime and energy per task with the T-02 method (RAPL / battery) and state the scaling to 1 kW.
+- [ ] Measure runtime and energy per task with the T-02 method (RAPL / battery) on the CPU path; GPU path on a
+      real GPU (`nvidia-smi` power log) when one is available. State the scaling to 1 kW.
+- [ ] Checkpoint at task boundaries for the GPU path (freeze is not a CUDA checkpoint, T-38 review).
 - [ ] Short LiveRun test (January and July day) through `DigitalHeat.LiveRun`.
 
 ## Done when

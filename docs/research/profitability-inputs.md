@@ -35,6 +35,12 @@ Packages: [R1 power](power-efficiency.md) · [R2 purchase cost](purchase-cost.md
    token prices for a fixed task about 29 % a year. Over a 6-year life the average price is only about
    50–55 % of the year-1 price. Every break-even therefore needs either a fixed contract price per
    server-hour or a shorter payback.
+6. **Hence GPU nodes only, with Type 2 as a contribution (decision 0019, §8).** On hardware that Type 1
+   pays for, Type 2 at CHF 0.66 adds CHF 0.43 per hour, up to CHF 9,800 per house and year. It lowers the
+   Type 1 share needed from 42–49 % to 23–43 %. A Swiss location premium of about +10 % (Azure, same VM)
+   covers part of the remaining price gap. **Open risk:** NVIDIA's GeForce driver licence excludes
+   "datacenter deployment" (undefined), so consumer cards are a best case until this is legally cleared
+   (`pc-licence-geforce-no-datacenter`).
 
 ## 2. Parameter table (inputs for T-14)
 
@@ -192,3 +198,47 @@ over the year (one US dataset, R4), so summer is a supply gap, not a demand gap.
 - Twelve key sources were opened and checked. 9 were confirmed verbatim and 3 needed wording fixes (L4
   configuration, the conditional Basel replacement duty, and "recommended" instead of "available" at
   CSCS 2019). The CSV notes say which.
+
+## 8. GPU vs CPU, Type 2 as contribution, Swiss premium (decision 0019)
+
+Printed by the same script. Reasons and sources: [`decisions/0019`](../decisions/0019-gpu-nodes-for-all-job-types.md).
+
+**Type 2 on dedicated CPU servers.** Price needed at fill 0.35 = `b + N · fixed ÷ (S · φ)` = 0.226 +
+27,229 ÷ (22,661 × 0.35) = **CHF 3.66 per server-hour**. That is 5.5× the pinned 0.66, and the Swiss spot
+ceiling is 1.80. Not reachable.
+
+**Type 2 on GPU nodes that Type 1 pays for.** Contribution per sold hour = price − 0.226:
+
+| Type 2 price | CHF/server-h | Contribution | Per house/yr, all leftover hours sold |
+|---|---:|---:|---:|
+| Pinned | 0.66 | 0.43 | 9,833 |
+| RTX 4090, RunPod community: 2 × USD 0.34 × 0.8402 (`cp-mkt-runpod-4090-community`) | 0.57 | 0.35 | 7,823 |
+| RTX 4090, vast.ai median: 2 × USD 0.50 × 0.8402 (`cp-mkt-vast-4090-median`) | 0.84 | 0.61 | 13,916 |
+
+Type 1 share needed for the house to break even: `N · fixed ÷ S = x (p1 − b) + (1 − x) φ2 (p2 − b)`, solved for `x`:
+
+| Type 1 on RTX 4090 | No Type 2 | Type 2 sells 35 % of the rest | Type 2 sells all |
+|---|---:|---:|---:|
+| Batch 1, list price (CHF 1.72) | 0.49 | 0.43 | 0.28 |
+| Batched (conservative), list price (CHF 1.95) | 0.42 | 0.37 | 0.23 |
+
+Worked example (batch 1, Type 2 sells all): 16,531 ÷ 22,661 = 0.7295 = x × 1.494 + (1 − x) × 0.434, so
+x = (0.7295 − 0.434) ÷ (1.494 − 0.434) = **0.28**.
+
+**Swiss premium.** The same Azure VM costs a median **+10.0 %** more in Switzerland North than in Frankfurt
+(range 10–18 % over 10 SKU/price-type pairs, `cp-region-azure-*`). Type 1 needs CHF 2.31 per server-hour
+at fill 0.35, which is 1.19–1.34× the commodity price in year 1 and 2.4–2.7× over the lifetime. So the
+location premium covers about a third to a half of the year-1 gap. The rest has to come from the
+service itself (Swiss German, compliance, secrecy).
+
+Reproduce the Azure comparison (public API, no key; one query per region, a few seconds apart to avoid
+HTTP 429):
+
+```
+GET https://prices.azure.com/api/retail/prices?currencyCode=CHF&$filter=armRegionName eq '<region>'
+    and priceType eq 'Consumption' and serviceName eq 'Virtual Machines'
+    and (armSkuName eq 'Standard_D32as_v5' or ... 'Standard_F32s_v2')
+regions: switzerlandnorth, germanywestcentral, westeurope, northeurope, francecentral
+```
+
+The raw responses are in `data/raw/market/price-snapshots/azure-region-comparison-2026-11-21.json`.

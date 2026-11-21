@@ -4,6 +4,17 @@
     "sold_server_hours": 22661.025390625,
     "case_break_even": 0.22609999999999608
   },
+  "gpu_vs_cpu": {
+    "cpu_type2_price_needed": 3.659127280377678,
+    "dedicated_gpu_type2_price_needed": 2.3103161983550677,
+    "type2_on_gpu_contribution": {
+      "pinned Type 2 price": 0.43390000000000395,
+      "cp-mkt-runpod-4090-community": 0.3452360000000039,
+      "cp-mkt-vast-4090-median": 0.6141000000000039
+    },
+    "type1_price_needed_fill_base": 2.3103161983550677,
+    "swiss_region_premium": 0.1
+  },
   "profiles": {
     "cpu-dense (R6615, EPYC 9354P)": {
       "price": 25671.42857142857,
