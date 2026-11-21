@@ -91,3 +91,6 @@ Renderer work: Nikita/Codex, feat/T-66-landscape-render; depends PR #52. Reuses 
 
 
 Presentation cleanup: user keeps Minecraft and retires other game labs. PR #54 / `5d6499d` removes their executable setup, retains shared mesh/runtime and Minecraft, and shares the frontend stylesheet with the renderer (header held badge removed). Thirteen scoped containers removed without deleting volumes; only Minecraft server + Node A client remain running. 57 gaming + 98 orchestration tests and power math pass; paused native run and two frames preserved. See `docs/jobs/presentation-cleanup.md` and `docs/performance/presentation-cleanup-2026-11-21.json`. T-66 remains in progress until code PR merges.
+
+
+T-66 completed: PR #54 merged at `72e602f`. T-69 follow-up, Nikita/Codex, `fix/T-69-render-node-map`, PR #59: live physical-host/node/frame visualization and measured render-time explanation, no runtime/API or heat-policy changes. Real paused five-frame run visually verified. Shared-host/single-GPU limit and pause time are explicit; see `docs/jobs/render-node-visualization.md`. Other agents should preserve the shared snapshot/heat-first path.
