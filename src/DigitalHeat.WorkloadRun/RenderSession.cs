@@ -242,13 +242,16 @@ internal sealed class RenderSession
                 var done=peers.SelectMany(p=>p.Results).Where(f=>ids.Contains(f.JobId)).OrderBy(f=>f.JobId,StringComparer.Ordinal).ToArray();
                 CheckFailure(ids,done);
                 if(cfg.PreparedSceneMode&&done.Any(f=>f.Metadata.GetProperty("scene_sha256").GetString()!=state.Scene!.SceneSha256||f.Metadata.GetProperty("recipe_id").GetString()!=state.Scene.RecipeId||f.Metadata.GetProperty("engine").GetString()!="BLENDER_EEVEE"||f.Metadata.GetProperty("build_hash").GetString()!=state.Scene.BuildHash))throw new IOException("Frame manifest differs from the prepared scene");
-                Update(s=>s with{Frames=done});
+                if(done.Length!=state.Frames.Length)Update(s=>s with{Frames=done});
                 if(done.Length==cfg.Frames){if(cfg.AssembleVideo){await Assemble();if(stopRequested)return;}Update(s=>s with{Phase="complete",FinishedUtc=DateTimeOffset.UtcNow,Held=false});return;}
                 var known=peers.SelectMany(p=>p.Jobs).Select(j=>j.Request.Id).ToHashSet(StringComparer.Ordinal);
-                for(int frame=1;frame<=cfg.Frames;frame++){
+                // Feed at most one new frame per GPU peer each pass. The old one-frame
+                // per-second pacing starved parallel workers; MeshPeer still owns placement.
+                int remaining=Math.Max(1,peers.Count(p=>p.PhysicalGpuId is not null));
+                for(int frame=1;frame<=cfg.Frames&&remaining>0;frame++){
                     string id=state.Id+"-"+frame.ToString("D3");if(known.Contains(cfg.Id+"."+id))continue;
                     string backend=cfg.PreparedSceneMode?"EEVEE":RenderDeviceAllocation.Backend(frame,cfg.Frames,cfg.GpuFrameShare,peers.SelectMany(p=>p.VerifiedBackends).FirstOrDefault(b=>b!="CPU"));
-                    try{await Submit("/frames",id,frame,backend,state.Scene?.SceneSha256);}catch(Exception e)when(e is HttpRequestException or TaskCanceledException){pollingError="Submission uncertain; reconciling the same frame ID";}break;
+                    try{await Submit("/frames",id,frame,backend,state.Scene?.SceneSha256);remaining--;}catch(Exception e)when(e is HttpRequestException or TaskCanceledException){pollingError="Submission uncertain; reconciling the same frame ID";break;}
                 }
                 await Task.Delay(1000);
             }

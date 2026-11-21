@@ -1,5 +1,6 @@
 # Trusted procedural scene only. Both CPU preparation and GPU frames use this script.
 import bpy, gpu, json, sys, time, os, hashlib, traceback
+from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).parent))
 from scene_builder import build_scene
@@ -22,19 +23,27 @@ def execute(spec,keep_scene=False,publish_completion=True):
         if (out/'activate').read_text()!=spec['activation']: raise RuntimeError('Activation identity mismatch')
     settings=json.loads(Path(spec['settings_file']).read_text())
     mode=spec['mode'];started=time.monotonic()
+    dispatched=spec.get('dispatched_utc')
+    dispatch_delay=max(0,(datetime.now(timezone.utc)-datetime.fromisoformat(dispatched.replace('Z','+00:00'))).total_seconds()) if dispatched else None
     meta={'ffmpeg_available':getattr(bpy.app.build_options,'codec_ffmpeg',False),'stage':mode,'blender':bpy.app.version_string,'build_hash':bpy.app.build_hash.decode(),'recipe_id':spec['recipe_id'],**settings}
     if mode=='info':
-        save(out,'result.json',meta)
+        pass
     elif mode=='prepare':
-        scene=build_scene(settings,spec['recipe_id'])
-        scene.render.engine='BLENDER_EEVEE'
-        if hasattr(scene,'eevee'):scene.eevee.taa_render_samples=settings['samples']
-        bpy.ops.file.pack_all()
-        if bpy.data.libraries or any(i.filepath and not i.packed_file for i in bpy.data.images if i.source=='FILE'):
-            raise RuntimeError('External scene dependencies are not permitted')
-        target=out/'scene.blend';bpy.ops.wm.save_as_mainfile(filepath=str(target),compress=True)
-        meta.update(scene_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),prepare_seconds=time.monotonic()-started,external_assets='none; packed procedural scene')
-        save(out,'result.json',meta)
+        target=out/'scene.blend';cached=spec.get('reusable_scene_path')
+        cached_bytes=Path(cached).read_bytes() if cached and Path(cached).is_file() else None
+        reused=bool(cached_bytes is not None and hashlib.sha256(cached_bytes).hexdigest()==spec.get('reusable_scene_sha256'))
+        if reused:
+            # Owner verified recipe/build and immutable content; recheck before copying.
+            target.write_bytes(cached_bytes)
+        else:
+            scene=build_scene(settings,spec['recipe_id'])
+            scene.render.engine='BLENDER_EEVEE'
+            if hasattr(scene,'eevee'):scene.eevee.taa_render_samples=settings['samples']
+            bpy.ops.file.pack_all()
+            if bpy.data.libraries or any(i.filepath and not i.packed_file for i in bpy.data.images if i.source=='FILE'):
+                raise RuntimeError('External scene dependencies are not permitted')
+            bpy.ops.wm.save_as_mainfile(filepath=str(target),compress=True)
+        meta.update(scene_sha256=hashlib.sha256(target.read_bytes()).hexdigest(),prepare_seconds=time.monotonic()-started,prepared_scene_reused=reused,external_assets='none; packed procedural scene')
     elif mode=='assemble':
         path=Path(spec['manifest_path']);raw=path.read_bytes();manifest=json.loads(raw)
         if hashlib.sha256(raw).hexdigest()!=path.name.split('.')[0]:raise RuntimeError('Assembly manifest hash mismatch')
@@ -59,16 +68,21 @@ def execute(spec,keep_scene=False,publish_completion=True):
         clip=bpy.data.movieclips.load(str(out/'video.mp4'))
         if clip.frame_duration!=len(frames):raise RuntimeError('Encoded video frame count mismatch')
         meta.update(stage='assemble',frames=len(frames),fps=manifest['fps'],encode_seconds=time.monotonic()-begin,manifest_sha256=hashlib.sha256(raw).hexdigest(),scene_sha256=manifest['scene_sha256'],encoded_frames=clip.frame_duration,device='CPU video encoding')
-        save(out,'result.json',meta)
     elif mode in ('frame','probe'):
+        verify_seconds=load_seconds=0.0
         if mode=='frame':
+            verify_started=time.monotonic()
             path=Path(spec['scene_path'])
             if hashlib.sha256(path.read_bytes()).hexdigest()!=spec['scene_sha256']:raise RuntimeError('Scene content mismatch')
+            verify_seconds=time.monotonic()-verify_started
             identity=(spec['scene_sha256'],spec['recipe_id'])
             if not keep_scene or loaded_scene!=identity:
+                load_started=time.monotonic()
                 bpy.ops.wm.open_mainfile(filepath=str(path),load_ui=False,use_scripts=False)
+                load_seconds=time.monotonic()-load_started
                 loaded_scene=identity
             if bpy.context.scene.get('digitalheat_recipe_id')!=spec['recipe_id']:raise RuntimeError('Scene recipe mismatch')
+        setup_started=time.monotonic()
         scene=bpy.context.scene;scene.render.engine='BLENDER_EEVEE'
         if hasattr(scene,'eevee'):scene.eevee.taa_render_samples=settings['samples']
         scene.render.resolution_x=8 if mode=='probe' else settings['width']
@@ -76,14 +90,17 @@ def execute(spec,keep_scene=False,publish_completion=True):
         scene.render.resolution_percentage=100;scene.render.image_settings.file_format='PNG'
         scene.frame_set(spec.get('frame',1));scene.render.filepath=str(out/'frame.png')
         meta['warm_scene_reused']=bool(keep_scene and rendered_scene==loaded_scene)
+        setup_seconds=time.monotonic()-setup_started
         start=time.monotonic();bpy.ops.render.render(write_still=True)
-        meta.update(context());meta.update(backend='EEVEE',engine='BLENDER_EEVEE',frame=spec.get('frame',1),scene_sha256=spec.get('scene_sha256'),render_seconds=time.monotonic()-start)
+        render_seconds=time.monotonic()-start
+        meta.update(context());meta.update(backend='EEVEE',engine='BLENDER_EEVEE',frame=spec.get('frame',1),scene_sha256=spec.get('scene_sha256'),render_seconds=render_seconds,scene_verify_seconds=verify_seconds,scene_load_seconds=load_seconds,frame_setup_seconds=setup_seconds)
         name=(meta['device'] or '').lower()
         if not name or any(s in name for s in ('llvmpipe','softpipe','software','gdi generic','swiftshader','lavapipe')):
             raise RuntimeError('No verified hardware graphics context: '+name)
         rendered_scene=loaded_scene
-        save(out,'result.json',meta)
     else:raise RuntimeError('Unknown trusted job stage')
+    meta.update(worker_seconds=time.monotonic()-started,dispatch_to_execute_seconds=dispatch_delay,completed_utc=datetime.now(timezone.utc).isoformat())
+    save(out,'result.json',meta)
     if publish_completion:save(out,'exit.json',{'code':0,'activation':spec.get('activation'),'recipe_id':spec['recipe_id']})
 
 if __name__=='__main__':
