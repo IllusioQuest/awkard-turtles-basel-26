@@ -73,8 +73,10 @@ def main() -> None:
                         "unitsPerServerHour": ah or "",
                         "ourCaseCostPerUnit": round(case_cost / ah, 5) if ah else "",
                         "ourFullCostPerUnit": round(full_cost / ah, 5) if ah else ""})
-            # Research Monte Carlo: compared per 1 kW server-hour
+            # Research Monte Carlo: compared per 1 kW server-hour, only where the job uses the whole server
             tasks = cfg["researchMonteCarlo"]["tasksPerServerHour"].get(hw_id)
+            if tasks is None:
+                continue
             out.append({**base, "product": "Research Monte Carlo", "unit": "CHF per 1 kW server-hour",
                         "unitsPerServerHour": val(tasks) if tasks else "",
                         "ourCaseCostPerUnit": round(case_cost, 4), "ourFullCostPerUnit": round(full_cost, 4)})

@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Market / presentation
 - **Depends on:** T-02, T-14
-- **Suggested owner:** anyone  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (Claude; approach proposed, waiting for approval)
+- **Suggested owner:** anyone  ·  **Owner:** Jona / Claude  ·  **Status:** done (docs/research/price-comparison.md, scripts/price_comparison.py, paper §6 table)
 
 ## Goal
 
@@ -10,9 +10,9 @@ Show our cost per unit (e.g. per audio hour, per 1,000 pages) next to AWS, Googl
 
 ## Tasks
 
-- [ ] Our cost per unit = (electricity − heat value + hardware share) ÷ units per server-hour (from T-02 throughput).
-- [ ] Market prices from `data/raw/market/ai-services.csv` (normalised CHF).
-- [ ] Chart data + a short note on what is comparable (quality, data location) in `docs/research/price-comparison.md`.
+- [x] Our cost per unit = (electricity − heat value + hardware share) ÷ units per server-hour (from T-02 throughput).
+- [x] Market prices from `data/raw/market/ai-services.csv` (normalised CHF).
+- [x] Chart data + a short note on what is comparable (quality, data location) in `docs/research/price-comparison.md`.
 
 ## Done when
 
