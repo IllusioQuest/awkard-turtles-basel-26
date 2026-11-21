@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.Fleet.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.FleetApi", "DigitalHeat.FleetApi\DigitalHeat.FleetApi.csproj", "{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalHeat.LiveFleetRun", "DigitalHeat.LiveFleetRun\DigitalHeat.LiveFleetRun.csproj", "{5E8651F7-D748-4853-A068-53CD5942240C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,5 +92,9 @@ Global
 		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B055F7A6-FD25-4CDE-B769-18BA6C0C411F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E8651F7-D748-4853-A068-53CD5942240C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E8651F7-D748-4853-A068-53CD5942240C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E8651F7-D748-4853-A068-53CD5942240C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E8651F7-D748-4853-A068-53CD5942240C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

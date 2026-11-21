@@ -69,6 +69,8 @@ later.
 
 | [0060](0060-fleet-job-event-log.md) | Optional fleet job event log for the household view | proposed; reviewed with changes |
 
+| [0061](0061-live-fleet-household-demo.md) | Paced Fleet decisions for a real household demo job | proposed; reviewed with changes |
+
 - [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
 
 - [0058 - Portable native Blender runtime](0058-portable-native-render.md): proposed; user approved native adapter, CPU preparation/GPU frames and frame-boundary pause; multiple nodes only.

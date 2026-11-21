@@ -134,6 +134,7 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           <Link className="link back" to={`/admin/${encodeURIComponent(run.id)}?h=${selectedH}&house=${encodeURIComponent(house.id)}`}>
             ← Network
           </Link>
+          <span> · </span><Link className="link back" to="/live">Live request →</Link>
           <h1>{house.id}</h1>
           <span className="note">{[place, run.id].filter(Boolean).join(' · ')}</span>
         </div>

@@ -1,0 +1,11 @@
+{
+  "image": "digitalheat/research-sim:live-demo",
+  "cpu_cores": { "value": 1, "unit": "CPU cores", "source": "Demo resource limit; not a measured 1 kW server." },
+  "seconds_per_simulated_hour": { "value": 2, "unit": "seconds/hour", "source": "Demo replay speed; simulated time is not physical time." },
+  "simulated_queue_jobs": { "value": 11, "unit": "jobs", "source": "User-requested busy-day example; illustrative arrivals, not measured demand." },
+  "lattice_size": { "value": 16, "unit": "spins/side", "source": "Existing research-sim demo fixture, docs/model/unified-heat-first-mesh.md." },
+  "sweeps": { "value": 1000, "unit": "sweeps/task", "source": "Short interactive task size; scenario value." },
+  "thermalisation_sweeps": { "value": 100, "unit": "sweeps/task", "source": "Short interactive task size; scenario value." },
+  "temperature": { "value": 2.3, "unit": "model temperature", "source": "Near the Ising critical temperature; docs/jobs/research-sim.md." },
+  "seed": { "value": 20251115, "unit": "seed", "source": "Existing research-sim demo seed, docs/model/unified-heat-first-mesh.md." }
+}
