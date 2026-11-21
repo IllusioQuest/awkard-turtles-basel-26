@@ -116,3 +116,6 @@ T-73 verified, PR #65 / d43be26: five real worker processes live at localhost:18
 
 
 T-74 Nikita/Codex, fix/T-74-render-labels, 7a3551a: requested presentation-only removals live at localhost:18950/ui. Worker details panel, physical-host heading, role/work-budget text and link explanation removed; map/stats/controls and all five-worker runtime/heat settings preserved. Served HTML and JS syntax verified; browser preview unavailable.
+
+
+T-75 Nikita/Codex, fix/T-75-compact-render-map: bottom Physical hosts footer removed, actual origin peer labelled Initial job provider in graphic, compact cards for five-worker desktop row (responsive wrapping). Live HTML and JS syntax verified; visual browser access unavailable. No runtime/heat changes.

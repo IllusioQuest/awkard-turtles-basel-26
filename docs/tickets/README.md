@@ -111,3 +111,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-73](T-73-five-worker-render.md) | Restart and five-worker render pipeline | Nikita / Codex | in review; PR #65; five-worker 48-frame pipeline verified |
 
 | [T-74](T-74-render-label-cleanup.md) | Remove requested renderer presentation labels | Nikita / Codex | in review |
+
+| [T-75](T-75-compact-render-map.md) | Compact render cards and identify initial job provider | Nikita / Codex | in review |
