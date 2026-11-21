@@ -9,7 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Nikita / Codex | planned: feat/T-44-minecraft-server | Minecraft CPU server, persistent local world and universal scheduler integration | depends on T-43 / PR #33; no runtime interface changes yet | edition/version, Vanilla/Paper and EULA choices pending; T-44 |
+| Nikita / Codex | feat/T-44-minecraft-server | Minecraft world server plus browser client on Node A | T-43 / PR #33; existing desktop runtime, no new shared interfaces | local implementation checked; gameplay test pending; rejected battery measurement blocks heat placement; push held for user test |
 | Nikita / Codex | feat/T-43-universal-workloads | T-43 resource-aware workload placement and scoped Docker lifecycle | generic atomic admission + legacy gaming adapter; existing Core heat/locality unchanged | 29 orchestration + 36 gaming tests; shared regressions and isolated Docker/backup proof; PR #33 ready; universal-workloads.md |
 | Nikita / Codex | `fix/T-42-monitor-integration` | Review/clarify new gaming console; integrate author monitor under T-42 (T-41 already taken) | Existing Core/placement unchanged; read-only resource probe and console controls | PR #32 ready; 36 gaming/46 Core/20 Network tests and clean build; original author checkout preserved; gaming-monitor-review.md |
 | Jona / Codex | `docs/T-06-final-results` | T-06 reference-house price and cost sensitivity | none | PR #21 open |
@@ -62,3 +62,4 @@ coordination between people, shared interfaces and integration risks. Keep your 
    which one the pitch uses.
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
+
