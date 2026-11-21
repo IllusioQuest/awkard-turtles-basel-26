@@ -1,0 +1,71 @@
+{
+  "machine": {
+    "cpu_model": "AMD Ryzen 7 250 w/ Radeon 780M Graphics",
+    "logical_cpus": 16,
+    "kernel": "7.2.11-200.fc44.x86_64",
+    "os": "Fedora Linux 44 (Workstation Edition)",
+    "scaling_governor": "powersave",
+    "platform_profile": "balanced",
+    "rapl_domain": "package-0",
+    "image": "digitalheat/transcription-whisper",
+    "image_id": "sha256:26d8bf57caad3b065b4744674820347c2c217e7da056aff5d47408b7f63c4451",
+    "image_labels": {
+      "org.digitalheat.whisper-cpp-version": "v1.9.5"
+    },
+    "docker_cpus": 8.0,
+    "env": [
+      "THREADS=8"
+    ],
+    "cmd": [
+      "run"
+    ],
+    "started_local": "2026-11-21T01:10:58+0100"
+  },
+  "idle": {
+    "duration_s": 57.999699115753174,
+    "rapl_j": 171.176282,
+    "rapl_w": 2.951330517394135,
+    "battery_w": 14.669610169491525,
+    "battery_valid": true
+  },
+  "reps": 5,
+  "work_unit": "audio minute",
+  "work_units_per_run": 14.981,
+  "runtime_s_per_unit": {
+    "mean": 4.622548561511247,
+    "stdev": 0.0385294368888199,
+    "min": 4.599225685868767,
+    "max": 4.690407849943261,
+    "n": 5
+  },
+  "rapl_gross_kwh_per_unit": {
+    "mean": 2.9139649055470262e-05,
+    "stdev": 5.033659011833069e-07,
+    "min": 2.8827424070489286e-05,
+    "max": 3.00153827069844e-05,
+    "n": 5
+  },
+  "rapl_net_kwh_per_unit": {
+    "mean": 2.535002299711711e-05,
+    "stdev": 4.719486815311107e-07,
+    "min": 2.5056200909234418e-05,
+    "max": 2.6170124850520688e-05,
+    "n": 5
+  },
+  "battery_gross_kwh_per_unit": {
+    "mean": 3.818619382849072e-05,
+    "stdev": 3.5113783581251025e-06,
+    "min": 3.403821117654753e-05,
+    "max": 4.209805600757371e-05,
+    "n": 5
+  },
+  "battery_net_kwh_per_unit": {
+    "mean": 1.9349829471281246e-05,
+    "stdev": 3.6272289074814016e-06,
+    "min": 1.4925328555287311e-05,
+    "max": 2.3325187695786916e-05,
+    "n": 5
+  },
+  "mean_rapl_w": 23.043316858210932,
+  "mean_battery_w": 29.75388874740343
+}
