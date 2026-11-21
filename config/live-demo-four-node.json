@@ -1,0 +1,14 @@
+{
+  "minimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "Demo setting: permit pause down to zero for visible control; matches the year explorer comparison scenario in config/reference-house.json." },
+  "allowedCpuCoresPerContainer": { "value": 1, "unit": "CPU cores/container", "source": "Demo setting: one Docker CPU per visual node, limited by compose.live-demo.yml; not a 1 kW power measurement." },
+  "referenceServerElectricKw": { "value": 1, "unit": "kW/server", "source": "config/reference-house.json:ServerElectricKw, reference case only." },
+  "heatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "config/reference-house.json:HeatRecoveryShare, reference case only." },
+  "targetTemperatureMinC": { "value": 15, "unit": "°C", "source": "Demo mapping choice: lower endpoint of the illustrative slider; not a measured room temperature." },
+  "targetTemperatureMaxC": { "value": 25, "unit": "°C", "source": "Demo mapping choice: upper endpoint corresponding to a full reference-server heat request; not a measured room temperature." },
+  "nodes": [
+    { "id": "node-1", "container": "digitalheat-node-1", "position": 1 },
+    { "id": "node-2", "container": "digitalheat-node-2", "position": 2 },
+    { "id": "node-3", "container": "digitalheat-node-3", "position": 3 },
+    { "id": "node-4", "container": "digitalheat-node-4", "position": 4 }
+  ]
+}

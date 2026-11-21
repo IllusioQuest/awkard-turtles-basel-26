@@ -43,3 +43,4 @@ later.
 
 | [0034](0034-minecraft-measured-workload.md) | Official Vanilla Minecraft and measured-power startup gate | proposed; T-44; review pending |
 | [0035](0035-federated-job-ownership.md) | Federated job ownership and node-local heat control | proposed; reviewed with changes; T-45 |
+| [0040](0040-local-four-node-demo.md) | Local four-node demo queue and shared C# live control | proposed; T-51; reviewed with changes |

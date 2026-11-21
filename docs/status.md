@@ -9,6 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
+| Jona / Codex | `feat/T-51-four-node-live-demo` | One-laptop four-container live scheduler view with real parallel work | existing Core scheduler and Docker executor; local Ising queue; LiveGrid API/UI | in progress; one laptop, four containers; cross-laptop networking remains later |
 | Nikita / Codex | feat/T-46-monitor-value-labels | Clarify console labels, units and model/observation boundary | renderer only; no shared interfaces | in progress; checked T-45 protocol, T-14 economics and T-18 dashboard overlap |
 | Nikita / Codex | feat/T-44-minecraft-server | Minecraft world server plus browser client on Node A | T-43 / PR #33; existing desktop runtime, no new shared interfaces | code integrated into main by user request; gameplay unverified; rejected battery measurement blocks heat placement |
 | Nikita / Codex | `fix/T-42-monitor-integration` | Review/clarify new gaming console; integrate author monitor under T-42 (T-41 already taken) | Existing Core/placement unchanged; read-only resource probe and console controls | PR #32 ready; 36 gaming/46 Core/20 Network tests and clean build; original author checkout preserved; gaming-monitor-review.md |

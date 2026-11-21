@@ -81,3 +81,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-44](T-44-minecraft-server.md) | Minecraft persistent server workload integration | Nikita / Codex | code integrated; gameplay test pending; measured heat gate blocked |
 | [T-45](T-45-federated-scheduling.md) | Federated scheduling and safe job ownership | Jona / Codex | in progress (design, offer/claim model and paper; live runtime not implemented) |
 | [T-46](T-46-monitor-value-labels.md) | Explain console monitoring values | Nikita / Codex | in progress |
+| [T-51](T-51-four-node-live-demo.md) | Four-node live heat and work demo | Jona / Codex | in progress (one-laptop pilot; four container nodes + animated live scheduler view) |

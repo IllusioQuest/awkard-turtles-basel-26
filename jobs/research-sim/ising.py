@@ -26,10 +26,11 @@ import json
 import math
 import os
 import sys
+import threading
 import time
 from multiprocessing import Pool
 from pathlib import Path
-
+import uuid
 import random
 
 WORK = Path(os.environ.get("WORK", "/work"))
@@ -45,6 +46,8 @@ T_MAX = float(os.environ.get("T_MAX", "3.5"))
 N_TEMPERATURES = int(os.environ.get("N_TEMPERATURES", "16"))
 N_SEEDS = int(os.environ.get("N_SEEDS", "2"))
 BASE_SEED = int(os.environ.get("BASE_SEED", "20251115"))
+NODE_ID = os.environ.get("NODE_ID", "local")
+CLAIM_LEASE_SECONDS = float(os.environ.get("CLAIM_LEASE_SECONDS", "60"))
 
 WORK_UNIT = "simulation task"
 ONSAGER_TC = 2.0 / math.log(1.0 + math.sqrt(2.0))
@@ -123,8 +126,17 @@ def _work(args: tuple[dict, str]) -> tuple[str, int, int]:
     return task["id"], start, end
 
 
+def _calculate(task: dict) -> tuple[dict, int, int]:
+    start = time.time_ns()
+    result = simulate(task)
+    end = time.time_ns()
+    result["runtime_s"] = (end - start) / 1e9
+    return result, start, end
+
+
 def write_progress(pass_no: int, done: int, total: int, units_done: int) -> None:
-    tmp = WORK / "progress.json.tmp"
+    # Each parallel node needs a unique temp name before the atomic replacement.
+    tmp = WORK / f"progress.{NODE_ID}.{os.getpid()}.tmp"
     tmp.write_text(json.dumps({"work_unit": WORK_UNIT, "units_done": units_done,
                                "pass": pass_no, "tasks_done": done, "tasks_total": total}) + "\n")
     os.replace(tmp, WORK / "progress.json")
@@ -136,9 +148,13 @@ def run() -> None:
         sys.exit(f"no tasks in {WORK / 'in'}; run prepare first")
     out_root = WORK / "out"
     out_root.mkdir(parents=True, exist_ok=True)
+    if NODE_ID != "local":
+        _run_node(tasks, out_root)
+        return
     log = out_root / "log.csv"
     if not log.exists():
         log.write_text("pass,task,start_unix_ns,end_unix_ns\n")
+    # Keep the original single-container runner semantics unchanged.
     units_done = 0
     pass_no = 0
     with Pool(WORKERS) as pool:
@@ -146,7 +162,7 @@ def run() -> None:
             out = out_root / f"pass_{pass_no:03d}"
             out.mkdir(exist_ok=True)
             for stale in out.glob("*.part"):
-                stale.unlink()  # unfinished task from an earlier kill: redo it
+                stale.unlink()
             pending = [t for t in tasks if not (out / f"{t['id']}.json").exists()]
             done = len(tasks) - len(pending)
             units_done += done
@@ -158,6 +174,139 @@ def run() -> None:
                 units_done += 1
                 write_progress(pass_no, done, len(tasks), units_done)
             pass_no += 1
+
+
+def _claim_path(pass_no: int, task_id: str) -> Path:
+    return WORK / "claims" / f"pass_{pass_no:03d}" / task_id
+
+
+def _claim_task(task_id: str, pass_no: int) -> str | None:
+    """Lease a task using atomic directory creation on the shared volume.
+
+    Expired leases can be stolen. Result publication is separately atomic and exclusive, so a
+    delayed former owner cannot overwrite a result already committed by a successor.
+    """
+    claim = _claim_path(pass_no, task_id)
+    claim.parent.mkdir(parents=True, exist_ok=True)
+    token = uuid.uuid4().hex
+    for _ in range(3):
+        try:
+            claim.mkdir()
+            (claim / "owner.json").write_text(json.dumps({
+                "node_id": NODE_ID, "token": token, "lease_until": time.time() + CLAIM_LEASE_SECONDS
+            }))
+            return token
+        except FileExistsError:
+            try:
+                owner = json.loads((claim / "owner.json").read_text())
+            except (FileNotFoundError, json.JSONDecodeError):
+                try:
+                    if time.time() - claim.stat().st_mtime > CLAIM_LEASE_SECONDS:
+                        expired = claim.with_name(f"{claim.name}.expired-{uuid.uuid4().hex}")
+                        claim.rename(expired)
+                        import shutil
+                        shutil.rmtree(expired, ignore_errors=True)
+                except (FileNotFoundError, OSError):
+                    pass
+                continue
+            if owner.get("lease_until", float("inf")) >= time.time():
+                return None
+            expired = claim.with_name(f"{claim.name}.expired-{uuid.uuid4().hex}")
+            try:
+                claim.rename(expired)
+            except (FileNotFoundError, FileExistsError, OSError):
+                continue
+            import shutil
+            shutil.rmtree(expired, ignore_errors=True)
+    return None
+
+
+def _run_node(tasks: list[dict], out_root: Path) -> None:
+    """One container node repeatedly claims one task so idle peers can take the next one."""
+    if not math.isfinite(CLAIM_LEASE_SECONDS) or CLAIM_LEASE_SECONDS <= 0:
+        sys.exit("CLAIM_LEASE_SECONDS must be positive")
+    pass_no = 0
+    out = out_root / f"pass_{pass_no:03d}"
+    out.mkdir(exist_ok=True)
+    node_log = out_root / f"{NODE_ID}.csv"
+    if not node_log.exists():
+        node_log.write_text("pass,task,start_unix_ns,end_unix_ns,node_id\n")
+    while True:
+        if all((out / f"{task['id']}.json").exists() for task in tasks):
+            return
+        task = next((t for t in tasks if not (out / f"{t['id']}.json").exists()
+                     and not _claim_is_live(t["id"], pass_no)
+                     and _claim_task(t["id"], pass_no) is not None), None)
+        if task is None:
+            time.sleep(0.2)
+            continue
+        claim = _claim_path(pass_no, task["id"])
+        token = ""
+        heartbeat_stop = threading.Event()
+        heartbeat = None
+        try:
+            owner_at_start = json.loads((claim / "owner.json").read_text())
+            token = owner_at_start["token"]
+            if owner_at_start.get("node_id") != NODE_ID:
+                continue
+            heartbeat = threading.Thread(target=_renew_claim,
+                args=(claim, NODE_ID, token, heartbeat_stop), daemon=True)
+            heartbeat.start()
+            result, start, end = _calculate(task)
+            owner = json.loads((claim / "owner.json").read_text())
+            if owner.get("token") != token:
+                continue
+            target = out / f"{task['id']}.json"
+            tmp = target.with_name(f"{target.name}.{token}.part")
+            tmp.write_text(json.dumps(result))
+            committed = False
+            try:
+                os.link(tmp, target)
+                committed = True
+            except FileExistsError:
+                pass
+            finally:
+                tmp.unlink(missing_ok=True)
+            if committed:
+                with node_log.open("a") as f:
+                    f.write(f"{pass_no},{task['id']},{start},{end},{NODE_ID}\n")
+        finally:
+            heartbeat_stop.set()
+            if heartbeat is not None:
+                heartbeat.join(timeout=1)
+            try:
+                owner = json.loads((claim / "owner.json").read_text())
+                if owner.get("token") == token:
+                    import shutil
+                    shutil.rmtree(claim)
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
+        done = sum((out / f"{t['id']}.json").exists() for t in tasks)
+        write_progress(pass_no, done, len(tasks), done)
+
+
+def _claim_is_live(task_id: str, pass_no: int) -> bool:
+    try:
+        owner = json.loads((_claim_path(pass_no, task_id) / "owner.json").read_text())
+        return owner.get("lease_until", 0) >= time.time()
+    except (FileNotFoundError, json.JSONDecodeError):
+        return False
+
+
+def _renew_claim(claim: Path, node_id: str, token: str, stop: threading.Event) -> None:
+    """Extend active work leases; a Docker pause freezes this heartbeat with the worker."""
+    interval = max(1.0, CLAIM_LEASE_SECONDS / 3)
+    while not stop.wait(interval):
+        try:
+            owner = json.loads((claim / "owner.json").read_text())
+            if owner.get("token") != token or owner.get("node_id") != node_id:
+                return
+            owner["lease_until"] = time.time() + CLAIM_LEASE_SECONDS
+            tmp = claim / f"owner.{token}.tmp"
+            tmp.write_text(json.dumps(owner))
+            os.replace(tmp, claim / "owner.json")
+        except (FileNotFoundError, OSError, json.JSONDecodeError):
+            return
 
 
 if __name__ == "__main__":

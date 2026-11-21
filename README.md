@@ -56,6 +56,50 @@ personal data, no model download); details in [`docs/jobs/research-sim.md`](docs
 
    Clean up afterwards with `docker rm -f research-sim`.
 
+## Four-node live demo (T-51 pilot)
+
+This runs four real Docker containers as independent node workers on one laptop. The containers
+claim distinct, seeded Ising tasks from a shared local folder. The browser view controls each one
+through `GreedyHeatScheduler` → `SchedulerController.Apply` → `DockerJobExecutor`, the same C# path
+used by the other live runner. CPU load and completed tasks are observed live. This is a local
+single-laptop pilot; it does not yet connect two computers. The slider is labelled as an illustrative
+temperature-to-heat input; it is not a room sensor, and laptop power or delivered heat is not measured.
+
+Run these commands in **PowerShell** from the repository root. Docker Desktop must be running with
+Linux containers and the .NET 8 SDK installed. Run once to build the image; later starts can skip
+that command. The image uses Python's standard library and no model downloads.
+
+```powershell
+docker build --pull=false -t digitalheat/research-sim:live-demo jobs/research-sim
+$work = Join-Path $PWD 'data/external/research-sim/live-demo-work'
+New-Item -ItemType Directory -Force $work | Out-Null
+docker run --rm --mount "type=bind,source=$work,target=/work" digitalheat/research-sim:live-demo prepare
+docker compose -f compose.live-demo.yml up -d
+dotnet run --project src/DigitalHeat.LiveGrid
+```
+
+Open [http://127.0.0.1:5087](http://127.0.0.1:5087), press **F11**, and move one node's vertical
+slider. The middle value (20 °C) starts each node at half of the reference heat request; move it to
+15 °C to pause that container, or raise it to let its scheduler run faster. Other containers keep
+claiming the next independent tasks. Spark movement follows newly recorded task completions; a task
+already in flight stays with its node unless its claim lease expires. Press **Ctrl+C** in the console,
+then stop the four containers:
+
+```powershell
+docker compose -f compose.live-demo.yml down
+```
+
+To verify shared-queue correctness without Docker (four parallel local worker processes, temporary
+data only):
+
+```powershell
+python jobs/research-sim/test_fleet.py
+```
+
+It checks that every seeded work unit has exactly one accepted result and that the per-node logs
+contain unique completed task IDs. The full real-container pause/CPU test is the browser procedure
+above. The technical decision and limits are in [decision 0040](docs/decisions/0040-local-four-node-demo.md).
+
 Other measured jobs (transcription, LLM summary) use the same LiveRun command with their own
 descriptor in [`config/jobs/`](config/jobs/) and container; see [`docs/jobs/`](docs/jobs/).
 The full LiveRun options (placement rules, observed load) are under

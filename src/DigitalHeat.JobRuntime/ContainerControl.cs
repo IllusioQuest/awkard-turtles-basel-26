@@ -12,8 +12,14 @@ public interface IContainerControl
     double ReadCpuPercent(string containerId);
 }
 
+/// <summary>Optional batched observation so dashboards do not start one Docker CLI process per node.</summary>
+public interface IBatchedContainerControl
+{
+    IReadOnlyDictionary<string, double> ReadCpuPercents(IReadOnlyList<string> containerIds);
+}
+
 /// <summary>All Docker CLI calls are confined to this class. Arguments never pass through a shell.</summary>
-public sealed class DockerCliContainerControl : IContainerControl
+public sealed class DockerCliContainerControl : IContainerControl, IBatchedContainerControl
 {
     private const int CommandTimeoutMilliseconds = 10_000; // Demo policy: ADR 0009.
     private readonly string dockerPath;
@@ -28,7 +34,28 @@ public sealed class DockerCliContainerControl : IContainerControl
     public double ReadCpuPercent(string containerId)
     {
         var output = Run("stats", "--no-stream", "--format", "{{.CPUPerc}}", containerId).Trim();
-        if (!double.TryParse(output.TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture,
+        return ParseCpuPercent(output);
+    }
+
+    public IReadOnlyDictionary<string, double> ReadCpuPercents(IReadOnlyList<string> containerIds)
+    {
+        if (containerIds.Count == 0) return new Dictionary<string, double>();
+        string[] arguments = ["stats", "--no-stream", "--format", "{{.Name}}={{.CPUPerc}}", .. containerIds];
+        var result = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (string line in Run(arguments).Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            int separator = line.IndexOf('=');
+            if (separator <= 0 || !result.TryAdd(line[..separator], ParseCpuPercent(line[(separator + 1)..])))
+                throw new InvalidDataException($"Invalid Docker stats row: {line}");
+        }
+        foreach (string id in containerIds)
+            if (!result.ContainsKey(id)) throw new InvalidDataException($"Docker stats omitted container {id}.");
+        return result;
+    }
+
+    private static double ParseCpuPercent(string output)
+    {
+        if (!double.TryParse(output.Trim().TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture,
                 out double percent) || !double.IsFinite(percent) || percent < 0)
             throw new InvalidDataException($"Invalid Docker CPU percentage: {output}");
         return percent;
