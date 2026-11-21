@@ -22,6 +22,7 @@ Write down the 'highly complex optimisation problem' from the whiteboard precise
 
 ## Read first
 
+- `docs/model/routing-complexity.md` (complexity, LP formulation, effort estimate)
 - whiteboard photo (2026-11-21)
 - `docs/vision.md (building block 4)`
 
