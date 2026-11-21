@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Results / docs
 - **Depends on:** T-05
-- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** in progress (scenario and job inputs pending)
+- **Suggested owner:** anyone  ·  **Owner:** Jona / Codex  ·  **Status:** draft PR #8 (scenario and job inputs pending)
 
 ## Goal
 
