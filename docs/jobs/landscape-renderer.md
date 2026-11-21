@@ -126,3 +126,26 @@ for 48 frames. Do not scale them into a promised completion time. Hardware is th
 Intel i5-1240P laptop; GPU probe returned no Cycles devices. GPU execution and GPU pause are
 unverified here. Evidence: ../performance/landscape-render-verification-2026-11-21.json.
 Code PR #54. The app is left idle, with a labelled real calibration preview, ready for Run comparison.
+
+## Follow-up: responsiveness and mixed devices
+
+The user reported a real 15-second timeout after the initial smoke check. Browser polls had
+waited synchronously for all peers; status handlers also competed with synchronous Docker
+control under the peer lock. Failure responses changed shape, breaking JavaScript refresh.
+The fix publishes immutable peer snapshots, refreshes peer data off the browser request path,
+keeps JSON schema stable on failure, coalesces browser polling and bounds mailbox work. Slow
+peer reads wait without abandoning ownership. Frame-submission acknowledgements are queued;
+a lost acknowledgement reconciles the same durable ID. Eight minimum .NET control workers
+avoid synchronous Docker calls starving ASP.NET continuations under a one-core quota. This is
+a lab runtime setting, not more render CPU or a numerical model parameter.
+
+User approved 80% GPU / 20% CPU frame jobs (ADR 0053). `-GpuFrameShare 0.8` is configurable.
+At 48 frames this rounds to 38 GPU frames and 10 CPU frames, evenly spread. Each frame is still
+independently heat-scheduled among eligible nodes. CPU jobs request no GPU; GPU jobs require a
+verified backend. The single-node leg pins both types to one GPU-capable node; multiple-node
+execution can place frames on different eligible workers. Without a verified GPU, all 48 are
+explicitly CPU fallback. This is frame-count allocation, not guaranteed GPU/CPU utilization.
+GPU utilization can also include CPU scene preparation and other workloads. Both legs preserve
+the same allocation plan across recovery; image/frame-count changes are rejected. A queued
+frame can expire before it obtains an executor and is still reported, rather than waiting forever.
+Node cards show current frame number, actual backend and completed frame counts in the run.
