@@ -125,3 +125,6 @@ model as main case), T-21 storyboard money scene. Ennio: 0018/0019 status lines 
 T-39 milestone: two healthy Selkies nodes, Intel OpenGL accelerated, CPU H.264 capture/encode proven; Vulkan CPU-only and VAAPI failed. Browser smoke and zero-heat admission choice pending. See gaming-lab.md. No session coordinator or CS2 gameplay claim.
 
 T-39 update: browser desktop/input now confirmed by user screenshot/test. Summer session placement should use hotel/spa heat sites regardless of player location, preserving active matches. Live wallpaper stretch applied; GPU Vulkan/CS2 and coordinator still pending. No available useful-heat site fallback needs user choice.
+## Paper skeleton (2026-11-21, Jona / Claude)
+T-22: `docs/paper/outline.md` with title, draft abstract, candidate contributions, sections, figure list
+(which run produces each figure) and team questions. Docs only.
