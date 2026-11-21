@@ -117,7 +117,7 @@ dashboard. Only a component import/render was added to `AdminPage`; their model/
 and household files were preserved. Shared status/branches are evidence of reported work, not a
 claim about agents actively running. No external messages sent.
 
-Checks: clean API build; 42 gaming/monitor tests including input JSON round-trip, strict rejection,
+Checks: clean API build; 42 gaming/monitor tests and 41 Network integration tests, including input JSON round-trip, strict rejection,
 snapshot agreement with engine views and unknown Docker errors; frontend type/build/lint; HTTP
 smoke (replay, read-only actual Docker, Host/Origin 403, invalid/unknown inputs 400, content type
 400); browser check of controls, July values, resource observations and expanded explanations.
@@ -132,6 +132,6 @@ npm run build
 npm run lint
 ```
 
-User-facing browser preview is local; code is prepared for review in its feature PR. Documentation
+User-facing browser preview is local; code is in [PR #35](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/35), not yet merged. Documentation
 is committed directly to main per the standing team workflow. Historical T-42 console commands in
 older docs describe that retired version; use this guide for the replacement.
