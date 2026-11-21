@@ -1,0 +1,16 @@
+# T-59 — Swiss building/ownership data and simulation node mix
+
+- Owner: Nikita / Codex; coordinate generator integration with Ennio / Claude (T-58).
+- Status: in progress
+- Branch: data/T-59-building-owner-mix, from latest main.
+
+Analyze the user-provided BFS 2020 ownership release and linked detailed tables. Preserve
+population/year/coverage and distinguish ownership, building category, households and physical
+compute servers. Publish reproducible counts/weights with provenance and a generator handoff.
+Check existing T-58 HouseGenerator before modifying shared assumptions: it currently samples
+only single-family houses using per-cell single-family counts. Do not call this a representative
+all-building mix. No replacement heat formula, reference-house change or guessed hotel/spa share.
+
+Done: checked source tables and coverage, documented calculation path and appropriate sampling
+proposal, communicated with co-builders, and implementation/handoff status accurately recorded.
+Important generator/data-model choices require team/user agreement before code integration.
