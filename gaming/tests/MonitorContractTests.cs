@@ -78,7 +78,7 @@ public class MonitorContractTests
         public string Run(IReadOnlyList<string> args)
         {
             if (args.Contains("inspect")) return "true false";
-            if (args.Contains("exec")) throw new InvalidOperationException("Synthetic process probe failure");
+            if (args.Contains("top")) throw new InvalidOperationException("Synthetic process probe failure");
             if (args.Contains("stats")) return "";
             return "aaaaaaaaaaaa";
         }

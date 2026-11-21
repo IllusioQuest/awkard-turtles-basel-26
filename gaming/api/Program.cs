@@ -22,6 +22,8 @@ var app = builder.Build();
 using var http = new HttpClient();
 http.DefaultRequestHeaders.UserAgent.ParseAdd("DigitalHeat-monitor/1.0");
 using var gate = new SemaphoreSlim(1, 1);
+using var dockerSource = new DockerEngineObservationSource(setup, policy.DockerObservation,
+    TimeSpan.FromSeconds(policy.DockerCommandTimeoutSeconds), token => new ReadOnlyDockerCommands(policy, token));
 IReadOnlyDictionary<string, DockerNodeState> observations = new Dictionary<string, DockerNodeState>();
 DateTimeOffset? observedAt = null;
 app.Use(async (context, next) =>
@@ -77,7 +79,7 @@ app.MapPost("/api/monitor/snapshot", async (HttpContext context) =>
         else hour = setup.ReplayHour(setup.IndexOf(inputs.SelectedHourLocal!));
         if (inputs.ObserveDocker && (observedAt is null || DateTimeOffset.UtcNow - observedAt.Value >= TimeSpan.FromSeconds(policy.ObservationCacheSeconds)))
         {
-            observations = await Task.Run(() => new DockerProbe(setup, new ReadOnlyDockerCommands(policy, deadline.Token)).Probe(), deadline.Token);
+            observations = await dockerSource.ProbeAsync(deadline.Token);
             deadline.Token.ThrowIfCancellationRequested();
             observedAt = DateTimeOffset.UtcNow;
         }
@@ -94,12 +96,13 @@ app.MapPost("/api/monitor/snapshot", async (HttpContext context) =>
 app.Run();
 
 public sealed record ServicePolicy(int Port, int FrontendPort, int ObservationCacheSeconds,
-    int SnapshotTimeoutSeconds, int DockerCommandTimeoutSeconds, long MaxRequestBytes, string Source)
+    int SnapshotTimeoutSeconds, int DockerCommandTimeoutSeconds, long MaxRequestBytes, string Source, DockerObservationOptions DockerObservation)
 {
     public void Validate()
     {
         if (Port is < 1024 or > 65535 || FrontendPort is < 1024 or > 65535 || ObservationCacheSeconds <= 0 ||
-            SnapshotTimeoutSeconds <= 0 || DockerCommandTimeoutSeconds <= 0 || MaxRequestBytes <= 0 || string.IsNullOrWhiteSpace(Source))
+            SnapshotTimeoutSeconds <= 0 || DockerCommandTimeoutSeconds <= 0 || MaxRequestBytes <= 0 || string.IsNullOrWhiteSpace(Source) || DockerObservation is null)
             throw new InvalidDataException("Invalid local API policy");
+        DockerObservation.Validate();
     }
 }

@@ -30,6 +30,9 @@ export interface MonitorNode {
   planned_sessions: Metric
   session_slots: Metric
   planned_heat_kwh_per_hour: Metric
+  resources_observed_at_utc?: string | null
+  cpu_sample_interval_seconds?: number | null
+  observation_source?: string
 }
 export interface MonitorSite {
   site_id: string
