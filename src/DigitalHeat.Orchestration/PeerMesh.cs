@@ -129,6 +129,9 @@ public sealed class MeshPeer : IDisposable
             changed = true;
         }
         if (changed) Publish();
+        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
+            coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
+                Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
         foreach (var job in journal.Jobs.OrderBy(j => j.Request.Kind == "interactive" ? 0 : 1)
             .ThenBy(j => j.Request.Deadline?.DueAtUtc ?? DateTimeOffset.MaxValue).ThenBy(j => j.Request.Id, StringComparer.Ordinal).ToArray())
         {
@@ -211,13 +214,14 @@ public sealed class MeshPeer : IDisposable
         if (old is not null)
         {
             if (old.Identity != proposal.Identity) throw new InvalidDataException("Conflicting proposal replay.");
-            Reply(origin, old); return;
+            if (old.Status == "rejected") { Reply(origin, old); return; }
         }
         string status;
         try
         {
             coordinator.Reconcile(runtimeNodes);
             coordinator.EnforceDeadlines();
+            if (old is not null) { Reply(origin, old); return; }
             var prior = coordinator.Attempts().SingleOrDefault(a => a.Attempt.Request.Id == proposal.Request.Id);
             if (prior is not null)
             {

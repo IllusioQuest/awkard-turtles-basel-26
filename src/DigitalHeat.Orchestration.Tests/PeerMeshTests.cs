@@ -159,6 +159,18 @@ public class PeerMeshTests : IDisposable
         Assert.Equal(1, runtimes["b"].Starts);
     }
 
+    [Fact] public void TargetRecoversCreatedAttemptWithoutDuplicateCreate()
+    {
+        var a = Add("a", 1); var b = Add("b", 8); Publish();
+        runtimes["b"].FailCreateAfterDispatch = true;
+        a.Submit(Request("a"), CoordinatorTests.Profile.Id); a.Tick();
+        Assert.Equal("proposed", a.Jobs().Single().Status);
+        runtimes["b"].FailCreateAfterDispatch = false;
+        b.Tick(); a.Tick();
+        Assert.Equal("accepted", a.Jobs().Single().Status);
+        Assert.Equal(1, runtimes["b"].Creates); Assert.Equal(1, runtimes["b"].Starts);
+    }
+
     public void Dispose()
     {
         foreach (var peer in peers) peer.Dispose();
