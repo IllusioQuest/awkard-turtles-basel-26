@@ -72,7 +72,8 @@ public sealed class LiveSources(MonitorSetup setup, HttpClient http)
                 heatValue = p.Chf / setup.Reference.HeatPumpEfficiency.Value; // case: price ÷ heat-pump efficiency
                 priceSource = p.Label + " (annual tariff, not spot price; H4 proxy for non-household sites)";
             }
-            sites[siteId] = new SiteHour(demand, demandSource, liveTemperature, price, heatValue, priceSource);
+            sites[siteId] = new SiteHour(demand, demandSource, liveTemperature, price, heatValue, priceSource,
+                liveTemperature is null ? "Current forecast unavailable; no temperature substituted" : "Current Open-Meteo hourly forecast; not a local sensor");
         }
         return new LiveHourResult(new HourInputs("live", label, startUtc, sites), warnings);
     }
@@ -137,18 +138,26 @@ public sealed class LiveSources(MonitorSetup setup, HttpClient http)
 
 /// <summary>Docker state of one node, probed with exact compose labels (as DockerDesktopRuntime does).</summary>
 public sealed record DockerNodeState(bool ContainerRunning, bool? ApplicationRunning, string Detail,
-    string? CpuPercent = null, string? MemoryUsage = null);
+    string? CpuPercent = null, string? MemoryUsage = null)
+{
+    public DateTimeOffset? ObservedAtUtc { get; init; }
+    public DateTimeOffset? ResourcesObservedAtUtc { get; init; }
+    public double? CpuSampleIntervalSeconds { get; init; }
+    public string ObservationSource { get; init; } = "docker_cli";
+}
 
 /// <summary>Read-only Docker probe: <c>docker ps</c> and <c>pgrep</c>. Never starts, stops or pauses anything.</summary>
 public sealed class DockerProbe(MonitorSetup setup, IDockerCommandRunner docker)
 {
-    public IReadOnlyDictionary<string, DockerNodeState> Probe()
+    public IReadOnlyDictionary<string, DockerNodeState> Probe(IReadOnlyCollection<string>? nodeIds = null, CancellationToken cancel = default)
     {
         var app = setup.Profiles.Applications.Single(a => a.Id == setup.Config.ApplicationId);
         var result = new Dictionary<string, DockerNodeState>(StringComparer.Ordinal);
         var containers = new Dictionary<string, (string Context, string Container)>();
         foreach (var node in setup.Config.Nodes)
         {
+            if (nodeIds is not null && !nodeIds.Contains(node.NodeId)) continue;
+            cancel.ThrowIfCancellationRequested();
             var profile = setup.Profiles.Nodes.Single(p => p.Id == node.NodeId);
             try
             {
@@ -162,20 +171,24 @@ public sealed class DockerProbe(MonitorSetup setup, IDockerCommandRunner docker)
                 var state = docker.Run(["--context", profile.DockerContext, "inspect", "--format", "{{.State.Running}} {{.State.Paused}}", ids[0]]).Trim();
                 if (state != "true false") { result[node.NodeId] = new(false, null, "not available (stopped or paused)"); continue; }
                 bool? appRunning = null;
+                string processDetail = "";
                 if (!setup.IncompatibleNodes.ContainsKey(node.NodeId))
                 {
-                    // pgrep exits 1 when nothing matches; the runner turns that into an exception.
-                    try { appRunning = docker.Run(["--context", profile.DockerContext, "exec", ids[0], "pgrep", "-f", app.Executable]).Trim().Length > 0; }
-                    catch (InvalidOperationException) { appRunning = false; }
+                    // Read-only process listing; literal command-line match, never retain/output arguments.
+                    try { appRunning = docker.Run(["--context", profile.DockerContext, "top", ids[0], "-eo", "pid,args"]).Contains(app.Executable, StringComparison.Ordinal); }
+                    catch (OperationCanceledException) when (cancel.IsCancellationRequested) { throw; }
+                    catch (Exception) { processDetail = "; application probe unavailable"; }
                 }
-                result[node.NodeId] = new(true, appRunning, "running " + ids[0][..Math.Min(12, ids[0].Length)]);
+                result[node.NodeId] = new(true, appRunning, "running " + ids[0][..Math.Min(12, ids[0].Length)] + processDetail) { ObservedAtUtc = DateTimeOffset.UtcNow };
                 containers[node.NodeId] = (profile.DockerContext, ids[0]);
             }
-            catch (Exception e) { result[node.NodeId] = new(false, null, "docker error: " + e.Message.Split('\n')[0]); }
+            catch (OperationCanceledException) when (cancel.IsCancellationRequested) { throw; }
+            catch (Exception) { result[node.NodeId] = new(false, null, "docker error: observation_unavailable") { ObservedAtUtc = DateTimeOffset.UtcNow }; }
         }
         // One stats snapshot per engine; CPU/RAM are observations, never converted to watts or heat.
         foreach (var context in containers.Values.Select(v => v.Context).Distinct())
         {
+            cancel.ThrowIfCancellationRequested();
             try
             {
                 var ids = containers.Values.Where(v => v.Context == context).Select(v => v.Container).ToArray();
@@ -188,9 +201,10 @@ public sealed class DockerProbe(MonitorSetup setup, IDockerCommandRunner docker)
                     if (id.Length == 0) continue;
                     var node = containers.SingleOrDefault(c => c.Value.Context == context && c.Value.Container.StartsWith(id, StringComparison.Ordinal));
                     if (node.Key is not null)
-                        result[node.Key] = result[node.Key] with { CpuPercent = row.GetProperty("CPUPerc").GetString(), MemoryUsage = row.GetProperty("MemUsage").GetString() };
+                        result[node.Key] = result[node.Key] with { CpuPercent = row.GetProperty("CPUPerc").GetString(), MemoryUsage = row.GetProperty("MemUsage").GetString(), ResourcesObservedAtUtc = DateTimeOffset.UtcNow };
                 }
             }
+            catch (OperationCanceledException) when (cancel.IsCancellationRequested) { throw; }
             catch (Exception)
             {
                 foreach (var node in containers.Where(c => c.Value.Context == context))

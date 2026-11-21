@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import MapView, { type HeatLayer } from './MapView'
 import SitePanel from './SitePanel'
+import MonitoringPanel from './monitoring/MonitoringPanel'
 import { EconomicsChart, HeatChart, LoadChart } from './charts'
 import {
   HOURS_PER_DAY,
@@ -98,6 +99,8 @@ export default function AdminPage() {
           ))}
         </div>
       </div>
+
+      <MonitoringPanel />
 
       <section className="stats">
         <Stat label="Sites online" value={`${current.sitesOnline} / ${SITES.length}`} note={`${num.format(TOTAL_SERVERS)} servers`} />
