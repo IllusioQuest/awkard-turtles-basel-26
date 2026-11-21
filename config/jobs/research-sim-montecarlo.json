@@ -1,0 +1,22 @@
+{
+  "id": "research-sim-montecarlo",
+  "containerImage": "digitalheat/research-sim",
+  "command": [
+    "run"
+  ],
+  "interruptible": true,
+  "supportedControlLevels": [
+    "freeze",
+    "throttle",
+    "checkpoint"
+  ],
+  "deadlineHours": null,
+  "workUnit": "simulation task",
+  "runtimeSecondsPerWorkUnit": null,
+  "energyKwhPerWorkUnit": null,
+  "progressFile": "data/external/research-sim/work/progress.json",
+  "placementPolicy": {
+    "mode": "anywhere",
+    "source": "Demo workload only: synthetic 2D Ising model with generated random spins (docs/jobs/research-sim.md), no personal data and no customer contract. A real customer job must carry the policy from its contract (decision 0013)."
+  }
+}

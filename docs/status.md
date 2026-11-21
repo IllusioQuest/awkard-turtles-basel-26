@@ -134,3 +134,8 @@ T-39 interface coordination: user approved largest remaining useful heat capacit
 T-39: PR #22 now includes atomic per-site heat-capacity gaming reservations and deterministic home/hotel/spa demo. Shared Greedy numerator factored into HeatCapacity (IScheduler/IExecutor unchanged); 14 gaming and 40 Core tests pass. Runtime session launch/preemption still pending. See ADR 0022 and gaming-lab.md; no scored inputs changed.
 
 T-39: user approved an isolated Mesa Dozen Vulkan build/probe. ADR 0023 proposed; existing A/B desktops untouched during build. Separate source-pinned image only; no Windows driver changes or game download. Core interfaces unchanged.
+## T-30 research simulation job (2026-11-21, Jona / Claude)
+Branch `feat/T-30-research-simulation-job`: 2D Ising Monte Carlo container (`jobs/research-sim/`),
+descriptor `config/jobs/research-sim-montecarlo.json`, `docs/jobs/research-sim.md`. Code written; image
+build, laptop measurement and LiveRun not yet run (awaiting user approval for Docker). Runtime and
+energy `TODO(source)`. No shared interface changed.
