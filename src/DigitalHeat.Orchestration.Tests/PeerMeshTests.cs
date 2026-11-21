@@ -174,6 +174,51 @@ public class PeerMeshTests : IDisposable
         Assert.Equal(1, runtimes["b"].Creates); Assert.Equal(1, runtimes["b"].Starts);
     }
 
+    [Fact] public void OperatorHoldSurvivesRestartAndHeatCannotResumeIt()
+    {
+        var a=Add("a",1);var b=Add("b",8);Publish();
+        a.Submit(Request("a","render") with {Kind="batch",Lifecycle=new(true,true,false)},CoordinatorTests.Profile.Id);a.Tick();
+        b.SetHold(true);Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.Update(Inventory("b",9,2));b.Tick();Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.Dispose();peers.Remove(b);b=Add("b",9,3);
+        Assert.True(b.Held);b.Tick();Assert.Equal("paused",b.Attempts().Single().Phase);
+        b.SetHold(false);b.Tick();Assert.Equal("running",b.Attempts().Single().Phase);
+        Assert.Equal(1,runtimes["b"].Creates);
+    }
+
+    [Fact] public void HeldOriginDoesNotDispatchQueuedFrame()
+    {
+        var a=Add("a",1);Add("b",8);Publish();a.SetHold(true);
+        a.Submit(Request("a","queued"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Null(a.Jobs().Single().Target);Assert.All(runtimes.Values,r=>Assert.Equal(0,r.Starts));
+        a.SetHold(false);a.Tick();Assert.Equal("b",a.Jobs().Single().Target);
+    }
+
+    [Fact] public void CancelledBatchRejectsDelayedProposalAndReplyAfterRestart()
+    {
+        var a=Add("a",1);var b=Add("b",8);Publish();
+        bus.Drop=(_,_,m)=>m is PeerProposal;
+        string id=a.Submit(Request("a","cancel") with{Kind="batch",Lifecycle=new(true,true,false)},CoordinatorTests.Profile.Id);a.Tick();
+        var proposal=bus.Messages.Select(m=>m.Message).OfType<PeerProposal>().First();
+        a.SetHold(true);b.SetHold(true);a.CancelBatchWorkloads([id]);b.CancelBatchWorkloads([id]);
+        b.Dispose();peers.Remove(b);b=Add("b",8,2);bus.Drop=null;
+        b.Receive("a",proposal);a.Receive("b",new PeerReply(id,proposal.Generation,proposal.Identity,"accepted"));
+        a.SetHold(false);b.SetHold(false);a.Tick();b.Tick();
+        Assert.Equal("cancelled",a.Jobs().Single().Status);Assert.Equal(0,runtimes["b"].Creates);
+    }
+    [Fact] public void CancellationNeverStopsProtectedInteractiveWork()
+    {
+        var a=Add("a",1);var b=Add("b",8);Publish();string id=a.Submit(Request("a"),CoordinatorTests.Profile.Id);a.Tick();
+        b.SetHold(true);Assert.Throws<InvalidOperationException>(()=>b.CancelBatchWorkloads([id]));
+        Assert.Equal("running",b.Attempts().Single().Phase);
+    }
+    [Fact] public void CancellationFenceBlocksSubmissionArrivingAfterSnapshot()
+    {
+        var a=Add("a",8);Publish();a.SetHold(true);a.CancelBatchWorkloads(["a.late"]);a.SetHold(false);
+        a.Submit(Request("a","late") with{Kind="batch",Lifecycle=new(true,true,false)},CoordinatorTests.Profile.Id);
+        a.Tick();Assert.Empty(a.Jobs());Assert.Equal(0,runtimes["a"].Creates);
+    }
+
     public void Dispose()
     {
         foreach (var peer in peers) peer.Dispose();

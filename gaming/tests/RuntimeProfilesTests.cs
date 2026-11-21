@@ -28,7 +28,7 @@ public class RuntimeProfilesTests
             "--filter", "label=com.docker.compose.service=session"], commands.Calls[0]);
         Assert.Equal(Container, plan.ContainerId);
         Assert.Contains("'literal'\"'\"' ; touch /tmp/injected; #'", plan.DockerArguments[^1]);
-        Assert.Contains("digitalheat-desktop.lock flock -n /tmp/digitalheat-xonotic.lock", plan.DockerArguments[^1]);
+        Assert.Contains("digitalheat-desktop.lock", plan.DockerArguments[^1]);
         Assert.Contains("'+map' 'demo'", plan.DockerArguments[^1]);
         new DockerDesktopRuntime(commands).Dispatch(plan);
         Assert.Equal(2, commands.Calls.Count);

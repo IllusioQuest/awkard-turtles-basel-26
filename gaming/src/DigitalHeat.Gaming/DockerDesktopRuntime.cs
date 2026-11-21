@@ -33,9 +33,9 @@ public sealed class DockerDesktopRuntime(IDockerCommandRunner commands)
         var listing = commands.Run(["--context", node.DockerContext, "ps", "-q", "--filter", $"label=com.docker.compose.project={node.ComposeProject}", "--filter", $"label=com.docker.compose.service={node.ComposeService}"]);
         var ids = listing.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
         if (ids.Length != 1 || !Regex.IsMatch(ids[0], "^[a-f0-9]{12,64}$")) throw new InvalidOperationException("Expected exactly one running container in the configured node scope.");
-        // Both locks cover the entire desktop, including games started with the legacy launcher.
+        // One application owns the desktop. Game-specific launchers and locks are retired.
         static string Quote(string value) => "'" + value.Replace("'", "'\"'\"'") + "'";
-        var command = "exec flock -n /tmp/digitalheat-desktop.lock flock -n /tmp/digitalheat-xonotic.lock sh -c " +
+        var command = "exec flock -n /tmp/digitalheat-desktop.lock sh -c " +
             Quote("log=$1; shift; exec \"$@\" >> \"$log\" 2>&1") + " sh " + string.Join(" ", new[] { app.LogPath, app.Executable }.Concat(arguments).Select(Quote));
         var docker = new List<string> { "--context", node.DockerContext, "exec", "-d", "--user", app.User, "--workdir", app.WorkingDirectory };
         foreach (var environment in app.Environment.OrderBy(e => e.Key, StringComparer.Ordinal)) docker.AddRange(["--env", $"{environment.Key}={environment.Value}"]);

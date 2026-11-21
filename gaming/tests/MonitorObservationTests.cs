@@ -10,7 +10,7 @@ public class MonitorObservationTests
     private static MonitorSetup Setup()
     {
         var root = MonitorSetup.FindRepositoryRoot();
-        return MonitorSetup.Load(root, Path.Combine(root, "gaming/deploy/heat-monitor.json"));
+        return MonitorSetup.Load(root, Path.Combine(root, "gaming/tests/Fixtures/monitor-heat.json"));
     }
 
     private sealed class Commands : IDockerCommandRunner
@@ -23,7 +23,7 @@ public class MonitorObservationTests
                 return "{\"ID\":\"bbbbbbbbbbbb\",\"CPUPerc\":\"12.5%\",\"MemUsage\":\"512MiB / 4GiB\"}\n" +
                     "{\"ID\":\"cccccccccccc\",\"CPUPerc\":\"25.0%\",\"MemUsage\":\"1GiB / 4GiB\"}";
             if (arguments.Contains("inspect")) return arguments[^1] == "aaaaaaaaaaaa" ? "true true" : "true false";
-            if (arguments.Contains("top")) return "COMMAND\n/opt/Xonotic/xonotic-linux64-sdl";
+            if (arguments.Contains("top")) return "COMMAND\n/opt/test-app/application";
             return arguments[^1].EndsWith("session-a") ? "aaaaaaaaaaaa" : arguments[^1].EndsWith("session-b") ? "bbbbbbbbbbbb" : "cccccccccccc";
         }
     }

@@ -1,0 +1,18 @@
+{
+  "id": "gpu",
+  "serve_ui": false,
+  "image": "registry.example.invalid/digitalheat/landscape@sha256:REPLACE_WITH_SAME_REGISTRY_DIGEST_ON_ALL_PEERS",
+  "state_directory": "./state",
+  "physical_host_id": "REPLACE_WITH_UNIQUE_PHYSICAL_HOST_ID",
+  "peers": {"gpu":"http://127.0.0.1:8080"},
+  "heat_demand_kwh": 300,
+  "cpu_cores": 1,
+  "ram_mib": 1536,
+  "frame_heat_kwh": 0.8,
+  "frames": 48,
+  "gpu_frame_share": 0.8,
+  "deadline_seconds": 7200,
+  "source": "LAB FIXTURE ONLY, copied from T-66: synthetic 300kWh heat headroom, abstract case 0.8kWh/server-hour per frame commitment; NOT measured heat/power. 48 frames, 640x360, 32 samples, 80/20 GPU/CPU jobs are user-approved demo parameters. 1 CPU/1536MiB limits and 7200s expiry are lab settings, not a performance SLA.",
+  "gpu": null,
+  "gpu_backend": null
+}

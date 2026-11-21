@@ -1,4 +1,4 @@
-param([ValidateSet('session-a','session-b','session-c')][string]$Node='session-a')
+param([ValidateSet('session-a')][string]$Node='session-a')
 $ErrorActionPreference='Stop'
 . "$PSScriptRoot/GamingLab.Common.ps1"
 $containerId=Get-GamingContainerId -Node $Node

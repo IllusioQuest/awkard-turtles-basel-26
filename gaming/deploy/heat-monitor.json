@@ -2,12 +2,12 @@
   "scenario": "config/network/switzerland-test.json",
   "reference_parameters": "config/reference-house.json",
   "runtime_profiles": "gaming/deploy/runtime-profiles.json",
-  "application_id": "xonotic",
+  "application_id": "minecraft",
   "player_origin_site_id": "basel-reference-house-case-1",
   "session_heat_kwh_per_hour": {
     "value": 0.8,
     "unit": "kWh/h per session",
-    "source": "docs/case/challenge.md: 1 kW rack server x 80 % recoverable heat; assumption A-018: one game session occupies one full case server (not a Xonotic power measurement)"
+    "source": "docs/case/challenge.md: 1 kW rack server x 80% recoverable heat. Abstract capacity preview only, NOT measured Minecraft power; actual Minecraft heat-based startup still requires the separate accepted measurement."
   },
   "dataset_utc_offset_hours": {
     "value": 1,
@@ -27,23 +27,10 @@
       "session_slots": 1,
       "session_slots_source": "docs/gaming-profiles.md: one /tmp/digitalheat-desktop.lock per desktop, one application per node",
       "live_demand": "case-formula",
-      "elcom_municipality": { "id": "2701", "source": "data/raw/elcom/iwb-basel-h4-2026.json: municipality 2701 = Basel" }
-    },
-    {
-      "node_id": "session-b",
-      "site_id": "basel-mfh-1",
-      "session_slots": 1,
-      "session_slots_source": "docs/gaming-profiles.md: one /tmp/digitalheat-desktop.lock per desktop, one application per node",
-      "live_demand": "replay-same-hour",
-      "elcom_municipality": { "id": "2701", "source": "data/raw/elcom/iwb-basel-h4-2026.json: municipality 2701 = Basel" }
-    },
-    {
-      "node_id": "session-c",
-      "site_id": "basel-hotel-spa-1",
-      "session_slots": 1,
-      "session_slots_source": "docs/gaming-profiles.md: one /tmp/digitalheat-desktop.lock per desktop, one application per node",
-      "live_demand": "replay-same-hour",
-      "elcom_municipality": { "id": "2701", "source": "data/raw/elcom/iwb-basel-h4-2026.json: municipality 2701 = Basel" }
+      "elcom_municipality": {
+        "id": "2701",
+        "source": "data/raw/elcom/iwb-basel-h4-2026.json: municipality 2701 = Basel"
+      }
     }
   ]
 }

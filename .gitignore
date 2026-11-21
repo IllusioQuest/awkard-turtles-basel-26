@@ -43,3 +43,5 @@ data/derived/fleet/*
 data/derived/fleet/populations/*
 !data/derived/fleet/populations/bfs-residential-2020-covered-1000.nodes.json
 !data/derived/fleet/populations/bfs-residential-2020-covered-1000.summary.csv
+/rendering/TestResults/
+/mesh/TestResults/

@@ -4,6 +4,15 @@ using DigitalHeat.Orchestration;
 
 try
 {
+    if (args.Length == 2 && args[0] == "render-probe") {
+        var probeConfig=JsonSerializer.Deserialize<RenderConfig>(File.ReadAllText(args[1]),RenderNodeHost.Json)
+            ??throw new InvalidDataException("Missing render config");
+        var report=RenderDeviceProbe.Run(probeConfig,new DockerCommands());
+        Console.WriteLine(JsonSerializer.Serialize(report,RenderNodeHost.Json));
+        return report.VerifiedBackend is null?2:0;
+    }
+    if (args.Length == 2 && args[0] == "render-verify") { await RenderSession.Verify(args[1]); return 0; }
+    if (args.Length == 2 && args[0] == "render-node") { await RenderNodeHost.Run(args[1]); return 0; }
     if (args.Length == 2 && args[0] == "mesh-node") { await MeshNodeHost.Run(args[1]); return 0; }
     if (args.Length == 3 && args[0] == "mesh-demo")
     {

@@ -29,14 +29,5 @@ services:
       SELKIES_BASIC_AUTH_PASSWORD: ${GAMING_PASSWORD_A:?Missing local password}
     volumes: ["session-a-home:/home/ubuntu"]
     labels: { digitalheat.gaming.node: session-a }
-  session-b:
-    <<: *session
-    ports: ["127.0.0.1:18882:8080"]
-    environment:
-      <<: *environment
-      SELKIES_BASIC_AUTH_PASSWORD: ${GAMING_PASSWORD_B:?Missing local password}
-    volumes: ["session-b-home:/home/ubuntu"]
-    labels: { digitalheat.gaming.node: session-b }
 volumes:
   session-a-home:
-  session-b-home:
