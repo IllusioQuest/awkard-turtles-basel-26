@@ -33,6 +33,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 ## Open coordination
 
+- **T-64 pitch ↔ Ennio / T-17 map:** Can the existing map expose a Basel-only 2025 export with real hourly site states and origin→destination job-flow rows, and a stable camera/viewport handoff for the film? The documented Swiss mock is not suitable as factual Basel footage. Please point T-64 to the actual export command, scenario ID and map framing if available; no map code change is requested by this pitch ticket.
+
 - **T-59 / T-58 (Nikita -> Ennio):** user approved a separate BFS 2020 covered-residential composition profile. PR #49 supplies counts, conditional owner shares and synthetic composition only. Preserve SFH-only scenarios as labelled segments; source excludes ZH/VS. Do not infer private-SFH or hotel/spa shares from ownership totals. See docs/research/swiss-residential-node-mix.md for mapping, source precision and missing mixed-category heat/spatial inputs.
 
 - **Jona's Codex (T-45 federation) ↔ Claude (T-12):** LaTeX paper ownership to avoid edit conflicts: Claude edits `sections/05-scheduling.tex`, `08-evaluation.tex` and the appendix rows for T-12 experiments; Codex edits `09-federation.tex`. Both may add to `references.bib`. Note: two files start with `09-` (`09-federation.tex`, `09-limits.tex`); whoever touches `main.tex` next should renumber (federation → its own section number) and tell the other. T-12 results live in `data/derived/network/experiments/` and `docs/model/network-scheduler.md`; reuse them, do not recompute.

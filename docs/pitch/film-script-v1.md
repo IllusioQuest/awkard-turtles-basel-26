@@ -4,13 +4,13 @@ Status: working script for T-64; no recording or rendered film yet. Spoken langu
 
 ## Opening A — character-led (recommended)
 
-**0:00–0:16 — annual slate, reference house exterior.**
+**0:00–0:16 — annual slate, ordinary Basel street and reference-house exterior.**
 
 “Meet Lea. Her house in Basel needs warmth every day, but not at the same hour or in the same amount. We tested what happens when useful computing follows that need for a full year.”
 
-[Lea is fictional. Overlay six figures from one validated reference-house result: server count, heat coverage, heat dumped, utilisation, missed deadlines, case break-even. Do not render an unavailable deadline rate. Label: `Reference house · simulation · Basel 2025`.]
+[Lea is fictional. The house is a representative architectural visualisation in a recognisable Basel urban setting, not a real identified case address. Overlay six figures from one validated reference-house result: server count, heat coverage, heat dumped, utilisation, missed deadlines, case break-even. Do not render an unavailable deadline rate. Label: `Reference house · simulation · Basel 2025`.]
 
-**0:16–0:37 — camera enters basement; January.**
+**0:16–0:37 — camera approaches this house; only the basement wall becomes transparent; January.**
 
 “Tonight, paid calculations run on the servers downstairs. A closed water loop takes their heat to the tank and the rooms. It covers part of the load. The existing heater covers the rest.”
 
