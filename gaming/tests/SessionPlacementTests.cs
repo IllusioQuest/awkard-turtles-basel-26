@@ -18,7 +18,7 @@ public class SessionPlacementTests
     [Fact] public void RanksAbsoluteHeatInsteadOfSaturatedLoadFraction()
     {
         var low = Site("hotel", 2); var high = Site("spa", 4);
-        var scheduler = new GreedyHeatScheduler(0);
+        var scheduler = new HeatFirstScheduler(0);
         Assert.Equal(scheduler.Decide(low.Heat), scheduler.Decide(high.Heat));
         Assert.Equal("spa", Start(Snapshot([low, high])).TryReserve(Request("one"), Now)!.SiteId);
     }
@@ -123,7 +123,7 @@ public class SessionPlacementTests
         {
             var signal = new HeatSignal(demand, stored, 35, 4, 0.8);
             double previous = Math.Clamp((demand + 35 - stored) / 0.8, minimum * 4, 4) / 4;
-            Assert.Equal(previous, new GreedyHeatScheduler(minimum).Decide(signal).TargetLoadPerServer);
+            Assert.Equal(previous, new HeatFirstScheduler(minimum).Decide(signal).TargetLoadPerServer);
         }
     }
 }

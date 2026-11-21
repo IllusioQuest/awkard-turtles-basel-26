@@ -4,8 +4,9 @@ namespace DigitalHeat.Core;
 public sealed class JobQueueExecutor : IExecutor
 {
     private const double LoadTolerance = 1e-9; // Floating-point comparison only, not a scenario parameter.
-    private sealed class PendingJob(int typeIndex, int dueStep, double remainingServerHours)
+    private sealed class PendingJob(string id, int typeIndex, int dueStep, double remainingServerHours)
     {
+        public string Id { get; } = id;
         public int TypeIndex { get; } = typeIndex;
         public int DueStep { get; } = dueStep;
         public double RemainingServerHours { get; set; } = remainingServerHours;
@@ -68,7 +69,7 @@ public sealed class JobQueueExecutor : IExecutor
                 if (dueStep <= horizonSteps)
                     dueWithinHorizon[typeIndex] = checked(dueWithinHorizon[typeIndex] + count);
                 double requiredServerHours = type.WorkUnitsPerJob.Value / type.WorkUnitsPerServerHour.Value;
-                for (int i = 0; i < count; i++) pending.Add(new PendingJob(typeIndex, dueStep, requiredServerHours));
+                for (int i = 0; i < count; i++) pending.Add(new PendingJob($"{type.Id}/{step:D10}/{i:D10}", typeIndex, dueStep, requiredServerHours));
             }
         hourStarted = true;
     }
@@ -86,7 +87,7 @@ public sealed class JobQueueExecutor : IExecutor
         if (!double.IsFinite(achieved) || achieved < 0 || achieved > cappedTarget + LoadTolerance)
             throw new InvalidOperationException("Executor achieved more load than available job work.");
         double remainingToApply = achieved * capacityServerHours;
-        foreach (var job in pending.OrderBy(x => x.DueStep))
+        foreach (var job in pending.OrderBy(x => new JobPriority(x.DueStep, x.Id)))
         {
             if (remainingToApply <= 0) break;
             double used = Math.Min(job.RemainingServerHours, remainingToApply);
@@ -134,20 +135,5 @@ public sealed class JobQueueExecutor : IExecutor
     {
         foreach (var job in pending.Where(x => x.DueStep <= step)) missed[job.TypeIndex]++;
         pending.RemoveAll(x => x.DueStep <= step);
-    }
-}
-
-/// <summary>Optional alternative to heat-led waiting: execute available work and dump surplus heat.</summary>
-public sealed class ExcessHeatPolicyScheduler(IScheduler heatLed, string policy) : IScheduler
-{
-    public SchedulerDecision Decide(HeatSignal signal)
-    {
-        var heatLedDecision = heatLed.Decide(signal);
-        return policy switch
-        {
-            "wait" => heatLedDecision,
-            "run-and-dump" => new SchedulerDecision(1),
-            _ => throw new InvalidDataException("Unknown excess-heat policy.")
-        };
     }
 }

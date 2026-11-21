@@ -1,0 +1,21 @@
+{
+  "source": "Synthetic protocol fixture, not measured job/hardware/heat/latency. Three distinct physical-domain models; no Docker processes. Numeric values are demonstration inputs, 2026-11-21.",
+  "interval_start_utc": "2025-07-15T17:00:00+00:00",
+  "cpu_cores_per_peer": 2,
+  "ram_mib_per_peer": 256,
+  "slots_per_peer": 2,
+  "job_cpu_cores": 1,
+  "job_ram_mib": 64,
+  "job_heat_kwh_per_hour": 0.8,
+  "offer_lifetime_seconds": 20,
+  "nodes": [
+    { "id": "home", "demand_kwh": 1, "player_rtt_ms": 5 },
+    { "id": "hotel", "demand_kwh": 8, "player_rtt_ms": 20 },
+    { "id": "spa", "demand_kwh": 6, "player_rtt_ms": 15 }
+  ],
+  "jobs": [
+    { "id": "batch-a", "origin": "home", "kind": "batch", "max_player_rtt_ms": null },
+    { "id": "game-b", "origin": "spa", "kind": "interactive", "max_player_rtt_ms": 25 },
+    { "id": "batch-c", "origin": "hotel", "kind": "batch", "max_player_rtt_ms": null }
+  ]
+}

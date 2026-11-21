@@ -51,7 +51,7 @@ public class FederatedClaimGateTests
         // node-local heat calculation. The demand and tank values are test scenario inputs.
         Assert.False(FederatedClaimGate.CanStart(Evidence() with { QuorumConfirmed = false }, "basel", Now, ClockError));
         var signal = new HeatSignal(0.5, 0, 1, 1, 0.8);
-        var applied = SchedulerController.Apply(signal, new GreedyHeatScheduler(0), new SimulatedExecutor());
+        var applied = SchedulerController.Apply(signal, new HeatFirstScheduler(0), new SimulatedExecutor());
         Assert.Equal(1, applied.ActualLoadPerServer);
     }
 }

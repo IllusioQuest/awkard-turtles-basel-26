@@ -45,7 +45,7 @@ public sealed class SiteHeatStateTests
         var state = new SiteHeatState("house-a", Signal(), HeatForecast.Build(Series(), "fixture", 0, 24));
         Assert.Equal(0.5, state.NeededHeatKwh);
         Assert.Equal(1.6, state.MaxHeatProducedKwh);
-        IScheduler greedy = new GreedyHeatScheduler(0);
+        IScheduler greedy = new HeatFirstScheduler(0);
         Assert.Equal(greedy.Decide(state.Signal), new CurrentHeatSchedulerAdapter(greedy).Decide(state));
     }
 

@@ -7,6 +7,6 @@
   "demand": { "from_file": null, "volume_scale": { "transcription-whisper-large-v3": 0.1, "llm-inference-apertus-8b": 0.1, "research-sim-montecarlo": 0.1 } },
   "pricing": { "id": "mock-load", "p_min_chf": 0.226, "p_max_chf": 1.20, "gamma": 1, "p_ref_chf": 0.82, "p_ref_noise_sd": 0.079, "elasticity": -0.8 },
   "forecast": { "kind": "archived" },
-  "scheduler": { "id": "mock-heat-led", "low_share": 0.3, "high_share": 0.9, "urgent_margin_s": 3600, "chunk_target_s": 3600 },
+  "scheduler": { "id": "mesh-heat-first", "chunk_target_s": 3600 },
   "logging": { "house_timeseries": "hourly", "out_dir": "data/derived/fleet" }
 }

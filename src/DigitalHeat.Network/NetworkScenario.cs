@@ -98,7 +98,7 @@ public static class NetworkScenarioLoader
             if (s.Type1 is null) return null;
             double share = shareOverride ?? s.Type1.ShareOfHeatLedServerHours.Value;
             var site = scenario.NetworkSites[i];
-            double heatLed = NetworkSimulation.Run([site], new LocalGreedyScheduler(), new PerfectForesightForecasts(), 1)
+            double heatLed = NetworkSimulation.Run([site], new HeatFirstNetworkScheduler(), new PerfectForesightForecasts(), 1)
                 .Sites[0].Summary.ServerHours;
             int jobs = (int)Math.Round(share * heatLed / days / s.Type1.ServerHoursPerJob.Value, MidpointRounding.AwayFromZero);
             return (Type1Spec?)new Type1Spec(jobs, s.Type1.ServerHoursPerJob.Value,
