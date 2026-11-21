@@ -102,6 +102,56 @@ public class WorkModelTests
         Assert.All(r.Sites, s => Assert.Equal(0, s.Summary.DumpedHeatKwh, 9));
     }
 
+    private static string Toy() => Path.Combine(Root(), "src", "DigitalHeat.Network.Tests", "Fixtures", "two-site-toy.json");
+
+    [Fact]
+    public void ScenarioLoaderReproducesTheCaseDemand()
+    {
+        var scenario = NetworkScenarioLoader.Load(Path.Combine(Root(), "config", "network", "reference-only.json"), Root());
+        var p = ReferenceParameters.Load(Path.Combine(Root(), "config", "reference-house.json"));
+        var demand = HeatDemand.Build(WeatherCsv.Read(Path.Combine(Root(), "data", "raw", "open-meteo",
+            "basel-2025-hourly.csv")), p);
+        var site = Assert.Single(scenario.NetworkSites);
+        Assert.Equal(demand, site.Demand);
+        Assert.Equal(0.8, site.RecoverableKwhPerServerHour, 12);
+        var spec = Assert.Single(NetworkScenarioLoader.Type1Specs(scenario))!;
+        // 0.3 × 22,661 heat-led server-hours ÷ 365 days ÷ 0.000917 server-hours per job.
+        Assert.InRange(spec.JobsPerDay, (int)(0.3 * 22661.03 / 365 / 0.000917) - 1, (int)(0.3 * 22661.03 / 365 / 0.000917) + 1);
+    }
+
+    [Fact]
+    public void NetworkGreedyKeepsWorkAtHomeWhenHomeCanFinishIt()
+    {
+        var scenario = NetworkScenarioLoader.Load(Toy(), Root());
+        var specs = NetworkScenarioLoader.Type1Specs(scenario, 0.1);
+        var sites = scenario.NetworkSites;
+        var ledger = new WorkLedger(sites, specs, [1.0, 1.0], sites[0].Demand.Count, 24);
+        var r = NetworkSimulation.Run(sites, new NetworkGreedyJobsScheduler(), new PerfectForesightForecasts(), 1, work: ledger);
+        Assert.Equal(0, r.Work!.Type1.Missed);
+        Assert.Empty(r.Work.Flows);
+    }
+
+    [Fact]
+    public void ExportWritesTheMapContract()
+    {
+        var scenario = NetworkScenarioLoader.Load(Toy(), Root());
+        var specs = NetworkScenarioLoader.Type1Specs(scenario);
+        var sites = scenario.NetworkSites;
+        var r = NetworkSimulation.Run(sites, new NetworkGreedyJobsScheduler(), new PerfectForesightForecasts(), 1,
+            work: new WorkLedger(sites, specs, [1.0, 1.0], sites[0].Demand.Count, 24));
+        string tmp = Directory.CreateTempSubdirectory("dh-export-").FullName;
+        string dir = NetworkExport.Write(tmp, scenario, r, new NetworkRunInfo(1.0, null, specs, "test"));
+        foreach (var f in new[] { "run.json", "sites.json", "site-hours.json", "flows.json", "summary.json" })
+            Assert.True(File.Exists(Path.Combine(dir, f)), f);
+        using var hours = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(dir, "site-hours.json")));
+        Assert.Equal(8760, hours.RootElement.GetProperty("localTimes").GetArrayLength());
+        Assert.Equal(8760, hours.RootElement.GetProperty("sites").GetProperty("allschwil-indoor-pool")
+            .GetProperty("type1ServerHours").GetArrayLength());
+        using var flows = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(dir, "flows.json")));
+        Assert.True(flows.RootElement.GetProperty("rows").GetArrayLength() > 0);
+        Directory.Delete(tmp, true);
+    }
+
     [Fact]
     public void PlacementPolicyBlocksMovesAbroad()
     {

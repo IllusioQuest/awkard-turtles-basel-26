@@ -56,14 +56,17 @@ public sealed class LocalGreedyJobsScheduler : INetworkScheduler
 
 /// <summary>
 /// B2 network greedy: each site's heat-led capacity is the local greedy load. Type 1 cohorts, earliest
-/// deadline first, use their origin's free heat-led capacity first; any rest goes to the eligible site
-/// with the most free heat-led capacity (ties: lower site index). Filler fills what is left. Origin
-/// first keeps work at home unless a move helps (no arbitrary flows, decision 0025 review).
+/// deadline first, use their origin's free heat-led capacity first. Work moves only if the origin cannot
+/// finish it in time: an EDF feasibility test per origin compares the cumulative pending work up to each
+/// cohort's due hour with the origin's capacity until then, estimated by persistence (this hour's
+/// heat-led server-hours × hours left; no forecast). Only that excess goes to the eligible site with the
+/// most free heat-led capacity (ties: lower site index). Filler fills what is left. So work stays at
+/// home unless a move helps (no arbitrary flows, decision 0025 review).
 /// </summary>
 public sealed class NetworkGreedyJobsScheduler : INetworkScheduler
 {
     public string Id => "B2";
-    public string Label => "B2 network greedy: Type 1 EDF at origin, overflow to the eligible site with most free heat-led capacity";
+    public string Label => "B2 network greedy: Type 1 EDF at origin; moves only work the origin cannot finish by its deadline (persistence estimate) to the eligible site with most free heat-led capacity";
 
     public NetworkDecision Decide(NetworkState state)
     {
@@ -75,18 +78,32 @@ public sealed class NetworkGreedyJobsScheduler : INetworkScheduler
         for (int i = 0; i < n; i++)
             free[i] = heatLed[i] = GreedyWork.HeatLedTarget(state.Sites[i], state.States[i]) * GreedyWork.Capacity(state.Sites[i]);
         var allocations = new List<WorkAllocation>();
+        var cumulative = new double[n];   // pending own work per origin up to the current cohort's due hour
+        var movedFrom = new double[n];    // work already sent away from each origin this hour
         foreach (var c in work.Pending)
         {
             double r = c.RemainingServerHours;
-            if (c.EligibleSites[c.OriginSite]) r -= Assign(c, c.OriginSite, r);
-            while (r > WorkLedger.MissedEpsilonServerHours)
+            int o = c.OriginSite;
+            bool home = c.EligibleSites[o];
+            if (home) cumulative[o] += r;
+            // EDF feasibility at the origin: what cannot be done at home before the due hour must move.
+            double homeCapacityUntilDue = home ? heatLed[o] * (c.DueHour - state.HourIndex) : 0;
+            double mustMove = Math.Min(r, Math.Max(0, cumulative[o] - homeCapacityUntilDue - movedFrom[o]));
+            double stay = r - mustMove;
+            if (home) stay -= Assign(c, o, stay);
+            // Work that must leave is still done at home now if the origin has capacity left this hour.
+            double toMove = mustMove - (home ? Assign(c, o, mustMove) : 0);
+            while (toMove > WorkLedger.MissedEpsilonServerHours)
             {
                 int best = -1;
                 for (int j = 0; j < n; j++)
-                    if (c.EligibleSites[j] && free[j] > WorkLedger.MissedEpsilonServerHours && (best < 0 || free[j] > free[best]))
+                    if (j != o && c.EligibleSites[j] && free[j] > WorkLedger.MissedEpsilonServerHours
+                        && (best < 0 || free[j] > free[best]))
                         best = j;
                 if (best < 0) break;
-                r -= Assign(c, best, r);
+                double moved = Assign(c, best, toMove);
+                toMove -= moved;
+                movedFrom[o] += moved;
             }
         }
         var filler = new double[n];
