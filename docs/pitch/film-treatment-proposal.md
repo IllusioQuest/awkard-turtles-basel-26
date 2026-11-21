@@ -8,6 +8,8 @@ One Basel house needs heat at changing times; useful computing can follow that n
 
 The fixed case reference house is a *model*, not the private house-plan archive. The camera may use the private plan's **room relationships** (separate cellar beside the gas heating room) for spatial plausibility, as approved by the team lead, but the facade and dimensions remain illustrative and non-identifying. The 2025 yearly figures come from the C# result, not from animation keyframes.
 
+The six required opening claims and their current evidence are checked in [`claim-sheet.md`](claim-sheet.md). In particular, the unlimited-work comparison has no missed-deadline percentage; the film must not borrow the 0% from the finite transcription-only diagnostic.
+
 ## Two possible voices, same images
 
 **Character-led:** “Meet Lea. On a cold January evening, her home needs more heat than four servers can supply. Across Basel, a planning firm needs a batch of documents checked by morning. The computers work; their recovered heat enters Lea's heating circuit. In July she only needs hot water. The scheduler pauses work here and offers the next eligible job to another Basel site.” Lea and the firm are fictional examples. Do not imply a real customer or a measured house.

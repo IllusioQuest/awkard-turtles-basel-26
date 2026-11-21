@@ -27,3 +27,9 @@ Useful server heat uses a warm amber trace inside the water loop, backup heat a 
 ## Acceptance check for the next frame
 
 At presentation size, a viewer should first see a **realistic Basel house in a street**. The basement reveal should be a purposeful visual effect that lasts only for the explanation. Materials, shadows, scale cues and neighbouring buildings must make the scene feel inhabited. If it still reads as a clean miniature, reject it before producing summer and map shots.
+
+## Blockout review, 21 November 2026
+
+The second Blender blockout moved the house into a row, but the frontal camera cut off the roofs and pavement, and repeated windows and roof forms still read as a synthetic set. It is **rejected as final imagery**. The preview and its procedural source remain local, outside this PR. A fresh-context visual review agreed with this assessment.
+
+For the next shot test, use an eye-height oblique view along the street with a visible sidewalk, roadway and depth. Neighbours need different eaves, materials, window axes, entrances and wear. Establish true-to-life scale with a bicycle, tree, person or parked vehicle. A licensed real Basel street photograph can serve as a photographic plate; a separate, freely designed representative hero house can be camera-matched into it. The plate cannot be presented as the fixed case house. The [Wikimedia Commons winter Basel candidate](https://commons.wikimedia.org/wiki/File:A_Cold_Day_in_Basel_2.jpg) is CC BY 4.0, but its framing must be checked before selection and attribution must accompany any use. The public [MapBS 3D data](https://www.bs.ch/bvd/grundbuch-und-vermessungsamt/geo/hilfe/mapbs-3d) can guide wider street geometry and the city pull-out; it does not supply detailed, photorealistic facades by itself.
