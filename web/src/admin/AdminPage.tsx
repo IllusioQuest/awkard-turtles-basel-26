@@ -262,7 +262,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
         {weather && showWeather && (
           <div className="map-legend">
-            <span>Temperature</span>
+            <span>Temperature (°C){run.periodHours >= HOURS_PER_DAY ? ', daily mean' : ''}</span>
             <div className="legend-bar" style={{ background: temperatureGradientCss() }} />
             <div className="legend-ticks fixed">
               {TEMP_LEGEND_TICKS_C.map((c) => (
@@ -271,7 +271,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
                 </span>
               ))}
             </div>
-            <span className="note">°C, fixed scale; colder or warmer values show the end colours</span>
           </div>
         )}
 
@@ -363,14 +362,27 @@ function RunView({ source, run, runs, houses, network }: Props) {
 }
 
 /** Temperature field at hour t from the real weather points; null while loading or when the overlay is off. */
+/**
+ * Weather field at hour t. For runs with day granularity (periodHours ≥ 24) it is the mean over the
+ * local day containing t, like the case's heating-day rule and the daily house temperatures; a
+ * single hour (e.g. midnight) would show the day/night cycle (≈ 8.7 K per day in 2025) instead of
+ * the weather. Hourly runs show the hour.
+ */
 function useWeatherField(source: DataSource, run: RunInfo, t: number, enabled: boolean): WeatherField | null {
+  const daily = run.periodHours >= HOURS_PER_DAY
+  const fromH = daily ? Math.floor(t / HOURS_PER_DAY) * HOURS_PER_DAY : t
+  const toH = Math.min(run.hours, fromH + (daily ? HOURS_PER_DAY : 1))
   const points = useAsync(enabled ? 'weather-points' : null, () => source.weatherPoints())
-  const hours = useAsync(enabled ? `weather:${run.id}:${t}` : null, () => source.weather(run.id, t, t + 1))
+  const hours = useAsync(enabled ? `weather:${run.id}:${fromH}:${toH}` : null, () => source.weather(run.id, fromH, toH))
   return useMemo(() => {
-    if (!enabled || !points.data || !hours.data?.temperatureC[0]) return null
+    const rows = hours.data?.temperatureC
+    if (!enabled || !points.data || !rows?.length) return null
     let interpolator = interpolators.get(points.data)
     if (!interpolator) interpolators.set(points.data, (interpolator = makeInterpolator(points.data)))
-    return interpolator.fill(hours.data.temperatureC[0])
+    if (rows.length === 1) return interpolator.fill(rows[0])
+    const mean = new Array<number>(rows[0].length).fill(0)
+    for (const row of rows) for (let i = 0; i < row.length; i++) mean[i] += row[i] / rows.length
+    return interpolator.fill(mean)
   }, [enabled, points.data, hours.data])
 }
 
