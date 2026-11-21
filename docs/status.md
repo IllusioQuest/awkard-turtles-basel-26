@@ -28,6 +28,8 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 
 ## Open coordination
 
+- **Jona (T-06), hardware cost:** T-15 found that one Dell R570 draws ≈ 0.16 kW, not 1 kW; a 1 kW reference server is ≈ 6.15 R570s (CHF 50,743). The hardware depreciation sensitivity in T-06 (A-017: one R570 per server) is therefore ≈ 6× too low. See `docs/research/hardware.md`.
+- **Team lead decision (2026-11-21):** GPU inference server (L4 profile, `config/hardware/`) is the main hardware scenario for the pitch, with the three-profile comparison on one slide; scored reference-house figures keep the case's abstract 1 kW server.
 - **Ennio (T-02) ↔ team lead/Claude (T-26):** demand model for the scored figures (premium transcription + filler load vs. heavier Whisper model vs. transcription only). Details and options: `docs/tickets/T-26-sourced-job-demand.md`. Ennio, please answer there.
 - **Jona (T-06):** team lead adopted CHF 0.66 per server-hour as computing price for the draft (adjustable, range 0.25–1.80, `docs/research/computing-price.md`); please update `config/reference-house.json` in T-06.
 - **Nikita (T-23) ↔ T-01:** representation of always-on services in the job catalog (options in `docs/tickets/T-01-job-catalog.md`).

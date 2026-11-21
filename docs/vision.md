@@ -117,6 +117,8 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
+**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability.
+
 ## Under consideration: filler load sold as spot capacity (2026-11-21)
 
 Real demand for our premium service (confidential transcription) fills only a tiny share of a
