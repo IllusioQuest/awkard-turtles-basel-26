@@ -74,4 +74,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-40](T-40-gaming-profiles.md) | Reusable gaming profiles and retire webhosting | Nikita / Codex | done (PR #22) |
 
-| [T-42](T-42-gaming-monitor-review.md) | Review and clarify gaming heat monitor | Nikita / Codex | in progress |
+| [T-42](T-42-gaming-monitor-review.md) | Review and clarify gaming heat monitor | Nikita / Codex | in review (PR #32) |

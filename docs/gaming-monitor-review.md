@@ -1,5 +1,7 @@
 # Gaming console review and data clarity (T-42)
 
+Implementation ready in [PR #32](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/32), commit 2a4f9b2; code integration pending. Documentation is on main.
+
 ## Review
 
 The new monitor is a useful read-only heat-placement prototype. It reuses `SessionPlacement`,
@@ -70,5 +72,4 @@ series, not an extrapolation from the current hour. Dataset building sizes/tanks
 fixtures. A live read-only snapshot saw the existing game and CPU/RAM observations; no game or
 container was restarted. One-shot live mode applied an actual Open-Meteo response; ElCom returned
 no current H4 observation and the committed 0.3325 CHF/kWh snapshot was visibly used as fallback.
-Compact January/July and full detail text were visually inspected at 80 columns. Further final
-Core/Network/build results are recorded in the ticket at integration.
+Compact January/July and full detail text were visually inspected at 80 columns. Final integration checks: 46 Core tests and 20 Network tests pass; the Release gaming solution builds with zero warnings/errors.
