@@ -1,0 +1,16 @@
+{
+  "port": 5088,
+  "frontend_port": 5173,
+  "observation_cache_seconds": 5,
+  "snapshot_timeout_seconds": 45,
+  "docker_command_timeout_seconds": 5,
+  "max_request_bytes": 32768,
+  "docker_observation": {
+    "max_concurrent_reads": 4,
+    "max_response_bytes": 16777216,
+    "endpoint_cache_seconds": 60,
+    "min_api_version": "1.41",
+    "max_api_version": "1.51"
+  },
+  "source": "Local-development service limits, not performance measurements or model assumptions. No public bind/authentication is supported."
+}

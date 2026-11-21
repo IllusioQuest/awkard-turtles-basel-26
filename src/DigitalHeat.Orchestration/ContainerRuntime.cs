@@ -22,6 +22,8 @@ public sealed record RuntimeAttempt(string FleetId, string AttemptId, WorkloadRe
 public sealed record ContainerObservation(string State, string? ContainerId, bool Ready)
 {
     public bool Terminal => State is "exited" or "dead";
+    public int? ExitCode { get; init; }
+    public DateTimeOffset? ReportedFinishedAtUtc { get; init; }
 }
 
 public interface IWorkloadRuntime
@@ -99,7 +101,15 @@ public sealed class DockerWorkloadRuntime(IDockerCommands docker) : IWorkloadRun
             try { Run(a.Node, new[] { "exec", "--user", a.Profile.User, ids[0] }.Concat(a.Profile.ReadyCommand).ToArray()); }
             catch (InvalidOperationException) { ready = false; }
         }
-        return new(status, ids[0], ready);
+        DateTimeOffset? finished = null;
+        if (state.TryGetProperty("FinishedAt", out var ended) && ended.ValueKind == JsonValueKind.String
+            && DateTimeOffset.TryParse(ended.GetString(), CultureInfo.InvariantCulture, DateTimeStyles.None, out var at)
+            && at.Year > 1) finished = at.ToUniversalTime();
+        return new(status, ids[0], ready)
+        {
+            ExitCode = status is "exited" or "dead" && state.TryGetProperty("ExitCode", out var code) ? code.GetInt32() : null,
+            ReportedFinishedAtUtc = finished
+        };
     }
 
     public void Create(RuntimeAttempt a)

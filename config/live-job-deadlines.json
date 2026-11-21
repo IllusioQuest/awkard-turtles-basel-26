@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "poll_interval_seconds": 1,
+  "max_queued_jobs": 100,
+  "source": "User-approved experimental local service policy, 2026-11-21. Queue/startup counts. Not measured SLAs, hardware-independent runtime claims or hourly simulation parameters.",
+  "profiles": [
+    {
+      "id": "small-transcription",
+      "job_id": "transcription-whisper-base",
+      "work_unit": "audio minute",
+      "max_work_units": 15,
+      "deadline_seconds": 300,
+      "evidence": "docs/jobs/transcription.md: 4.62 seconds per audio minute on measured AMD laptop, 8 threads; roughly 69.3 seconds for 15 minutes. Does not establish performance on another hardware/queue or model. User chose 300-second target."
+    },
+    {
+      "id": "small-summary",
+      "job_id": "llm-summary-apertus-8b",
+      "work_unit": "audio minute summarised",
+      "max_work_units": 15,
+      "deadline_seconds": 300,
+      "evidence": "docs/jobs/llm-summary.md: 14.98-minute transcript, 3310 input/319 generated tokens, 133.3 seconds on measured AMD laptop. Input bound is operator-declared and assumes comparable token/output bounds, not arbitrary 15-minute documents. User chose 300-second target."
+    },
+    {
+      "id": "finite-research",
+      "job_id": "research-sim-montecarlo",
+      "work_unit": "simulation task",
+      "max_work_units": 320,
+      "deadline_seconds": 600,
+      "evidence": "docs/jobs/research-sim.md: finite 320-task measurement, 274.4 seconds on Intel Core Ultra 7 255H, 8 workers. Infinite PASSES=0 is not this bounded job. User chose 600-second target."
+    }
+  ]
+}
