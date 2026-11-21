@@ -10,7 +10,7 @@ public sealed record NetworkTotals(double TotalHeatDemandKwh, double ServerHeatU
 
 /// <summary>Run settings written to <c>run.json</c> (decision 0025 §7).</summary>
 public sealed record NetworkRunInfo(double FillerAvailability, double? Type1ShareOverride,
-    IReadOnlyList<Type1Spec?> Type1Specs, string Command);
+    IReadOnlyList<Type1Spec?> Type1Specs, string Command, int TransferDelayHours = 0);
 
 /// <summary>
 /// Writes the map export contract of decision 0025 §7 into <c>results/network/&lt;scenario&gt;/&lt;strategy&gt;/</c>:
@@ -41,6 +41,7 @@ public static class NetworkExport
             ["type1JobsPerDay"] = new JsonObject(scenario.Sites.Select((s, i) =>
                 KeyValuePair.Create(s.Id, (JsonNode?)(info.Type1Specs[i]?.JobsPerDay)))),
             ["timezone"] = scenario.Timezone,
+            ["transferDelayHours"] = info.TransferDelayHours,
             ["command"] = info.Command,
             ["inputs"] = new JsonArray(scenario.InputFiles.Select(f => (JsonNode)new JsonObject
                 { ["path"] = Rel(f), ["sha256"] = Sha256(f) }).ToArray()),

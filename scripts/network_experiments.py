@@ -15,6 +15,9 @@ Experiments:
     B  filler availability phi (1.0/0.6/0.35/0.2) at share 0.3: B1, B2
     C  forecast error sigma24 (0/0.05/0.10/0.20, rho 0.8, fixed seed) for the LP at share 0.3
     D  network mix: all sites vs residential only (no hotels/pools) at share 0.3, incl. reserve controls
+    E  transfer delay d (0/1/4/12 h, decision 0030, an assumption sweep) at share 0.3: B2, B2-reserve (LP for d=4,12)
+
+Each row also reports moved Type 1 server-hours per avoided missed job versus B1 of the same setting.
 """
 
 from __future__ import annotations
@@ -55,6 +58,10 @@ def runs(with_lp: bool) -> list[tuple[str, list[str]]]:
     r.append(("D_network_mix", ["--strategy", GREEDY, "--type1-share", "0.3", "--exclude-kinds", RESIDENTIAL_ONLY]))
     if with_lp:
         r.append(("D_network_mix", ["--strategy", "LP", "--type1-share", "0.3", "--exclude-kinds", RESIDENTIAL_ONLY]))
+    for d in (0, 1, 4, 12):
+        r.append(("E_transfer_delay", ["--strategy", GREEDY, "--type1-share", "0.3", "--transfer-delay", str(d)]))
+        if with_lp and d in (4, 12):
+            r.append(("E_transfer_delay", ["--strategy", "LP", "--type1-share", "0.3", "--transfer-delay", str(d)]))
     return r
 
 
@@ -84,10 +91,22 @@ def main() -> int:
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, a.jobs)) as pool:
         results = [row for rows in pool.map(lambda t: run_one(*t), todo) for row in rows]
 
+    # Moved server-hours per avoided missed job, versus B1 of the same setting (decision 0030).
+    def key(r):
+        return (r["experiment"], r.get("type1Share"), r.get("phi"), tuple(r.get("excludeKinds") or []),
+                r.get("transferDelayHours", 0))
+    b1 = {key(r): r for r in results if r["strategy"] == "B1"}
+    for r in results:
+        base = b1.get(key(r))
+        avoided = (base["type1Missed"] - r["type1Missed"]) if base else None
+        r["avoidedMissedJobsVsB1"] = avoided
+        r["movedServerHoursPerAvoidedJob"] = (r["type1MovedServerHours"] / avoided) if avoided else None
+
     OUT.mkdir(parents=True, exist_ok=True)
     fields = ["experiment", "strategy", "forecast", "type1Share", "phi", "excludeKinds", "sites", "coverage",
               "dumpedHeatKwh", "serverHours", "utilisation", "type1MissedDeadlinePercent", "type1Arrived",
-              "type1Missed", "type1MovedServerHours", "runtimeSeconds", "command"]
+              "type1Missed", "type1MovedServerHours", "transferDelayHours", "avoidedMissedJobsVsB1",
+              "movedServerHoursPerAvoidedJob", "runtimeSeconds", "command"]
     for exp in sorted({r["experiment"] for r in results}):
         rows = [r for r in results if r["experiment"] == exp]
         suffix = "-lp" if a.lp else ""

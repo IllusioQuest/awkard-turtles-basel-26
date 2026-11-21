@@ -16,7 +16,7 @@ namespace DigitalHeat.Network.Lp;
 /// Only pending (arrived) work is known; future arrivals are not foreseen. Commits the current hour:
 /// load per site, Type 1 allocations and filler.
 /// </summary>
-public sealed class RollingHorizonWorkLpScheduler : INetworkScheduler
+public sealed class RollingHorizonWorkLpScheduler(int transferDelayHours = 0) : INetworkScheduler
 {
     private const double RelativeTolerance = 1e-9, AbsoluteTolerance = 1e-9, ZeroDumpKwh = 1e-7;
 
@@ -82,7 +82,9 @@ public sealed class RollingHorizonWorkLpScheduler : INetworkScheduler
             for (int s = 0; s < n; s++)
             {
                 if (!c.EligibleSites[s]) continue;
-                for (int k = 0; k < lastHour; k++)
+                // Transfer delay (decision 0030): away from the origin only from hour arrival + d on.
+                int firstHour = s == c.OriginSite ? 0 : Math.Max(0, c.ArrivalHour + transferDelayHours - state.HourIndex);
+                for (int k = firstHour; k < lastHour; k++)
                 {
                     var v = solver.MakeNumVar(0, double.PositiveInfinity, "");
                     x[(ci, s, k)] = v;
