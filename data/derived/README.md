@@ -8,4 +8,4 @@ anything (e.g. the yearly results of the reference house). Otherwise it is git-i
 
 | File | Produced by | Inputs | Committed? |
 |---|---|---|---|
-| `reference-house/*.json` (three server-count comparisons) | `python scripts/export_reference_house.py` (.NET 8 required) | Basel 2025 hourly weather, ElCom 2026 snapshot, `config/reference-house.json`, `config/reference-house-results.json`, `config/job-scenarios/unlimited.json`, WP2 `data/raw/market/costs.csv`; script invokes the shared C# `DigitalHeat.YearRun` | yes; compact draft/jury figures |
+| `reference-house/*.json` (five server-count comparisons) | `python scripts/export_reference_house.py` (.NET 8 required) | Basel 2025 hourly weather, ElCom 2026 snapshot, `config/reference-house.json`, `config/reference-house-results.json`, `config/job-scenarios/unlimited.json`, WP2 `data/raw/market/costs.csv`; script invokes the shared C# `DigitalHeat.YearRun` | yes; compact draft/jury figures |

@@ -1,6 +1,22 @@
 {
   "variants": [
     {
+      "id": "three-server-comparison",
+      "serverCount": {
+        "value": 3,
+        "unit": "servers",
+        "source": "Team member requested a 3-server comparison on 2026-11-21; illustrative design variant, not a selected installation"
+      }
+    },
+    {
+      "id": "five-server-comparison",
+      "serverCount": {
+        "value": 5,
+        "unit": "servers",
+        "source": "Team member requested a 5-server comparison on 2026-11-21; illustrative design variant, not a selected installation"
+      }
+    },
+    {
       "id": "summer-hot-water-minimum",
       "serverCount": {
         "value": 1,

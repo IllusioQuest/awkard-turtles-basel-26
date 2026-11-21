@@ -8,27 +8,29 @@ units are in [`config/reference-house.json`](../../config/reference-house.json),
 [`docs/assumptions.md`](../assumptions.md), the [weather source](../../data/raw/open-meteo/SOURCE.md)
 and the [ElCom snapshot](../../data/raw/elcom/SOURCE.md).
 
-| Year result | 1 server: summer hot-water sizing | 4 servers: explorer comparison | 13 servers: cold-hour sizing |
+| Year result | 3 servers | 4 servers | 5 servers |
 |---|---:|---:|---:|
-| Heat demand covered by server heat | 19.5% | 58.0% | 100.0% |
-| Backup heat, kWh | 25,126 | 13,102 | 0 |
-| Heat dumped, kWh | 0 | 0 | 0* |
-| Utilisation of installed server-hours | 87.1% | 64.7% | 34.3% |
-| Full-load-equivalent server-hours (assumed sold) | 7,631 | 22,661 | 39,082 |
+| Heat demand covered by server heat | 45.5% | 58.0% | 69.9% |
+| Backup heat, kWh | 17,007 | 13,102 | 9,410 |
+| Heat dumped, kWh | 0 | 0 | 0 |
+| Utilisation of installed server-hours | 67.7% | 64.7% | 62.3% |
+| Full-load-equivalent server-hours (assumed sold) | 17,779 | 22,661 | 27,275 |
 | Missed deadlines | undefined | undefined | undefined |
-| Electricity cost, CHF | 2,537 | 7,535 | 12,995 |
-| Value of used heat, CHF | 812 | 2,411 | 4,154 |
-| Computing income at illustrative CHF 0.30/server-hour, CHF | 2,289 | 6,798 | 11,725 |
-| **Case break-even, CHF/server-hour** | **0.2261** | **0.2261** | **0.2262** |
+| Electricity cost, CHF | 5,911 | 7,535 | 9,069 |
+| Value of used heat, CHF | 1,892 | 2,411 | 2,902 |
+| Computing income at illustrative CHF 0.30/server-hour, CHF | 5,334 | 6,798 | 8,183 |
+| **Case break-even, CHF/server-hour** | **0.2261** | **0.2261** | **0.2261** |
 
-*With 13 servers, approximately 35 kWh remain in the tank at year end. This heat is not credited
-as used, which raises its break-even slightly despite essentially zero dumped heat. The 1-server
-and 13-server counts are rounded from the case's summer 0.6-server and coldest-hour 12.5-server
-calculations; 4 servers is the existing explorer scenario. None is approved as the team's chosen
-installation. The 12.5-server figure covers cold-hour **space heating**; hot water is additional
-and the tank bridges short gaps. Exact values: [1 server](../../data/derived/reference-house/summer-hot-water-minimum.json),
+The team asked to compare 3 and 5; 4 is the existing explorer scenario and a regression check,
+**not an optimum**. None is approved as the installation. Exact values:
+[3 servers](../../data/derived/reference-house/three-server-comparison.json),
 [4 servers](../../data/derived/reference-house/explorer-default.json),
-[13 servers](../../data/derived/reference-house/coldest-hour-capacity.json).
+[5 servers](../../data/derived/reference-house/five-server-comparison.json).
+The case-derived sizing bounds are also exported: [1 server](../../data/derived/reference-house/summer-hot-water-minimum.json)
+covers 19.5% at 87.1% utilisation; [13 servers](../../data/derived/reference-house/coldest-hour-capacity.json)
+cover 100% at 34.3% utilisation. The 13-server count rounds up the case's cold-hour
+**space-heating** requirement of 12.5 servers; hot water is additional and the tank bridges
+short gaps. About 35 kWh remain in that tank at year end and are not credited as used heat.
 
 ## How to read the money
 
@@ -49,11 +51,11 @@ annual straight-line depreciation. These are WP2 rows `cost-server-dell-r570` an
 verified as equivalent** to the case's heat-recovering 1 kW server; the life is another company's
 accounting estimate. VAT basis, installation and operations remain open.
 
-| Illustrative hardware-only sensitivity | 1 server | 4 servers | 13 servers |
+| Illustrative hardware-only sensitivity | 3 servers | 4 servers | 5 servers |
 |---|---:|---:|---:|
-| Annual depreciation, CHF | 1,375 | 5,499 | 17,871 |
-| Break-even incl. this depreciation only, CHF/server-hour | 0.4062 | 0.4687 | 0.6835 |
-| Combined surplus at CHF 0.30/h after this depreciation only, CHF/year | −811 | −3,824 | −14,987 |
+| Annual depreciation, CHF | 4,124 | 5,499 | 6,873 |
+| Break-even incl. this depreciation only, CHF/server-hour | 0.4581 | 0.4687 | 0.4781 |
+| Combined surplus at CHF 0.30/h after this depreciation only, CHF/year | −2,810 | −3,824 | −4,858 |
 
 Under this **non-equivalent hardware illustration**, CHF 0.30/h would not cover even the shown
 depreciation. In the case-only balance, a computing price below the case break-even fails before
@@ -66,10 +68,10 @@ See [WP2](../research/costs-and-energy.md) for the missing cost categories.
 
 Run `python scripts/export_reference_house.py` with .NET 8 installed. The script copies the
 committed raw weather, ElCom snapshot and unlimited-job scenario into temporary roots, varies
-only the sourced server count, invokes `DigitalHeat.YearRun` for each, and writes the three small
-JSON files above. Its exact variant inputs are in
+only the sourced server count, invokes `DigitalHeat.YearRun` for each, and writes five small
+JSON files. Its exact variant inputs are in
 [`config/reference-house-results.json`](../../config/reference-house-results.json). Repeating
-the command produced identical SHA-256 hashes for all three outputs. The year model and the
+the command produced identical SHA-256 hashes for all five outputs. The year model and the
 JavaScript explorer agree on the 4-server comparison (58.0%, zero dump, 22,661 server-hours,
 CHF 0.2261/h).
 

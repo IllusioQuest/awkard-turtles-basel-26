@@ -1,0 +1,148 @@
+{
+  "Summary": {
+    "ServerCount": 5,
+    "HeatingDays": 206,
+    "Hours": 8760,
+    "SpaceHeatDemandKwh": 26850.546875,
+    "HotWaterDemandKwh": 4380,
+    "TotalHeatDemandKwh": 31230.546875,
+    "ServerHeatUsedKwh": 21820.09375,
+    "BackupHeatKwh": 9410.453125,
+    "DumpedHeatKwh": 1.5543122344752192e-15,
+    "ServerHours": 27275.1171875,
+    "Utilisation": 0.6227195704908676,
+    "Coverage": 0.6986779270095634,
+    "ElectricityCostChf": 9068.97646484375,
+    "HeatValueChf": 2902.07246875,
+    "ComputingIncomeChf": 8182.53515625,
+    "BreakEvenChfPerServerHour": 0.2261,
+    "MissedDeadlines": "not modelled yet",
+    "JobDemandAssumption": "unlimited jobs; excess heat policy: wait; source: docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
+    "ProfitabilityNote": "Case break-even covers electricity minus used-heat value only. Hardware, integration and operations are excluded; this is not a full-cost profitability claim.",
+    "Jobs": null
+  },
+  "Parameters": {
+    "HoursPerDay": {
+      "Value": 24,
+      "Unit": "hours/day",
+      "Source": "docs/case/challenge.md: 24 hourly values per local day"
+    },
+    "HoursPerStep": {
+      "Value": 1,
+      "Unit": "hours",
+      "Source": "docs/case/challenge.md: hourly time steps"
+    },
+    "DesignHeatingKw": {
+      "Value": 10,
+      "Unit": "kW",
+      "Source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "BaseTemperatureC": {
+      "Value": 20,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: reference-house heating formula"
+    },
+    "FormulaDivisorC": {
+      "Value": 25.6,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: 20 minus 2025 coldest hourly temperature"
+    },
+    "HeatingDayThresholdC": {
+      "Value": 12,
+      "Unit": "°C",
+      "Source": "docs/case/challenge.md: daily mean strictly below 12 °C"
+    },
+    "HotWaterKwhPerDay": {
+      "Value": 12,
+      "Unit": "kWh/day",
+      "Source": "docs/case/challenge.md: four-person household hot water"
+    },
+    "TankCapacityKwh": {
+      "Value": 35,
+      "Unit": "kWh",
+      "Source": "docs/case/challenge.md: approximate usable storage, no losses"
+    },
+    "ServerElectricKw": {
+      "Value": 1,
+      "Unit": "kW/server",
+      "Source": "docs/case/challenge.md: rack-server reference"
+    },
+    "HeatRecoveryShare": {
+      "Value": 0.8,
+      "Unit": "fraction",
+      "Source": "docs/case/challenge.md: 80 percent recoverable into water"
+    },
+    "HeatPumpEfficiency": {
+      "Value": 2.5,
+      "Unit": "kWh heat/kWh electricity",
+      "Source": "docs/case/challenge.md: heat-value divisor"
+    },
+    "ServerCount": {
+      "Value": 5,
+      "Unit": "servers",
+      "Source": "Team member requested a 5-server comparison on 2026-11-21; illustrative design variant, not a selected installation"
+    },
+    "MinimumLoadShare": {
+      "Value": 0,
+      "Unit": "fraction/server",
+      "Source": "prototypes/year-explorer/index.html: zero-minimum-load comparison scenario"
+    },
+    "ElectricityPriceChfPerKwh": {
+      "Value": 0.3325,
+      "Unit": "CHF/kWh",
+      "Source": "data/raw/elcom/iwb-basel-h4-2026.json: Basel total 33.25 Rp./kWh divided by 100"
+    },
+    "ComputePriceChfPerServerHour": {
+      "Value": 0.3,
+      "Unit": "CHF/server-hour",
+      "Source": "prototypes/year-explorer/index.html: illustrative slider value only; TODO(source) for market-backed compute income"
+    }
+  },
+  "JobScenario": {
+    "Mode": "unlimited",
+    "ExcessHeatPolicy": "wait",
+    "Source": "docs/case/challenge.md: unlimited jobs are allowed if the assumption is stated; wait is the reference-house heat-led comparison policy",
+    "JobTypes": []
+  },
+  "Inputs": {
+    "Weather": "data/raw/open-meteo/basel-2025-hourly.csv",
+    "Electricity": "data/raw/elcom/iwb-basel-h4-2026.json",
+    "Config": "config/reference-house.json",
+    "JobScenario": "config\\job-scenarios\\unlimited.json",
+    "VariantConfig": "config/reference-house-results.json",
+    "HardwareCostResearch": "data/raw/market/costs.csv"
+  },
+  "Variant": {
+    "Id": "five-server-comparison",
+    "Status": "illustrative, not team-selected",
+    "ServerCount": {
+      "value": 5,
+      "unit": "servers",
+      "source": "Team member requested a 5-server comparison on 2026-11-21; illustrative design variant, not a selected installation"
+    }
+  },
+  "HardwareIllustration": {
+    "Status": "illustrative partial cost, not a full-cost result",
+    "Purpose": "Illustrative hardware-depreciation sensitivity only; this air-cooled product is not established as an equivalent heat-recovering reference server or chosen hardware.",
+    "PurchaseCost": {
+      "RowId": "cost-server-dell-r570",
+      "ValueChfPerServer": 8248.03,
+      "SourceUrl": "https://www.digitec.ch/de/s1/product/dell-poweredge-r570-xeon-6507p-32-gb-rack-server-server-66461463",
+      "Accessed": "2026-11-20"
+    },
+    "AccountingLife": {
+      "RowId": "lifetime-microsoft-server-accounting",
+      "Years": 6.0,
+      "SourceUrl": "https://www.microsoft.com/investor/reports/ar22/",
+      "Accessed": "2026-11-20"
+    },
+    "AnnualDepreciationChf": 6873.358333333334,
+    "BreakEvenWithThisDepreciationOnlyChfPerServerHour": 0.4781010559838528,
+    "SystemSurplusAfterThisDepreciationOnlyChf": -4857.727173177083
+  },
+  "FullCost": {
+    "Status": "unknown: no comparable hardware system, complete installation or operations quote",
+    "Formula": "(electricity - used-heat value + annual hardware depreciation + annual operations + annualized installation) / sold server-hours",
+    "BreakEvenChfPerServerHour": null
+  }
+}
