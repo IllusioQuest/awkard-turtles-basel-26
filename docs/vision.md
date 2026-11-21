@@ -12,6 +12,14 @@ services and which scheduling, for the host of the servers *and* for DigitalHeat
 The case owner wants a working business idea, not only a demonstrator. Our answer must show
 where the model works, for whom, and where it does not.
 
+## Residential houses must pay off (meta-insight, 2026-11-21)
+
+DigitalHeat has not worked with single-family houses yet, but chose a simple residential house as
+the case reference and speaks of homes throughout. Competitors failed or retreated exactly there
+(`research/competitors.md`). Our task is therefore to **make residential houses profitable**, not to
+move away from them. Business model v2 (ticket T-34): sovereign Swiss GPU cloud that heats homes,
+sized for year-round heat, refurbished hardware, compute-heavy premium AI, routing instead of dumping.
+
 ## Who must win
 
 | Actor | Example | Wins when ... |
@@ -117,9 +125,23 @@ Pitch must still open with the case's key figures for the reference house (see
 - Future scenarios: Swiss climate scenarios (e.g. CH2018), electricity and compute price
   scenarios. Not yet in the research plan.
 
-**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability.
+**Hardware (decided 2026-11-21):** GPU inference servers (L4 profile) are the main pitch scenario; CPU and consumer-GPU profiles are shown as comparison (`research/hardware.md`). Finding: hardware cost, not electricity, decides profitability. **Per job type (decision 0018):** Type 1 (AI services) on GPU, Type 2 (batch compute) on CPU; scored reference-house figures use the CPU values measured on the laptop.
+
+## Two job types (proposed, decision 0018, 2026-11-21)
+
+The job model of business model v2 (T-34); makes the "filler load" below concrete.
+
+- **Type 1, sovereign AI services (pays):** mainly transcription (T-02) and a batch LLM service priced
+  per token (T-33, Apertus 8B); OCR and indexing later. Served first.
+- **Type 2, batch compute filler (heats):** leftover heat-led capacity sold through our own job
+  broker for simulations and research computing (Monte Carlo, parameter sweeps, Python/C++ batch).
+  Heat-led price between electricity cost (0.226 / 0.3325) and Swiss spot (1.80); scored figures
+  keep 0.66. Fill as much as possible, no unpaid work; unsold hours go to the backup heater.
+  Scored figures assume all hours sold; fill rate 0.35 (`research/filler-demand.md`) as sensitivity.
 
 ## Under consideration: filler load sold as spot capacity (2026-11-21)
+
+> Made concrete as Type 2 by decision 0018 (proposed); kept here as background.
 
 Real demand for our premium service (confidential transcription) fills only a tiny share of a
 house's server capacity: about 436 audio hours per 1 kW server-hour (T-02) against 428 dictation

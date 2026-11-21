@@ -1,0 +1,4 @@
+rep,wall_s,work_units,work_unit,rapl_gross_kwh,rapl_net_kwh,battery_gross_kwh,battery_net_kwh,rapl_mean_w,battery_mean_w
+0,132.008,14.981,audio minute summarised,0.0009145960108333333,0.0007874220473854522,,,25.13394312858511,
+1,132.862,14.981,audio minute summarised,0.0009147580591666666,0.0007867615504378663,,,25.138329203257523,
+2,134.947,14.981,audio minute summarised,0.000930796735,0.0008007906844172754,,,25.00639615787886,
