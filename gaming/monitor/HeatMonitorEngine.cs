@@ -10,7 +10,7 @@ public sealed record MonitorNodeInfo(string NodeId, string SiteId, int SessionSl
 
 /// <summary>Inputs of one site for one hour, with a label saying where each number came from.</summary>
 public sealed record SiteHour(DemandHour Demand, string DemandSource, double? TemperatureC,
-    double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh, string PriceSource);
+    double ElectricityPriceChfPerKwh, double HeatValueChfPerKwh, string PriceSource, string? TemperatureSource = null);
 
 /// <summary>One aligned hour for all monitored sites. <c>Mode</c> is "replay" or "live".</summary>
 public sealed record HourInputs(string Mode, string LocalLabel, DateTimeOffset IntervalStartUtc,

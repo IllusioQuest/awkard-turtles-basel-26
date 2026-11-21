@@ -72,7 +72,8 @@ public sealed class LiveSources(MonitorSetup setup, HttpClient http)
                 heatValue = p.Chf / setup.Reference.HeatPumpEfficiency.Value; // case: price ÷ heat-pump efficiency
                 priceSource = p.Label + " (annual tariff, not spot price; H4 proxy for non-household sites)";
             }
-            sites[siteId] = new SiteHour(demand, demandSource, liveTemperature, price, heatValue, priceSource);
+            sites[siteId] = new SiteHour(demand, demandSource, liveTemperature, price, heatValue, priceSource,
+                liveTemperature is null ? "Current forecast unavailable; no temperature substituted" : "Current Open-Meteo hourly forecast; not a local sensor");
         }
         return new LiveHourResult(new HourInputs("live", label, startUtc, sites), warnings);
     }
@@ -162,13 +163,14 @@ public sealed class DockerProbe(MonitorSetup setup, IDockerCommandRunner docker)
                 var state = docker.Run(["--context", profile.DockerContext, "inspect", "--format", "{{.State.Running}} {{.State.Paused}}", ids[0]]).Trim();
                 if (state != "true false") { result[node.NodeId] = new(false, null, "not available (stopped or paused)"); continue; }
                 bool? appRunning = null;
+                string processDetail = "";
                 if (!setup.IncompatibleNodes.ContainsKey(node.NodeId))
                 {
-                    // pgrep exits 1 when nothing matches; the runner turns that into an exception.
+                    // The API runner maps pgrep's clean no-match result to empty output; errors remain unknown.
                     try { appRunning = docker.Run(["--context", profile.DockerContext, "exec", ids[0], "pgrep", "-f", app.Executable]).Trim().Length > 0; }
-                    catch (InvalidOperationException) { appRunning = false; }
+                    catch (Exception) { processDetail = "; application probe unavailable"; }
                 }
-                result[node.NodeId] = new(true, appRunning, "running " + ids[0][..Math.Min(12, ids[0].Length)]);
+                result[node.NodeId] = new(true, appRunning, "running " + ids[0][..Math.Min(12, ids[0].Length)] + processDetail);
                 containers[node.NodeId] = (profile.DockerContext, ids[0]);
             }
             catch (Exception e) { result[node.NodeId] = new(false, null, "docker error: " + e.Message.Split('\n')[0]); }
