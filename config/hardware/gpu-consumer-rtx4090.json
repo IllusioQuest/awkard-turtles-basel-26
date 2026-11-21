@@ -1,0 +1,23 @@
+{
+  "Id": "gpu-consumer-rtx4090",
+  "Label": "Consumer GPU desktops (RTX 4090), scaled to 1 kW",
+  "Status": "variant: not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+  "Description": "One 'server' = 1 kW of electric load = two complete RTX 4090 desktops (450 W GPU each, about 100 W for the rest of both systems), the GPU variant A5 of docs/research/computing-price.md. Consumer hardware, sold on home-host GPU marketplaces.",
+  "TranscriptionModel": "faster-whisper large-v2 (GPU), proxy benchmark on a slower RTX 3070 Ti",
+  "UnitsPerServer": { "value": 2, "unit": "units/server", "source": "docs/research/computing-price.md A5: 2 x RTX 4090 (450 W TGP each) = about 1 kW (assumption)" },
+  "UnitElectricKw": { "value": 0.45, "unit": "kW/unit", "source": "data/raw/market/costs.csv power-gpu-nvidia-rtx4090-tgp: 450 W total graphics power (GPU only, not system draw)" },
+  "UnitPurchasePriceChf": { "value": 8150, "unit": "CHF/unit", "source": "data/raw/market/costs.csv cost-gpu-pccom-rtx4090-system: complete desktop i9-13900K, RTX 4090, 64 GB (high; VAT not explicit)" },
+  "HostElectricKw": { "value": 0.1, "unit": "kW/server", "source": "assumption: remainder of the 1 kW not covered by 2 x 450 W GPU TGP (CPU, RAM, PSU losses of both desktops), as implied by docs/research/computing-price.md A5; TODO(source) measured system draw" },
+  "HostPurchasePriceChf": { "value": 0, "unit": "CHF/server", "source": "no separate host: the units are complete desktops" },
+  "ServerElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation" },
+  "IdleElectricKw": { "value": null, "unit": "kW/server", "source": "TODO(source): idle draw of the desktops not sourced" },
+  "HeatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling: GPU water block about CHF 420 per card, data/raw/market/costs.csv cost-install-alphacool-gpu-block, compatibility with the RTX 4090 not established)" },
+  "PurchasePriceChfPerServer": { "value": 16300, "unit": "CHF/server", "source": "derived: 2 x CHF 8150; water cooling excluded" },
+  "LifetimeYears": { "value": 6, "unit": "years", "source": "data/raw/market/costs.csv lifetime-coreweave-technology-accounting (datacentre accounting life; consumer GPU life TODO(source), likely shorter)" },
+  "OpsChfPerServerYear": { "value": 1416, "unit": "CHF/server-year", "source": "derived: 2 boxes x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic)" },
+  "TranscriptionAudioHoursPerServerHour": { "value": 91.8, "unit": "audio hours/server-hour", "source": "derived: 2 GPUs x 45.88 audio h per GPU-hour, faster-whisper large-v2 fp16 batch 8 on an RTX 3070 Ti (data/raw/market/hardware.csv hw-perf-fasterwhisper-3070ti-largev2-b8, medium); conservative proxy, RTX 4090 not measured, TODO(source)" },
+  "WebhostingSitesPerServer": { "value": null, "unit": "sites/server", "source": "TODO(source): no sourced webhosting throughput per kW yet (T-23)" },
+  "SpotPriceChfPerServerHour": { "value": null, "unit": "CHF/server-hour", "source": "TODO(source): no datacentre spot product with an RTX 4090; see HomeHostPriceChfPerServerHour" },
+  "OnDemandPriceChfPerServerHour": { "value": 1.50, "unit": "CHF/server-hour", "source": "derived: 2 x CHF 0.7478 per GPU-hour RunPod RTX 4090 secure cloud (data/raw/market/compute-prices.csv cp-mkt-runpod-4090-secure, high); docs/research/computing-price.md A5" },
+  "HomeHostPriceChfPerServerHour": { "value": 0.57, "unit": "CHF/server-hour", "source": "derived: 2 x CHF 0.2857 per GPU-hour RunPod RTX 4090 community cloud (cp-mkt-runpod-4090-community, high); vast.ai median 2 x 0.4201 = 0.84 (low); docs/research/computing-price.md A5" }
+}
