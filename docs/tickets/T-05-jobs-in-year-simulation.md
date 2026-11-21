@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core
 - **Depends on:** T-01
-- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** in progress (T-01 input pending)
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** PR #6 open (T-01 input pending)
 
 ## Goal
 
@@ -31,7 +31,7 @@ Make the year balance job-aware so it can report missed deadlines in % of jobs.
 
 ## Integration status
 
-The queue code and `YearRun` output are ready on `feat/T-05-job-queue`; see
+The queue code and `YearRun` output are ready in PR #6 on `feat/T-05-job-queue`; see
 `docs/model/job-queue.md` and decision 0010. The reference run remains explicitly unlimited,
 so `MissedDeadlinePercent` is `null`. A scored finite result needs T-01/T-02 to provide sourced
 arrival counts, work-unit throughput and deadlines. No such values were invented in this ticket.
