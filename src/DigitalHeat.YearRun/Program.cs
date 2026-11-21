@@ -5,13 +5,15 @@ using DigitalHeat.Network;
 using DigitalHeat.YearRun;
 
 var positional = new List<string>();
-string? bundlePath = null;
+string? bundlePath = null, sizingPath = null;
 for (int i = 0; i < args.Length; i++)
 {
     if (args[i] == "--output" && bundlePath is null && i + 1 < args.Length)
         bundlePath = Path.GetFullPath(args[++i]);
+    else if (args[i] == "--sizing" && sizingPath is null && i + 1 < args.Length)
+        sizingPath = Path.GetFullPath(args[++i]);
     else if (args[i].StartsWith("--", StringComparison.Ordinal))
-        throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json] [--output DIRECTORY]");
+        throw new ArgumentException("Usage: YearRun [repository-root] [job-scenario.json] [--output DIRECTORY] [--sizing FILE.json]");
     else positional.Add(args[i]);
 }
 if (positional.Count > 2) throw new ArgumentException("Too many positional arguments.");
@@ -23,6 +25,11 @@ var jobScenario = JobScenario.Load(scenarioPath);
 var weather = WeatherCsv.Read(Path.Combine(root, "data", "raw", "open-meteo", "basel-2025-hourly.csv"));
 VerifyElectricitySnapshot(Path.Combine(root, "data", "raw", "elcom", "iwb-basel-h4-2026.json"), parameters);
 var demand = HeatDemand.Build(weather, parameters);
+if (sizingPath is not null)
+{
+    SizingReport.Write(sizingPath, root, demand, parameters);
+    return;
+}
 IScheduler scheduler = jobScenario.Mode == "unlimited"
     ? new SingleSiteUnlimitedNetworkScheduler(
         NetworkScenarioLoader.Load(Path.Combine(root, "config", "network", "reference-only.json"), root)
