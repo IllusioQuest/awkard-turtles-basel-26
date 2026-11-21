@@ -43,9 +43,12 @@ public sealed class NodeFeedbackInbox
     public NodeFeedbackInbox(string directory, string stateDirectory, string fleetId, NodeFeedbackPolicy policy, WorkloadInventory inventory)
     {
         policy.Validate(inventory);
-        this.directory = Path.GetFullPath(directory); this.policy = policy; this.fleetId = fleetId;
+        this.directory = Path.GetFullPath(directory);
+        this.policy = policy;
+        this.fleetId = fleetId;
         bindingsIdentity = WorkloadJson.Identity(policy);
-        Directory.CreateDirectory(this.directory); Directory.CreateDirectory(stateDirectory);
+        Directory.CreateDirectory(this.directory);
+        Directory.CreateDirectory(stateDirectory);
         statePath = Path.Combine(stateDirectory, "node-feedback-state.json");
         if (!File.Exists(statePath)) return;
         var state = JsonSerializer.Deserialize<NodeFeedbackState>(File.ReadAllText(statePath), WorkloadJson.Options)
@@ -77,26 +80,44 @@ public sealed class NodeFeedbackInbox
                 if (stream.Length > policy.MaxReportBytes) throw new InvalidDataException("Report exceeds size policy.");
                 var report = JsonSerializer.Deserialize<NodeFeedback>(stream, WorkloadJson.Options)
                     ?? throw new InvalidDataException("Empty report.");
-                Validate(report, node, inventory, now);
-                if (reports.TryGetValue(node.Id, out var prior) && report.Sequence <= prior.Sequence)
-                {
-                    if (report.Sequence != prior.Sequence || report != prior) throw new InvalidDataException("Old sequence or conflicting replay.");
-                }
-                else
-                {
-                    reports[node.Id] = report;
-                    try { WriteAtomic(statePath, new NodeFeedbackState(fleetId, bindingsIdentity, reports.Values.ToArray())); }
-                    catch { if (prior is null) reports.Remove(node.Id); else reports[node.Id] = prior; throw; }
-                }
+                ValidateReport(report, node, inventory, now);
+                AcceptReport(report);
                 invalid.Remove(node.Id);
             }
             catch (Exception error) when (error is IOException or JsonException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
-            { invalid.Add(node.Id); errors.Add($"{node.Id}: {error.Message}"); }
+            {
+                invalid.Add(node.Id);
+                errors.Add($"{node.Id}: {error.Message}");
+            }
         }
         return errors.ToArray();
     }
 
-    private void Validate(NodeFeedback r, ComputeNode node, WorkloadInventory inventory, DateTimeOffset now)
+    private void AcceptReport(NodeFeedback report)
+    {
+        reports.TryGetValue(report.NodeId, out var prior);
+        if (prior is not null && report.Sequence <= prior.Sequence)
+        {
+            if (report.Sequence != prior.Sequence || report != prior)
+                throw new InvalidDataException("Old sequence or conflicting replay.");
+            return; // Identical retries must not renew expiry or cause another durable write.
+        }
+
+        reports[report.NodeId] = report;
+        try
+        {
+            WriteAtomic(statePath, new NodeFeedbackState(fleetId, bindingsIdentity, reports.Values.ToArray()));
+        }
+        catch
+        {
+            // Never enable admission from a report whose sequence watermark was not persisted.
+            if (prior is null) reports.Remove(report.NodeId);
+            else reports[report.NodeId] = prior;
+            throw;
+        }
+    }
+
+    private void ValidateReport(NodeFeedback r, ComputeNode node, WorkloadInventory inventory, DateTimeOffset now)
     {
         if (r.NodeId != node.Id || r.Sequence <= 0 || string.IsNullOrWhiteSpace(r.Source)
             || r.ObservedAtUtc.Offset != TimeSpan.Zero || r.ValidUntilUtc.Offset != TimeSpan.Zero
@@ -120,9 +141,9 @@ public sealed class NodeFeedbackInbox
             && r.ObservedAtUtc <= now && now < r.ValidUntilUtc;
         var heat = policy.HeatReporters.ToDictionary(b => b.SiteId, b => reports.TryGetValue(b.NodeId, out var r)
             && Fresh(r) && r.Heat is not null ? r : null, StringComparer.Ordinal);
-        var readyReports = reports.Values.Where(Fresh).ToArray();
         var until = basis.ResourceValidUntilUtc;
-        foreach (var r in readyReports) if (until is {} u && r.ValidUntilUtc < u) until = r.ValidUntilUtc;
+        foreach (var report in reports.Values.Where(Fresh))
+            if (until is {} expiry && report.ValidUntilUtc < expiry) until = report.ValidUntilUtc;
         return basis with
         {
             Revision = revision,
@@ -133,7 +154,7 @@ public sealed class NodeFeedbackInbox
         };
     }
 
-    internal static void WriteAtomic<T>(string path, T value)
+    private static void WriteAtomic<T>(string path, T value)
     {
         string temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
