@@ -52,3 +52,4 @@ later.
 | [0041](0041-cs16-linux-compatibility.md) | Isolated CS 1.6 Linux compatibility trial | proposed; user approved two-node Wine trial; reviewed with changes; T-53 |
 | [0043](0043-gaming-gpu-eligibility.md) | Gaming GPU eligibility with existing heat ranking | proposed; user approved; T-55 |
 | [0044](0044-event-driven-node-feedback.md) | Event-driven workload-owner node feedback | proposed; user approved; T-56 |
+| [0045](0045-bfs-residential-population.md) | Separate sourced residential-stock composition profile | proposed; user approved; T-59 |
