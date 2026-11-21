@@ -65,3 +65,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-36](T-36-hosting-heat-routing.md) | Shared scheduler drives hosting request routing | Nikita / Codex | in review (PR #19; depends on #12) |
 | [T-34](T-34-business-model-v2.md) | Business model v2: sovereign GPU cloud that heats homes profitably | 2 Pitch | T-14, T-35, T-11/T-12 | team lead + Claude | Team lead / Claude | in progress |
 
+
+| [T-38](T-38-hybrid-service-review.md) | Review hybrid GPU/CPU service proposal | Nikita / Codex | done: analysis only; implementation awaits user choice |
