@@ -1,0 +1,41 @@
+\section{Introduction}
+\label{sec:intro}
+
+A server is an electric heater that also computes: almost all of the electricity it draws ends up
+as heat. Homes, on the other hand, pay for heat for most of the year. Placing servers in homes and
+using their heat for space heating and hot water is therefore an old and attractive idea. It is
+also an idea that has repeatedly failed in the residential setting: Nerdalize went bankrupt
+\cite{nerdalize_bankruptcy}, Cloud\&Heat moved away from residential sites \cite{cloudandheat_history},
+and Qarnot discontinued its room radiators because of seasonality \cite{qarnot_techcrunch2023}.
+
+The core difficulty is a mismatch in time. For the reference house of the case (Basel, 2025
+weather; Section~\ref{sec:case}), the heat demand in the coldest hour would need 12.5 servers of
+\qty{1}{kW}, while hot water alone in summer needs about 0.6 servers
+(\texttt{docs/case/key-figures.md}). Computing demand does not follow this pattern. A design that
+is sized for the winter peak runs mostly idle or dumps heat in summer; a design sized for summer
+covers little of the winter demand.
+
+We ask three research questions:
+\begin{description}
+  \item[RQ1] How many servers per house, and with which scheduling strategy?
+  \item[RQ2] Which work fits which season, and where should it run?
+  \item[RQ3] Under which electricity, compute and hardware prices does it pay off, and for whom?
+\end{description}
+
+\paragraph{Contributions.} \todo{team to choose 3--4 of the candidates below (outline.md)}
+\begin{enumerate}
+  \item A formal model of heat-led job routing across sites as a linear programme with a rolling
+    horizon, which contains the greedy heat-following scheduler as its one-site, one-hour special
+    case (Sections~\ref{sec:model} and~\ref{sec:scheduling}).
+  \item An economic decomposition per server-hour: the case break-even (electricity minus used heat)
+    versus the full-cost break-even, and the split of the system surplus between host and operator
+    (Section~\ref{sec:economics}).
+  \item The tension between the case's ranking and the operator's money: at a filler price above the
+    electricity price, running all servers and dumping heat maximises the surplus, so heat-led
+    operation is a choice with a price (Section~\ref{sec:economics}).
+  \item Evidence that on a single house the greedy rule is optimal, while the value of planning and
+    routing arises in a network with deadlines and year-round heat sinks (Section~\ref{sec:evaluation}).
+  \item A demonstrator in which one scheduler drives both the year simulation and real containers
+    (Section~\ref{sec:demonstrator}).
+  \item \todo{sizing by load duration (not computed yet)}; \todo{capacity versus demand at city scale}.
+\end{enumerate}

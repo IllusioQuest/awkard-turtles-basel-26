@@ -5,6 +5,7 @@
 > to it. Figures marked **TODO** do not exist yet. The structure follows the paper outline in
 > [`docs/vision.md`](../vision.md), updated for the business model in decision
 > [0020](../decisions/0020-business-model-operator-two-job-types.md).
+> LaTeX draft: [`latex/`](latex/README.md) (`latexmk -pdf main.tex`).
 
 ## Working title
 
