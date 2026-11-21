@@ -38,4 +38,4 @@ Status: `case` = fixed by the case for the reference house · `sourced` = from a
 | A-023 | Platform commission (host-owned variant) | 0.15 of computing income | vast.ai host share ≈ 85 %, [`filler-demand.md`](research/filler-demand.md) §2 (low) | sourced (low) |
 | A-024 | Wear/replacement and installation | 0 (optimistic placeholders) | `TODO(source)`: T-35 (wear), installation bill of materials | ours (placeholder) |
 | A-025 | Gas / oil boiler efficiency | 0.9 kWh heat/kWh fuel | KTBL heating-oil sheet (90–95 %), via search summary (low) | sourced (low) |
-| A-026 | Unsold server-hours | servers off, no idle draw (GPU idle power `TODO(source)`) | ours, decision 0026 | ours |
+| A-026 | Unsold server-hours | servers off, no idle draw (GPU idle power `TODO(source)`) | ours, decision 0028 | ours |

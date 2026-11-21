@@ -34,18 +34,31 @@ public static class EconomicsNames
     public static string Name(OperatingPolicy p) => p == OperatingPolicy.HeatLed ? "heat-led" : "always-on";
 }
 
-/// <summary>Filler and premium prices for hardware profiles whose id starts with the prefix.</summary>
+/// <summary>
+/// Job-model figures for hardware profiles whose id starts with the prefix (decision 0020): Type 1
+/// (batch LLM, priced per token) is converted to CHF per server-hour with the profile's token
+/// throughput; Type 2 (research simulations) is priced per server-hour.
+/// </summary>
 public sealed class PriceSet
 {
     public required string HardwareProfilePrefix { get; init; }
-    public required ProfileValue FillerPriceChfPerServerHour { get; init; }
-    public required ProfileValue PremiumPriceChfPerServerHour { get; init; }
+    public required ProfileValue Type2PriceChfPerServerHour { get; init; }
+    public required ProfileValue Type1MillionTokensPerServerHour { get; init; }
+}
+
+/// <summary>Hardware profiles excluded from the economics defaults, with the reason (decision 0027).</summary>
+public sealed class ExcludedHardware
+{
+    public required string HardwareProfilePrefix { get; init; }
+    public required string Reason { get; init; }
 }
 
 public sealed class EconomicsLevers
 {
     public required int[] ServerCounts { get; init; }
-    public required double[] PremiumShares { get; init; }
+    public required double[] Type1Shares { get; init; }
+    public required double[] Type1PricesChfPerMillionTokens { get; init; }
+    public required double[] Type2FillRates { get; init; }
     public required string[] Policies { get; init; }
     public required string[] HeatAlternatives { get; init; }
     public required string Source { get; init; }
@@ -55,11 +68,11 @@ public sealed class EconomicsGrid
 {
     public required string HardwareProfile { get; init; }
     public required int[] ServerCounts { get; init; }
-    public required double[] PremiumShares { get; init; }
-    public required double[] FillRates { get; init; }
-    public required double FillerPriceMinChfPerServerHour { get; init; }
-    public required double FillerPriceMaxChfPerServerHour { get; init; }
-    public required double FillerPriceStepChfPerServerHour { get; init; }
+    public required double[] Type1Shares { get; init; }
+    public required double[] Type2FillRates { get; init; }
+    public required double Type2PriceMinChfPerServerHour { get; init; }
+    public required double Type2PriceMaxChfPerServerHour { get; init; }
+    public required double Type2PriceStepChfPerServerHour { get; init; }
     public required double ElectricityPriceMinChfPerKwh { get; init; }
     public required double ElectricityPriceMaxChfPerKwh { get; init; }
     public required double ElectricityPriceStepChfPerKwh { get; init; }
@@ -76,14 +89,15 @@ public sealed class EconomicsGrid
     }
 }
 
-/// <summary>Economic scenario parameters, <c>config/economics/*.json</c> (T-14, decision 0026).</summary>
+/// <summary>Economic scenario parameters, <c>config/economics/*.json</c> (T-14, decision 0028).</summary>
 public sealed class EconomicsParameters
 {
     public required string Description { get; init; }
     public required string HardwareDirectory { get; init; }
     public required string DefaultHardwareProfile { get; init; }
-    public required Parameter FillRate { get; init; }
-    public required Parameter PremiumShareOfOfferedHours { get; init; }
+    public required Parameter Type2FillRate { get; init; }
+    public required Parameter Type1ShareOfOfferedHours { get; init; }
+    public required Parameter Type1PriceChfPerMillionTokens { get; init; }
     public required Parameter WearReplacementSharePerYear { get; init; }
     public required Parameter HeatFeeChfPerKwh { get; init; }
     public required Parameter PlatformCommissionShare { get; init; }
@@ -97,18 +111,20 @@ public sealed class EconomicsParameters
     public required Parameter GasCo2KgPerKwhFuel { get; init; }
     public required EconomicsVariants Variants { get; init; }
     public required IReadOnlyList<PriceSet> PriceSets { get; init; }
+    public required IReadOnlyList<ExcludedHardware> NotPermittedHardware { get; init; }
     public required EconomicsLevers Levers { get; init; }
     public required EconomicsGrid Grid { get; init; }
-    public required Parameter RequiredPremiumShareStep { get; init; }
+    public required Parameter RequiredType1ShareStep { get; init; }
 
     private static readonly Dictionary<string, string> Units = new()
     {
-        [nameof(FillRate)] = "fraction", [nameof(PremiumShareOfOfferedHours)] = "fraction",
+        [nameof(Type2FillRate)] = "fraction", [nameof(Type1ShareOfOfferedHours)] = "fraction",
+        [nameof(Type1PriceChfPerMillionTokens)] = "CHF/1M tokens",
         [nameof(WearReplacementSharePerYear)] = "fraction/year", [nameof(HeatFeeChfPerKwh)] = "CHF/kWh",
         [nameof(PlatformCommissionShare)] = "fraction", [nameof(GasPriceChfPerKwhFuel)] = "CHF/kWh",
         [nameof(GasBoilerEfficiency)] = "kWh heat/kWh fuel", [nameof(OilPriceChfPerLitre)] = "CHF/litre",
         [nameof(OilEnergyKwhPerLitre)] = "kWh/litre", [nameof(OilBoilerEfficiency)] = "kWh heat/kWh fuel",
-        [nameof(RequiredPremiumShareStep)] = "fraction", [nameof(InstallationChfPerSite)] = "CHF/site",
+        [nameof(RequiredType1ShareStep)] = "fraction", [nameof(InstallationChfPerSite)] = "CHF/site",
         [nameof(OilCo2KgPerKwhFuel)] = "kg CO2/kWh fuel", [nameof(GasCo2KgPerKwhFuel)] = "kg CO2/kWh fuel"
     };
 
@@ -124,24 +140,31 @@ public sealed class EconomicsParameters
                 || string.IsNullOrWhiteSpace(item.Source))
                 throw new InvalidDataException($"Invalid value, unit or source for {name}.");
         }
-        if (e.FillRate.Value > 1 || e.PremiumShareOfOfferedHours.Value > 1 || e.PlatformCommissionShare.Value > 1
+        if (e.Type2FillRate.Value > 1 || e.Type1ShareOfOfferedHours.Value > 1 || e.PlatformCommissionShare.Value > 1
             || e.GasBoilerEfficiency.Value <= 0 || e.OilBoilerEfficiency.Value <= 0
-            || e.OilEnergyKwhPerLitre.Value <= 0 || e.RequiredPremiumShareStep.Value is <= 0 or > 1)
+            || e.OilEnergyKwhPerLitre.Value <= 0 || e.RequiredType1ShareStep.Value is <= 0 or > 1)
             throw new InvalidDataException("Economics values are outside valid bounds.");
         (e.Variants ?? throw new InvalidDataException("Missing economics variants.")).Validate();
         foreach (var s in e.PriceSets)
-            foreach (var v in new[] { s.FillerPriceChfPerServerHour, s.PremiumPriceChfPerServerHour })
+            foreach (var (v, unit) in new[] { (s.Type2PriceChfPerServerHour, "CHF/server-hour"),
+                         (s.Type1MillionTokensPerServerHour, "M tokens/server-hour") })
             {
-                if (v.Unit != "CHF/server-hour" || string.IsNullOrWhiteSpace(v.Source)
+                if (v.Unit != unit || string.IsNullOrWhiteSpace(v.Source)
                     || (v.Value is null && !v.Source.StartsWith("TODO(source)", StringComparison.Ordinal))
                     || v.Value is < 0)
                     throw new InvalidDataException($"Invalid price in price set {s.HardwareProfilePrefix}.");
             }
-        if (e.PriceSets.Any(s => s.FillerPriceChfPerServerHour.Value is null))
-            throw new InvalidDataException("Every price set needs a filler price.");
+        if (e.PriceSets.Any(s => s.Type2PriceChfPerServerHour.Value is null))
+            throw new InvalidDataException("Every price set needs a Type 2 price.");
+        if (e.NotPermittedHardware.Any(x => string.IsNullOrWhiteSpace(x.Reason)
+                || e.PriceSets.Any(s => s.HardwareProfilePrefix.StartsWith(x.HardwareProfilePrefix, StringComparison.Ordinal))))
+            throw new InvalidDataException("A not-permitted hardware profile needs a reason and no price set.");
         if (string.IsNullOrWhiteSpace(e.Levers.Source) || string.IsNullOrWhiteSpace(e.Grid.Source)
             || e.Levers.ServerCounts.Concat(e.Grid.ServerCounts).Any(n => n <= 0)
-            || e.Levers.PremiumShares.Concat(e.Grid.PremiumShares).Concat(e.Grid.FillRates).Any(x => x is < 0 or > 1))
+            || e.Levers.Type1Shares.Concat(e.Grid.Type1Shares).Concat(e.Grid.Type2FillRates)
+                .Concat(e.Levers.Type2FillRates).Any(x => x is < 0 or > 1)
+            || e.Levers.Type1PricesChfPerMillionTokens.Length == 0
+            || e.Levers.Type1PricesChfPerMillionTokens.Any(x => !double.IsFinite(x) || x < 0))
             throw new InvalidDataException("Invalid lever or grid axes.");
         foreach (var x in e.Levers.HeatAlternatives.Append(e.Grid.HeatAlternative)) EconomicsNames.ParseAlternative(x);
         foreach (var x in e.Levers.Policies.Append(e.Grid.Policy)) EconomicsNames.ParsePolicy(x);
@@ -204,7 +227,7 @@ public sealed class EconomicsVariants
 
 /// <summary>
 /// Executor for the year simulation that can only deliver as much load as there is sold work:
-/// achieved load = min(target, available share). Demand-side cap, decision 0026.
+/// achieved load = min(target, available share). Demand-side cap, decision 0028.
 /// </summary>
 public sealed class DemandLimitedExecutor : IExecutor
 {
@@ -220,54 +243,54 @@ public sealed class DemandLimitedExecutor : IExecutor
     public double ApplyTargetLoad(double targetLoadPerServer) => Math.Min(targetLoadPerServer, AvailableLoadPerServer);
 }
 
-/// <summary>Physical year of one site, split into premium and filler server-hours.</summary>
-public sealed record SiteYearOperation(int ServerCount, double PremiumServerHours, double FillerServerHours,
+/// <summary>Physical year of one site, split into Type 1 and Type 2 server-hours.</summary>
+public sealed record SiteYearOperation(int ServerCount, double Type1ServerHours, double Type2ServerHours,
     double ServerElectricKwh, double HeatUsedKwh, double HeatDemandKwh, double DumpedHeatKwh,
-    double Utilisation, double AvailableLoadShare, double UnservedPremiumServerHours)
+    double Utilisation, double AvailableLoadShare, double UnservedType1ServerHours)
 {
-    public double ServerHours => PremiumServerHours + FillerServerHours;
+    public double ServerHours => Type1ServerHours + Type2ServerHours;
     public double Coverage => HeatDemandKwh > 0 ? HeatUsedKwh / HeatDemandKwh : 0;
 }
 
 public static class SiteOperation
 {
     /// <summary>
-    /// Share of a server's capacity that has paid work: premium share p is served first,
-    /// filler fills φ of the rest, a = p + φ·(1 − p) (expected value of F = φ·N, decision 0014).
+    /// Share of a server's capacity that has paid work: Type 1 share p is served first,
+    /// Type 2 fills φ of the rest, a = p + φ·(1 − p) (expected value of F = φ·N, decision 0014).
     /// </summary>
-    public static double AvailableLoadShare(double premiumShare, double fillRate)
+    public static double AvailableLoadShare(double type1Share, double fillRate)
     {
-        if (premiumShare is < 0 or > 1 || fillRate is < 0 or > 1)
-            throw new ArgumentOutOfRangeException(nameof(premiumShare));
-        return premiumShare + fillRate * (1 - premiumShare);
+        if (type1Share is < 0 or > 1 || fillRate is < 0 or > 1)
+            throw new ArgumentOutOfRangeException(nameof(type1Share));
+        return type1Share + fillRate * (1 - type1Share);
     }
 
     /// <summary>Runs the unchanged year simulation and scheduler with the demand cap.</summary>
     public static SiteYearOperation Simulate(IReadOnlyList<DemandHour> demand, ReferenceParameters reference,
-        int serverCount, OperatingPolicy policy, double premiumShare, double fillRate)
+        int serverCount, OperatingPolicy policy, double type1Share, double fillRate)
     {
         double minimumLoad = policy == OperatingPolicy.AlwaysOn ? 1 : reference.MinimumLoadShare.Value;
         var p = reference.WithScenario(serverCount, minimumLoad);
-        double available = AvailableLoadShare(premiumShare, fillRate);
+        double available = AvailableLoadShare(type1Share, fillRate);
         var result = YearSimulation.Run(demand, p, new GreedyHeatScheduler(minimumLoad),
             new DemandLimitedExecutor(available));
-        return FromYear(result, premiumShare, fillRate, p.HoursPerStep.Value);
+        return FromYear(result, type1Share, fillRate, p.HoursPerStep.Value);
     }
 
     /// <summary>
-    /// Premium is served first in every hour: premium load = min(actual load, p), filler = the rest.
-    /// Premium capacity p that the heat-led schedule leaves unused in an hour is reported as
-    /// unserved: a premium buyer would have to be served elsewhere in that hour (lever G).
+    /// Type 1 is served first in every hour: Type 1 load = min(actual load, p), Type 2 = the rest.
+    /// Type 1 capacity p that the heat-led schedule leaves unused in an hour is reported as
+    /// unserved: a Type 1 buyer would have to be served elsewhere in that hour (lever G).
     /// </summary>
-    public static SiteYearOperation FromYear(YearResult result, double premiumShare, double fillRate,
+    public static SiteYearOperation FromYear(YearResult result, double type1Share, double fillRate,
         double hoursPerStep)
     {
-        double available = AvailableLoadShare(premiumShare, fillRate);
+        double available = AvailableLoadShare(type1Share, fillRate);
         double perLoad = result.Summary.ServerCount * hoursPerStep; // server-hours per unit of load and step
         double hours = result.Summary.ServerHours;
-        double premium = result.Hours.Sum(h => Math.Min(h.ActualLoadPerServer, premiumShare)) * perLoad;
-        double unserved = result.Hours.Sum(h => premiumShare - Math.Min(h.ActualLoadPerServer, premiumShare)) * perLoad;
-        return new SiteYearOperation(result.Summary.ServerCount, premium, hours - premium,
+        double type1 = result.Hours.Sum(h => Math.Min(h.ActualLoadPerServer, type1Share)) * perLoad;
+        double unserved = result.Hours.Sum(h => type1Share - Math.Min(h.ActualLoadPerServer, type1Share)) * perLoad;
+        return new SiteYearOperation(result.Summary.ServerCount, type1, hours - type1,
             result.Hours.Sum(x => x.ServerElectricKwh), result.Summary.ServerHeatUsedKwh,
             result.Summary.TotalHeatDemandKwh, result.Summary.DumpedHeatKwh, result.Summary.Utilisation,
             available, unserved);
@@ -277,7 +300,7 @@ public static class SiteOperation
 /// <summary>All money inputs for one evaluation; prices per 1 kW server-hour. The last four are
 /// installation (TODO(source), 0 in the base case) and the creative-ideas variants (0 = off).</summary>
 public sealed record EconomicInputs(double ElectricityPriceChfPerKwh, double HeatPriceChfPerKwh,
-    double HeatPumpEfficiency, double PremiumPriceChfPerServerHour, double FillerPriceChfPerServerHour,
+    double HeatPumpEfficiency, double Type1PriceChfPerServerHour, double Type2PriceChfPerServerHour,
     double PurchasePriceChfPerServer, double LifetimeYears, double OpsChfPerServerYear,
     double WearReplacementSharePerYear, double HeatFeeChfPerKwh, double PlatformCommissionShare,
     double InstallationChfPerSite = 0, double Co2CreditChfPerKwhHeat = 0,
@@ -288,21 +311,21 @@ public sealed record ActorSplit(double HostChf, double DigitalHeatChf)
     public bool WinWin => HostChf > 0 && DigitalHeatChf > 0;
 }
 
-public sealed record EconomicResult(double PremiumIncomeChf, double FillerIncomeChf, double HeatValueChf,
+public sealed record EconomicResult(double Type1IncomeChf, double Type2IncomeChf, double HeatValueChf,
     double ElectricityCostChf, double DepreciationChf, double WearChf, double OperationsChf,
     double InstallationChf, double Co2CreditChf, double SystemSurplusChf,
     double? CaseBreakEvenChfPerServerHour, double? FullCostBreakEvenChfPerServerHour,
     double? BreakEvenPurchasePriceFactor, double AffordableInstallationChfPerSite,
     ActorSplit OperatorModel, ActorSplit HostOwnedModel)
 {
-    public double ComputingIncomeChf => PremiumIncomeChf + FillerIncomeChf;
+    public double ComputingIncomeChf => Type1IncomeChf + Type2IncomeChf;
 }
 
 public static class Economics
 {
     /// <summary>
-    /// System surplus per year and its split (decision 0026, docs/model/economics.md):
-    /// surplus = premium + filler income + heat value (+ CO₂ credits) − electricity − depreciation
+    /// System surplus per year and its split (decision 0028, docs/model/economics.md):
+    /// surplus = Type 1 + Type 2 income + heat value (+ CO₂ credits) − electricity − depreciation
     /// − wear − operations − installation ÷ lifetime.
     /// Operator model: host = heat value − heat fee; DigitalHeat = the rest (it owns hardware and
     /// installation, pays electricity and operations, keeps income and credits).
@@ -312,9 +335,9 @@ public static class Economics
     {
         if (x.LifetimeYears <= 0 || x.HeatPumpEfficiency <= 0 || x.PlatformCommissionShare is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(x));
-        double premium = op.PremiumServerHours * x.PremiumPriceChfPerServerHour;
-        double filler = op.FillerServerHours * x.FillerPriceChfPerServerHour;
-        double income = premium + filler;
+        double type1 = op.Type1ServerHours * x.Type1PriceChfPerServerHour;
+        double type2 = op.Type2ServerHours * x.Type2PriceChfPerServerHour;
+        double income = type1 + type2;
         double heatValue = op.HeatUsedKwh * x.HeatPriceChfPerKwh;
         // Variant own PV: the expected sold kWh in PV-surplus hours (flat demand: share a of each
         // hour is sold) is bought at the forgone feed-in price instead of the retail price.
@@ -346,17 +369,17 @@ public static class Economics
         var operatorModel = new ActorSplit(heatValue - heatFee, surplus - (heatValue - heatFee));
         double commission = x.PlatformCommissionShare * income;
         var hostOwned = new ActorSplit(surplus - (commission - operations), commission - operations);
-        return new EconomicResult(premium, filler, heatValue, electricity, depreciation, wear, operations,
+        return new EconomicResult(type1, type2, heatValue, electricity, depreciation, wear, operations,
             installation, co2, surplus, caseBreakEven, fullBreakEven, priceFactor, affordableInstallation,
             operatorModel, hostOwned);
     }
 
     /// <summary>
-    /// Smallest premium share on the grid 0, step, ..., 1 for which <paramref name="criterion"/>
+    /// Smallest Type 1 share on the grid 0, step, ..., 1 for which <paramref name="criterion"/>
     /// holds; null if it never holds. Linear search because the year simulation is not linear in p
     /// (tank, caps).
     /// </summary>
-    public static double? RequiredPremiumShare(Func<double, EconomicResult> evaluateAtShare,
+    public static double? RequiredType1Share(Func<double, EconomicResult> evaluateAtShare,
         Func<EconomicResult, bool> criterion, double step)
     {
         if (step is <= 0 or > 1) throw new ArgumentOutOfRangeException(nameof(step));
@@ -369,11 +392,20 @@ public static class Economics
         return null;
     }
 
+    /// <summary>
+    /// Type 1 income per sold server-hour = million tokens per server-hour (profile throughput)
+    /// × price per million tokens (decision 0020: Type 1 is priced per token). 0 when the
+    /// throughput is TODO(source).
+    /// </summary>
+    public static double Type1PriceChfPerServerHour(PriceSet prices, double priceChfPerMillionTokens) =>
+        (prices.Type1MillionTokensPerServerHour.Value ?? 0) * priceChfPerMillionTokens;
+
     /// <summary>Inputs for one hardware profile from the central economics parameters (base case:
     /// creative-ideas variants are off unless co2Credits / ownPv are set).</summary>
     public static EconomicInputs InputsFor(HardwareProfile hardware, EconomicsParameters e,
         ReferenceParameters reference, HeatAlternative alternative, double electricityPriceChfPerKwh,
-        double? fillerPriceOverride = null, bool co2Credits = false, bool ownPv = false)
+        double? type2PriceOverride = null, bool co2Credits = false, bool ownPv = false,
+        double? type1PriceChfPerMillionTokensOverride = null)
     {
         var prices = e.PriceSetFor(hardware.Id);
         double ops = hardware.OpsChfPerServerYear.Value
@@ -381,8 +413,9 @@ public static class Economics
         const double KgPerTonne = 1000;
         return new EconomicInputs(electricityPriceChfPerKwh,
             e.HeatPriceChfPerKwh(alternative, electricityPriceChfPerKwh, reference.HeatPumpEfficiency.Value),
-            reference.HeatPumpEfficiency.Value, prices.PremiumPriceChfPerServerHour.Value ?? 0,
-            fillerPriceOverride ?? prices.FillerPriceChfPerServerHour.Value!.Value,
+            reference.HeatPumpEfficiency.Value, Type1PriceChfPerServerHour(prices,
+                type1PriceChfPerMillionTokensOverride ?? e.Type1PriceChfPerMillionTokens.Value),
+            type2PriceOverride ?? prices.Type2PriceChfPerServerHour.Value!.Value,
             hardware.PurchasePriceChfPerServer.Value!.Value, hardware.LifetimeYears.Value!.Value, ops,
             e.WearReplacementSharePerYear.Value, e.HeatFeeChfPerKwh.Value, e.PlatformCommissionShare.Value,
             e.InstallationChfPerSite.Value,

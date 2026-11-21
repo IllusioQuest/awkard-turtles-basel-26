@@ -4,7 +4,7 @@ using Xunit;
 
 namespace DigitalHeat.Core.Tests;
 
-/// <summary>Economics per actor (T-14, decision 0026): hand-checkable cases and case cross-checks.</summary>
+/// <summary>Economics per actor (T-14, decision 0028): hand-checkable cases and case cross-checks.</summary>
 public sealed class EconomicsTests
 {
     private static string Root()
@@ -23,11 +23,11 @@ public sealed class EconomicsTests
     private static IReadOnlyList<DemandHour> Demand() => HeatDemand.Build(
         WeatherCsv.Read(Path.Combine(Root(), "data", "raw", "open-meteo", "basel-2025-hourly.csv")), Reference());
 
-    // One server, 100 premium + 200 filler server-hours, 300 kWh, 240 kWh heat used.
+    // One server, 100 type1 + 200 type2 server-hours, 300 kWh, 240 kWh heat used.
     private static readonly SiteYearOperation Op = new(1, 100, 200, 300, 240, 1000, 0, 0.5, 0.5, 0);
 
     private static readonly EconomicInputs In = new(ElectricityPriceChfPerKwh: 0.3, HeatPriceChfPerKwh: 0.12,
-        HeatPumpEfficiency: 2.5, PremiumPriceChfPerServerHour: 3, FillerPriceChfPerServerHour: 1,
+        HeatPumpEfficiency: 2.5, Type1PriceChfPerServerHour: 3, Type2PriceChfPerServerHour: 1,
         PurchasePriceChfPerServer: 6000, LifetimeYears: 6, OpsChfPerServerYear: 100,
         WearReplacementSharePerYear: 0.01, HeatFeeChfPerKwh: 0.02, PlatformCommissionShare: 0.1,
         InstallationChfPerSite: 600);
@@ -78,10 +78,10 @@ public sealed class EconomicsTests
     [Fact]
     public void FullCostBreakEvenPriceZeroesTheSurplus()
     {
-        var noPremium = Op with { PremiumServerHours = 0, FillerServerHours = 300 };
-        var r = Economics.Evaluate(noPremium, In);
-        var atBreakEven = Economics.Evaluate(noPremium,
-            In with { FillerPriceChfPerServerHour = r.FullCostBreakEvenChfPerServerHour!.Value });
+        var noType1 = Op with { Type1ServerHours = 0, Type2ServerHours = 300 };
+        var r = Economics.Evaluate(noType1, In);
+        var atBreakEven = Economics.Evaluate(noType1,
+            In with { Type2PriceChfPerServerHour = r.FullCostBreakEvenChfPerServerHour!.Value });
         Assert.Equal(0, atBreakEven.SystemSurplusChf, 9);
     }
 
@@ -98,19 +98,19 @@ public sealed class EconomicsTests
     }
 
     [Fact]
-    public void DemandCapAndPremiumFirstSplit()
+    public void DemandCapAndType1FirstSplit()
     {
         Assert.Equal(0.25 + 0.35 * 0.75, SiteOperation.AvailableLoadShare(0.25, 0.35), 12);
         Assert.Equal(0.4, new DemandLimitedExecutor(0.4).ApplyTargetLoad(0.9), 12);
         Assert.Equal(0.1, new DemandLimitedExecutor(0.4).ApplyTargetLoad(0.1), 12);
-        // Two hours at load 0.6 and 0.1, two servers, p = 0.2: premium = (0.2 + 0.1) × 2 = 0.6,
-        // all work = 1.4, filler = 0.8, unserved premium = (0 + 0.1) × 2 = 0.2.
+        // Two hours at load 0.6 and 0.1, two servers, p = 0.2: type1 = (0.2 + 0.1) × 2 = 0.6,
+        // all work = 1.4, type2 = 0.8, unserved type1 = (0 + 0.1) × 2 = 0.2.
         HourResult H(double load) => new("t", 0, 0, 0, load, load, 0, 0, 0, 0, 0, 0, 0, load * 2);
         var summary = new YearSummary(2, 0, 2, 0, 0, 0, 0, 0, 0, 1.4, 0.35, 0, 0, 0, 0, null, "", "", "");
         var op = SiteOperation.FromYear(new YearResult([H(0.6), H(0.1)], summary), 0.2, 0.35, 1);
-        Assert.Equal(0.6, op.PremiumServerHours, 12);
-        Assert.Equal(0.8, op.FillerServerHours, 12);
-        Assert.Equal(0.2, op.UnservedPremiumServerHours, 12);
+        Assert.Equal(0.6, op.Type1ServerHours, 12);
+        Assert.Equal(0.8, op.Type2ServerHours, 12);
+        Assert.Equal(0.2, op.UnservedType1ServerHours, 12);
     }
 
     [Fact]
@@ -152,17 +152,40 @@ public sealed class EconomicsTests
         Assert.Equal("gpu-inference-l4", e.PriceSetFor("gpu-inference-l4-refurbished").HardwareProfilePrefix);
         Assert.Throws<InvalidDataException>(() => e.PriceSetFor("unknown-profile"));
         Assert.Null(e.TryPriceSetFor("unknown-profile"));
-        foreach (string id in new[] { "cpu-server", "gpu-consumer-rtx4090", "gpu-inference-l4" })
+        Assert.Equal("gpu-inference-t4", e.PriceSetFor("gpu-inference-t4-refurbished").HardwareProfilePrefix);
+        foreach (string id in new[] { "cpu-server", "gpu-inference-l4" })
             Assert.NotNull(e.PriceSetFor(id));
+        Assert.Equal("gpu-inference-l4", e.DefaultHardwareProfile);
     }
 
     [Fact]
-    public void RequiredPremiumShareFindsTheFirstPassingStep()
+    public void GeForceProfilesAreNotPermittedAndHaveNoPriceSet()
+    {
+        // Decision 0027: the GeForce driver licence excludes datacenter deployment.
+        var e = Config();
+        Assert.Null(e.TryPriceSetFor("gpu-consumer-rtx4090"));
+        Assert.Contains(e.NotPermittedHardware, x => "gpu-consumer-rtx4090".StartsWith(x.HardwareProfilePrefix, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Type1PricePerServerHourIsTokensTimesTokenPrice()
+    {
+        // Decision 0020: Type 1 is priced per token; L4 base 14.357 M tokens/server-hour × CHF 0.126 per 1M.
+        var e = Config();
+        var l4 = e.PriceSetFor("gpu-inference-l4");
+        double expected = l4.Type1MillionTokensPerServerHour.Value!.Value * e.Type1PriceChfPerMillionTokens.Value;
+        Assert.Equal(expected, Economics.Type1PriceChfPerServerHour(l4, e.Type1PriceChfPerMillionTokens.Value), 12);
+        Assert.InRange(expected, 1.80, 1.82);
+        Assert.Equal(0.66, e.PriceSetFor("gpu-inference-l4").Type2PriceChfPerServerHour.Value!.Value, 12);
+    }
+
+    [Fact]
+    public void RequiredType1ShareFindsTheFirstPassingStep()
     {
         static EconomicResult Fake(double s) => new(0, 0, 0, 0, 0, 0, 0, 0, 0, s - 0.137, null, null, null, 0,
             new ActorSplit(1, s - 0.137), new ActorSplit(1, s - 0.137));
-        Assert.Equal(0.14, Economics.RequiredPremiumShare(Fake, r => r.SystemSurplusChf > 0, 0.01)!.Value, 12);
-        Assert.Null(Economics.RequiredPremiumShare(Fake, r => r.SystemSurplusChf > 5, 0.01));
+        Assert.Equal(0.14, Economics.RequiredType1Share(Fake, r => r.SystemSurplusChf > 0, 0.01)!.Value, 12);
+        Assert.Null(Economics.RequiredType1Share(Fake, r => r.SystemSurplusChf > 5, 0.01));
     }
 
     [Fact]
@@ -173,13 +196,13 @@ public sealed class EconomicsTests
         {
             EconomicsBundle.Write(output, Root(), Path.Combine(Root(), "config", "economics", "reference-house.json"),
                 Demand(), Reference());
-            foreach (string f in new[] { "run.json", "parameters.json", "levers.csv", "required-premium.csv", "win-win.csv" })
+            foreach (string f in new[] { "run.json", "parameters.json", "levers.csv", "required-type1.csv", "win-win.csv" })
                 Assert.True(File.Exists(Path.Combine(output, f)), f);
             var grid = File.ReadAllLines(Path.Combine(output, "win-win.csv"));
             var g = Config().Grid;
-            int cells = EconomicsGrid.Axis(g.FillerPriceMinChfPerServerHour, g.FillerPriceMaxChfPerServerHour, g.FillerPriceStepChfPerServerHour).Length
+            int cells = EconomicsGrid.Axis(g.Type2PriceMinChfPerServerHour, g.Type2PriceMaxChfPerServerHour, g.Type2PriceStepChfPerServerHour).Length
                 * EconomicsGrid.Axis(g.ElectricityPriceMinChfPerKwh, g.ElectricityPriceMaxChfPerKwh, g.ElectricityPriceStepChfPerKwh).Length;
-            Assert.Equal(1 + cells * g.ServerCounts.Length * g.PremiumShares.Length * g.FillRates.Length, grid.Length);
+            Assert.Equal(1 + cells * g.ServerCounts.Length * g.Type1Shares.Length * g.Type2FillRates.Length, grid.Length);
             Assert.StartsWith("hardware_profile_id,", grid[0]);
         }
         finally { if (Directory.Exists(output)) Directory.Delete(output, true); }
