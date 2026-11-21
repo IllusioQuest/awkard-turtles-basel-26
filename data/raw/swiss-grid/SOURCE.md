@@ -40,6 +40,14 @@ Why 26 capitals: a 10 km grid has no point in Basel-Stadt (37 km²) and only two
 | Columns | `point_id`, `time_local`, `temperature_2m` (forecast model at lead 0, i.e. its own "actual"), the three forecast columns (°C) |
 | Caveat | The forecast models are not the archive reanalysis. Against the archive (`weather-2025-hourly`), all leads show ≈ +1.2 K bias and ≈ 2.6 K RMSE, i.e. mostly model difference, not forecast skill. **Measure forecast error against `temperature_2m` (lead 0) in this file**, and apply it to the archive temperatures if the scheduler needs archive-consistent forecasts |
 
+Provenance: batches 0–11 (240 points) fetched on Ennio's laptop; the remaining 195 points were fetched
+on a teammate's machine (Open-Meteo hourly limit reached here) and transferred as the finished
+file on 2026-11-21. Checked: the 240 overlapping points are identical value-for-value (2,102,400 rows).
+
+Forecast error (all 435 points, against lead 0 of the same model): 1 day ≈ 1.0 K RMSE, 2 days
+≈ 1.5 K, 3 days ≈ 1.7 K, bias ≤ 0.15 K. The lead-0 vs archive difference (≈ +0.7 K, RMSE 2.2 K;
+above 1,500 m ≈ +2.0 K, 3.6 K) is model/elevation difference, not forecast error.
+
 ## Checks (2026-11-21)
 
 - `python3 scripts/fetch_swiss_grid.py check`: every point has 8,760 hourly rows in both files.
