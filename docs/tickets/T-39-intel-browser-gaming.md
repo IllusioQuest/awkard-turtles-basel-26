@@ -29,3 +29,5 @@ Compatibility lab review: PR #22, https://github.com/IllusioQuest/awkard-turtles
 User confirmed actual streamed desktop and keyboard/input via screenshot. Applied live wallpaper stretch on A; visual follow-up pending. Summer placement explicitly prefers eligible hotel/spa heat sites independent of player location. All-sites-unavailable fallback still needs a choice. Non-disruptive repaint helper pushed d37beb2; see gaming-lab.md.
 
 Read linked live case. User requests largest available heat reserve for execution-site selection. Proposed definition and atomic per-site reservation accounting recorded in gaming-lab.md; await confirmation of headroom versus stored heat before changing interfaces. No numeric case parameters changed.
+
+User confirmed remaining useful heat capacity definition. Implemented shared helper and gaming-only atomic reservation model/demo in 540bbd7 (PR #22 updated). 14 gaming tests and 40 main-based Core tests pass, including legacy-output cross-check. This is reservation accounting only: actual batch preemption, launch/reconciliation and stream routing remain pending. ADR 0022 reviewed go with changes.
