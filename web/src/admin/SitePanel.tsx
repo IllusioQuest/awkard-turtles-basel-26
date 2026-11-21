@@ -104,9 +104,8 @@ export default function SitePanel({ run, house, state, series, t, fromMs, toMs, 
           <Line dataKey="load" stroke="var(--series-1)" strokeWidth={2} dot={history.length <= 2} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
-      <span className="note">{`${rangeLabel} up to the selected ${daily ? 'day' : 'hour'}${unit === 'hour' ? '' : `, mean per ${unit}`}`}</span>
 
-      <dl className="kv">
+      <dl className="kv" style={{marginTop: 8}}>
         {rows.map(([k, v]) => (
           <div key={k}>
             <dt>{k}</dt>

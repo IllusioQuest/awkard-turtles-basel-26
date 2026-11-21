@@ -202,8 +202,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const missedShare = totals.misses / Math.max(1, totals.completions + totals.misses)
   const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers })), [houses])
   const wall = wallMs(run, t)
-  const windowNote = `${rangeLabel} up to the selected ${step === HOURS_PER_DAY ? 'day' : 'hour'}`
-  const perBucket = bucketHours > 1 ? `${windowNote}, mean per ${unit}` : windowNote
 
   return (
     <main className="page admin">
@@ -347,15 +345,15 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
       <section className="charts">
         <div className="card">
-          <ChartHead label="Network load" note={perBucket} />
+          <ChartHead label="Network load" />
           <LoadChart data={buckets} t={wall} />
         </div>
         <div className="card">
-          <ChartHead label="Heat" note={perBucket} />
+          <ChartHead label="Heat" />
           <HeatChart data={buckets} t={wall} />
         </div>
         <div className="card wide">
-          <ChartHead label="Computing income and electricity cost per month" note="Whole run (not affected by the time range)" />
+          <ChartHead label="Computing income and electricity cost per month" />
           <EconomicsChart data={monthly} />
         </div>
         <div className="card wide">
@@ -395,11 +393,11 @@ function useWeatherField(source: DataSource, run: RunInfo, t: number, enabled: b
   }, [enabled, points.data, hours.data])
 }
 
-function ChartHead({ label, note }: { label: string; note: string }) {
+function ChartHead({ label, note }: { label: string; note?: string }) {
   return (
     <div className="card-head">
       <span className="label">{label}</span>
-      <span className="note">{note}</span>
+      {note && <span className="note">{note}</span>}
     </div>
   )
 }
