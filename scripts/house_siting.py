@@ -267,12 +267,24 @@ def build_report(zip_path: Path, evidence: dict, config_path: Path = DEFAULT_CON
     return "\n".join(lines)
 
 
-def extract_ai(zip_path: Path, model: str) -> dict:
+def extract_ai(zip_path: Path, model: str, out: Path | None = None) -> dict:
     """Ask a local Ollama vision model for proposed room evidence, page by page."""
     if not model or "/" in model or "\\" in model or ":cloud" in model.lower():
         raise ValueError("Provide a local Ollama model name")
     pdfs, _ = _read_zip(zip_path)
-    rooms = []
+    zip_sha256 = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+    result = {"mode": "local_ollama_unreviewed", "model": model,
+              "source_zip_sha256": zip_sha256, "completed_pages": [], "rooms": []}
+    if out is not None and out.exists():
+        previous = json.loads(out.read_text(encoding="utf-8"))
+        if (previous.get("mode") != result["mode"] or
+                previous.get("model") != model or
+                previous.get("source_zip_sha256") != zip_sha256):
+            raise ValueError("Existing AI checkpoint belongs to another model or ZIP")
+        validate_evidence(previous, pdfs)
+        result = previous
+    rooms = result["rooms"]
+    done_pages = {(page["pdf"], page["page"]) for page in result["completed_pages"]}
     with tempfile.TemporaryDirectory(prefix="house-siting-") as temp:
         for filename, raw in sorted(pdfs.items()):
             pdf_path = Path(temp) / filename
@@ -285,9 +297,11 @@ def extract_ai(zip_path: Path, model: str) -> dict:
             if count > 12:
                 raise ValueError("Too many plan pages for local review")
             for page in range(1, count + 1):
+                if (filename, page) in done_pages:
+                    continue
                 prefix = Path(temp) / f"page-{page}"
                 subprocess.run(["pdftoppm", "-f", str(page), "-l", str(page),
-                                "-singlefile", "-scale-to", "1600", "-jpeg",
+                                "-singlefile", "-scale-to", "1200", "-jpeg",
                                 str(pdf_path), str(prefix)], check=True,
                                capture_output=True)
                 image = base64.b64encode(prefix.with_suffix(".jpg").read_bytes()).decode("ascii")
@@ -296,11 +310,15 @@ def extract_ai(zip_path: Path, model: str) -> dict:
                     "Return JSON only: {\"rooms\":[{\"label\":string,"
                     "\"near_heating\":boolean|null,\"occupied_use\":boolean|null,"
                     "\"attic\":boolean|null,\"observations\":[string]}]}. "
-                    "Include only rooms visibly labelled on this page; null for unknown. "
+                    "Identify at most five visibly labelled rooms potentially relevant "
+                    "to siting equipment: heating, cellar, laundry, or work rooms. "
+                    "Keep each observation under ten words and give at most two per room. "
+                    "Use null for unknown; if none are visible, return an empty rooms list. "
                     "Do not estimate server count, electrical capacity or heating demand."
                 )
                 payload = json.dumps({
                     "model": model, "stream": False, "format": "json",
+                    "options": {"num_predict": 768},
                     "messages": [{"role": "user", "content": prompt, "images": [image]}],
                 }).encode("utf-8")
                 req = urllib.request.Request(
@@ -308,7 +326,7 @@ def extract_ai(zip_path: Path, model: str) -> dict:
                     headers={"Content-Type": "application/json"}, method="POST")
                 # Disable proxy environment variables; plan images must stay on loopback.
                 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-                with opener.open(req, timeout=180) as response:
+                with opener.open(req, timeout=600) as response:
                     content = json.loads(response.read())["message"]["content"]
                 proposed = json.loads(content)
                 for i, item in enumerate(proposed.get("rooms", []), 1):
@@ -319,8 +337,14 @@ def extract_ai(zip_path: Path, model: str) -> dict:
                         "occupied_use": item["occupied_use"], "attic": item["attic"],
                         "observations": item["observations"],
                     })
+                result["completed_pages"].append({"pdf": filename, "page": page})
+                if out is not None:
+                    checkpoint = out.with_suffix(out.suffix + ".tmp")
+                    checkpoint.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n",
+                                          encoding="utf-8")
+                    checkpoint.replace(out)
     validate_evidence({"rooms": rooms}, pdfs)
-    return {"mode": "local_ollama_unreviewed", "model": model, "rooms": rooms}
+    return result
 
 
 def extract_mock(zip_path: Path) -> dict:
@@ -357,7 +381,7 @@ def main() -> None:
         evidence = json.loads(args.evidence.read_text(encoding="utf-8"))
         output = build_report(args.zip, evidence, args.case_config)
     elif args.command == "extract-ai":
-        output = json.dumps(extract_ai(args.zip, args.model), indent=2, ensure_ascii=False)
+        output = json.dumps(extract_ai(args.zip, args.model, args.out), indent=2, ensure_ascii=False)
     else:
         output = json.dumps(extract_mock(args.zip), indent=2, ensure_ascii=False)
     args.out.write_text(output + "\n", encoding="utf-8")

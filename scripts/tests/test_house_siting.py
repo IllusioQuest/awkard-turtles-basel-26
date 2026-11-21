@@ -103,10 +103,14 @@ class HouseSitingTests(unittest.TestCase):
                 def open(self, request, **kwargs):
                     requests.append(request)
                     return Response()
+            checkpoint = Path(tmp) / "proposed.json"
             with patch.object(hs.subprocess, "run", side_effect=fake_run), patch.object(hs.urllib.request, "build_opener", return_value=Opener()) as build_opener:
-                result = hs.extract_ai(archive, "vision-local")
+                result = hs.extract_ai(archive, "vision-local", checkpoint)
+                resumed = hs.extract_ai(archive, "vision-local", checkpoint)
             self.assertEqual(build_opener.call_count, 2)
             self.assertEqual(len(requests), 2)
+            self.assertEqual(result, resumed)
+            self.assertEqual(len(json.loads(checkpoint.read_text())["completed_pages"]), 2)
             self.assertTrue(all(req.full_url == hs.OLLAMA_URL for req in requests))
             self.assertTrue(all(room["reviewed"] is False for room in result["rooms"]))
             payload = json.loads(requests[0].data)
