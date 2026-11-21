@@ -17,21 +17,27 @@ main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2
 .name{position:absolute;left:22px;top:18px;font-weight:700;font-size:clamp(15px,1.4vw,21px);opacity:.55}
 .heat{position:absolute;left:22px;top:44px;font-weight:300;font-size:clamp(28px,3.4vw,52px);font-variant-numeric:tabular-nums;line-height:1}
 .heat small{font-size:.4em;font-weight:500;opacity:.55;margin-left:4px}
-.server{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:clamp(84px,9vw,120px);aspect-ratio:1}
-.server svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
-.server .track{fill:none;stroke:#0000001a;stroke-width:5}
-.server .arc{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
-.server .slot{position:absolute;inset:12%;display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;align-content:center}
-.slot .tok.big:not(:only-child){width:40px;height:40px;font-size:14px}
-.state{position:absolute;left:50%;top:calc(44% + clamp(54px,5.6vw,74px));transform:translateX(-50%);font-size:clamp(12px,1vw,15px);
+.rack{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);display:flex;gap:clamp(8px,1.2vw,18px);align-items:flex-end}
+.srv{display:grid;justify-items:center;gap:4px;--load:0}
+.srv .box{position:relative;width:clamp(52px,5vw,72px);height:clamp(66px,6.4vw,94px);border-radius:10px;background:#13191c;overflow:hidden;box-shadow:0 2px 5px #0004}
+.srv .power{position:absolute;left:0;right:0;bottom:0;height:calc(var(--load)*100%);background:linear-gradient(to top,#ff6a1f,#ffb56b);transition:height .8s ease}
+.srv .slot{position:absolute;inset:0;display:grid;place-items:center}
+.srv .pct{font-size:clamp(13px,1.1vw,17px);font-weight:700;opacity:.75;font-variant-numeric:tabular-nums}
+.waves{height:30px;display:flex;justify-content:center;gap:7px;opacity:calc(var(--load)*1);transition:opacity .8s}
+.waves i{width:5px;height:24px;border-radius:3px;background:#ffffffb0;animation:rise 1.6s ease-in-out infinite}
+.waves i:nth-child(2){animation-delay:-.55s}.waves i:nth-child(3){animation-delay:-1.1s}
+@keyframes rise{0%{transform:translateY(10px) scaleY(.5);opacity:0}45%{opacity:1}100%{transform:translateY(-12px) scaleY(1);opacity:0}}
+.srv.frozen .box::after{content:"❄";position:absolute;right:4px;top:2px;font-size:14px;color:#cfe9ff}
+.state{position:absolute;left:50%;top:calc(42% + clamp(62px,6vw,84px));transform:translateX(-50%);font-size:clamp(12px,1vw,15px);
   font-weight:600;opacity:.55;white-space:nowrap}
 .queue{position:absolute;left:22px;right:96px;bottom:62px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:84px;overflow:hidden}
 .tok{--c:#888;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
   font-weight:700;font-size:12px;flex:none;box-shadow:0 1px 2px #0003}
 .tok.big{width:60px;height:60px;font-size:19px;background:conic-gradient(var(--c) calc(var(--p,0)*1turn),color-mix(in srgb,var(--c) 35%,white) 0);transition:--p .4s}
 .tok.filler{width:18px;height:18px;box-shadow:none;opacity:.75}
-.slot .tok.filler.big,.slot .tok.filler.big:not(:only-child){width:30px;height:30px}
-.node.paused .slot .tok{filter:saturate(.25) brightness(1.15)}
+.slot .tok.big{width:44px;height:44px;font-size:16px}
+.slot .tok.filler.big{width:28px;height:28px}
+.srv.frozen .slot .tok{filter:saturate(.25) brightness(1.15)}
 .add{position:absolute;left:18px;bottom:16px;border:1.5px solid #13191c55;border-radius:999px;padding:6px 14px;
   font-weight:600;font-size:14px;opacity:.55;transition:opacity .2s,background .2s}
 .add:hover{opacity:1;background:#ffffff55}
@@ -85,7 +91,7 @@ footer b{color:var(--paper);font-weight:600}
   Each panel is a house with three servers (three tasks can run at once). The slider sets the room temperature the house wants
   (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Whenever something changes (a job arrives, a server becomes free, a slider moves) and at least once per hour (2 s here), the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
-  <br><br>Circles in the middle: the tasks running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
+  <br><br>Dark boxes: the house's servers. The orange column and the heat waves show each server's power, set by the scheduler from the heat the house wants; at 50 % every server runs at half power, gives half the heat and computes half as fast (the task on it fills more slowly). ❄ = frozen because no heat is wanted. A curved line shows a task moving between houses.
   Coloured circles: paid jobs with a deadline (number = job, colour = house it came from); they go first and move between houses. Small grey circles: research filler that heats whenever no paid job needs the server; it stays local.
   1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
   <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
@@ -112,8 +118,8 @@ function build(s){
   s.nodes.slice().sort((a,b)=>a.position-b.position).forEach(n=>{
     const el=document.createElement("section"); el.className="node"; el.dataset.id=n.id;
     el.innerHTML=`<div class="name">${n.label}</div><div class="heat"></div>
-      <div class="server"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="46"/>
-        <circle class="arc" cx="50" cy="50" r="46" stroke-dasharray="${ARC}" stroke-dashoffset="${ARC}"/></svg><div class="slot"></div></div>
+      <div class="rack">${Array.from({length:s.serversPerNode||1},()=>`<div class="srv"><div class="waves"><i></i><i></i><i></i></div>
+        <div class="box"><i class="power"></i><div class="slot"></div></div><div class="pct">0 %</div></div>`).join("")}</div>
       <div class="state"></div><div class="queue"></div>
       <button class="add" title="key ${s.nodes.indexOf(n)+1}">+ job</button><div class="note"></div>
       <div class="slider"><input type="range" min="${s.temperatureRange[0]}" max="${s.temperatureRange[1]}" step="0.5" aria-label="Target temperature in ${n.label}"></div>`;
@@ -167,7 +173,8 @@ function place(s){
   const before=new Map();st.tokens.forEach((e,id)=>e.isConnected&&before.set(id,e.getBoundingClientRect()));
   const first=!st.lastNode; const lastNode=st.lastNode||new Map(), nowNode=new Map(), want=new Set();
   for(const n of s.nodes){const card=cardOf(n.id);
-    for(const [kind,box] of [["running",card.querySelector(".slot")],["waiting",card.querySelector(".queue")]]){
+    const slots=[...card.querySelectorAll(".srv .slot")];
+    for(const [kind,box0] of [["running",null],["waiting",card.querySelector(".queue")]]){
       // Type 1 tasks first, then Type 2 filler (grey, local, never moves)
       const list=kind==="running"?[...n.running,...(n.fillerRunning||[]).map(f=>({id:f.id,job:"R",filler:true,progress:f.progress}))]
         :[...n.waiting,...Array.from({length:n.fillerWaiting||0},(_,k)=>({id:`${n.id}-fw${k}`,job:"R",filler:true}))];
@@ -175,6 +182,11 @@ function place(s){
       const shown=kind==="waiting"?list.slice(0,MAXQ):list;
       const els=shown.map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");
         if(kind==="running")e.style.setProperty("--p",t.progress??0);return e;});
+      if(kind==="running"){  // one running task per server box
+        els.forEach((e,k)=>{const b=slots[Math.min(k,slots.length-1)];if(e.parentElement!==b)b.appendChild(e);});
+        slots.forEach(b=>[...b.children].forEach(c=>{if(!els.includes(c))c.remove();}));
+        continue;}
+      const box=box0;
       els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
       [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
       if(kind==="waiting"&&list.length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${list.length-MAXQ}`;box.appendChild(m);}}}
@@ -218,8 +230,12 @@ function render(s){
     paint(el,+input.value);
     const work=n.running.length+n.waiting.length+(n.fillerRunning||[]).length+(n.fillerWaiting||0),paused=n.targetLoad===0;
     el.classList.toggle("paused",paused&&work>0);
-    el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-n.targetLoad)).toFixed(1));
-    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`+(n.actualLoad==null?"":` · measured ${Math.round(n.actualLoad*100)} %`);
+    // each server box: power column and heat waves = the load the scheduler set for every server
+    const busy=n.running.length+(n.fillerRunning||[]).length, nsrv=s.serversPerNode||1;
+    el.querySelectorAll(".srv").forEach((b,k)=>{const has=k<busy, load=has?n.targetLoad:0;
+      b.style.setProperty("--load",load);b.classList.toggle("frozen",has&&paused);
+      b.querySelector(".pct").textContent=has?(paused?"paused":`${Math.round(load*100)} %`):"idle";});
+    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`${nsrv} servers × ${Math.round(n.targetLoad*100)} % power`+(n.actualLoad==null?"":` · measured ${Math.round(n.actualLoad*100)} %`);
     el.querySelector(".state").title=n.error||"";}
   place(s);
   document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));

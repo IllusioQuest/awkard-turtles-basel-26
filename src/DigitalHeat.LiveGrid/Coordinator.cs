@@ -374,7 +374,7 @@ sealed class LiveCoordinator
                 step, stepSeconds = cfg.StepSeconds.Value, msToNextStep = Math.Round(msToNext),
                 scheduler = new { id = scheduler.Id, label = scheduler.Label }, autoSpawn,
                 tasksPerJob = (int)cfg.TasksPerJob.Value, deadlineSteps = (int)cfg.DeadlineSteps.Value,
-                serverHoursPerTask = cal.ServerHoursPerTask,
+                serverHoursPerTask = cal.ServerHoursPerTask, serversPerNode = cal.ServersPerNode,
                 temperatureRange = new[] { cfg.TargetTemperatureMinC.Value, cfg.TargetTemperatureMaxC.Value },
                 nodes = ids.Select((id, i) => new
                 {
