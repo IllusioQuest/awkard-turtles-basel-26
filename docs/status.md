@@ -62,7 +62,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 1. **Generic real-job executor implemented** (must-have 2). Fake-control tests and a neutral
    Busybox container demonstrate command mapping; an owner-supplied real job is still needed for
    the scored end-to-end demo.
-2. **Must-have 1 example jobs:** Nikita owns webhosting; Ennio's transcription job is measured (PR for T-02). At least one
+2. **Must-have 1 example jobs:** Nikita owns the separate gaming experiment (webhosting retired in T-40); Ennio's transcription job is measured (PR for T-02). At least one
    measured laptop run and energy scaling to 1 kW remain to be verified by their owners.
 3. **Year explorer (JavaScript) and C# core must give the same numbers.** Explorer default:
    4 servers, min load 0 %, tank 35 kWh, 0.3325 CHF/kWh → 58.0 % covered, 0 kWh dumped,
@@ -158,3 +158,4 @@ T-39 cleanup in progress on featur-gaming: user confirmed playable Xonotic and r
 weather per city, sourced profiles, synthetic fields marked per field; `scripts/build_network_dataset.py` (reproducible).
 Data for the network map: `docs/model/network-map-data.md`; mock export git-ignored (`scripts/make_network_mock_export.py`).
 The network map itself is built by Ennio; `prototypes/network-map-draft/` only holds reusable parts (cantons GeoJSON, loader).
+

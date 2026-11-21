@@ -120,7 +120,7 @@ ElCom snapshot, with exact source labels in the JSON file.
 ## Live control of a containerized job
 
 `DigitalHeat.LiveRun` attaches to an **already running Linux container**. It does not
-start or implement a workload. Nikita's webhosting and Ennio's transcription work own
+start or implement a workload. Ennio's transcription work owns
 their containers, descriptors and measurements; the descriptor format is
 [`config/jobs/job.schema.json`](config/jobs/job.schema.json). It records an ID,
 image or container command, supported controls, work unit, optional deadline,
@@ -166,3 +166,4 @@ not a sensor reading. A forced pause does not modify later reference snapshots.
 `docker stats` CPU use divided by the allowed CPU cores is shown as observed
 CPU load; it does not establish electrical power or recovered heat. See
 [`docs/decisions/0009-generic-job-control.md`](docs/decisions/0009-generic-job-control.md).
+
