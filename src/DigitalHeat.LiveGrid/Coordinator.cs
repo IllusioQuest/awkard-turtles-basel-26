@@ -253,6 +253,17 @@ sealed class LiveCoordinator
         return tasks;
     }
 
+    /// <summary>Share of the running task done, as the worker reports it (progress/&lt;node&gt;.json); null if unknown.</summary>
+    private double? Progress(int node, string taskId)
+    {
+        try
+        {
+            var root = JsonDocument.Parse(File.ReadAllText(Path.Combine(work, "progress", ids[node] + ".json"))).RootElement;
+            return root.GetProperty("task").GetString() == taskId ? root.GetProperty("fraction").GetDouble() : null;
+        }
+        catch (Exception) { return null; }
+    }
+
     private static bool TryDelete(string f)
     {
         try { File.Delete(f); return true; }
@@ -291,7 +302,8 @@ sealed class LiveCoordinator
                     waiting = tasks.Where(t => t.Node == i && !t.Running).OrderBy(t => t.DueStep).ThenBy(t => t.Id)
                         .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }).ToArray(),
                     running = tasks.Where(t => t.Node == i && t.Running)
-                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }).ToArray(),
+                        .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep,
+                            progress = Progress(i, t.Id) }).ToArray(),
                 }).ToArray(),
                 jobs = jobs.Values.OrderByDescending(j => j.Id).Take(12).Select(j => new
                 {

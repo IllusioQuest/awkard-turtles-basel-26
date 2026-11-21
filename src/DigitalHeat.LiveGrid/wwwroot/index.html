@@ -27,7 +27,7 @@ main{display:grid;gap:8px;min-height:0;grid-template-columns:repeat(var(--cols,2
 .queue{position:absolute;left:22px;right:96px;bottom:62px;display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:84px;overflow:hidden}
 .tok{--c:#888;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;
   font-weight:700;font-size:12px;flex:none;box-shadow:0 1px 2px #0003}
-.tok.big{width:48px;height:48px;font-size:17px}
+.tok.big{width:60px;height:60px;font-size:19px;background:conic-gradient(var(--c) calc(var(--p,0)*1turn),color-mix(in srgb,var(--c) 35%,white) 0);transition:--p .4s}
 .node.paused .slot .tok{filter:saturate(.25) brightness(1.15)}
 .add{position:absolute;left:18px;bottom:16px;border:1.5px solid #13191c55;border-radius:999px;padding:6px 14px;
   font-weight:600;font-size:14px;opacity:.55;transition:opacity .2s,background .2s}
@@ -52,6 +52,9 @@ footer b{color:var(--paper);font-weight:600}
 @keyframes fade{from{opacity:0}}
 .quiet{color:var(--muted)}
 .flyer{position:fixed;left:0;top:0;z-index:50;pointer-events:none}
+#flow{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:49}
+#flow .route{fill:none;stroke-width:5;stroke-linecap:round;opacity:.9;filter:drop-shadow(0 1px 2px #0006)}
+.more{height:30px;padding:0 10px;border-radius:15px;background:#13191c22;display:grid;place-items:center;font-weight:700;font-size:13px}
 #help{position:fixed;inset:0;display:none;place-items:center;background:#000a;z-index:90}
 #help.show{display:grid}
 #help div{max-width:620px;background:var(--paper);color:var(--ink);border-radius:16px;padding:22px 26px;font-size:16px;line-height:1.5}
@@ -73,12 +76,13 @@ footer b{color:var(--paper);font-weight:600}
   <button class="quiet" id="auto" title="A">auto-spawn off</button>
   <button class="quiet" id="helpBtn" title="?">?</button>
 </footer>
+<svg id="flow" aria-hidden="true"></svg>
 <div id="help"><div>
   <h2>How to read it</h2>
   Each panel is a house with one server. The slider sets the room temperature the house wants
   (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Every hour (a few seconds here) the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
-  <br><br>Big circle in the middle: the task running now (ring = measured CPU load; pale = paused).
+  <br><br>Big circle in the middle: the task running now; it fills as the real computation progresses, faster at higher load (ring = load the scheduler set; the measured CPU load is shown below it; pale = paused). A curved line shows a task moving between houses.
   Small circles: waiting tasks. Number = job, colour = house the job came from.
   1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
   <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
@@ -133,29 +137,58 @@ const spawn=id=>api(`/api/nodes/${id}/spawn`,{}).then(poll).catch(()=>{});
 /* tokens: one element per task file; a change of house is a calm flight */
 function tok(t){let e=st.tokens.get(t.id);
   if(!e){e=document.createElement("div");e.className="tok";e.textContent=t.job;e.style.setProperty("--c",colorOf(t.origin));
-    e.title=`Job ${t.job} from ${labelOf(t.origin)}`;e._new=true;st.tokens.set(t.id,e);}return e;}
-function fly(e,a,b){
-  const c=e.cloneNode(true);c.classList.add("flyer");c.style.width=a.width+"px";c.style.height=a.height+"px";document.body.appendChild(c);
-  const mx=(a.left+b.left)/2,my=Math.min(a.top,b.top)-40,s=b.width/a.width;
-  return c.animate([{transform:`translate(${a.left}px,${a.top}px)`},{transform:`translate(${mx}px,${my}px) scale(1.15)`,offset:.5},
-    {transform:`translate(${b.left}px,${b.top}px) scale(${s})`}],{duration:1400,easing:"cubic-bezier(.4,0,.2,1)"}).finished.then(()=>c.remove());
+    e.title=`Job ${t.job} from ${labelOf(t.origin)}`;st.tokens.set(t.id,e);}return e;}
+const MAXQ=14;   // visible waiting tokens per house; the rest is a "+n" counter
+const centreOf=r=>({x:r.left+r.width/2,y:r.top+r.height/2});
+/* A move between houses: a curved path in the job's colour is drawn from the old house to the new one,
+   the task travels along it, then the path fades. Driven by the task files, so every real move shows. */
+function flyAlong(colour,label,big,from,to){
+  const svg=$("#flow"), ns="http://www.w3.org/2000/svg", p=document.createElementNS(ns,"path");
+  const dx=to.x-from.x, dy=to.y-from.y, len=Math.hypot(dx,dy)||1, bend=Math.min(160,len*.28);
+  const cx=(from.x+to.x)/2-dy/len*bend, cy=(from.y+to.y)/2+dx/len*bend;
+  p.setAttribute("d",`M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`);
+  p.setAttribute("stroke",colour);p.setAttribute("class","route");svg.appendChild(p);
+  const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+  p.animate([{strokeDashoffset:L},{strokeDashoffset:0}],{duration:600,fill:"forwards",easing:"ease-out"});
+  const t=document.createElement("div");t.className="tok flyer"+(big?" big":"");t.textContent=label;t.style.setProperty("--c",colour);
+  document.body.appendChild(t);const half=(big?48:30)/2, start=performance.now()+250, dur=1900;
+  return new Promise(done=>{(function step(now){
+    const k=Math.min(1,Math.max(0,(now-start)/dur)), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, pt=p.getPointAtLength(L*e);
+    t.style.transform=`translate(${pt.x-half}px,${pt.y-half}px) scale(${1+.25*Math.sin(Math.PI*k)})`;
+    if(k<1)requestAnimationFrame(step);
+    else{t.remove();p.animate([{opacity:1},{opacity:0}],{duration:900,fill:"forwards"}).finished.then(()=>p.remove());done();}
+  })(performance.now());});
 }
 function place(s){
   const before=new Map();st.tokens.forEach((e,id)=>e.isConnected&&before.set(id,e.getBoundingClientRect()));
-  const want=new Set();
+  const first=!st.lastNode; const lastNode=st.lastNode||new Map(), nowNode=new Map(), want=new Set();
   for(const n of s.nodes){const card=cardOf(n.id);
     for(const [kind,box] of [["running",card.querySelector(".slot")],["waiting",card.querySelector(".queue")]]){
-      const els=n[kind].map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");return e;});
+      n[kind].forEach(t=>nowNode.set(t.id,{node:n.id,t,kind}));
+      const shown=kind==="waiting"?n[kind].slice(0,MAXQ):n[kind];
+      const els=shown.map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");
+        if(kind==="running")e.style.setProperty("--p",t.progress??0);return e;});
       els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
-      [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});}}
-  st.tokens.forEach((e,id)=>{if(!want.has(id)){const r=before.get(id);st.tokens.delete(id);
-    if(r){const c=e.cloneNode(true);c.classList.add("flyer");c.style.width=r.width+"px";c.style.height=r.height+"px";document.body.appendChild(c);
-      c.animate([{transform:`translate(${r.left}px,${r.top}px)`,opacity:1},{transform:`translate(${r.left}px,${r.top-24}px)`,opacity:0}],{duration:900}).finished.then(()=>c.remove());}}});
-  want.forEach(id=>{const e=st.tokens.get(id),a=before.get(id),b=e.getBoundingClientRect();
-    if(e._new){e._new=false;e.animate([{opacity:0,transform:"scale(.4)"},{opacity:1,transform:"scale(1)"}],{duration:700,easing:"ease-out"});return;}
-    if(!a)return;const dx=a.left-b.left,dy=a.top-b.top;if(Math.abs(dx)+Math.abs(dy)<1)return;
-    if(Math.hypot(dx,dy)>200){e.style.visibility="hidden";fly(e,a,b).then(()=>e.style.visibility="");}
-    else e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:500,easing:"ease-out"});});
+      [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
+      if(kind==="waiting"&&n[kind].length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${n[kind].length-MAXQ}`;box.appendChild(m);}}}
+  const queueCentre=id=>centreOf(cardOf(id).querySelector(".queue").getBoundingClientRect());
+  // tasks that left every house: done (or dropped after a missed deadline) - a short fade upwards
+  lastNode.forEach((v,id)=>{if(nowNode.has(id))return;const r=before.get(id),e=st.tokens.get(id);st.tokens.delete(id);
+    if(r&&e){const c=e.cloneNode(true);c.classList.add("flyer");document.body.appendChild(c);
+      c.animate([{transform:`translate(${r.left}px,${r.top}px)`,opacity:1},{transform:`translate(${r.left}px,${r.top-28}px)`,opacity:0}],{duration:900}).finished.then(()=>c.remove());}});
+  nowNode.forEach((v,id)=>{
+    const prev=lastNode.get(id), e=st.tokens.get(id), shown=e&&want.has(id);
+    if(!prev){if(shown&&!first){e._new=false;e.animate([{opacity:0,transform:"scale(.4)"},{opacity:1,transform:"scale(1)"}],{duration:700,easing:"ease-out"});}
+      if(e)e._new=false;return;}
+    const a=before.get(id), b=shown?e.getBoundingClientRect():null;
+    if(prev.node!==v.node){            // moved to another house: show the route
+      const from=a?centreOf(a):queueCentre(prev.node), to=b?centreOf(b):queueCentre(v.node);
+      if(shown)e.style.visibility="hidden";
+      flyAlong(colorOf(v.t.origin),v.t.job,false,from,to).then(()=>{if(e)e.style.visibility="";});
+    } else if(a&&b){const dx=a.left-b.left,dy=a.top-b.top;
+      if(Math.abs(dx)+Math.abs(dy)>=1&&e.style.visibility!=="hidden")e.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:500,easing:"ease-out"});}
+  });
+  st.lastNode=new Map([...nowNode].map(([id,v])=>[id,v]));
 }
 function note(id,text,cls,full){const c=cardOf(id);if(!c)return;const n=c.querySelector(".note");
   n.textContent=text;n.title=full||text;n.className="note show "+(cls||"");clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove("show"),4500);}
@@ -178,8 +211,8 @@ function render(s){
     paint(el,+input.value);
     const work=n.running.length+n.waiting.length,paused=n.targetLoad===0;
     el.classList.toggle("paused",paused&&work>0);
-    el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-(n.actualLoad??0))).toFixed(1));
-    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`;
+    el.querySelector(".arc").setAttribute("stroke-dashoffset",(ARC*(1-n.targetLoad)).toFixed(1));
+    el.querySelector(".state").textContent=n.error?"Docker: "+n.error.slice(0,70):!work?"no work":paused?"paused · no heat wanted":`running at ${Math.round(n.targetLoad*100)} %`+(n.actualLoad==null?"":` · measured ${Math.round(n.actualLoad*100)} %`);
     el.querySelector(".state").title=n.error||"";}
   place(s);
   document.querySelectorAll("[data-sched]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sched===s.scheduler.id));

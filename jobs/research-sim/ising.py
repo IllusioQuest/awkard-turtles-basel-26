@@ -53,7 +53,7 @@ WORK_UNIT = "simulation task"
 ONSAGER_TC = 2.0 / math.log(1.0 + math.sqrt(2.0))
 
 
-def simulate(task: dict) -> dict:
+def simulate(task: dict, progress=None) -> dict:
     """Metropolis checkerboard simulation of one task; returns per-spin observables.
 
     Energy per spin e = -(1/N) sum_<ij> s_i s_j; |m| = |sum s_i| / N. Susceptibility
@@ -75,7 +75,11 @@ def simulate(task: dict) -> dict:
     # Only dE = 4 and 8 can be rejected; acceptance probabilities exp(-dE/T).
     accept = {4: math.exp(-4.0 / temp), 8: math.exp(-8.0 / temp)}
     m_abs, m2, e1, e2 = [], [], [], []
-    for sweep in range(task["thermalisation_sweeps"] + task["sweeps"]):
+    total_sweeps = task["thermalisation_sweeps"] + task["sweeps"]
+    report_every = max(1, total_sweeps // 50)
+    for sweep in range(total_sweeps):
+        if progress is not None and sweep % report_every == 0:
+            progress(sweep / total_sweeps)
         for i in order:
             d_e = 2 * spins[i] * (spins[right[i]] + spins[left[i]] + spins[down[i]] + spins[up[i]])
             if d_e <= 0 or rng.random() < accept[d_e]:
@@ -126,9 +130,9 @@ def _work(args: tuple[dict, str]) -> tuple[str, int, int]:
     return task["id"], start, end
 
 
-def _calculate(task: dict) -> tuple[dict, int, int]:
+def _calculate(task: dict, progress=None) -> tuple[dict, int, int]:
     start = time.time_ns()
-    result = simulate(task)
+    result = simulate(task, progress)
     end = time.time_ns()
     result["runtime_s"] = (end - start) / 1e9
     return result, start, end
@@ -209,7 +213,7 @@ def _run_node(out_root: Path) -> None:
         except (FileNotFoundError, json.JSONDecodeError):
             path.unlink(missing_ok=True)
             continue
-        result, start, end = _calculate(task)
+        result, start, end = _calculate(task, lambda f, name=path.name: _write_progress(name, f))
         result["node_id"] = NODE_ID
         target = done / path.name
         tmp = done / f".{path.name}.{NODE_ID}.part"
@@ -218,6 +222,15 @@ def _run_node(out_root: Path) -> None:
         path.unlink(missing_ok=True)
         with node_log.open("a") as f:
             f.write(f"{task['id']},{task.get('job', '')},{start},{end},{NODE_ID}\n")
+
+
+def _write_progress(task_name: str, fraction: float) -> None:
+    """$WORK/progress/<node>.json: share of the running task's sweeps done (the view shows it)."""
+    d = WORK / "progress"
+    d.mkdir(exist_ok=True)
+    tmp = d / f".{NODE_ID}.tmp"
+    tmp.write_text(json.dumps({"task": task_name.removesuffix(".json"), "fraction": round(fraction, 3)}))
+    os.replace(tmp, d / f"{NODE_ID}.json")
 
 
 def _claim_next(queue: Path, running: Path) -> list[Path] | None:
