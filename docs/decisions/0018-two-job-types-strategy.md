@@ -1,6 +1,6 @@
 # 0018: Two job types: sovereign AI services (Type 1) and batch compute filler (Type 2)
 
-- **Status:** proposed
+- **Status:** proposed; hardware split ("Type 2 on CPU") superseded by 0019
 - **Date:** 2026-11-21
 - **Decided by:** Ennio; team confirmation pending. This is the job model inside business model v2 (T-34).
 
@@ -24,7 +24,8 @@ The sourced Basel transcription demand covers about 0.1 % of the reference house
   priced per token (T-33, Apertus 8B). OCR and document indexing come later. Sold as local and
   Swiss and served first. **Hardware:** Type 1 runs on GPU servers in the pitch scenario (T-15,
   T-34). The scored figures use the CPU values measured on the laptop.
-- **Type 2: batch compute filler (CPU).** The capacity left over whenever heat is needed is sold
+- **Type 2: batch compute filler** (originally "CPU"; superseded by decision 0019: Type 2 runs on the
+  same GPU nodes as Type 1). The capacity left over whenever heat is needed is sold
   for simulations and research computing: Monte Carlo (e.g. finance, physics), parameter sweeps,
   Python/C++ batch jobs. It is sold through **our own job broker**, as a queue of short, pausable
   tasks.
