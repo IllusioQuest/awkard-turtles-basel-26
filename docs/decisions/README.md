@@ -53,3 +53,5 @@ later.
 | [0043](0043-gaming-gpu-eligibility.md) | Gaming GPU eligibility with existing heat ranking | proposed; user approved; T-55 |
 | [0044](0044-event-driven-node-feedback.md) | Event-driven workload-owner node feedback | proposed; user approved; T-56 |
 | [0045](0045-bfs-residential-population.md) | Separate sourced residential-stock composition profile | proposed; user approved; T-59 |
+| 0048 | Jona unified network/admission boundary | reserved on feat/T-60-unified-scheduler |
+| [0049](0049-origin-owned-mesh-prototype.md) | Shared heat-first policy and origin-owned mesh prototype | proposed; user approved simulation-first/origin ownership; T-62 |
