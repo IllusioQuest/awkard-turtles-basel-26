@@ -329,3 +329,32 @@ xonotic-demo.log. Dispatch success alone does not prove successful gameplay.
 This is still a manually launched presentation node. Automatic launch following shared heat
 reservation, observed batch preemption, termination reconciliation and remote-node adapters
 remain pending. Do not imply that the game is already orchestrated by the scheduler.
+
+### Xonotic startup verification
+
+Game image built and official checksum passed. The final image restores USER ubuntu after
+installing files; launching as root was an initial setup error, corrected before handoff. The
+launcher explicitly uses /opt/Xonotic as working directory (otherwise engine assets are not
+found). Desktop C's initial lab home ownership was restored to uid 1000. Current C retains the
+normal non-root desktop user and receives the existing display and PulseAudio runtime paths.
+
+Verified by Test-Xonotic.ps1 under actual Windows PowerShell 5.1: one game process running,
+Intel Iris Xe D3D12 OpenGL renderer, game configuration/assets loaded, 48 kHz stereo audio
+initialized. stormkeep.bsp exists in the original maps archive. Actual race/gameplay FPS and
+browser input are not inferred from these checks; user testing requested. SDL joystick startup
+logs an undefined udev shim symbol, so gamepad support is not verified; keyboard/mouse are the
+presentation input path. No game source or engine binary changed.
+
+    .\gaming\scripts\Test-Xonotic.ps1
+
+If already running, quit Xonotic through its own menu before requesting -StartMatch; the launch
+lock prevents concurrent instances. Launch logging appends, so a duplicate request cannot erase
+the running game's log. A local game can also be selected interactively from the existing menu.
+Use Ctrl+Shift+X inside the browser for Selkies Gaming Mode (pointer/keyboard capture), and hold
+Escape at least two seconds to leave it. Source: https://docs.selkies.io/latest/usage/.
+
+A Windows PowerShell 5.1 quoting issue in the transient Vulkan render wrapper was found while
+checking startup evidence: it returned exit 0 with empty renderer output. Fixed by passing the
+probe as stdin with CRLF normalization, and now requiring actual Intel selection output even
+for render mode. Repeated PS5.1 render shows the named Intel GPU and exit 0. No empty-output
+render result is accepted as success.
