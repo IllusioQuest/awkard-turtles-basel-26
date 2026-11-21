@@ -34,3 +34,9 @@ sole destinations, empty eligibility and reload, plus whole-set fallback on part
 Gate actual heat preference to controlled demo use; no serving-capacity claim.
 T-27 code is still absent from origin/main at this check; PR #12 must be merged or treated as an
 explicit stacked dependency. Do not silently merge it. User design choices remain pending.
+
+## Approved scope extension (2026-11-21)
+User chose automatic pause/move rather than routing-only, then approved six nodes (three per
+component), two serving replicas per component and a common batch/always-on catalog.
+Decision 0016 extends 0015. Implementation must verify readiness-before-switch, request drain,
+safe aborts, locality denial and gateway failure during a transition. T-01 notified via its ticket.
