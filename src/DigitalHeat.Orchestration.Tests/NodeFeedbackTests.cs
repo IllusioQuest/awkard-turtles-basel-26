@@ -51,10 +51,11 @@ public class NodeFeedbackTests : IDisposable
         Assert.Equal(1, runtime.Inner.Starts); Assert.Equal(0, runtime.Inner.Pauses);
     }
 
-    [Fact] public void GamingLatencyFiltersBeforeHeatWhileUnconstrainedBatchFollowsHeat()
+    [Theory] [InlineData(15, "a")] [InlineData(25, "b")]
+    public void GamingUsesHighestHeatWithinLatencyLimitWhileUnconstrainedBatchFollowsHeat(double maxRttMs, string expectedNode)
     {
         var clock = new Clock(); var runtime = new Runtime();
-        var game = PlacementTests.Request() with { LatencyLimits = [new("player", 15)] };
+        var game = PlacementTests.Request() with { LatencyLimits = [new("player", maxRttMs)] };
         var batch = PlacementTests.Request("batch", "batch");
         var config = new WorkloadConfiguration(fleet, PlacementTests.Inventory(), Nodes,
             [new(batch, CoordinatorTests.Profile), new(game, CoordinatorTests.Profile)]);
@@ -63,7 +64,7 @@ public class NodeFeedbackTests : IDisposable
         using var c = new WorkloadCoordinator(fleet, State, runtime, clock, retainHourlyHeat: true);
         var owner = new NodeFeedbackOwner(c, config, inbox, Policy, clock);
         Assert.Empty(owner.Tick(() => config));
-        Assert.Equal("a", c.Attempts().Single(a => a.Attempt.Request.Id == game.Id).Attempt.Reservation.NodeId);
+        Assert.Equal(expectedNode, c.Attempts().Single(a => a.Attempt.Request.Id == game.Id).Attempt.Reservation.NodeId);
         Assert.Equal("b", c.Attempts().Single(a => a.Attempt.Request.Id == batch.Id).Attempt.Reservation.NodeId);
     }
 
