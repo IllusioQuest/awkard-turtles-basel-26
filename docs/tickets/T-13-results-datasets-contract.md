@@ -16,7 +16,7 @@ One export format that all dashboards and the paper read, so nothing recomputes 
 
 ## Done when
 
-- UIs (T-17..T-19) and the explorer can read runs without any model code.
+- UIs (T-17/T-18) and the explorer can read runs without any model code.
 
 ## Read first
 

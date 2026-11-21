@@ -30,8 +30,6 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-16](T-16-price-comparison.md) | Price comparison with known providers | 2 Pitch | T-02, T-14 | anyone | | open |
 | [T-17](T-17-admin-dashboard.md) | Admin dashboard (DigitalHeat) | 3 Pitch stretch | T-13, T-00 (UI stack) | anyone (Lovable possible) | Ennio / Claude | in progress (`web/`, /admin, mock data first) |
 | [T-18](T-18-owner-dashboard.md) | Server-owner dashboard (host, private) | 3 Pitch stretch | T-13 | anyone | Ennio / Claude | in progress (`web/`, /household, mock data first) |
-| [T-19](T-19-customer-configurator.md) | Customer configurator and cost-benefit analysis (public) | 3 Pitch stretch | T-10, T-14 | anyone | | open |
-| [T-20](T-20-marketing-website.md) | Marketing website | 4 Later | T-19 | open | | open |
 | [T-21](T-21-pitch.md) | Pitch storyboard, demo script and slides | 2 Pitch | T-00 | team lead + Claude | Team lead / Claude | in progress (storyboard direction agreed: docs/pitch/storyboard.md) |
 | [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | Jona / Claude | in progress (skeleton on main) |
 | [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | retired by user request (T-40) |
@@ -53,7 +51,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
       ├─ T-02 ─ T-03 ─ T-04 (live demo)        T-03 ─ T-23
       ├─ T-09 ─ T-10 ─ T-11 ─ T-12 (routing)   T-05 ─ T-13 ─ T-17/T-18
-      ├─ T-15 ─ T-14 ─ T-16, T-19               T-11 + T-13 ─ T-22
+      ├─ T-15 ─ T-14 ─ T-16                     T-11 + T-13 ─ T-22
       └─ T-21 (pitch)
 ```
 

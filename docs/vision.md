@@ -92,8 +92,8 @@ The three layers the case owner suggested, plus what we add:
    compute prices, climate change, hardware ageing).
 7. **Demonstrator.** A real job on a laptop, paused and resumed by the same scheduler code.
 
-**UI later (not for the draft):** a configurator for customers (hosts), an admin tool for
-DigitalHeat (tune parameters, see sites), and flow simulations and heat maps on a map.
+**UI later (not for the draft):** an admin tool for DigitalHeat (tune parameters, see sites),
+and flow simulations and heat maps on a map.
 
 ## Paper outline (later)
 
