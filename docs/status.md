@@ -127,3 +127,6 @@ T-76 verified PR68 /21b0769: 48-frame pipeline and MP4 complete in133.7017 activ
 
 
 T-77 Nikita/Codex perf/T-77-render-runtime: profiling native scene/load/render and monitoring overhead, then measured warm/concurrency improvements. Five roles and heat-first admission preserved; default concurrency changes require user decision. Depends PR68. Minecraft excluded.
+
+
+T-77 PR69/593fe8b,0abf3e1:117 tests; native timings, immutable released-result cache, bounded per-GPU submission waves, no unchanged session rewrites, verified scene reuse and native journal replacement fix. Two48-frame MP4 runs93.3555/131.3246s; preparation0.99469->0.00972worker-seconds, scene identity preserved. Benchmark1/2 medians9.9772/7.8012s for6frames;3-worker warmup timed out60s and owned diagnostic jobs cancelled. User explicitly keeps3 simultaneous renders. Do not claim stable overall speedup or change concurrency. Docs/performance evidence on main, Minecraft unchanged.
