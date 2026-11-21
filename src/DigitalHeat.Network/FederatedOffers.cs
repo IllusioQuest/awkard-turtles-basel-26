@@ -28,7 +28,7 @@ public static class FederatedOfferSelection
         var ambiguousSites = distinctOffers.Where(o => o is not null && !string.IsNullOrWhiteSpace(o.SiteId))
             .GroupBy(o => o.SiteId, StringComparer.Ordinal)
             .Where(g => g.Count() > 1).Select(g => g.Key).ToHashSet(StringComparer.Ordinal);
-        var candidates = new List<(FederatedCapacityOffer Offer, double HeadroomKwh)>();
+        var candidates = new List<(FederatedCapacityOffer Offer, HeatShareRank Rank)>();
         foreach (var offer in distinctOffers)
         {
             if (offer is null || offer.HeatSignal is null || string.IsNullOrWhiteSpace(offer.SiteId)
@@ -43,15 +43,16 @@ public static class FederatedOfferSelection
             {
                 double headroom = HeatCapacity.RemainingKwh(offer.HeatSignal,
                     offer.CommittedRecoverableHeatKwh);
-                if (headroom > 0) candidates.Add((offer, headroom));
+                if (headroom > 0) candidates.Add((offer, HeatShareRank.From(
+                    HeatCapacity.RemainingKwh(offer.HeatSignal), offer.CommittedRecoverableHeatKwh, offer.SiteId)));
             }
             catch (ArgumentOutOfRangeException) { /* Untrusted or invalid inventory fails closed. */ }
         }
         FederatedCapacityOffer? best = null;
-        HeatPlacementRank bestRank = default;
+        HeatShareRank bestRank = default;
         foreach (var candidate in candidates)
         {
-            var rank = new HeatPlacementRank(candidate.HeadroomKwh, candidate.Offer.SiteId);
+            var rank = candidate.Rank; // decision 0053
             if (best is not null && rank.CompareTo(bestRank) <= 0) continue;
             best = candidate.Offer;
             bestRank = rank;

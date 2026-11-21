@@ -57,7 +57,11 @@ public class NodeFeedbackTests : IDisposable
         var clock = new Clock(); var runtime = new Runtime();
         var game = PlacementTests.Request() with { LatencyLimits = [new("player", maxRttMs)] };
         var batch = PlacementTests.Request("batch", "batch");
-        var config = new WorkloadConfiguration(fleet, PlacementTests.Inventory(), Nodes,
+        // Decision 0053: home already has 0.5 of its 3 kWh committed (share 0.83), so spa (share 1.0, then
+        // 0.94 after the first job) ranks higher for every job that may reach it.
+        var basis = PlacementTests.Inventory();
+        basis = basis with { Sites = [basis.Sites[0] with { ExternalCommittedHeatKwh = .5 }, basis.Sites[1]] };
+        var config = new WorkloadConfiguration(fleet, basis, Nodes,
             [new(batch, CoordinatorTests.Profile), new(game, CoordinatorTests.Profile)]);
         var inbox = new NodeFeedbackInbox(Inbox, State, fleet, Policy, config.Inventory);
         NodeFeedbackInbox.Publish(Inbox, Report("a")); NodeFeedbackInbox.Publish(Inbox, Report("b"));

@@ -75,14 +75,18 @@ public sealed class WorkloadPlacement
             if (index!.ExternalIds.Contains(request.Id))
                 throw new InvalidDataException("Workload ID is already externally allocated.");
             WorkloadReservation? best = null;
-            // Heat is the ranking priority. Latency is only a configured eligibility limit in
-            // Candidates; a faster eligible node must not outrank one with more useful heat.
+            HeatShareRank bestRank = default;
+            // Heat is the ranking priority (decision 0053: free share of the site's hourly heat budget,
+            // then free kWh, then IDs). Latency is only a configured eligibility limit in Candidates;
+            // a faster eligible node must not outrank one with more useful heat.
+            var budgets = inventory!.Sites.ToDictionary(s => s.Id, s => s.Heat, StringComparer.Ordinal);
             foreach (var candidate in Candidates(request))
             {
                 if (selectedSiteId is not null && candidate.SiteId != selectedSiteId) continue;
-                if (best is null || new HeatPlacementRank(candidate.AvailableHeatKwhBeforeReservation, candidate.SiteId, candidate.NodeId)
-                    .CompareTo(new(best.AvailableHeatKwhBeforeReservation, best.SiteId, best.NodeId)) > 0)
-                    best = candidate;
+                double budget = HeatCapacity.RemainingKwh(budgets[candidate.SiteId]);
+                var rank = HeatShareRank.From(budget, Math.Max(0, budget - candidate.AvailableHeatKwhBeforeReservation),
+                    candidate.SiteId, candidate.NodeId);
+                if (best is null || rank.CompareTo(bestRank) > 0) { best = candidate; bestRank = rank; }
             }
             if (best is not null) held.Add(request.Id, new(request, best, false));
             return best;

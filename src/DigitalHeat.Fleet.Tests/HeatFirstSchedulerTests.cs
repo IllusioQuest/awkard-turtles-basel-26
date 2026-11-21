@@ -26,6 +26,34 @@ public class HeatFirstSchedulerTests
         f.Arrive(f.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
         Assert.Equal(0, Assert.Single(f.Chunks).House.Value);
     }
+    [Fact] public void FreeHeatShareSpreadsWorkInsteadOfFillingTheLargestSite()
+    {
+        // Decision 0053. Budgets 8 kWh (demand 7 + tank 1) and 2 kWh (1 + 1), 0.8 kWh per chunk.
+        // The first job goes to the larger site (both at share 1.0); afterwards the large site has
+        // 7.2 / 8 = 0.9 free and the small one 1.0, so the second job goes to the small site.
+        var fleet = new FakeFleet();
+        fleet.AddHouse(2, cap: 1, demandKw: 7); fleet.AddHouse(2, cap: 1, demandKw: 1);
+        var scheduler = new HeatFirstFleetScheduler(new() { ChunkTargetS = 3600 });
+        fleet.Scheduler = scheduler; scheduler.Initialize(fleet, fleet); fleet.HourStart();
+        fleet.Arrive(fleet.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
+        fleet.Arrive(fleet.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
+        Assert.Equal([0, 1], fleet.Chunks.Select(c => c.House.Value));
+    }
+    [Fact] public void TinyBudgetDoesNotWinOverAFullLoadSite()
+    {
+        // Decision 0053 review: a 0.3 kWh site has share 1.0 but cannot run a server at full load
+        // (0.8 kWh); the partly filled large site still can, so it gets the work at load 1.
+        var fleet = new FakeFleet();
+        fleet.AddHouse(2, cap: 1, tank: 1, demandKw: 2); fleet.AddHouse(1, cap: 1, tank: 1, demandKw: .3);
+        var scheduler = new HeatFirstFleetScheduler(new() { ChunkTargetS = 3600 });
+        fleet.Scheduler = scheduler; scheduler.Initialize(fleet, fleet); fleet.HourStart();
+        fleet.Arrive(fleet.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
+        fleet.Arrive(fleet.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
+        Assert.Equal([0, 0], fleet.Chunks.Select(c => c.House.Value));
+        Assert.All(fleet.Chunks, c => Assert.Equal(1, c.Load));
+        fleet.Arrive(fleet.AddJob(Batch(), 10, 0, FleetTime.MsPerHour));
+        Assert.Equal(1, fleet.Chunks[2].House.Value);   // only the partial site is left
+    }
     [Fact] public void NoHeatNeverStartsEvenAnUrgentJob()
     {
         var f = Create((1, 0));

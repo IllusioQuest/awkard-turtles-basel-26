@@ -59,3 +59,4 @@ later.
 
 | [0051](0051-one-heat-first-policy.md) | One heat-first policy; retire competing modes | proposed; user approved; reviewed with changes; T-65; PR #52 |
 
+| [0053](0053-free-heat-share-rank.md) | Rank eligible sites by free share of hourly heat budget | proposed; user approved; reviewed; replaces HeatPlacementRank in Fleet, Network, Orchestration; T-67 |

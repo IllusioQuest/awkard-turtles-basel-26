@@ -3,15 +3,16 @@ using DigitalHeat.Core;
 namespace DigitalHeat.Fleet;
 
 /// <summary>Event-driven chunk adapter. Core owns heat load/rank and EDF order; the engine owns
-/// work, physical tank settlement and lifecycle. A completion never reopens committed hourly heat.</summary>
+/// work, physical tank settlement and lifecycle. A completion never reopens committed hourly heat.
+/// Sites are ranked by free share of their hourly heat budget (decision 0053, Core HeatShareRank).</summary>
 public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetScheduler
 {
     private const double Epsilon = 1e-9;
     private IFleetView view = null!;
     private IFleetActions actions = null!;
     private readonly SortedSet<(JobPriority Rank, int Job)> queue = [];
-    private readonly SortedSet<HeatPlacementRank> candidates = [];
-    private HeatPlacementRank?[] ranks = [];
+    private readonly SortedSet<HeatShareRank> candidates = [];
+    private HeatShareRank?[] ranks = [];
     private double[] budget = [], committed = [], spareLoad = [];
     private readonly Dictionary<int, double> chunkClaims = [];
     private int hour = -1;
@@ -21,7 +22,7 @@ public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetSch
     {
         this.view = view; this.actions = actions;
         int n = view.Houses.Count;
-        ranks = new HeatPlacementRank?[n]; budget = new double[n]; committed = new double[n]; spareLoad = new double[n];
+        ranks = new HeatShareRank?[n]; budget = new double[n]; committed = new double[n]; spareLoad = new double[n];
         foreach (var house in view.Houses)
             actions.RegisterTankThreshold(house.Id, house.TankCapacityKwh);
     }
@@ -70,13 +71,18 @@ public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetSch
             if (!queue.Contains(key)) continue;
             while (job.UnassignedUnits > Epsilon && job.ActiveChunks.Count < job.Type.MaxChunks)
             {
-                int best = -1;
+                // Decision 0053: prefer the best-ranked site that can run a server at full load, so
+                // small budgets do not fragment work into low-load chunks; only then partial budgets.
+                int best = -1, partial = -1;
                 foreach (var rank in candidates.Reverse())
                 {
                     int hi = int.Parse(rank.NodeId, System.Globalization.CultureInfo.InvariantCulture);
-                    if (Allowed(view.Houses[hi].Spec, job)
-                        && spareLoad[hi] + Epsilon >= Math.Max(Epsilon, job.Type.Lifecycle.MinLoad)) { best = hi; break; }
+                    if (!Allowed(view.Houses[hi].Spec, job)
+                        || spareLoad[hi] + Epsilon < Math.Max(Epsilon, job.Type.Lifecycle.MinLoad)) continue;
+                    if (spareLoad[hi] + Epsilon >= 1) { best = hi; break; }
+                    if (partial < 0) partial = hi;
                 }
+                if (best < 0) best = partial;
                 if (best < 0) break;
                 var house = view.Houses[best];
                 var server = house.Servers.First(s => view.Servers[s.Value].Chunk is null);
@@ -128,7 +134,7 @@ public sealed class HeatFirstFleetScheduler(SchedulerSection config) : IFleetSch
             Claim(hi, chunk.Id.Value, load); desired -= load;
         }
         spareLoad[hi] = Math.Max(0, Math.Min(desired, (budget[hi] - committed[hi]) / PerServerHeat));
-        var rank = new HeatPlacementRank(Math.Max(0, budget[hi] - committed[hi]), house.Spec.HouseId,
+        var rank = HeatShareRank.From(budget[hi], committed[hi], house.Spec.HouseId,
             hi.ToString(System.Globalization.CultureInfo.InvariantCulture));
         ranks[hi] = rank;
         if (spareLoad[hi] > Epsilon && house.Servers.Any(s => view.Servers[s.Value].Chunk is null)) candidates.Add(rank);
