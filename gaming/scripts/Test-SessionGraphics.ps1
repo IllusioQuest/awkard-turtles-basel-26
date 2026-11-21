@@ -1,9 +1,10 @@
-param([ValidateSet('session-a','session-b')][string]$Node='session-a')
+param([ValidateSet('session-a','session-b','session-c')][string]$Node='session-a')
 $ErrorActionPreference='Stop'
 $labRoot=Split-Path -Parent $PSScriptRoot
 $reportRoot=Join-Path $labRoot 'TestResults'
 New-Item -ItemType Directory -Force $reportRoot | Out-Null
-$ids=@(& docker ps -aq --filter label=com.docker.compose.project=digitalheat-gaming --filter "label=digitalheat.gaming.node=$Node")
+$project=if($Node -eq 'session-c'){'digitalheat-dozen'}else{'digitalheat-gaming'}
+$ids=@(& docker ps -aq --filter "label=com.docker.compose.project=$project" --filter "label=com.docker.compose.service=$Node")
 if ($LASTEXITCODE -ne 0 -or $ids.Count -ne 1 -or $ids[0] -notmatch '^[a-f0-9]{12,64}$') { throw 'Expected exactly one lab node' }
 $probe=@'
 set +e
