@@ -108,4 +108,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-72](T-72-live-household-demo.md) | Live one-house request and dashboard | Codex | done (PR #61) |
 
 
-| [T-73](T-73-five-worker-render.md) | Restart and five-worker render pipeline | Nikita / Codex | in progress; ADR 0065 reviewed |
+| [T-73](T-73-five-worker-render.md) | Restart and five-worker render pipeline | Nikita / Codex | in review; PR #65; five-worker 48-frame pipeline verified |

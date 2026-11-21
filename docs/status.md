@@ -110,3 +110,6 @@ Journal error follow-up (9b43089): pulled main, reproduced failure at frame 11, 
 
 
 T-73 Nikita/Codex, feat/T-73-five-worker-render: user approved 3 concurrent shared-Iris GPU workers + CPU scene preparation + CPU MP4 assembly, Restart, GPU work weights1.1/1/.9. ADR0065 reviewed with changes; native role/manifest/shared-group checks implemented, isolated five-process verification next. Same heat-first mesh; one synthetic500kWh total partitioned, no extra physical GPU or utilization claim. Depends PR64 journal replacement fix; old outputs preserved.
+
+
+T-73 verified, PR #65 / d43be26: five real worker processes live at localhost:18950/ui, replacing older renderer services (outputs retained). CPU prepare + three shared-Iris GPU workers + CPU MP4 assembly. 114 tests; full48 complete in114.1642 active workflow seconds, GPU counts16/16/16, peak3 concurrent, valid48-frame video. Six-frame pause/restart checks pass. Weights1.1/1/.9 are admission work budgets, not GPU percentages; heat-first policy unchanged, synthetic500kWh partitioned once. Preserve role/manifest/shared-identity checks and journal fix. Minecraft untouched. See docs/jobs/five-worker-renderer.md. Earlier two-node-only status entries are historical.
