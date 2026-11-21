@@ -367,6 +367,61 @@ public sealed class RunStore
         return res;
     }
 
+    /// <summary>Most recent 100 events in [fromMs, toMs), preserving file order for ties.</summary>
+    public JobEventLog JobEvents(string runId, string houseId, long fromMs, long toMs)
+    {
+        var m = Meta(runId);
+        if (Houses(runId).All(h => h.Id != houseId)) throw new NotFoundException($"Unknown house '{houseId}' in run '{runId}'.");
+        if (fromMs < 0 || fromMs >= m.Calendar.EndMs || toMs <= fromMs || toMs > m.Calendar.EndMs)
+            throw new BadRangeException($"Bad event range [{fromMs}, {toMs}) for run '{runId}'.");
+        string path = Path.Combine(m.Dir, "job-events.csv");
+        if (!File.Exists(path)) return new JobEventLog(false, false, []);
+        const int limit = 100;
+        var queue = new Queue<JobEvent>();
+        bool truncated = false;
+        using var reader = new StreamReader(path);
+        var columns = CsvTable.SplitLine(reader.ReadLine() ?? throw new InvalidDataException("Empty job event log."));
+        int col(string name)
+        {
+            int i = Array.IndexOf(columns, name);
+            return i >= 0 ? i : throw new InvalidDataException($"Missing job event column '{name}'.");
+        }
+        int timeCol = col("time_ms"), houseCol = col("house_id"), idCol = col("job_id"), typeCol = col("job_type"),
+            chunkCol = col("chunk_id"), kindCol = col("kind");
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            if (line.Length == 0) continue;
+            var r = CsvTable.SplitLine(line);
+            if (r[houseCol] != houseId) continue;
+            long ms = long.Parse(r[timeCol], CultureInfo.InvariantCulture);
+            if (ms < fromMs || ms >= toMs) continue;
+            string chunk = r[chunkCol];
+            if (queue.Count == limit) { queue.Dequeue(); truncated = true; }
+            queue.Enqueue(new JobEvent(ms, r[idCol], r[typeCol],
+                chunk.Length > 0 ? int.Parse(chunk, CultureInfo.InvariantCulture) : null, r[kindCol]));
+        }
+        // A job with exactly one chunk has whole-job lifecycle events. Keep chunk labels for
+        // split or unknown jobs; the summary covers the entire run, not just the selected range.
+        var candidates = queue.Select(e => e.JobId).ToHashSet(StringComparer.Ordinal);
+        var singleChunk = new HashSet<string>(StringComparer.Ordinal);
+        string jobsPath = Path.Combine(m.Dir, "jobs.csv");
+        if (candidates.Count > 0 && File.Exists(jobsPath))
+        {
+            using var jobs = new StreamReader(jobsPath);
+            var header = CsvTable.SplitLine(jobs.ReadLine() ?? throw new InvalidDataException("Empty jobs file."));
+            int jobId = Array.IndexOf(header, "job_id"), chunks = Array.IndexOf(header, "chunks");
+            if (jobId >= 0 && chunks >= 0)
+                while ((line = jobs.ReadLine()) is not null)
+                {
+                    if (line.Length == 0) continue;
+                    var row = CsvTable.SplitLine(line);
+                    if (candidates.Contains(row[jobId]) && row[chunks] == "1") singleChunk.Add(row[jobId]);
+                }
+        }
+        return new JobEventLog(true, truncated, queue.Select(e => singleChunk.Contains(e.JobId) ? e with { ChunkId = null } : e).ToArray());
+    }
+
     public IReadOnlyList<Snapshot> Snapshots(string runId, int fromH, int toH)
     {
         var m = Meta(runId);

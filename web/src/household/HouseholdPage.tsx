@@ -82,6 +82,11 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
   }, [minMs, maxMs, selectedMs])
 
   const [range, setRange] = useState<TimeRange>({ from: minMs, to: maxMs, preset: 'run' })
+  const source = useSource()
+  const fromMs = Math.max(0, range.from - minMs)
+  const toMs = Math.min(run.hours * 3_600_000, range.to - minMs)
+  const jobLog = useAsync(source ? `job-events:${run.id}:${house.id}:${fromMs}:${toMs}` : null,
+    () => source!.jobEvents(run.id, house.id, fromMs, toMs))
 
   const data = useMemo(() => householdSeries(run, house, periods, range.from, range.to), [run, house, periods, range])
   const sum = useMemo(() => totals(data, run.maxElectricKwPerServer), [data, run.maxElectricKwPerServer])
@@ -143,6 +148,7 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           />
         </div>
       </div>
+
 
       <section className="stats">
         <Stat label="Servers" value={String(house.servers)} note={`heat capacity ${dec1.format(capacityKw)} kW`} />
@@ -220,6 +226,27 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
             true,
           )}
         </div>
+      </section>
+      <section className="card job-log" aria-labelledby="job-log-heading">
+        <h2 id="job-log-heading">Job logs</h2>
+        {jobLog.loading && <p className="note">Loading activity…</p>}
+        {jobLog.error && <p className="note">Could not load job activity: {jobLog.error.message}</p>}
+        {!jobLog.loading && jobLog.data && !jobLog.data.available && <p className="note">Job activity was not recorded for this run.</p>}
+        {!jobLog.loading && jobLog.data?.available && jobLog.data.events.length === 0 && <p className="note">No job activity in this period.</p>}
+        {!jobLog.loading && !jobLog.error && jobLog.data?.truncated && <p className="note">Showing the most recent 100 events. Select a shorter period to see earlier activity.</p>}
+        {!jobLog.loading && !jobLog.error && jobLog.data?.available && jobLog.data.events.length > 0 && (
+          <ol className="job-log-list">
+            {[...jobLog.data.events].reverse().map((event, index) => (
+              <li key={`${event.timeMs}-${event.jobId}-${event.chunkId}-${event.kind}-${index}`} className="job-log-entry">
+                <span className={`job-log-dot job-log-dot-${event.kind}`} aria-hidden="true" />
+                <div className="job-log-message">
+                  <span><strong>{event.jobId}</strong> {event.chunkId === null ? event.kind : `· chunk ${event.chunkId} ${event.kind}`}</span>
+                </div>
+                <time className="note">{fmtFull.format(minMs + event.timeMs)}</time>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
     </main>
   )

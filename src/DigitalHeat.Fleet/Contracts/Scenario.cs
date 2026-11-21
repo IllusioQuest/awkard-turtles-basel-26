@@ -128,4 +128,6 @@ public sealed class LoggingSection
     /// <summary>"none" | "daily" | "hourly" | "events".</summary>
     [JsonPropertyName("house_timeseries")] public string HouseTimeseries { get; set; } = "hourly";
     [JsonPropertyName("out_dir")] public string OutDir { get; set; } = "data/derived/fleet";
+    /// <summary>Write chunk lifecycle events for the household view.</summary>
+    [JsonPropertyName("job_events")] public bool JobEvents { get; set; }
 }

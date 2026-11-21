@@ -93,6 +93,7 @@ public static class FleetSimulation
             },
             TickMs = scenario.Run.TickMs, ServerParams = sp, Houses = houses, JobTypes = types, Jobs = jobs,
             Scheduler = sched, Pricing = price, Forecast = forecast,
+            CaptureJobEvents = scenario.Logging.JobEvents,
             Timeseries = scenario.Logging.HouseTimeseries switch
             {
                 "none" => TimeseriesMode.None, "daily" => TimeseriesMode.Daily, "hourly" => TimeseriesMode.Hourly,

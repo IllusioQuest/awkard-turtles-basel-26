@@ -138,6 +138,10 @@ export class MockSource implements DataSource {
     return series
   }
 
+  async jobEvents() {
+    return { available: false, truncated: false, events: [] }
+  }
+
   async weatherPoints() {
     return POINTS
   }

@@ -1,0 +1,2 @@
+job_id,type,type_index,arrival_ms,deadline_ms,work_units,batch_size,origin_kind,origin_lat,origin_lon,client_id,origin_canton
+summer-research-1,research-sim-full-load,0,0,82800000,2500000,1,anywhere,,,,

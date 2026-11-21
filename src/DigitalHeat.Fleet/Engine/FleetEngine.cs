@@ -59,6 +59,13 @@ public sealed partial class FleetEngine
     private readonly NetworkHourRow[] _hourRows;
     private int _closedHours;
     private readonly List<HouseTimeseriesRow> _timeseries = [];
+    private readonly List<JobEventRow> _jobEvents = [];
+
+    private void LogJobEvent(HouseState house, JobState job, int? chunk, string kind)
+    {
+        if (_in.CaptureJobEvents)
+            _jobEvents.Add(new JobEventRow(_nowMs, house.Input.Spec.HouseId, job.RequestValue.JobKey, job.TypeValue.Id, chunk, kind));
+    }
 
     public FleetEngine(EngineInputs inputs)
     {
@@ -414,6 +421,7 @@ public sealed partial class FleetEngine
         double size = job.RequestValue.WorkUnits;
         if (job.StatusValue != JobStatus.Active || job.Kept < size - UnitsTol * Math.Max(1, size)) return;
         job.StatusValue = JobStatus.Done;
+        LogJobEvent(h, job, null, "completed");
         job.FinishMs = _nowMs;
         SetContribution(job, 0);
         _open.Set.Remove(job.Index);
@@ -705,7 +713,7 @@ public sealed partial class FleetEngine
         }
         return new FleetRunResult
         {
-            Houses = houses, Jobs = jobs, NetworkHours = _hourRows, HouseTimeseries = _timeseries,
+            Houses = houses, Jobs = jobs, NetworkHours = _hourRows, HouseTimeseries = _timeseries, JobEvents = _jobEvents,
             EventCount = _eventCount, SchedulerCalls = _schedulerCalls, WallTimeS = wallS,
         };
     }

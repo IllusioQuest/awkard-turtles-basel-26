@@ -16,6 +16,7 @@ cd web && npm run dev        # Vite proxies /api to http://localhost:5080
 | `GET /api/runs/{id}/network` | `NetworkHour[]`, one per run hour | `network-hourly.csv` |
 | `GET /api/runs/{id}/snapshots?from=h0&to=h1` | `Snapshot[]`, one per hour in `[h0, h1)` (max 744) | `houses-timeseries.csv` |
 | `GET /api/runs/{id}/houses/{houseId}/series` | `HousePeriod[]`, all periods | `houses-timeseries.csv` |
+| `GET /api/runs/{id}/houses/{houseId}/job-events?fromMs=a&toMs=b` | optional per-house job lifecycle events for `[a,b)` in run-relative milliseconds, at most the most recent 100, with availability and truncation flags | optional `job-events.csv` |
 | `GET /api/weather/points` | `WeatherPoint[]` (435 grid points) | `data/raw/swiss-grid/grid-10km.csv` |
 | `GET /api/runs/{id}/weather?from=h0&to=h1` | `WeatherHours` (max 744 hours) | `data/raw/swiss-grid/weather-2025-hourly.csv.gz`, offset by the run start |
 
@@ -29,3 +30,4 @@ Rules:
 - Runs are loaded lazily on first use and cached in memory (the 173 MB hourly timeseries of
   `ch-100` takes a few seconds once).
 - Unknown run or house: 404 with a short message. Bad range: 400.
+- Event records preserve simulation order for equal timestamps. `started`, `paused`, `resumed` and `stopped` refer to a chunk; the API omits the chunk ID for jobs with exactly one recorded chunk. `completed` is the whole job, attributed to the final house. Older runs without logging report `available: false` rather than an empty log. The events are simulated, not live telemetry.

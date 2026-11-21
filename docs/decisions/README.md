@@ -67,6 +67,8 @@ later.
 
 | [0056](0056-free-heat-share-rank.md) | Rank eligible sites by free share of hourly heat budget | proposed; user approved; reviewed; replaces HeatPlacementRank in Fleet, Network, Orchestration; T-67 |
 
+| [0060](0060-fleet-job-event-log.md) | Optional fleet job event log for the household view | proposed; reviewed with changes |
+
 - [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
 
 - [0058 - Portable native Blender runtime](0058-portable-native-render.md): proposed; user approved native adapter, CPU preparation/GPU frames and frame-boundary pause; multiple nodes only.

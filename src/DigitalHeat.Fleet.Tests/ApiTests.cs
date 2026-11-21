@@ -78,4 +78,26 @@ public class ApiTests : IDisposable
         Assert.Throws<NotFoundException>(() => _store.HouseSeries("mini", "nope"));
         Assert.Throws<BadRangeException>(() => _store.Snapshots("mini", 5, 5));
     }
+
+    [Fact]
+    public void Job_events_are_optional_bounded_and_range_filtered()
+    {
+        Assert.False(_store.JobEvents("mini", "reference", 0, 3600000).Available);
+        var lines = new List<string> { "time_ms,house_id,job_id,job_type,chunk_id,kind" };
+        for (int i = 0; i < 105; i++) lines.Add($"100,reference,job-{i},test,0,started");
+        lines.Add("200,reference,job-last,test,,completed");
+        File.WriteAllLines(Path.Combine(_dir, "mini", "job-events.csv"), lines);
+        File.WriteAllLines(Path.Combine(_dir, "mini", "jobs.csv"), ["job_id,chunks", "job-5,1", "job-6,2"]);
+        var slice = _store.JobEvents("mini", "reference", 100, 200);
+        Assert.True(slice.Available);
+        Assert.True(slice.Truncated);
+        Assert.Equal(100, slice.Events.Length);
+        Assert.Equal("job-5", slice.Events[0].JobId);
+        Assert.Null(slice.Events[0].ChunkId);
+        Assert.Equal(0, slice.Events[1].ChunkId);
+        Assert.Equal("job-104", slice.Events[^1].JobId);
+        Assert.Single(_store.JobEvents("mini", "reference", 200, 201).Events);
+        Assert.Throws<NotFoundException>(() => _store.JobEvents("mini", "unknown", 0, 1));
+        Assert.Throws<BadRangeException>(() => _store.JobEvents("mini", "reference", 1, 1));
+    }
 }
