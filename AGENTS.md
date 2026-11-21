@@ -16,9 +16,15 @@ Do not read all tickets, decisions or research files.
   direction from the case owner's examples.
 - **Long-term:** a general simulation of any location with a network of computing and heat sites,
   solid enough for a paper. Hence generality, reproducibility and decision records.
+- The case owner suggested a story in three layers: **financial** (money flows over time, sliders
+  for when it stops paying off), **marketing** (which priced services we can beat), **physical**
+  (simulation of heat and servers); see `docs/deep-dive/notes-structured.md` §7. One option, not a
+  requirement.
 - **Work is organised in tickets:** [`docs/tickets/README.md`](docs/tickets/README.md). Active
   branches and coordination: [`docs/status.md`](docs/status.md).
-- **Available, not set up:** ElevenLabs and Lovable subscriptions. Do not use them without the team.
+- **Available, not set up:** ElevenLabs and Lovable subscriptions. Do not use them without the team;
+  mention them where they fit (ElevenLabs as a transcription price point or for pitch audio,
+  Lovable as a dashboard option).
 
 ## 2. Deadlines
 
@@ -31,7 +37,8 @@ All times Europe/Zurich. `scripts/deadline-reminder.sh` reads the dated rows; ke
 | TBD (≈ 22 Nov, morning) | End of hackathon, final pitch | Exact time to be added by the team. |
 | TBD | Feature freeze | Team decides later. |
 
-Do not state time left or push deadlines unless asked.
+No automatic reminders: the team tracks time itself. Do not state time left or push deadlines
+unless asked.
 
 ## 3. Where things are
 
@@ -62,10 +69,13 @@ the must-haves or the pitch.
 
 ## 4. How we win: priorities
 
-1. **Valid submission first.** The three must-haves in `key-figures.md` are hard requirements. Do
-   not polish one part while another must-have is missing.
+1. **Valid submission first.** The three must-haves in `key-figures.md` are hard requirements. Get
+   a thin end-to-end version working early (real job paused/resumed by the scheduler, yearly
+   balance, a simple view), then improve it. Do not polish one part while another must-have is
+   missing.
 2. **Half the score is transparency and feasibility.** Every number traceable, every assumption
-   visible, an honest statement of when the model does not pay off.
+   visible, an honest statement of when the model does not pay off. A correct, explained number
+   beats an impressive, unexplained one.
 3. **`main` is always demo-ready.** The live demo (January day, July day, interrupted real job)
    runs on a laptop, offline, deterministically, with a fallback (e.g. a recorded run).
 4. **WOW comes from the story and one or two strong visuals** plus a real process paused live, not
@@ -81,7 +91,8 @@ the must-haves or the pitch.
    houses, tanks, prices or locations only **in addition**, labelled as variants.
 2. **Every number has a source:** case text, URL plus access date, or our own reproducible
    measurement. Never invent one; if missing, leave a visible `TODO(source)` and tell the user.
-3. **The same scheduler code** that produces the yearly balance controls the real running job.
+3. **The same scheduler code** that produces the yearly balance controls the real running job. No
+   separate demo-only control path.
 4. **Units in names:** `heat_demand_kwh`, `price_chf_per_kwh`, ...
 5. **Time:** hourly steps, Europe/Zurich, 24 values per day (see `data/raw/open-meteo/SOURCE.md`).
 
@@ -94,8 +105,10 @@ the must-haves or the pitch.
   prices are swappable without touching logic.
 - **Simulation and reality share interfaces:** simulated servers and real processes are executors
   behind the same `IExecutor`.
-- **Reproducible:** deterministic (fixed seeds), one documented command per result.
-- **Simple and robust:** few well-known dependencies; formulas get a short docstring with source.
+- **Reproducible:** deterministic (fixed seeds), one documented command per result, every output
+  traceable to its inputs and parameters.
+- **Simple and robust:** few well-known dependencies, add one only with a reason; formulas get a
+  short docstring with source.
 - **Hackathon-sized quality:** clean enough for a teammate to extend tomorrow; no speculative
   abstractions.
 
@@ -110,8 +123,8 @@ the must-haves or the pitch.
 ## 8. Decisions and reviews
 
 Hard-to-reverse decisions (interfaces, data model, stack, scheduling strategy, economic model or
-scored formulas, scope, larger UI choices) get a decision record and one review by a fresh-context
-subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
+key formulas, anything that changes scored figures, scope, larger UI choices) get a decision
+record and one review by a fresh-context subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
 
 1. Write `docs/decisions/NNNN-title.md` from the template, status `proposed`, and add it to the
    index. Take the next free number on `main` and on open branches (see the index); renumber
@@ -120,6 +133,8 @@ subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
    `decision-reviewer` subagent), with a short packet only, never the conversation.
 3. Apply what convinces you, record it in the "Review" section, report to the user in 2–4 lines.
    Your user's agreement is enough to implement; the team later sets `accepted`.
+
+One review per decision; no review loops.
 
 ## 9. Git workflow
 
@@ -130,16 +145,18 @@ subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
 - **Merging:** people merge by default. An agent may squash-merge its own PR only if it is small,
   tests pass, it changes no architecture, interface or scored figure, needs no decision record,
   **and** its user agreed in the conversation.
+- Stay inside your task's files; three people are working in parallel.
 
 ### 9a. Integration between parallel work
 
 - **Work from tickets:** claim one (owner + `in progress` in the index and the ticket file), name
   the branch after it (`feat/T-03-docker-executor`), reference it in the PR, set `done` when
-  merged. New work without a ticket: add one and tell your human. If a ticket is wrong or too big,
-  say so instead of changing its scope.
+  merged. New work without a ticket: add one and tell your human. Respect the
+  ticket's dependencies; if a ticket is wrong or too big, say so instead of changing its scope.
 - **Check others' work** at the start, at milestones, before changing a shared interface and before
   a PR: `docs/status.md`, `git fetch && git branch -r`, `git log --oneline -15 origin/main`, open
-  PRs. Keep your row in `docs/status.md` current.
+  PRs. If another agent has changed a dependency, coordinate the handoff in `docs/status.md` or the
+  relevant PR before continuing. Keep your row in `docs/status.md` current.
 - **Build on what exists:** the C# core and its interfaces (decisions 0005, 0009, 0024), `data/raw/`
   with its `SOURCE` files, `config/`. Never create a second heat or economic model; if an interface
   does not fit, propose a change via a decision record.
@@ -152,22 +169,24 @@ subagent. Not for bug fixes, refactors, styling, docs or data re-fetches.
 - **Reply in the user's language.** Everything in the repository is in English.
 - Short reports: what changed, how it was checked, open questions. Say what is a prototype and what
   is verified.
-- **Ask instead of deciding** when the choice belongs to the team (vision, stack, hardware, business
-  model, scope, anything a juror might ask about); give a recommendation with reasons.
+- **Ask instead of deciding** when the choice belongs to the team (vision, stack, hardware, servers
+  per house, business model, scope, anything a juror might ask about); give a recommendation with reasons.
 - **Agree on the approach before building anything substantial** (model, calculation, visual, new
   module, published page): propose in a few lines, then wait. Small, precisely described tasks can
   go ahead.
 - **Every result with numbers comes with its calculation path:** method, inputs with sources, one
   worked example, and how to read each chart.
-- Prefer several short check-ins over one large surprise. Be economical with time and tokens.
+- Prefer several short check-ins over one large surprise; when unsure whether to ask, ask. Keep
+  check-ins short close to a deadline, but do not skip them. Be economical with time and tokens;
+  use subagents for reviews and broad searches.
 
 ## 11. Data
 
 - Rules and layout: [`data/README.md`](data/README.md). Raw data is never edited by hand; derived
   data comes from scripts only; large datasets are not committed.
 - `python3 scripts/fetch_data.py --check` validates the data against the case.
-- Never commit secrets, API keys or personal data. Data sovereignty matters: sensitive data stays
-  local or anonymised.
+- Never commit secrets, API keys or personal data. Data sovereignty matters: no data to other
+  countries where not allowed; sensitive data stays local or anonymised.
 
 ## 12. Team decisions
 
