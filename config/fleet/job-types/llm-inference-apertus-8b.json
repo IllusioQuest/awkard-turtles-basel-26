@@ -1,0 +1,80 @@
+{
+  "id": "llm-inference-apertus-8b",
+  "class": "type1",
+  "work_unit": "token",
+  "description": "LLM inference of an 8B open-weight model (Apertus 8B class) on a GPU server (docs/model/fleet-simulation.md section 5.2). Work unit = one token, input and output counted alike. Type 1: fixed price, served first.",
+  "energy_kwh_per_work_unit": {
+    "value": 5.833333333333333e-08,
+    "unit": "kWh/token",
+    "source": "0.21 J per token / 3.6e6 J per kWh = 5.83e-8 kWh: RTX 4090, vLLM batched, 450 W / 2,148 tok/s (data/raw/market/hardware.csv pe-rtx4090-vllm-iog-qps8, opened, medium); conservative reading: every token, input and output, costs 0.21 J (docs/research/profitability-inputs.md, 'Conservative (a floor)')"
+  },
+  "size": {
+    "dist": "empirical",
+    "file": "data/derived/demand/llm-token-quantiles.csv",
+    "filter": { "source": "azure2024", "series": "conv" },
+    "quantile_column": "quantile",
+    "value_columns": ["input_tokens", "output_tokens"],
+    "min": 1,
+    "unit": "tokens/request",
+    "source": "Azure LLM inference trace 2024, service conv, input + output tokens per request (data/derived/demand/llm-token-quantiles.csv; data/raw/demand-traces/azure-llm-2024/SOURCE.md, https://github.com/Azure/AzurePublicDataset/blob/master/AzureLLMInferenceDataset2024.md, CC BY 4.0, retrieved 2026-11-21). Input and output quantiles are summed at the same quantile (comonotonic approximation); piecewise-linear inverse CDF, capped at the 0.99 quantile (7,387 tokens); min 1 token at q = 0: TODO(source) minimum request size not in the trace. The sampled mean (1,769.5) is the basis for the volume; the file's mean row is 1,738.4 (1,632.8 in + 105.6 out)"
+  },
+  "batch_size": {
+    "dist": "fixed",
+    "value": 1000,
+    "unit": "requests/job",
+    "source": "scenario value, not sourced: 1,000 requests per job keeps the job count manageable (about 1,600 jobs/day instead of 1.6 million)"
+  },
+  "deadline_s": {
+    "dist": "uniform",
+    "min": 7200,
+    "max": 259200,
+    "unit": "s",
+    "source": "team range 2026-11-21, docs/model/fleet-simulation.md §5.1"
+  },
+  "max_chunks": { "value": 8, "unit": "chunks", "source": "scenario value, not sourced: a 1,000-request job may be split over up to 8 servers" },
+  "min_chunk_work_units": { "value": 1769.465, "unit": "tokens", "source": "derived: mean tokens per request of the size distribution (one request is the split granularity, docs/model/fleet-simulation.md section 5.2); checked against the size distribution mean by the test suite" },
+  "start_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): model-load time per chunk start not sourced; 0 = not modelled" },
+  "lifecycle": {
+    "allow_pause": true,
+    "checkpointable": true,
+    "min_load": { "value": 0, "unit": "fraction", "source": "TODO(source): lowest sustainable GPU load not sourced; 0 = continuous load as Core (HeatBalance reference)" },
+    "resume_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): 0 = not modelled" },
+    "checkpoint_overhead_s": { "value": 0, "unit": "s", "source": "TODO(source): 0 = not modelled" },
+    "source": "allow_pause: interruptible = true in config/jobs/llm-summary-apertus-8b.json; checkpointable: scenario value, completed requests are kept on stop; not measured"
+  },
+  "input_mb_per_work_unit": { "value": 0, "unit": "MB/token", "source": "TODO(source): prompt data size not in the repo; 0 = not modelled (not used by the engine)" },
+  "state_mb": { "value": 0, "unit": "MB", "source": "TODO(source): checkpoint size not in the repo; 0 = not modelled (not used by the engine)" },
+  "placement_policy": {
+    "mode": "anywhere",
+    "source": "scenario value: generic API traffic without a customer contract; a real customer must carry its own policy (docs/decisions/0013-job-data-locality.md)"
+  },
+  "volume": {
+    "kind": "tokens_per_week",
+    "tokens_per_week": {
+      "value": 194e12,
+      "unit": "tokens/week",
+      "source": "cd-t1-openrouter-week (data/raw/market/compute-demand.csv): OpenRouter 194 trillion tokens in the week ending 2026-10-26, via press https://fourweekmba.com/ai-openrouters-run-rate-tops-10-quadrillion-tokens-up-6-7x/, low: search snippet, page not opened, read from a chart label"
+    },
+    "swiss_share": { "value": 0.01, "unit": "fraction", "source": "scenario value, not sourced" },
+    "market_share": { "value": 0.01, "unit": "fraction", "source": "scenario value, not sourced" },
+    "volume_scale": { "value": 1, "unit": "factor", "source": "scenario value: reference volume, no scaling" }
+  },
+  "arrival_shape": {
+    "file": "data/derived/demand/llm-azure2024-hour-of-week.csv",
+    "index_column": "hour_of_week_zurich",
+    "column": "requests_rel",
+    "filter": { "service": "conv" },
+    "source": "Azure LLM inference trace 2024, service conv (data/raw/demand-traces/azure-llm-2024/SOURCE.md, https://github.com/Azure/AzurePublicDataset/blob/master/AzureLLMInferenceDataset2024.md, CC BY 4.0, retrieved 2026-11-21); the trace's US-dominated user base is a caveat of that file"
+  },
+  "origin_mix": {
+    "client_site_share": { "value": 0, "unit": "fraction", "source": "scenario value: API traffic has no data-origin site; the repo gives no other value" }
+  },
+  "price": {
+    "kind": "fixed",
+    "chf_per_work_unit": {
+      "value": 8.910288854704265e-08,
+      "unit": "CHF/token",
+      "source": "derived: Public AI Apertus 8B CHF 0.084 in / 0.168 out per 1M tokens (docs/research/compute-demand-traces.md section 3, host location not stated) weighted by the Azure conv mean tokens per request, 1,632.7977 in / 105.6057 out (llm-token-quantiles.csv mean row): (0.084 x 1632.7977 + 0.168 x 105.6057) / 1e6 = CHF 1.5490e-4 per request / 1,738.4034 tokens = CHF 8.910e-8 per token"
+    }
+  }
+}
