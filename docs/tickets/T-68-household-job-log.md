@@ -1,6 +1,6 @@
 # T-68: Household simulated job event log
 
-- **Owner:** Codex · **Status:** in progress · **Branch:** `feat/T-68-household-job-log`
+- **Owner:** Codex · **Status:** done (PR #58) · **Branch:** `feat/T-68-household-job-log`
 - **Depends on:** T-18 household dashboard and T-58 fleet simulation.
 
 Show chronological, per-house job lifecycle events in the household view and provide two reproducible, explicitly simulated reference-house day scenarios: two completed winter jobs and one summer job with a heat-related pause and later resume. Use the actual fleet scheduler and preserve the separate annual reference scenario. Document artificial inputs and limits. See decision 0060.

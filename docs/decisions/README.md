@@ -69,6 +69,8 @@ later.
 
 | [0060](0060-fleet-job-event-log.md) | Optional fleet job event log for the household view | proposed; reviewed with changes |
 
+| [0064](0064-live-fleet-household-demo.md) | Paced Fleet decisions for a real household demo job | proposed; reviewed with changes |
+
 - [0057 - Portable Linux render worker packaging](0057-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
 
 - [0058 - Portable native Blender runtime](0058-portable-native-render.md): proposed; user approved native adapter, CPU preparation/GPU frames and frame-boundary pause; multiple nodes only.
@@ -76,3 +78,7 @@ later.
 - [0059 - Adapter-specific runtime validation](0059-runtime-validation-boundary.md): proposed; reviewed with changes; native and Docker validation remain separate behind one executor interface.
 
 - [0061 — Renderer network roster and uniform native GPU workers](0061-render-network-roster.md): proposed; user requested two physical GPU servers, reviewed with changes; configs prepared, no remote hosts available.
+
+- [0062 - Size servers per house by marginal value](0062-marginal-value-server-sizing.md): proposed; T-70; Core `ServerSizing` + reference-house report; reviewed with changes; scored figures unchanged.
+
+- [0063 — Warm native GPU worker](0063-warm-native-gpu-worker.md): proposed; user chose existing-renderer speed first; fresh review pending.

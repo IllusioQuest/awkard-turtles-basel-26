@@ -140,8 +140,25 @@ dotnet test src/DigitalHeat.Fleet.Tests
 dotnet run -c Release --project src/DigitalHeat.FleetApi -- --runs data/derived/fleet --port 5080
 ```
 
-Results go to `data/derived/fleet/<scenario>/` (git-ignored). Mock scheduler and mock pricing are
-placeholders; see the known simplifications in the output README.
+Results go to `data/derived/fleet/<scenario>/` (git-ignored). Pricing is modelled; see the known
+simplifications in the output README.
+
+### Live household request
+
+With Docker and the local `digitalheat/research-sim:live-demo` image available, start the Fleet API
+and web dashboard as above, open `http://127.0.0.1:5173/live`, then run one of:
+
+```bash
+dotnet run -c Release --project src/DigitalHeat.LiveFleetRun -- summer
+dotnet run -c Release --project src/DigitalHeat.LiveFleetRun -- winter
+dotnet run -c Release --project src/DigitalHeat.LiveFleetRun -- winter --busy
+```
+
+Fleet's heat-first scheduler controls a dedicated real Monte Carlo container. The dashboard separates
+modelled heat, tank and accelerated time from observed process state and computed task results. The
+request ends when the replay asks it to finish its current task; simulated and real task counts are
+not equated. Busy mode adds an illustrative simulated queue beside the single real request.
+Configuration, sources, limitations and details: [`T-72`](docs/tickets/T-72-live-household-demo.md).
 
 ## Live control of a containerized job
 

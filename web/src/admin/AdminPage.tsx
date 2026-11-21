@@ -209,7 +209,8 @@ function RunView({ source, run, runs, houses, network }: Props) {
       <div className="page-head">
         <div>
           <h1>Network</h1>
-          {run.note && <span className="note">{run.note}</span>}
+          {/* The note is ugly */}
+          {/* {run.note && <span className="note">{run.note}</span>} */}
         </div>
         <div className="head-controls">
           <select aria-label="Run" value={run.id} onChange={(e) => navigate(`/admin/${encodeURIComponent(e.target.value)}`)}>
