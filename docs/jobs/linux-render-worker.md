@@ -1,5 +1,7 @@
 # Linux GPU render worker — prepared, not hardware-verified
 
+**Current path:** the laptop now has verified native Iris Xe/Eevee rendering. For the two additional physical GPU servers and the current prepared-scene pipeline, use [native GPU server/network instructions](gpu-server-network.md). The Docker/Cycles setup below is the earlier separately prepared path, not a drop-in Eevee peer.
+
 T-66 / PR #54 / ADR 0057. User selected a compatible Linux GPU worker on
 2026-11-21; no such machine is currently available. The laptop remains CPU-only.
 A deployment bundle is prepared; no remote host was contacted. GPU acceleration

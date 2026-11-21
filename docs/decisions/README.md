@@ -74,3 +74,5 @@ later.
 - [0058 - Portable native Blender runtime](0058-portable-native-render.md): proposed; user approved native adapter, CPU preparation/GPU frames and frame-boundary pause; multiple nodes only.
 
 - [0059 - Adapter-specific runtime validation](0059-runtime-validation-boundary.md): proposed; reviewed with changes; native and Docker validation remain separate behind one executor interface.
+
+- [0061 — Renderer network roster and uniform native GPU workers](0061-render-network-roster.md): proposed; user requested two physical GPU servers, reviewed with changes; configs prepared, no remote hosts available.
