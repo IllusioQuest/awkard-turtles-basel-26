@@ -4,7 +4,8 @@ param(
     [ValidateSet('isolation','scheduler')][string]$Topology = 'isolation',
     [switch]$Build,
     [switch]$SkipGatewaySwitch,
-    [double]$EngineReadyTimeoutSeconds = 60
+    [double]$EngineReadyTimeoutSeconds = 60,
+    [ValidateRange(1,300)][int]$DemoSlowRequestSeconds = 20
 )
 $ErrorActionPreference = 'Stop'
 $labRoot = Split-Path -Parent $PSScriptRoot
@@ -62,7 +63,7 @@ foreach ($node in $Nodes) {
     Invoke-Docker @('exec',$engine,'docker','run','-d','--name','webhosting-component',
         '--network','bridge','--publish',"${appPort}:${appPort}",'--restart','no','--read-only','--tmpfs','/tmp:rw,noexec,nosuid',
         '--cap-drop','ALL','--security-opt','no-new-privileges','--env',"ASPNETCORE_URLS=http://0.0.0.0:$appPort",
-        '--label',"webhosting.component=$component",'--env','Demo__SlowRequestSeconds=6',
+        '--label',"webhosting.component=$component",'--env',"Demo__SlowRequestSeconds=$DemoSlowRequestSeconds",
         '--env',"NodeId=$node",$image)
 }
 if (-not $SkipGatewaySwitch) {
