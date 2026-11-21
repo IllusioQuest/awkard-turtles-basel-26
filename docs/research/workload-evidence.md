@@ -1,7 +1,7 @@
 # Public workload and price evidence for live jobs
 
 User-supplied sources reviewed 2026-11-21, alongside T-48 deadlines and T-49/T-50 performance work.
-No large dataset was downloaded and no external result was silently substituted for a local
+No large dataset was downloaded by T-48/T-50 and no external result was silently substituted for a local
 measurement or the existing scored parameters. Source fields distinguish measurement, trace,
 market snapshot, derived estimate and operator policy. Proposed deadlines are policies, not trace facts.
 
@@ -53,3 +53,13 @@ The approved live targets use our measured small-job runtimes as context and the
 300/600-second policy choice. The configuration names those sources and bounds inputs. Public
 trace/MLPerf/provider data may produce separately labelled workload/hardware/price variants once
 concrete compatible records are selected; they do not retroactively prove feasibility of the targets.
+
+## Parallel data handoff
+
+T-51 / PR #39 was merged while this work was being verified. Reuse its retained source records,
+derived profiles and [compute-demand notes](compute-demand-traces.md), rather than creating another
+trace importer. That task downloaded large traces separately and committed only documented
+aggregates/source records where appropriate. Its task-start-based Alibaba series is an execution
+activity proxy, not observed job-submission arrivals or customer deadlines. Keep that distinction
+when using it for future live workload profiles. This handoff does not validate or alter another
+agent's price assumptions, and does not change the 300/600-second operator policies.

@@ -3,12 +3,12 @@
   "method_file": "config/computing-price-method.json",
   "snapshot": {
     "path": "data/raw/market/price-snapshots/azure-switzerlandnorth-2026-11-21.json",
-    "sha256": "b397bf22ec74eaa38c956c834d146f63b3e6aeb5be5499982dc1554f18bac568",
+    "sha256": "d49eead2019fcc72f487ba6ed2741f1f556c4b721cebe24a0feeb35de0c52ec7",
     "retrieved_at_utc": "2026-11-21T01:30:52+00:00",
     "source": "https://prices.azure.com/api/retail/prices"
   },
   "value_chf_per_server_hour": 0.6873,
-  "value_method": "C1 = A2 (cheapest Azure Switzerland North Linux spot, per 1 kW server-hour) x lowest community/datacentre price ratio; docs/research/computing-price.md ง3 C1",
+  "value_method": "C1 = A2 (cheapest Azure Switzerland North Linux spot, per 1 kW server-hour) x lowest community/datacentre price ratio; docs/research/computing-price.md ยง3 C1",
   "adopted_value_chf_per_server_hour": 0.66,
   "adopted_value_source": "docs/research/computing-price.md: team decision 2026-11-21 (anchor A3, Hetzner dedicated server; no public price API, so not updated automatically). Used here only for comparison.",
   "difference_to_adopted_chf_per_server_hour": 0.0273,

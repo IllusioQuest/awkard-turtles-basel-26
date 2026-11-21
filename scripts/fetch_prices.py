@@ -62,11 +62,11 @@ def rel(path: Path) -> str:
 
 
 def load_method(path: Path = METHOD_FILE) -> dict:
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_server_kw(path: Path = HOUSE_FILE) -> dict:
-    return json.loads(path.read_text())["ServerElectricKw"]
+    return json.loads(path.read_text(encoding="utf-8"))["ServerElectricKw"]
 
 
 def load_compute_rows(path: Path = COMPUTE_CSV) -> dict[str, dict]:
@@ -123,7 +123,7 @@ def write_snapshot(method: dict, first_url: str, items: list[dict], pages: int,
         "items": sorted(items, key=lambda i: (i.get("armSkuName", ""), i.get("productName", ""),
                                               i.get("meterName", ""), i.get("skuId", ""))),
     }
-    target.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
+    target.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return target
 
 
@@ -131,7 +131,7 @@ def latest_snapshot(directory: Path = SNAPSHOT_DIR) -> Path:
     files = sorted(directory.glob(f"{SNAPSHOT_PREFIX}*.json"))
     if not files:
         raise FileNotFoundError(f"no snapshot in {rel(directory)}; run without --derive-only")
-    return max(files, key=lambda p: json.loads(p.read_text())["retrieved_at_utc"])
+    return max(files, key=lambda p: json.loads(p.read_text(encoding="utf-8"))["retrieved_at_utc"])
 
 
 # --- Derive (pure) -------------------------------------------------------------------
@@ -247,7 +247,7 @@ def derive_file(snapshot_path: Path) -> dict:
 
 def write_derived(result: dict, target: Path = DERIVED_FILE) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
+    target.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def check_derived(target: Path = DERIVED_FILE) -> bool:
@@ -255,7 +255,7 @@ def check_derived(target: Path = DERIVED_FILE) -> bool:
     if not target.exists():
         print(f"[check] FAIL {rel(target)} missing")
         return False
-    stored = json.loads(target.read_text())
+    stored = json.loads(target.read_text(encoding="utf-8"))
     fresh = derive_file(REPO_ROOT / stored["snapshot"]["path"])
     ok = fresh == stored
     print(f"[check] {'OK  ' if ok else 'FAIL'} computing price reproducible from "
