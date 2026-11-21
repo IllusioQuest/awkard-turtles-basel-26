@@ -26,13 +26,13 @@ public static class YearSimulation
         if (demand.Count == 0) throw new ArgumentException("Empty demand.", nameof(demand));
         jobScenario?.Validate();
         int hoursPerDay = checked((int)p.HoursPerDay.Value);
-        if (jobScenario?.Mode == "finite" && demand.Count % hoursPerDay != 0)
+        if ((jobScenario?.Mode is "finite" or "mixed") && demand.Count % hoursPerDay != 0)
             throw new ArgumentException("Finite job runs require complete local days.", nameof(demand));
         var rows = new List<HourResult>(demand.Count);
         double tankKwh = 0;
         double count = p.ServerCount.Value;
         double perServerHeatKwh = p.ServerElectricKw.Value * p.HeatRecoveryShare.Value * p.HoursPerStep.Value;
-        JobQueueExecutor? queue = jobScenario?.Mode == "finite"
+        JobQueueExecutor? queue = (jobScenario?.Mode is "finite" or "mixed")
             ? new JobQueueExecutor(jobScenario, executor, hoursPerDay, demand.Count, count,
                 p.HoursPerStep.Value) : null;
         IExecutor effectiveExecutor = queue ?? executor;
@@ -65,9 +65,11 @@ public static class YearSimulation
         double serverHours = rows.Sum(x => x.ActualLoadPerServer * count * p.HoursPerStep.Value);
         double electricCost = rows.Sum(x => x.ServerElectricKwh) * p.ElectricityPriceChfPerKwh.Value;
         double heatValue = used * p.ElectricityPriceChfPerKwh.Value / p.HeatPumpEfficiency.Value;
-        double income = serverHours * p.ComputePriceChfPerServerHour.Value;
-        double? breakEven = serverHours > 0 ? (electricCost - heatValue) / serverHours : null;
         JobSummary? jobs = queue?.Finish();
+        double income = jobScenario?.Mode == "mixed"
+            ? jobs!.ByType.Sum(x => x.ComputingIncomeChf ?? 0) + jobs.Filler!.ComputingIncomeChf
+            : serverHours * p.ComputePriceChfPerServerHour.Value;
+        double? breakEven = serverHours > 0 ? (electricCost - heatValue) / serverHours : null;
         string missedDeadlines = jobs is null ? "not modelled yet"
             : jobs.MissedDeadlinePercent is double percent
                 ? $"{percent:R}% of jobs due within the simulated year"
