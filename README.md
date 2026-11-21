@@ -25,6 +25,13 @@ python3 scripts/fetch_data.py --check   # validate the data against the case's e
 scripts/deadline-reminder.sh            # time left until our deadlines
 ```
 
+## Try the animated house (T-25 draft)
+
+Open [`prototypes/animated-house/index.html`](prototypes/animated-house/index.html) directly in a
+browser. It replays 15 January and 15 July from the committed C# result export without a server
+or internet connection. The controls, provenance and optional LiveRun log import are documented
+in its [README](prototypes/animated-house/README.md). The team-lead visual review is pending.
+
 ## C# reference-house core (proposed)
 
 Requires the .NET 8 SDK. From the repository root:

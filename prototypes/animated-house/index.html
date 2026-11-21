@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DigitalHeat · Inside the example house</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      background: #09131e; color: #edf5f3; --cyan: #62e5d4; --orange: #ffb25d;
+      --pink: #ffa8b8; --muted: #a9bac0; --line: #28404b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 65% 5%, #173444 0, #09131e 58%); }
+    button, select, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1500px; margin: auto; padding: 20px 24px 28px; }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .eyebrow { color: var(--cyan); letter-spacing: .14em; text-transform: uppercase; font-size: 12px; font-weight: 750; }
+    h1 { font-size: clamp(25px, 3vw, 42px); line-height: 1.08; margin: 5px 0 0; letter-spacing: -.035em; }
+    .subtitle { color: var(--muted); max-width: 640px; margin: 7px 0 0; font-size: 14px; }
+    .status { border: 1px solid #426470; background: #102b37; color: #aef2e8;
+      border-radius: 999px; padding: 8px 13px; font-size: 12px; white-space: nowrap; }
+    .toolbar { border: 1px solid var(--line); background: #10212dcc; border-radius: 18px;
+      padding: 12px 15px; display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+    .days { display: flex; background: #091824; border: 1px solid #294550; border-radius: 12px; padding: 4px; gap: 3px; }
+    .days button, .icon, select, .log-button { border: 0; color: #dcebe9; background: transparent; border-radius: 9px; padding: 8px 12px; }
+    .days button[aria-pressed="true"] { background: #264b54; color: white; box-shadow: inset 0 0 0 1px #4b878c; }
+    .icon { background: #264851; min-width: 42px; border: 1px solid #4d7780; }
+    .icon:hover, .days button:hover, .log-button:hover { background: #315b63; }
+    .time { min-width: 90px; font-size: 21px; font-variant-numeric: tabular-nums; font-weight: 750; }
+    .timeline { flex: 1; min-width: 160px; accent-color: var(--cyan); cursor: pointer; }
+    select { background: #142e39; border: 1px solid #45636c; }
+    .stage { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(280px, .72fr); gap: 16px; margin-top: 16px; }
+    .panel { border: 1px solid var(--line); border-radius: 23px; background: #10212d;
+      box-shadow: 0 18px 50px #0004; overflow: hidden; }
+    .house-panel { padding: 10px 16px 16px; }
+    .panel-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 5px 2px; }
+    .panel-heading h2, .facts h2 { margin: 0; font-size: 18px; }
+    .panel-heading span { color: var(--muted); font-size: 12px; }
+    svg { width: 100%; height: auto; display: block; }
+    .room { fill: #19313a; stroke: #45636b; stroke-width: 2; }
+    .basement { fill: #122733; stroke: #45636b; stroke-width: 2; }
+    .roof { fill: #274653; stroke: #67929b; stroke-width: 3; }
+    .flow { fill: none; stroke-width: 7; stroke-linecap: round; stroke-dasharray: 13 11;
+      animation: move 1s linear infinite; opacity: .12; transition: opacity .3s; }
+    .flow.active { opacity: 1; }
+    .flow.cyan { stroke: var(--cyan); } .flow.orange { stroke: var(--orange); }
+    .flow.pink { stroke: var(--pink); } .flow.muted { stroke: #9fb2b6; }
+    @keyframes move { to { stroke-dashoffset: -24; } }
+    .label { fill: #dceae7; font-size: 17px; font-weight: 700; }
+    .sub { fill: #a7bac0; font-size: 13px; }
+    .meter { fill: #314e55; stroke: #689098; stroke-width: 2; }
+    .water { fill: #56c4d5; transition: y .4s, height .4s; }
+    .rack { fill: #091924; stroke: #6b9fa4; stroke-width: 2; }
+    .server { fill: var(--cyan); transition: opacity .4s; }
+    .badge { font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; padding: 0 5px 5px; color: var(--muted); font-size: 12px; }
+    .swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .facts { padding: 19px; display: flex; flex-direction: column; gap: 8px; }
+    .facts h2 { margin-bottom: 7px; }
+    .fact { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px solid #28404b; padding: 10px 1px; }
+    .fact:last-of-type { border: 0; }
+    .fact span { color: var(--muted); }
+    .fact strong { font-variant-numeric: tabular-nums; text-align: right; font-size: 17px; }
+    .fact strong.cyan { color: var(--cyan); } .fact strong.orange { color: var(--orange); }
+    .callout { margin-top: auto; border: 1px solid #3e6671; border-radius: 15px; background: #173743;
+      padding: 13px 14px; line-height: 1.43; font-size: 14px; }
+    .callout b { color: #b1f5e8; }
+    .bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .note { padding: 16px 20px; line-height: 1.45; color: #c7d8d9; font-size: 13px; }
+    .note h3 { color: white; margin: 0 0 7px; font-size: 15px; }
+    .note p { margin: 5px 0; }
+    .log-button { display: inline-block; border: 1px solid #4b767d; background: #1c3b47; margin-top: 7px; }
+    .log-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .live { border: 1px solid #595063; border-radius: 11px; background: #282636; padding: 9px 11px; margin-top: 10px; }
+    .live.hidden { display: none; }
+    .live strong { color: #e6bdeb; }
+    .fine { font-size: 11px; color: #91a7ae; }
+    footer { color: #91a7ae; font-size: 11px; margin: 15px 3px 0; }
+    footer a { color: #a9e9e0; }
+    @media (max-width: 900px) { .stage, .bottom { grid-template-columns: 1fr; } .shell { padding: 13px; } }
+    @media (prefers-reduced-motion: reduce) { .flow { animation: none; } .water, .server { transition: none; } }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <div><div class="eyebrow">DigitalHeat · Reference house</div>
+      <h1>Inside the example house</h1>
+      <p class="subtitle">A day of computing and heating, hour by hour. Watch where the heat goes.</p></div>
+    <div class="status">C# year simulation · offline replay</div>
+  </header>
+  <section class="toolbar" aria-label="Playback controls">
+    <div class="days" role="group" aria-label="Select day">
+      <button id="jan" type="button" aria-pressed="true">15 January</button>
+      <button id="jul" type="button" aria-pressed="false">15 July</button>
+    </div>
+    <button id="previous" class="icon" type="button" aria-label="Previous hour">←</button>
+    <button id="play" class="icon" type="button" aria-label="Play">▶</button>
+    <button id="next" class="icon" type="button" aria-label="Next hour">→</button>
+    <span id="time" class="time">00:00</span>
+    <input id="timeline" class="timeline" type="range" min="0" max="23" value="0" aria-label="Hour of day">
+    <select id="speed" aria-label="Playback speed"><option value="1000">1×</option><option value="500">2×</option><option value="250">4×</option></select>
+  </section>
+  <div class="stage">
+    <section class="panel house-panel" aria-label="House heat flows">
+      <div class="panel-heading"><h2>Heat through the house</h2><span>Arrows show an active flow, not its exact scale</span></div>
+      <svg viewBox="0 0 920 570" role="img" aria-labelledby="diagram-title diagram-desc">
+        <title id="diagram-title">Reference house heat-flow diagram</title>
+        <desc id="diagram-desc">Servers in the basement, a thermal tank, backup heat, a radiator and hot water. Active arrows follow the exported hourly values.</desc>
+        <path class="roof" d="M58 209 L459 36 L860 209 L827 224 L459 72 L91 224 Z"/>
+        <rect class="room" x="95" y="205" width="730" height="172" rx="9"/>
+        <rect class="basement" x="95" y="377" width="730" height="168" rx="9"/>
+        <line x1="464" y1="205" x2="464" y2="377" stroke="#42616a" stroke-width="2"/>
+        <text x="146" y="242" class="label">Space heating</text><text id="space-label" x="146" y="267" class="sub">… kWh demand</text>
+        <g transform="translate(155 297)" stroke="#ffcf98" stroke-width="5" fill="none">
+          <path d="M0 0v50m17-50v50m17-50v50m17-50v50m17-50v50"/><path d="M-6 2h86M-6 49h86"/>
+        </g>
+        <text x="571" y="242" class="label">Hot water</text><text id="hot-label" x="571" y="267" class="sub">… kWh demand</text>
+        <path d="M660 298 q-20 20 0 40 q20-20 0-40" fill="#8bd6e5"/>
+        <path d="M659 287 v-11 h39" stroke="#8bd6e5" stroke-width="8" fill="none"/>
+        <path d="M685 276 q25 15 2 31" stroke="#8bd6e5" stroke-width="6" fill="none"/>
+        <text x="126" y="411" class="label">Computing servers</text><text id="load-label" x="126" y="434" class="sub">… % target load</text>
+        <rect class="rack" x="128" y="449" width="166" height="68" rx="7"/>
+        <rect class="server" x="142" y="461" width="28" height="43" rx="3"/>
+        <rect class="server" x="179" y="461" width="28" height="43" rx="3"/>
+        <rect class="server" x="216" y="461" width="28" height="43" rx="3"/>
+        <rect class="server" x="253" y="461" width="28" height="43" rx="3"/>
+        <g id="pause-overlay" style="display:none"><rect x="128" y="449" width="166" height="68" rx="7" fill="#40304c" stroke="#e6bdeb" stroke-width="2"/>
+          <text x="148" y="490" fill="#f3d8f6" font-size="16" font-weight="800">JOB PAUSED</text></g>
+        <text x="355" y="411" class="label">Heat tank</text><text id="tank-label" x="355" y="434" class="sub">… kWh stored</text>
+        <rect class="meter" x="378" y="449" width="68" height="72" rx="9"/>
+        <rect id="water" class="water" x="383" y="516" width="58" height="0" rx="4"/>
+        <text x="555" y="411" class="label">Backup heater</text><text id="backup-label" x="555" y="434" class="sub">… kWh</text>
+        <rect x="590" y="454" width="69" height="59" rx="8" fill="#644032" stroke="#ffb25d" stroke-width="3"/>
+        <path d="M625 465q-18 20 0 40q20-19 0-40" fill="#ffb25d"/>
+        <path id="flow-direct" class="flow cyan" d="M290 475 H321 V357 H455 V284"/>
+        <path id="flow-dump" class="flow muted" d="M129 496 H65"/>
+        <path id="flow-charge" class="flow cyan" d="M296 491 H374"/>
+        <path id="flow-discharge" class="flow pink" d="M450 487 H480 V344 H515 V284"/>
+        <path id="flow-backup" class="flow orange" d="M627 455 V346 H556 V284"/>
+        <text x="320" y="368" class="badge" fill="#62e5d4">USE</text>
+        <text x="26" y="521" class="badge" fill="#9fb2b6">DUMP</text>
+        <text x="320" y="510" class="badge" fill="#62e5d4">STORE</text>
+        <text x="478" y="379" class="badge" fill="#ffa8b8">RELEASE</text>
+        <text x="662" y="357" class="badge" fill="#ffb25d">BACKUP</text>
+        <text x="385" y="197" class="sub">Combined heat supply; allocation between radiator and hot water is not modelled</text>
+      </svg>
+      <div class="legend"><span><i class="swatch" style="background:var(--cyan)"></i>Server heat</span>
+        <span><i class="swatch" style="background:var(--pink)"></i>Tank discharge</span>
+        <span><i class="swatch" style="background:var(--orange)"></i>Backup heat</span>
+        <span><i class="swatch" style="background:#9fb2b6"></i>Dumped heat</span></div>
+    </section>
+    <aside class="panel facts">
+      <h2 id="fact-title">15 January · 00:00</h2>
+      <div class="fact"><span>House needs</span><strong id="demand">—</strong></div>
+      <div class="fact"><span>Direct server heat</span><strong id="direct" class="cyan">—</strong></div>
+      <div class="fact"><span>Tank charges / releases</span><strong id="tank-flow">—</strong></div>
+      <div class="fact"><span>Backup heat</span><strong id="backup" class="orange">—</strong></div>
+      <div class="fact"><span>Heat dumped</span><strong id="dump">—</strong></div>
+      <div class="fact"><span>Tank at hour end</span><strong id="tank">—</strong></div>
+      <div class="fact"><span>Server target load</span><strong id="load">—</strong></div>
+      <div class="callout"><b>What this hour means</b><div id="explanation"></div></div>
+    </aside>
+  </div>
+  <div class="bottom">
+    <section class="panel note"><h3>Keep the story honest</h3>
+      <p>The house values come from the C# year simulation. On 15 July, the tank is full but
+      servers still run at a low load to cover hot water. Neither selected day contains a natural
+      zero-load step.</p>
+      <p class="fine">Arrows indicate whether a flow exists. Heat delivered to radiators versus hot
+      water is not separately allocated in the exported model.</p></section>
+    <section class="panel note"><h3>Show a real job pause</h3>
+      <p>Import a text log from <code>DigitalHeat.LiveRun</code> for either day. The log controls only
+      the job-status overlay; it does not rewrite the simulated house heat.</p>
+      <label class="log-button" for="log-file">Import LiveRun log</label>
+      <input id="log-file" class="log-input" type="file" accept=".txt,.log,text/plain">
+      <div id="log-status" class="fine">No live log imported. No real job pause is claimed.</div>
+      <div id="live" class="live hidden" aria-live="polite"></div>
+    </section>
+  </div>
+  <footer id="provenance"></footer>
+</main>
+<script>
+"use strict";
+const exportData = {"schema_version":1,"site_id":"reference-house","timezone":"Europe/Zurich","source_commit":"8651786d863a10c99e73421c63a42b90b93f4258","source_csv":"data/derived/reference-house-v1/sites/reference-house/hourly.csv","tank_capacity_kwh":35,"server_count":4,"days":{"2025-01-15":[{"local_time":"2025-01-15T00:00","heat_demand_kwh":10.0703125,"space_heat_kwh":9.5703125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":6.8703125},{"local_time":"2025-01-15T01:00","heat_demand_kwh":10.1484375,"space_heat_kwh":9.6484375,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":6.9484375},{"local_time":"2025-01-15T02:00","heat_demand_kwh":10.3828125,"space_heat_kwh":9.8828125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":7.1828125},{"local_time":"2025-01-15T03:00","heat_demand_kwh":10.421875,"space_heat_kwh":9.921875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":7.221875},{"local_time":"2025-01-15T04:00","heat_demand_kwh":10.3046875,"space_heat_kwh":9.8046875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":7.1046875},{"local_time":"2025-01-15T05:00","heat_demand_kwh":9.3671875,"space_heat_kwh":8.8671875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":6.1671875},{"local_time":"2025-01-15T06:00","heat_demand_kwh":9.171875,"space_heat_kwh":8.671875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.971875},{"local_time":"2025-01-15T07:00","heat_demand_kwh":9.4453125,"space_heat_kwh":8.9453125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":6.2453125},{"local_time":"2025-01-15T08:00","heat_demand_kwh":9.09375,"space_heat_kwh":8.59375,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.89375},{"local_time":"2025-01-15T09:00","heat_demand_kwh":8.546875,"space_heat_kwh":8.046875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.346875},{"local_time":"2025-01-15T10:00","heat_demand_kwh":8.1171875,"space_heat_kwh":7.6171875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.9171875},{"local_time":"2025-01-15T11:00","heat_demand_kwh":8.0390625,"space_heat_kwh":7.5390625,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.8390625},{"local_time":"2025-01-15T12:00","heat_demand_kwh":7.765625,"space_heat_kwh":7.265625,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.565625},{"local_time":"2025-01-15T13:00","heat_demand_kwh":7.375,"space_heat_kwh":6.875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.175},{"local_time":"2025-01-15T14:00","heat_demand_kwh":7.5703125,"space_heat_kwh":7.0703125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.3703125},{"local_time":"2025-01-15T15:00","heat_demand_kwh":7.609375,"space_heat_kwh":7.109375,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.409375},{"local_time":"2025-01-15T16:00","heat_demand_kwh":7.8046875,"space_heat_kwh":7.3046875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":4.6046875},{"local_time":"2025-01-15T17:00","heat_demand_kwh":8.3125,"space_heat_kwh":7.8125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.1125},{"local_time":"2025-01-15T18:00","heat_demand_kwh":8.546875,"space_heat_kwh":8.046875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.346875},{"local_time":"2025-01-15T19:00","heat_demand_kwh":8.9765625,"space_heat_kwh":8.4765625,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.7765625},{"local_time":"2025-01-15T20:00","heat_demand_kwh":9.0546875,"space_heat_kwh":8.5546875,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.8546875},{"local_time":"2025-01-15T21:00","heat_demand_kwh":8.8203125,"space_heat_kwh":8.3203125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.6203125},{"local_time":"2025-01-15T22:00","heat_demand_kwh":8.8203125,"space_heat_kwh":8.3203125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.6203125},{"local_time":"2025-01-15T23:00","heat_demand_kwh":8.8203125,"space_heat_kwh":8.3203125,"hot_water_kwh":0.5,"target_load_per_server":1.0,"actual_load_per_server":1.0,"produced_heat_kwh":3.2,"direct_used_kwh":3.2,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":0.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":5.6203125}],"2025-07-15":[{"local_time":"2025-07-15T00:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T01:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T02:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T03:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T04:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T05:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T06:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T07:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T08:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T09:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T10:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T11:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T12:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T13:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T14:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T15:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T16:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T17:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T18:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T19:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T20:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T21:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T22:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0},{"local_time":"2025-07-15T23:00","heat_demand_kwh":0.5,"space_heat_kwh":0.0,"hot_water_kwh":0.5,"target_load_per_server":0.15625,"actual_load_per_server":0.15625,"produced_heat_kwh":0.5,"direct_used_kwh":0.5,"tank_charge_kwh":0.0,"tank_discharge_kwh":0.0,"tank_stored_kwh":35.0,"dumped_heat_kwh":0.0,"backup_heat_kwh":0.0}]}};
+const dayKeys = ["2025-01-15", "2025-07-15"];
+const dayNames = {"2025-01-15": "15 January", "2025-07-15": "15 July"};
+let day = dayKeys[0], hourIndex = 0, timer = null, liveRows = new Map(), liveJob = "";
+const byId = id => document.getElementById(id);
+const energy = value => `${Number(value).toFixed(2)} kWh`;
+const percent = value => `${Math.round(Number(value) * 100)} %`;
+
+function explanation(row, log) {
+  if (log?.paused) return `The imported LiveRun log records ${log.forced ? "a forced pause" : "a pause"} here. The house diagram still shows the separate year simulation.`;
+  if (row.space_heat_kwh > 0 && row.backup_heat_kwh > 0)
+    return "Winter demand exceeds the heat supplied by the computing servers. The backup heater covers the remainder.";
+  if (row.tank_stored_kwh === exportData.tank_capacity_kwh && row.hot_water_kwh > 0)
+    return "The tank is full. Servers keep running at reduced load to provide this hour's hot water.";
+  if (row.tank_charge_kwh > 0) return "The servers produce more useful heat than the house needs now, so the remainder charges the tank.";
+  if (row.tank_discharge_kwh > 0) return "The tank releases stored server heat to help cover this hour's demand.";
+  return "The scheduler follows this hour's heat demand using the reference-house servers.";
+}
+
+function render() {
+  const row = exportData.days[day][hourIndex];
+  const log = liveRows.get(row.local_time);
+  const hour = row.local_time.slice(11);
+  byId("time").textContent = hour;
+  byId("timeline").value = String(hourIndex);
+  byId("fact-title").textContent = `${dayNames[day]} · ${hour}`;
+  byId("demand").textContent = energy(row.heat_demand_kwh);
+  byId("direct").textContent = energy(row.direct_used_kwh);
+  byId("tank-flow").textContent = `${energy(row.tank_charge_kwh)} / ${energy(row.tank_discharge_kwh)}`;
+  byId("backup").textContent = energy(row.backup_heat_kwh);
+  byId("dump").textContent = energy(row.dumped_heat_kwh);
+  byId("tank").textContent = `${row.tank_stored_kwh.toFixed(2)} / ${exportData.tank_capacity_kwh} kWh`;
+  byId("load").textContent = percent(row.target_load_per_server);
+  byId("space-label").textContent = `${energy(row.space_heat_kwh)} demand`;
+  byId("hot-label").textContent = `${energy(row.hot_water_kwh)} demand`;
+  byId("load-label").textContent = `${percent(row.target_load_per_server)} target load`;
+  byId("tank-label").textContent = `${energy(row.tank_stored_kwh)} stored`;
+  byId("backup-label").textContent = energy(row.backup_heat_kwh);
+  byId("explanation").textContent = explanation(row, log);
+  byId("jan").setAttribute("aria-pressed", String(day === dayKeys[0]));
+  byId("jul").setAttribute("aria-pressed", String(day === dayKeys[1]));
+  const waterHeight = 62 * row.tank_stored_kwh / exportData.tank_capacity_kwh;
+  byId("water").setAttribute("y", String(516 - waterHeight));
+  byId("water").setAttribute("height", String(waterHeight));
+  document.querySelectorAll(".server").forEach(bar => { bar.style.opacity = String(.16 + .84 * row.target_load_per_server); });
+  byId("pause-overlay").style.display = log?.paused ? "inline" : "none";
+  for (const [id, value] of [["flow-direct",row.direct_used_kwh],["flow-charge",row.tank_charge_kwh],
+      ["flow-discharge",row.tank_discharge_kwh],["flow-backup",row.backup_heat_kwh],
+      ["flow-dump",row.dumped_heat_kwh]])
+    byId(id).classList.toggle("active", value > 0);
+  const live = byId("live");
+  live.classList.toggle("hidden", !log);
+  if (log) {
+    const heading = document.createElement("strong");
+    heading.textContent = log.paused ? (log.forced ? "FORCED PAUSE" : "JOB PAUSED") : "Imported job control";
+    live.replaceChildren(heading, document.createElement("br"), document.createTextNode(
+      `Target ${log.target} · observed CPU load ${log.observed}${liveJob ? ` · ${liveJob}` : ""}`));
+  }
+}
+
+function stop() { if (timer !== null) clearInterval(timer); timer = null; byId("play").textContent = "▶"; byId("play").setAttribute("aria-label","Play"); }
+function start() { if (timer !== null) return; byId("play").textContent = "Ⅱ"; byId("play").setAttribute("aria-label","Pause");
+  timer = setInterval(() => { if (hourIndex === 23) { stop(); return; } hourIndex++; render(); }, Number(byId("speed").value)); }
+function setDay(value) { stop(); day = value; hourIndex = 0; render(); }
+byId("jan").addEventListener("click", () => setDay(dayKeys[0]));
+byId("jul").addEventListener("click", () => setDay(dayKeys[1]));
+byId("previous").addEventListener("click", () => { stop(); hourIndex = Math.max(0,hourIndex-1); render(); });
+byId("next").addEventListener("click", () => { stop(); hourIndex = Math.min(23,hourIndex+1); render(); });
+byId("play").addEventListener("click", () => timer === null ? start() : stop());
+byId("timeline").addEventListener("input", event => { stop(); hourIndex = Number(event.target.value); render(); });
+byId("speed").addEventListener("change", () => { if (timer !== null) { stop(); start(); } });
+document.addEventListener("keydown", event => { if (event.target.tagName === "INPUT" || event.target.tagName === "SELECT") return;
+  if (event.key === "ArrowRight") byId("next").click();
+  if (event.key === "ArrowLeft") byId("previous").click();
+  if (event.key === " ") { event.preventDefault(); byId("play").click(); }
+});
+
+function parseLiveLog(text) {
+  const rows = new Map();
+  const header = text.match(/Replaying (\d{4}-\d{2}-\d{2}) for ([^;\r\n]+)/);
+  for (const line of text.split(/\r?\n/)) {
+    const match = line.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}).*?\btarget=([\d.,]+)\s*%.*?\bobserved_cpu_load=([\d.,]+)\s*%/);
+    if (!match) continue;
+    const key = match[1];
+    if (!dayKeys.some(value => key.startsWith(value))) continue;
+    rows.set(key, {target: `${match[2].replace(",", ".")} %`,
+      observed: `${match[3].replace(",", ".")} %`, forced: line.includes("[forced pause]"),
+      paused: Number(match[2].replace(",", ".")) === 0});
+  }
+  return {rows, job: header?.[2]?.trim() ?? ""};
+}
+byId("log-file").addEventListener("change", async event => {
+  const file = event.target.files?.[0]; if (!file) return;
+  const parsed = parseLiveLog(await file.text());
+  if (!parsed.rows.size) { byId("log-status").textContent = "No matching LiveRun hour lines for 15 January or 15 July."; return; }
+  liveRows = parsed.rows; liveJob = parsed.job;
+  byId("log-status").textContent = `${parsed.rows.size} imported control hours · local file only · not independently verified`;
+  const firstDay = [...parsed.rows.keys()][0].slice(0,10);
+  if (firstDay !== day) setDay(firstDay); else render();
+});
+byId("provenance").textContent = `Source: ${exportData.source_csv} · C# export commit ${exportData.source_commit ?? "unknown"} · ${exportData.timezone}, 24 nominal local hours/day · ${exportData.server_count}-server reference-house scenario. No network request.`;
+render();
+</script>
+</body>
+</html>
