@@ -48,6 +48,15 @@ public class WorkModelTests
         Assert.Equal(core.Summary.Jobs.DueWithinHorizon, net.Work.Type1.DueWithinHorizon);
         Assert.Equal(core.Summary.Jobs.Completed, net.Work.Type1.Completed);
         Assert.Equal(core.Hours.Select(h => h.ActualLoadPerServer), net.Sites[0].Hours.Select(h => h.ActualLoadPerServer));
+
+        var b2Ledger = new WorkLedger([site], [new Type1Spec(40, 0.5, 24, Anywhere)], [0.0], demand.Count, 24);
+        var b2 = NetworkSimulation.Run([site], new NetworkGreedyJobsScheduler(), new PerfectForesightForecasts(), 1,
+            work: b2Ledger);
+        for (int h = 0; h < core.Hours.Count; h++)
+            Assert.True(Math.Abs(core.Hours[h].ActualLoadPerServer - b2.Sites[0].Hours[h].ActualLoadPerServer) < 1e-9,
+                $"First B2 mismatch at {h}: Core={core.Hours[h].ActualLoadPerServer:R}, B2={b2.Sites[0].Hours[h].ActualLoadPerServer:R}");
+        Assert.Equal(core.Summary.Jobs.Missed, b2.Work!.Type1.Missed);
+        Assert.Equal(core.Summary.BreakEvenChfPerServerHour, b2.Sites[0].Summary.CaseBreakEvenChfPerServerHour);
     }
 
     [Fact]

@@ -93,3 +93,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-57](T-57-scheduler-cleanup.md) | Clean scheduler code and measure owner runtime | Nikita / Codex | PR #46 in review; 61 orchestration + 46 Core tests; runtime evidence shared |
 | [T-58](T-58-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | done |
 | [T-59](T-59-swiss-building-mix.md) | Swiss building and ownership weights for simulation nodes | Nikita / Codex; coordinate T-58 | PR #49 in review; composition prepared; mixed thermal inputs pending T-58 |
+| [T-60](T-60-unified-scheduler-boundary.md) | One network decision, safe real admission | Jona / Codex | ready for review; `feat/T-60-unified-scheduler` |
+| [T-61](T-61-network-workload-integration.md) | Complete shared Network job path for finite year and real batch | open; coordinate Jona and Nikita | open; depends on T-60/T-54/T-43 |

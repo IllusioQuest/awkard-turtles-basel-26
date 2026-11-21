@@ -38,6 +38,29 @@ public class NetworkTests
     }
 
     [Fact]
+    public void NetworkB2OnOneSiteReproducesUnlimitedReferenceYearHourByHour()
+    {
+        var (p, demand, site) = Reference();
+        var year = YearSimulation.Run(demand, p, new GreedyHeatScheduler(p.MinimumLoadShare.Value),
+            new SimulatedExecutor());
+        var work = new WorkLedger([site], [null], [1.0], demand.Count, (int)p.HoursPerDay.Value);
+        var network = NetworkSimulation.Run([site], new NetworkGreedyJobsScheduler(),
+            new PerfectForesightForecasts(), 1, work: work);
+        Assert.Equal(year.Hours, network.Sites[0].Hours);
+        Assert.Equal(year.Summary.ServerHours, network.Sites[0].Summary.ServerHours);
+        Assert.Equal(year.Summary.Coverage, network.Sites[0].Summary.Coverage);
+        Assert.Equal(year.Summary.DumpedHeatKwh, network.Sites[0].Summary.DumpedHeatKwh);
+        Assert.Equal(year.Summary.BreakEvenChfPerServerHour,
+            network.Sites[0].Summary.CaseBreakEvenChfPerServerHour);
+
+        var routedYear = YearSimulation.Run(demand, p,
+            new SingleSiteUnlimitedNetworkScheduler(site, new NetworkGreedyJobsScheduler()),
+            new SimulatedExecutor());
+        Assert.Equal(year.Hours, routedYear.Hours);
+        Assert.Equal(year.Summary, routedYear.Summary);
+    }
+
+    [Fact]
     public void FullYearUpperBoundEqualsLocalGreedyOnReferenceHouse()
     {
         // Decision 0024: with minimum load 0, a lossless tank and unlimited work, greedy is optimal.

@@ -53,3 +53,4 @@ later.
 | [0043](0043-gaming-gpu-eligibility.md) | Gaming GPU eligibility with existing heat ranking | proposed; user approved; T-55 |
 | [0044](0044-event-driven-node-feedback.md) | Event-driven workload-owner node feedback | proposed; user approved; T-56 |
 | [0045](0045-bfs-residential-population.md) | Separate sourced residential-stock composition profile | proposed; user approved; T-59 |
+| [0048](0048-unified-scheduler-boundary.md) | Network scheduling decision and real admission boundary | proposed; T-60; reviewed with changes |

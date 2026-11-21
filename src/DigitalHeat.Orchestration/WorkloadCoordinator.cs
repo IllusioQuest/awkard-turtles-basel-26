@@ -198,16 +198,34 @@ public sealed class WorkloadCoordinator : IDisposable
 
     public AttemptRecord? TryStart(WorkloadRequest request, IReadOnlyList<RuntimeNode> nodes, ContainerProfile profile,
         DateTimeOffset nowUtc, bool pauseBatchFirst = true)
+        => TryStartCore(request, nodes, profile, nowUtc, pauseBatchFirst, null);
+
+    /// <summary>Start only at the network-selected site and inventory hour; never reroute to another site.</summary>
+    public AttemptRecord? TryStartAtSite(WorkloadRequest request, IReadOnlyList<RuntimeNode> nodes, ContainerProfile profile,
+        DateTimeOffset nowUtc, string selectedSiteId, HeatSignal expectedHeatSignal,
+        long expectedInventoryRevision, DateTimeOffset expectedHourStartUtc)
+    {
+        if (string.IsNullOrWhiteSpace(selectedSiteId)) throw new ArgumentException("A selected site is required.", nameof(selectedSiteId));
+        ArgumentNullException.ThrowIfNull(expectedHeatSignal);
+        return TryStartCore(request, nodes, profile, nowUtc, false, selectedSiteId, expectedInventoryRevision, expectedHourStartUtc, expectedHeatSignal);
+    }
+
+    private AttemptRecord? TryStartCore(WorkloadRequest request, IReadOnlyList<RuntimeNode> nodes, ContainerProfile profile,
+        DateTimeOffset nowUtc, bool pauseBatchFirst, string? selectedSiteId, long? expectedInventoryRevision = null,
+        DateTimeOffset? expectedHourStartUtc = null, HeatSignal? expectedHeatSignal = null)
     {
         lock (gate)
         {
             RequireReconciled();
             WorkloadPlacement.ValidateRequest(request);
+            if (expectedInventoryRevision is not null && !placement.MatchesSnapshot(selectedSiteId!, expectedHeatSignal!, expectedInventoryRevision.Value, expectedHourStartUtc!.Value, nowUtc)) return null;
             var prior = records.SingleOrDefault(r => r.Attempt.Request.Id == request.Id);
             if (prior is not null)
             {
                 if (WorkloadJson.Identity(prior.Attempt.Request) != WorkloadJson.Identity(request) || WorkloadJson.Identity(prior.Attempt.Profile) != WorkloadJson.Identity(profile))
                     throw new InvalidDataException("Attempt retry changed requirements/profile.");
+                if (selectedSiteId is not null && prior.Attempt.Reservation.SiteId != selectedSiteId)
+                    throw new InvalidOperationException("Existing attempt is at a different site than the network decision.");
                 if (prior.Phase == "created")
                 {
                     if (!CanDispatch(request)) { EnforceDeadlines(); return CurrentRecord(request.Id); }
@@ -232,7 +250,10 @@ public sealed class WorkloadCoordinator : IDisposable
             if (!CanDispatch(request)) return null;
             Preflight(request, nodes, profile);
             if (!CanDispatch(request)) return null;
-            var reservation = placement.TryReserve(request, DecisionTime(request, nowUtc));
+            var reservation = selectedSiteId is null
+                ? placement.TryReserve(request, DecisionTime(request, nowUtc))
+                : placement.TryReserveAtSite(request, selectedSiteId, expectedHeatSignal!, expectedInventoryRevision!.Value,
+                    expectedHourStartUtc!.Value, DecisionTime(request, nowUtc));
             if (reservation is null && request.Kind == "interactive" && pauseBatchFirst && CanAdmitAfterBatchPause(request, DecisionTime(request, nowUtc)))
             {
                 foreach (var batch in records.Where(r => r.Phase == "running" && r.Attempt.Request.Kind == "batch" && r.Attempt.Request.Lifecycle.AllowPause).ToArray())

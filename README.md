@@ -96,6 +96,10 @@ case values fixed for scored comparisons.
 `DigitalHeat.Core` exposes `IScheduler.Decide(HeatSignal)`, `IExecutor` and
 `SchedulerController.Apply`. `DigitalHeat.YearRun` supplies the simulated executor;
 `DigitalHeat.JobRuntime` supplies a Docker executor behind that same interface.
+The default unlimited YearRun now calls Network B2 through a one-site adapter each hour;
+`config/network/reference-only.json` is recorded as an input. Finite and mixed YearRun still
+use the Core queue path. The exact regression checks and remaining integration work are in
+[`docs/model/unified-scheduler-boundary.md`](docs/model/unified-scheduler-boundary.md).
 The default output marks missed deadlines as `not modelled yet` because unlimited
 work has no finite job count. A finite scenario reports arrivals, completed jobs,
 backlog, processed work and the percentage of jobs due within the simulated year
