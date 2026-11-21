@@ -90,7 +90,8 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         var report=JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(dir,"result.json")));
         if(report.GetProperty("blender").GetString()!=options.ExpectedVersion)throw new InvalidDataException("Native Blender version differs from recipe");
         blenderBuildHash=report.GetProperty("build_hash").GetString();
-        return new(options.EnableGpu?"EEVEE":null,options.EnableGpu?"EEVEE hardware context verified: "+report.GetProperty("device").GetString():"CPU scene preparation available",report);
+        if(cfg.WorkerRole=="assemble"&&!report.GetProperty("ffmpeg_available").GetBoolean())throw new InvalidDataException("Blender FFmpeg assembly support unavailable");
+        return new(options.EnableGpu?"EEVEE":null,options.EnableGpu?"EEVEE hardware context verified: "+report.GetProperty("device").GetString():cfg.WorkerRole=="assemble"?"CPU video assembly available (Blender FFmpeg)":"CPU scene preparation available",report);
     }
     public PreparedScene RegisterScene(PreparedScene scene)
     {
@@ -114,7 +115,9 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         ValidateAttempt(a);
         if(a.Profile.Image!=ProfileImage||a.Profile.Command.Length==0)throw new InvalidDataException("Untrusted native render profile");
         var cmd=a.Profile.Command;
-        if(cmd[0]=="prepare"&&cmd.Length==1)return;
+        if(cmd[0]=="prepare"&&cmd.Length==1){if(cfg.WorkerRole is not ("general" or "prepare"))throw new InvalidDataException("Worker is not a scene preparer");return;}
+        if(cmd[0]=="assemble"&&cmd.Length==2){if(cfg.WorkerRole!="assemble")throw new InvalidDataException("Worker is not a video assembler");ValidateAssembly(cmd[1]);return;}
+        if(cfg.WorkerRole is not ("general" or "render"))throw new InvalidDataException("Worker is not a frame renderer");
         if(cmd.Length!=3||cmd[1]!="EEVEE"||!options.EnableGpu||!int.TryParse(cmd[0],out int frame)||frame<1||frame>cfg.Frames||!File.Exists(AssetPath(cmd[2])))
             throw new InvalidDataException("Native frame profile/capability/artifact is invalid");
     }
@@ -134,9 +137,10 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         var r=Read(a);if(r.LaunchRequested)throw new IOException("Native launch already requested; reconcile ownership first");
         r=r with{LaunchRequested=true};WriteJson(RecordPath(a),r); // Durable uncertainty BEFORE spawning.
         string dir=Path.GetFullPath(DirectoryFor(a));var cmd=a.Profile.Command;
-        WriteJson(Path.Combine(dir,"spec.json"),new{mode=cmd[0]=="prepare"?"prepare":"frame",directory=dir,activation=r.Activation,
+        WriteJson(Path.Combine(dir,"spec.json"),new{mode=cmd[0]=="prepare"?"prepare":cmd[0]=="assemble"?"assemble":"frame",directory=dir,activation=r.Activation,
             recipe_id=RecipeId,settings_file=Path.Combine(scriptsDirectory,"scene_settings.json"),
-            frame=cmd[0]=="prepare"?0:int.Parse(cmd[0]),scene_sha256=cmd.Length==3?cmd[2]:null,scene_path=cmd.Length==3?AssetPath(cmd[2]):null});
+            frame=cmd[0] is "prepare" or "assemble"?0:int.Parse(cmd[0]),expected_frames=cfg.Frames,
+            manifest_path=cmd[0]=="assemble"?AssemblyPath(cmd[1]):null,scene_sha256=cmd.Length==3?cmd[2]:null,scene_path=cmd.Length==3?AssetPath(cmd[2]):null});
         if(IsWarm(a)){StartWarm(a,r);return;}
         var p=new Process{StartInfo=StartInfo(dir),EnableRaisingEvents=true};p.Exited+=(_,_)=>Wake?.Invoke();p.Start();children[a.AttemptId]=p;
         var output=p.StandardOutput.ReadToEndAsync();var error=p.StandardError.ReadToEndAsync();
@@ -186,7 +190,8 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
                 string hash=metadata.GetProperty("scene_sha256").GetString()!;string source=Path.Combine(dir,"scene.blend");
                 if(new FileInfo(source).Length>MaximumSceneBytes||Hash(File.ReadAllBytes(source))!=hash)throw new InvalidDataException("Prepared scene output mismatch");
                 string target=AssetPath(hash),temp=target+"."+a.AttemptId+".tmp";File.Copy(source,temp,true);File.Move(temp,target,true);
-            }else if(!File.Exists(Path.Combine(dir,"frame.png")))throw new InvalidDataException("Native output PNG missing");
+            }else if(metadata.GetProperty("stage").GetString()=="assemble"){if(!File.Exists(Path.Combine(dir,"video.mp4"))||new FileInfo(Path.Combine(dir,"video.mp4")).Length==0)throw new InvalidDataException("Video output missing");}
+            else if(!File.Exists(Path.Combine(dir,"frame.png")))throw new InvalidDataException("Native output PNG missing");
         }
         if(IsWarm(a))ReleaseWarm(a,r);
         WriteJson(RecordPath(a),r with{Released=true,ExitCode=observed.ExitCode});
@@ -198,6 +203,28 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         .Select(d=>new RenderArtifact(JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"job.json"))).GetProperty("job_id").GetString()!,cfg.Id,
             JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"result.json"))))).ToArray();
     public string? ImagePath(string job)=>Directory.GetDirectories(root).FirstOrDefault(d=>File.Exists(Path.Combine(d,"job.json"))&&JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"job.json"))).GetProperty("job_id").GetString()==job) is {} dir?Path.Combine(dir,"frame.png"):null;
+    private string AssemblyPath(string hash)
+    {
+        if(!System.Text.RegularExpressions.Regex.IsMatch(hash,"^[a-f0-9]{64}$"))throw new InvalidDataException("Invalid assembly identity");
+        return Path.Combine(options.AssetsDirectory,hash+".frames.json");
+    }
+    public void ValidateAssembly(string hash)
+    {
+        byte[] bytes=File.ReadAllBytes(AssemblyPath(hash));
+        if(bytes.Length>MaximumSceneBytes||Hash(bytes)!=hash)throw new InvalidDataException("Assembly manifest hash/size mismatch");
+        var m=JsonSerializer.Deserialize<JsonElement>(bytes);
+        if(m.GetProperty("recipe_id").GetString()!=RecipeId||m.GetProperty("build_hash").GetString()!=blenderBuildHash||m.GetProperty("frames").GetArrayLength()!=cfg.Frames)
+            throw new InvalidDataException("Assembly recipe/build/frame count mismatch");
+        string scene=m.GetProperty("scene_sha256").GetString()!;
+        if(!SavedScenes().Any(s=>s.SceneSha256==scene&&s.RecipeId==RecipeId&&s.BuildHash==blenderBuildHash))throw new InvalidDataException("Assembly scene is not registered for this recipe/build");
+        int index=0;
+        foreach(var f in m.GetProperty("frames").EnumerateArray()){
+            string file=f.GetProperty("file").GetString()!;
+            if(f.GetProperty("frame").GetInt32()!=++index||!System.Text.RegularExpressions.Regex.IsMatch(file,@"^frame-[a-f0-9]{64}\.png$")||
+               Hash(File.ReadAllBytes(Path.Combine(options.AssetsDirectory,file)))!=f.GetProperty("sha256").GetString())throw new InvalidDataException("Assembly frame index/path/hash mismatch");
+        }
+    }
+    public string? VideoPath(string job)=>ImagePath(job) is {} image?Path.Combine(Path.GetDirectoryName(image)!,"video.mp4"):null;
     public JsonElement Stats()
     {
         var now=DateTimeOffset.UtcNow;var rows=new List<object>();

@@ -1,0 +1,42 @@
+{
+  "physical_host_id": "presentation-laptop",
+  "shared_gpu_group": "presentation-shared-gpu",
+  "physical_gpu_id": "local-physical-gpu",
+  "total_heat_budget_kwh": 500,
+  "frame_heat_kwh": 0.8,
+  "cpu_threads_per_worker": 4,
+  "ram_mib_per_worker": 1536,
+  "frames": 48,
+  "deadline_seconds": 7200,
+  "warm_idle_timeout_seconds": 120,
+  "workers": [
+    {
+      "id": "cpu-prepare",
+      "role": "prepare",
+      "weight": 1
+    },
+    {
+      "id": "cpu-video",
+      "role": "assemble",
+      "weight": 1
+    },
+    {
+      "id": "gpu-1",
+      "role": "render",
+      "weight": 1.1
+    },
+    {
+      "id": "gpu-2",
+      "role": "render",
+      "weight": 1
+    },
+    {
+      "id": "gpu-3",
+      "role": "render",
+      "weight": 0.9
+    }
+  ],
+  "source": "User-approved one-laptop presentation: two CPU roles and three concurrent GPU workers share one Iris Xe. Equal base work units with GPU weights 1.1/1/.9. Synthetic total 500kWh inherited from old 300+200 lab, divided once among five logical quotas; NOT measured heat. Abstract case 0.8kWh/job-hour retained commitment. Four Blender threads per process, at most 12 in GPU phase; CPU stages do not overlap frame phase. Admission settings are not OS/driver quotas or promised utilization.",
+  "expected_blender_version": "5.3.0",
+  "graphics_api": "opengl"
+}
