@@ -294,3 +294,38 @@ SuperTuxKart is a racing alternative. Selection requested; neither game has been
 installed. Browser clients still install nothing and no game source modifications are planned.
 Sources checked 2026-11-21: https://xonotic.org/download/ (size, Linux/OpenGL requirements),
 https://supertuxkart.net/Download (Linux release availability).
+
+## Selected presentation game: Xonotic
+
+User selected Xonotic and confirmed Node C login now works. Desktop wallpaper repair now uses
+PCManFM's uniform-color mode rather than image stretching, including C, without restarting a
+session. It removes the mis-sized image; visual confirmation remains with the browser user.
+
+Prepare an original, unmodified Xonotic 0.8.6 Linux release in a derived image. Official archive
+https://dl.xonotic.org/xonotic-0.8.6.zip is verified against the publisher's SHA512 listing at
+https://dl.xonotic.org/xonotic-0.8.6.sha512 before extraction. No Steam account, game source edits
+or browser-client install. This game uses OpenGL; Dozen is not required by Xonotic itself, though
+C retains the tested experimental graphics image. No game-performance claim before launch.
+
+Commands once image build is complete:
+
+    .\gaming\scripts\Build-Xonotic.ps1
+    .\gaming\scripts\Start-DozenDesktop.ps1 -Xonotic
+    .\gaming\scripts\Start-Xonotic.ps1
+
+Optional offline local-match startup:
+
+    .\gaming\scripts\Start-Xonotic.ps1 -StartMatch
+
+A small sourced-as-demo-settings JSON defines 1280x720, 30 FPS cap, stormkeep and two bots;
+these are configuration choices, not measured hardware throughput. The derived image records
+its graphics base image ID and startup checks matching prior Vulkan enumeration/render evidence.
+Start-DozenDesktop -Xonotic recreates only C to use the game image, retaining its home and login;
+A/B remain untouched. Never run a recreation while protecting a real active match: this is the
+initial presentation setup, not a session-migration mechanism. Game launch uses an exclusive
+process lock to avoid two instances on the same desktop; stdout/stderr go to the desktop user's
+xonotic-demo.log. Dispatch success alone does not prove successful gameplay.
+
+This is still a manually launched presentation node. Automatic launch following shared heat
+reservation, observed batch preemption, termination reconciliation and remote-node adapters
+remain pending. Do not imply that the game is already orchestrated by the scheduler.
