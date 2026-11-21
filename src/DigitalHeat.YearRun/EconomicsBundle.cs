@@ -38,6 +38,9 @@ public static class EconomicsBundle
         var runner = new Runner(demand, reference);
         double electricity = reference.ElectricityPriceChfPerKwh.Value;
         double fill = e.FillRate.Value;
+        // Provenance is read before any output exists, so an export inside the repository stays clean.
+        string? revision = ResultBundle.Git(root, "rev-parse", "HEAD");
+        string? status = ResultBundle.Git(root, "status", "--porcelain", "--untracked-files=normal");
         Directory.CreateDirectory(output);
 
         var levers = new StringBuilder(LeverHeader + "\n");
@@ -111,8 +114,6 @@ public static class EconomicsBundle
             .Concat(Directory.GetFiles(hardwareDir, "*.json").Where(x => !x.EndsWith(".schema.json", StringComparison.Ordinal))
                 .OrderBy(x => x, StringComparer.Ordinal).Select(x => ResultBundle.RelativeInput(root, x)))
             .Distinct(StringComparer.Ordinal);
-        string? revision = ResultBundle.Git(root, "rev-parse", "HEAD");
-        string? status = ResultBundle.Git(root, "status", "--porcelain", "--untracked-files=normal");
         ResultBundle.WriteJson(Path.Combine(output, "run.json"), new
         {
             SchemaVersion, Kind = "economics", Timezone = "Europe/Zurich",
