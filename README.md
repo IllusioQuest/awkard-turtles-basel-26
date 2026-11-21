@@ -94,11 +94,51 @@ dotnet run --project src/DigitalHeat.LiveGrid -- --replay data/derived/live-demo
 
 The recorder polls `/api/state` every 0.4 seconds. Use `--output` to choose another recording path.
 
-**Task size on a new laptop:** one step is 2 s; each house has 3 servers of 0.5 core, and one task should take about 4 s (two steps) on one server, i.e. 2 s on a full core. Measure
-once and put the printed `sweeps` into `taskSweeps` in `config/live-demo-four-node.json`:
+**Two laptops, eight actual containers:** decision [0044](docs/decisions/0044-two-device-live-agent.md)
+implements the two-device plan in 0042. Both laptops need this branch, Docker Desktop, .NET 8 and
+the same temporary `DIGITALHEAT_AGENT_TOKEN` value. They must be on one reachable LAN. Laptop A is
+the only scheduler and model clock. Laptop B hosts four Docker workers and an agent; it does not
+run another scheduler. First on laptop B:
+
+```powershell
+$env:DIGITALHEAT_AGENT_TOKEN = '<same temporary token on both laptops>'
+dotnet run --project src/DigitalHeat.LiveGrid -- --agent --up --config config/live-demo-eight-node.json --port 5088
+```
+
+Then on laptop A, replacing the address with laptop B's WLAN/Ethernet IPv4 address:
+
+```powershell
+$env:DIGITALHEAT_AGENT_TOKEN = '<same temporary token on both laptops>'
+dotnet run --project src/DigitalHeat.LiveGrid -- --up --config config/live-demo-eight-node.json --peer-url http://<laptop-B-IPv4>:5088 --listen-lan
+```
+
+Laptop A opens `http://127.0.0.1:5087/?nodes=1-4`. On laptop B open
+`http://<laptop-A-IPv4>:5087/?nodes=5-8`. Both pages read the same coordinator state; each shows
+four rooms. The browser's `+ job` and slider on either screen reach the same scheduler. The node
+agent requires the token on every request. Allow inbound TCP 5088 on B and 5087 on A through the
+Windows firewall if prompted. `Test-NetConnection <laptop-B-IPv4> -Port 5088` on A checks the
+connection. Stop A and B with Ctrl+C; each stops its own four containers. This route has been
+checked with two processes and eight containers on one machine; a physical two-laptop rehearsal is
+still required. Task time was calibrated on A, so measure B before claiming equal task throughput.
+
+**Measured workload and scale:** one job is a technical 32-task Ising parameter scan, with 5,000
+measurement and 500 thermalisation sweeps per task: 180,224,000 spin updates are actually executed.
+Each task took 3.719, 4.025 and 4.007 s in three isolated 0.5-CPU container runs on the development
+laptop (median 4.007 s, 2026-11-21). One model hour is 2 wall seconds, so a task represents 2 model
+server-hours and the batch represents 64. The 20-model-hour deadline (40 wall seconds) is a **synthetic
+demo scenario**, not a customer requirement. A single warm house with three server slots has only
+60 server-hours before that deadline; distribution across houses is useful. See
+`config/live-demo-scale.json` for the conversion and sources. The UI limits visible waiting circles
+to 14 per house and shows the remaining count; every circle corresponds to a real task file. CPU is
+observed; the case's 1 kW server and recovered heat are not measured by this laptop run.
+
+**Task size on a new laptop:** first stop the demo containers, then measure at the actual per-slot
+0.5-CPU quota. One task should take about 4 s on one slot. Run the command three times and use the
+median full-task duration; update `taskSweeps` and `config/live-demo-scale.json` together:
 
 ```
-docker compose -f compose.live-demo.yml run --rm -e TARGET_SECONDS=2 node-1 calibrate
+docker compose -f compose.live-demo.yml down
+docker run --rm --cpus 0.5 -e TARGET_SECONDS=4 -e PROBE_SWEEPS=5000 digitalheat/research-sim:live-demo calibrate
 ```
 
 Queue check without Docker (four workers, a mover that keeps moving files):

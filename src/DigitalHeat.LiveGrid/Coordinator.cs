@@ -15,7 +15,7 @@ sealed class LiveCoordinator
     private readonly object gate = new();
     private readonly DemoConfig cfg;
     private readonly LiveCalibration cal;
-    private readonly string work;
+    private readonly LiveWorkStore files;
     private readonly IExecutor[] executors;
     private readonly string[] ids;
     private readonly double[] targetC;
@@ -50,17 +50,17 @@ sealed class LiveCoordinator
         int running = 0, waiting = 0;
         for (int i = 0; i < ids.Length; i++)
         {
-            running += Directory.GetFiles(Dir("running", i), "*.json", SearchOption.AllDirectories).Length;
-            waiting += Directory.GetFiles(Dir("queue", i), "*.json").Length;
+            running += files.List("running", i).Length;
+            waiting += files.List("queue", i).Length;
         }
-        return (Directory.GetFiles(Path.Combine(work, "done"), "*.json").Length, running, waiting);
+        return (files.DoneFiles("*.json").Length, running, waiting);
     }
 
     public Func<string, double?>? ActualLoad { get; set; }
 
-    public LiveCoordinator(DemoConfig cfg, LiveCalibration cal, string work, IExecutor[] executors)
+    public LiveCoordinator(DemoConfig cfg, LiveCalibration cal, LiveWorkStore files, IExecutor[] executors)
     {
-        this.cfg = cfg; this.cal = cal; this.work = work; this.executors = executors;
+        this.cfg = cfg; this.cal = cal; this.files = files; this.executors = executors;
         ids = cfg.Nodes.Select(n => n.Id).ToArray();
         targetC = ids.Select(_ => (cfg.TargetTemperatureMinC.Value + cfg.TargetTemperatureMaxC.Value) / 2).ToArray();
         targetLoad = new double[ids.Length];
@@ -79,10 +79,8 @@ sealed class LiveCoordinator
         _ => throw new InvalidDataException($"Unknown live-demo scheduler '{id}' (B1, B2 or LP)."),
     };
 
-    private double HeatShare(int i) => Math.Clamp((targetC[i] - cfg.TargetTemperatureMinC.Value)
+    private double HeatShare(int i) => !files.IsOnline(i) ? 0 : Math.Clamp((targetC[i] - cfg.TargetTemperatureMinC.Value)
         / (cfg.TargetTemperatureMaxC.Value - cfg.TargetTemperatureMinC.Value), 0, 1);
-
-    private string Dir(string kind, int node) => Path.Combine(work, kind, ids[node]);
 
     // ---- requests (no Docker call, return at once) -------------------------------------------------
 
@@ -131,18 +129,15 @@ sealed class LiveCoordinator
 
     private void ResetFiles()
     {
-        foreach (var kind in new[] { "queue", "running" })
-            for (int i = 0; i < ids.Length; i++)
-            {
-                Directory.CreateDirectory(Dir(kind, i));
-                foreach (var f in Directory.GetFiles(Dir(kind, i), "*.json", SearchOption.AllDirectories)) TryDelete(f);
-            }
-        Directory.CreateDirectory(Path.Combine(work, "done"));
-        foreach (var f in Directory.GetFiles(Path.Combine(work, "done"))) TryDelete(f);
+        files.Reset();
     }
 
     private object SpawnLocked(int node, int count, string how)
     {
+        // The technical 32-task scan is 16 temperatures × 2 seeds (docs/jobs/research-sim.md).
+        const int ScanTemperatures = 16;
+        const double ScanMinTemperature = 1.5;
+        const double ScanMaxTemperature = 3.5;
         int id = nextJob++;
         var job = new Job(id, node, step, step + (int)cfg.DeadlineSteps.Value, count);
         jobs[id] = job;
@@ -151,13 +146,12 @@ sealed class LiveCoordinator
             var task = new Dictionary<string, object>
             {
                 ["id"] = TaskName(id, k), ["job"] = id, ["origin"] = ids[node], ["spawn_step"] = step,
-                ["due_step"] = job.DueStep, ["temperature"] = Math.Round(1.5 + 2.0 * rng.NextDouble(), 4),
+                ["due_step"] = job.DueStep, ["temperature"] = Math.Round(ScanMinTemperature
+                    + (ScanMaxTemperature - ScanMinTemperature) * (k % ScanTemperatures) / (ScanTemperatures - 1), 6),
                 ["seed"] = (int)cfg.Seed.Value + id * 100 + k, ["lattice_size"] = (int)cfg.TaskLatticeSize.Value,
                 ["sweeps"] = (int)cfg.TaskSweeps.Value, ["thermalisation_sweeps"] = (int)cfg.TaskSweeps.Value / 10,
             };
-            string path = Path.Combine(Dir("queue", node), TaskName(id, k) + ".json");
-            File.WriteAllText(path + ".tmp", JsonSerializer.Serialize(task));
-            File.Move(path + ".tmp", path);
+            files.Put(node, TaskName(id, k) + ".json", JsonSerializer.Serialize(task));
         }
         Add("spawn", id, null, node, $"New job {id} at {Label(node)}: {count} tasks, due in "
             + $"{(int)cfg.DeadlineSteps.Value} steps ({how})");
@@ -184,6 +178,7 @@ sealed class LiveCoordinator
         lock (gate)
         {
             dirty = false;
+            files.RecoverPending();
             if (newHour)
             {
                 step++;
@@ -242,13 +237,7 @@ sealed class LiveCoordinator
 
     private void Move(LiveMove m, NetworkState state)
     {
-        string from = Path.Combine(Dir("queue", m.FromNode), m.TaskId + ".json");
-        string to = Path.Combine(Dir("queue", m.ToNode), m.TaskId + ".json");
-        try { File.Move(from, to); }
-        catch (FileNotFoundException) { return; }      // the worker claimed it first: it stays there
-        catch (DirectoryNotFoundException) { return; }
-        catch (IOException) { return; }                 // locked for a moment (Windows): try next step
-        catch (UnauthorizedAccessException) { return; }
+        if (!files.MoveQueue(m.FromNode, m.ToNode, m.TaskId + ".json")) return;
         var job = jobs[m.Job];
         double heat = state.States[m.FromNode].Signal.DemandKwh / cal.RecoverableKwhPerStep;
         int left = job.DueStep - step;
@@ -269,9 +258,12 @@ sealed class LiveCoordinator
     {
         for (int i = 0; i < ids.Length; i++)
         {
-            var waiting = Directory.GetFiles(Dir("queue", i), "f*.json");
+            if (!files.IsOnline(i)) continue;
+            try
+            {
+            var waiting = files.List("queue", i, "f*.json");
             int want = (fillerServerHours?[i] ?? 0) > 1e-9 ? cal.ServersPerNode : 0;
-            for (int k = want; k < waiting.Length; k++) TryDelete(waiting[k]);
+            for (int k = want; k < waiting.Length; k++) files.Delete("queue", i, waiting[k]);
             for (int k = waiting.Length; k < want; k++)
             {
                 string name = $"f{nextFiller++:000000}";
@@ -282,30 +274,33 @@ sealed class LiveCoordinator
                     ["lattice_size"] = (int)cfg.TaskLatticeSize.Value, ["sweeps"] = (int)cfg.TaskSweeps.Value,
                     ["thermalisation_sweeps"] = (int)cfg.TaskSweeps.Value / 10,
                 };
-                string path = Path.Combine(Dir("queue", i), name + ".json");
-                File.WriteAllText(path + ".tmp", JsonSerializer.Serialize(task));
-                File.Move(path + ".tmp", path);
+                files.Put(i, name + ".json", JsonSerializer.Serialize(task));
+            }
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                Console.Error.WriteLine($"[{ids[i]}] Filler deferred while peer is unavailable: {e.Message}");
             }
         }
     }
 
     private void CollectResults()
     {
-        foreach (var f in Directory.GetFiles(Path.Combine(work, "done"), "f*.json"))
-            if (TryDelete(f)) fillerDone++;
-        foreach (var f in Directory.GetFiles(Path.Combine(work, "done"), "j*.json"))
+        foreach (var (node, name) in files.DoneFiles("f*.json"))
+            if (files.Delete("done", node, name)) fillerDone++;
+        foreach (var (location, name) in files.DoneFiles("j*.json"))
         {
-            string name = Path.GetFileNameWithoutExtension(f);
-            if (!seenDone.Add(name)) continue;
-            int jobId = int.Parse(name[1..5]);
+            string taskId = Path.GetFileNameWithoutExtension(name);
+            if (!seenDone.Add(taskId)) continue;
+            int jobId = int.Parse(taskId[1..5]);
             if (!jobs.TryGetValue(jobId, out var job)) continue;
             string? nodeId = null;
-            try { nodeId = JsonDocument.Parse(ReadShared(f)).RootElement.GetProperty("node_id").GetString(); }
+            try { nodeId = JsonDocument.Parse(files.Read("done", location, name)).RootElement.GetProperty("node_id").GetString(); }
             catch (Exception) { }
             int node = Array.IndexOf(ids, nodeId);
             job.Done++;
             Add("complete", jobId, node < 0 ? null : node, null,
-                $"Job {jobId}: task {name[^2..]} done at {(node < 0 ? "?" : Label(node))}", name);
+                $"Job {jobId}: task {taskId[^2..]} done at {(node < 0 ? "?" : Label(node))}", taskId);
             if (job.Done == job.Tasks && !job.Missed)
                 Add("finished", jobId, null, job.Origin, $"Job {jobId} finished on time ({job.DueStep - step} steps to spare)");
         }
@@ -318,8 +313,8 @@ sealed class LiveCoordinator
             job.Missed = true;
             int removed = 0;
             for (int i = 0; i < ids.Length; i++)
-                foreach (var f in Directory.GetFiles(Dir("queue", i), $"j{job.Id:0000}-*.json"))
-                    if (TryDelete(f)) removed++;
+                foreach (var name in files.List("queue", i, $"j{job.Id:0000}-*.json"))
+                    if (files.Delete("queue", i, name)) removed++;
             Add("missed", job.Id, null, job.Origin, $"Job {job.Id} missed its deadline: {job.Tasks - job.Done} of {job.Tasks} tasks "
                 + $"not done ({removed} waiting removed). No house had enough free heat to take the rest in time.");
         }
@@ -331,12 +326,12 @@ sealed class LiveCoordinator
         var tasks = new List<LiveTask>();
         for (int i = 0; i < ids.Length; i++)
             foreach (var (kind, running) in new[] { ("queue", false), ("running", true) })
-                foreach (var f in Directory.GetFiles(Dir(kind, i), "j*.json", running ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                foreach (var name in files.List(kind, i, "j*.json"))
                 {
-                    string name = Path.GetFileNameWithoutExtension(f);
-                    if (!int.TryParse(name.AsSpan(1, 4), out int jobId) || !jobs.TryGetValue(jobId, out var job) || job.Missed)
+                    string taskId = Path.GetFileNameWithoutExtension(name);
+                    if (!int.TryParse(taskId.AsSpan(1, 4), out int jobId) || !jobs.TryGetValue(jobId, out var job) || job.Missed)
                         continue;
-                    tasks.Add(new LiveTask(name, jobId, i, running, job.SpawnStep, job.DueStep));
+                    tasks.Add(new LiveTask(taskId, jobId, i, running, job.SpawnStep, job.DueStep));
                 }
         return tasks;
     }
@@ -346,24 +341,10 @@ sealed class LiveCoordinator
     {
         try
         {
-            var root = JsonDocument.Parse(ReadShared(Path.Combine(work, "progress", ids[node], taskId + ".json"))).RootElement;
+            var root = JsonDocument.Parse(files.Read("progress", node, taskId + ".json")).RootElement;
             return root.GetProperty("task").GetString() == taskId ? root.GetProperty("fraction").GetDouble() : null;
         }
         catch (Exception) { return null; }
-    }
-
-    /// <summary>Reads without blocking the worker: on Windows a plain read would stop it replacing the file.</summary>
-    private static string ReadShared(string path)
-    {
-        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        using var r = new StreamReader(fs);
-        return r.ReadToEnd();
-    }
-
-    private static bool TryDelete(string f)
-    {
-        try { File.Delete(f); return true; }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
     }
 
     private string Label(int node) => cfg.Nodes[node].Label;
@@ -395,14 +376,14 @@ sealed class LiveCoordinator
                 {
                     id, label = Label(i), position = cfg.Nodes[i].Position, targetTemperatureC = targetC[i],
                     heatShare = HeatShare(i), targetLoad = targetLoad[i], actualLoad = ActualLoad?.Invoke(cfg.Nodes[i].Container),
-                    error = errors[i],
+                    error = files.IsOnline(i) ? errors[i] : "Peer offline",
                     waiting = tasks.Where(t => t.Node == i && !t.Running).OrderBy(t => t.DueStep).ThenBy(t => t.Id)
                         .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep }).ToArray(),
                     running = tasks.Where(t => t.Node == i && t.Running)
                         .Select(t => new { id = t.Id, job = t.Job, origin = ids[jobs[t.Job].Origin], dueStep = t.DueStep,
                             progress = Progress(i, t.Id) }).ToArray(),
-                    fillerWaiting = Directory.GetFiles(Dir("queue", i), "f*.json").Length,
-                    fillerRunning = Directory.GetFiles(Dir("running", i), "f*.json", SearchOption.AllDirectories)
+                    fillerWaiting = files.List("queue", i, "f*.json").Length,
+                    fillerRunning = files.List("running", i, "f*.json")
                         .Select(f => Path.GetFileNameWithoutExtension(f))
                         .Select(id => new { id, progress = Progress(i, id) }).ToArray(),
                 }).ToArray(),

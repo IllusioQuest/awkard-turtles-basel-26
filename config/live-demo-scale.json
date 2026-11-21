@@ -1,0 +1,23 @@
+{
+  "description": "Reproducible scale for the four-node technical Ising scenario; model time and laptop work are distinct from physical house heat.",
+  "sourceJob": "config/jobs/research-sim-montecarlo.json",
+  "workUnit": "one 32x32 Ising simulation at one temperature and seed",
+  "jobTasks": 32,
+  "jobTasksSource": "docs/jobs/research-sim.md: 16 temperatures x 2 seeds in a parameter scan; this demo executes 32 real tasks, not a customer demand trace.",
+  "taskMeasurementSweeps": 5000,
+  "taskThermalisationSweeps": 500,
+  "actualSpinUpdatesPerTask": 5632000,
+  "actualSpinUpdatesPerJob": 180224000,
+  "measuredDevice": "Intel Core Ultra 7 255H laptop, Windows 11, Docker Desktop Linux container, 0.5 CPU quota, one calibration worker; 2026-11-21",
+  "measurementCommand": "docker run --rm --cpus 0.5 -e TARGET_SECONDS=4 -e PROBE_SWEEPS=5000 digitalheat/research-sim:live-demo calibrate",
+  "measuredTaskSeconds": [3.719, 4.025, 4.007],
+  "medianTaskSeconds": 4.007,
+  "modelServerHoursPerTask": 2,
+  "wallSecondsPerModelHour": 2,
+  "modelServerHoursPerJob": 64,
+  "syntheticDeadlineModelHours": 20,
+  "syntheticDeadlineWallSeconds": 40,
+  "display": "The UI caps waiting tokens per house at 14 and shows a +N count. A token is a real task file; no completed task is invented or merely animated.",
+  "referenceHeatCaveat": "The case's 1 kW reference server and 80% recovery are simulation inputs. CPU quota and this laptop's measured task time do not measure electric power or recovered heat.",
+  "customerDemandCaveat": "32 tasks is the documented technical research scan, not evidence of 32 paid customer tasks or a real deadline. The catalog Type 2 job has no deadline; this is a separate synthetic deadline-bearing demonstration scenario."
+}

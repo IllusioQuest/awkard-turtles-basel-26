@@ -92,8 +92,8 @@ footer b{color:var(--paper);font-weight:600}
   (an illustrative input, not a sensor); higher means more heat wanted this hour, and the room colour follows it. Whenever something changes (a job arrives, a server becomes free, a slider moves) and at least once per hour (2 s here), the network scheduler sets each server's load
   from that heat and moves waiting tasks whose house cannot finish them before their deadline.
   <br><br>Dark boxes: the house's servers. The orange column and the heat waves show each server's power, set by the scheduler from the heat the house wants; at 50 % every server runs at half power, gives half the heat and computes half as fast (the task on it fills more slowly). ❄ = frozen because no heat is wanted. A curved line shows a task moving between houses.
-  Coloured circles: paid jobs with a deadline (number = job, colour = house it came from); they go first and move between houses. Small grey circles: research filler that heats whenever no paid job needs the server; it stays local.
-  1 task ≈ 1 server-hour of real Ising Monte Carlo in a Docker container.
+  Coloured circles: deadline-bearing demo jobs (number = job, colour = house it came from); they go first and move between houses. Their 20-hour deadline is synthetic. Small grey circles: research filler that heats whenever no demo job needs the server; it stays local.
+  Each circle is one real Ising task in a Docker container, calibrated to about 2 model server-hours. The room colour and CPU load do not measure physical heat.
   <br><br><b>Keys:</b> 1–<span id="nkeys">4</span> new job in that house · S switch scheduler · A auto-spawn · R reset · ? this help
 </div></div>
 <div id="offline"><div><b>LiveGrid is not reachable.</b><br>From the repository root:<br><code>dotnet run --project src/DigitalHeat.LiveGrid -- --up</code></div></div>
@@ -103,6 +103,8 @@ const PALETTE=["#2563eb","#c026d3","#059669","#d97706","#7c3aed","#0891b2","#dc2
 const ARC=2*Math.PI*46;
 const $=s=>document.querySelector(s);
 const st={nodes:[],byId:{},since:0,step:0,tokens:new Map(),drag:{},sentAt:{},lastLocal:{},range:[15,25],built:false,stepMs:4000,nextAt:0,tasksPerJob:6};
+const nodeRange=new URLSearchParams(location.search).get("nodes");
+const visibleNode=n=>!nodeRange||!/^\d+-\d+$/.test(nodeRange)||(()=>{const[a,b]=nodeRange.split("-").map(Number);return n.position>=a&&n.position<=b;})();
 const colorOf=id=>PALETTE[Math.max(0,st.nodes.findIndex(n=>n.id===id))%PALETTE.length];
 const labelOf=id=>(st.byId[id]||{}).label||id;
 const cardOf=id=>document.querySelector(`.node[data-id="${id}"]`);
@@ -114,8 +116,9 @@ async function api(path,body){
   if(!r.ok&&r.status!==204)throw new Error(await r.text()); return r.status===204?null:r.json();
 }
 function build(s){
-  const g=$("#grid"); g.innerHTML=""; g.style.setProperty("--cols",s.nodes.length>4?4:2);
-  s.nodes.slice().sort((a,b)=>a.position-b.position).forEach(n=>{
+  const visible=s.nodes.filter(visibleNode);
+  const g=$("#grid"); g.innerHTML=""; g.style.setProperty("--cols",visible.length>4?4:2);
+  visible.slice().sort((a,b)=>a.position-b.position).forEach(n=>{
     const el=document.createElement("section"); el.className="node"; el.dataset.id=n.id;
     el.innerHTML=`<div class="name">${n.label}</div><div class="heat"></div>
       <div class="rack">${Array.from({length:s.serversPerNode||1},()=>`<div class="srv"><div class="waves"><i></i><i></i><i></i></div>
@@ -173,12 +176,13 @@ function place(s){
   const before=new Map();st.tokens.forEach((e,id)=>e.isConnected&&before.set(id,e.getBoundingClientRect()));
   const first=!st.lastNode; const lastNode=st.lastNode||new Map(), nowNode=new Map(), want=new Set();
   for(const n of s.nodes){const card=cardOf(n.id);
-    const slots=[...card.querySelectorAll(".srv .slot")];
-    for(const [kind,box0] of [["running",null],["waiting",card.querySelector(".queue")]]){
+    const slots=card?[...card.querySelectorAll(".srv .slot")]:[];
+    for(const [kind,box0] of [["running",null],["waiting",card?.querySelector(".queue")]]){
       // Type 1 tasks first, then Type 2 filler (grey, local, never moves)
       const list=kind==="running"?[...n.running,...(n.fillerRunning||[]).map(f=>({id:f.id,job:"R",filler:true,progress:f.progress}))]
         :[...n.waiting,...Array.from({length:n.fillerWaiting||0},(_,k)=>({id:`${n.id}-fw${k}`,job:"R",filler:true}))];
       list.forEach(t=>nowNode.set(t.id,{node:n.id,t,kind}));
+      if(!card)continue;
       const shown=kind==="waiting"?list.slice(0,MAXQ):list;
       const els=shown.map(t=>{want.add(t.id);const e=tok(t);e.classList.toggle("big",kind==="running");
         if(kind==="running")e.style.setProperty("--p",t.progress??0);return e;});
@@ -190,7 +194,9 @@ function place(s){
       els.forEach(e=>{if(e.parentElement!==box||box.lastElementChild!==e)box.appendChild(e);});
       [...box.children].forEach(c=>{if(!els.includes(c))c.remove();});
       if(kind==="waiting"&&list.length>MAXQ){const m=document.createElement("div");m.className="more";m.textContent=`+${list.length-MAXQ}`;box.appendChild(m);}}}
-  const queueCentre=id=>centreOf(cardOf(id).querySelector(".queue").getBoundingClientRect());
+  const queueCentre=id=>{const card=cardOf(id);if(card)return centreOf(card.querySelector(".queue").getBoundingClientRect());
+    const positions=[...document.querySelectorAll(".node")].map(c=>st.byId[c.dataset.id].position);
+    return {x:st.byId[id].position<Math.min(...positions)?0:innerWidth,y:innerHeight/2};};
   // tasks that left every house: done (or dropped after a missed deadline) - a short fade upwards
   lastNode.forEach((v,id)=>{if(nowNode.has(id))return;const r=before.get(id),e=st.tokens.get(id);st.tokens.delete(id);
     if(r&&e){const c=e.cloneNode(true);c.classList.add("flyer");document.body.appendChild(c);
@@ -200,7 +206,7 @@ function place(s){
     if(!prev){if(shown&&!first){e._new=false;e.animate([{opacity:0,transform:"scale(.4)"},{opacity:1,transform:"scale(1)"}],{duration:700,easing:"ease-out"});}
       if(e)e._new=false;return;}
     const a=before.get(id), b=shown?e.getBoundingClientRect():null;
-    if(prev.node!==v.node){            // moved to another house: show the route
+    if(prev.node!==v.node&&(a||b)){   // moved between houses or across a screen edge
       const from=a?centreOf(a):queueCentre(prev.node), to=b?centreOf(b):queueCentre(v.node);
       if(shown)e.style.visibility="hidden";
       flyAlong(colorOf(v.t.origin),v.t.job,false,from,to).then(()=>{if(e)e.style.visibility="";});
@@ -225,7 +231,7 @@ function render(s){
   st.nodes=s.nodes;st.byId=Object.fromEntries(s.nodes.map(n=>[n.id,n]));st.range=s.temperatureRange;st.step=s.step;
   st.tasksPerJob=s.tasksPerJob;st.stepMs=s.stepSeconds*1000;st.nextAt=performance.now()+s.msToNextStep;
   if(!st.built)build(s);
-  for(const n of s.nodes){const el=cardOf(n.id),input=el.querySelector("input");
+  for(const n of s.nodes){const el=cardOf(n.id);if(!el)continue;const input=el.querySelector("input");
     if(!(st.drag[n.id]||Date.now()-(st.lastLocal[n.id]||0)<1500))input.value=n.targetTemperatureC;
     paint(el,+input.value);
     const work=n.running.length+n.waiting.length+(n.fillerRunning||[]).length+(n.fillerWaiting||0),paused=n.targetLoad===0;

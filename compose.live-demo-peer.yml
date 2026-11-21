@@ -1,0 +1,37 @@
+# Live demo (decision 0042, ticket T-54): four node workers, each with its own queue under
+# data/external/research-sim/live-demo-work/queue/<node>/. Start: docker compose -f compose.live-demo.yml up -d --build
+name: digitalheat-live-demo-peer
+services:
+  node-5:
+    image: digitalheat/research-sim:live-demo
+    build: jobs/research-sim
+    container_name: digitalheat-node-5
+    environment: { NODE_ID: node-5, LIVE_LOOP: "1", SLOTS: "3" }
+    volumes: ["./data/external/research-sim/live-demo-work:/work"]
+    cpus: 1.5
+    restart: unless-stopped
+  node-6:
+    image: digitalheat/research-sim:live-demo
+    build: jobs/research-sim
+    container_name: digitalheat-node-6
+    environment: { NODE_ID: node-6, LIVE_LOOP: "1", SLOTS: "3" }
+    volumes: ["./data/external/research-sim/live-demo-work:/work"]
+    cpus: 1.5
+    restart: unless-stopped
+  node-7:
+    image: digitalheat/research-sim:live-demo
+    build: jobs/research-sim
+    container_name: digitalheat-node-7
+    environment: { NODE_ID: node-7, LIVE_LOOP: "1", SLOTS: "3" }
+    volumes: ["./data/external/research-sim/live-demo-work:/work"]
+    cpus: 1.5
+    restart: unless-stopped
+  node-8:
+    image: digitalheat/research-sim:live-demo
+    build: jobs/research-sim
+    container_name: digitalheat-node-8
+    environment: { NODE_ID: node-8, LIVE_LOOP: "1", SLOTS: "3" }
+    volumes: ["./data/external/research-sim/live-demo-work:/work"]
+    cpus: 1.5
+    restart: unless-stopped
+

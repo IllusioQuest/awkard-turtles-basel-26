@@ -1,0 +1,31 @@
+{
+  "description": "Two-device live demo (decision 0042, ticket T-54): one coordinator on laptop A schedules eight physical Docker nodes, four per laptop. Laptop B runs only a node agent. Demo settings are not scored figures.",
+  "serversPerNode": { "value": 3, "unit": "servers/house", "source": "Demo choice: three worker slots per container, so a house runs up to three tasks at once and can take several moved tasks per step (the year simulation uses 12.5 servers per house, config/reference-house.json)." },
+  "fillerAvailability": { "value": 1, "unit": "fraction of server-hours", "source": "Year-simulation default phi = 1 (decision 0025): Type 2 research filler is always available, so a house that wants heat always has work; Type 1 jobs go first." },
+  "minimumLoadShare": { "value": 0, "unit": "fraction/server", "source": "Demo setting: permit pause down to zero for visible control; matches the year explorer comparison scenario in config/reference-house.json." },
+  "allowedCpuCoresPerContainer": { "value": 1.5, "unit": "CPU cores/container", "source": "Demo setting: 1.5 Docker CPUs per house = 3 servers x 0.5 core at full load (6 cores for four houses), limited by compose.live-demo.yml; not a 1 kW power measurement." },
+  "referenceServerElectricKw": { "value": 1, "unit": "kW/server", "source": "config/reference-house.json:ServerElectricKw, reference case only." },
+  "heatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "config/reference-house.json:HeatRecoveryShare, reference case only." },
+  "targetTemperatureMinC": { "value": 15, "unit": "°C", "source": "Demo mapping choice: lower endpoint of the illustrative slider (no heat wanted); not a measured room temperature." },
+  "targetTemperatureMaxC": { "value": 25, "unit": "°C", "source": "Demo mapping choice: upper endpoint (full heat of one server wanted); not a measured room temperature." },
+  "stepSeconds": { "value": 2, "unit": "s/scheduler hour", "source": "Demo choice: one scheduler hour is shown as 2 s, so new work is distributed within about 2 s." },
+  "serverHoursPerTask": { "value": 2, "unit": "server-hours/task", "source": "Own single-slot Docker measurement on this laptop, 2026-11-21: 5,000 measurement + 500 thermalisation sweeps at --cpus 0.5 took 3.719, 4.025, 4.007 s (median 4.007 s); one model server-hour is 2 wall seconds. See config/live-demo-scale.json." },
+  "taskLatticeSize": { "value": 32, "unit": "spins per side", "source": "jobs/research-sim/ising.py default lattice." },
+  "taskSweeps": { "value": 5000, "unit": "Metropolis measurement sweeps/task", "source": "Own Docker measurement on this laptop, 2026-11-21: 5000 measurement + 500 thermalisation sweeps at --cpus 0.5 took 3.719, 4.025, 4.007 s; command and measurement basis in config/live-demo-scale.json." },
+  "tasksPerJob": { "value": 32, "unit": "tasks/job", "source": "docs/jobs/research-sim.md: one Ising scan has 16 temperatures x 2 seeds = 32 independently executable tasks. This demo executes all 32, at a shorter measured sweep count per task." },
+  "deadlineSteps": { "value": 20, "unit": "model hours", "source": "Synthetic demo scenario, not a customer deadline: 20 scheduler hours = 40 wall seconds; 32 tasks x 2 server-hours = 64 server-hours, which exceeds one full three-slot node's 60 server-hours before due time, so redistribution is necessary." },
+  "forecastHorizonSteps": { "value": 12, "unit": "steps", "source": "Demo choice: horizon of the persistence forecast passed to the scheduler (the LP plans over it; B2 uses only the current hour)." },
+  "autoSpawnEverySteps": { "value": 10, "unit": "steps", "source": "Demo choice: when auto-spawn is on, one new job arrives every 10 steps (20 s) (about half of the four nodes' capacity at medium heat) at a node drawn with the seed below." },
+  "seed": { "value": 20261121, "unit": "integer", "source": "Fixed seed for reproducible auto-spawn and task seeds." },
+  "scheduler": "B2",
+  "nodes": [
+    { "id": "node-1", "label": "House 1", "container": "digitalheat-node-1", "position": 1 },
+    { "id": "node-2", "label": "House 2", "container": "digitalheat-node-2", "position": 2 },
+    { "id": "node-3", "label": "House 3", "container": "digitalheat-node-3", "position": 3 },
+    { "id": "node-4", "label": "House 4", "container": "digitalheat-node-4", "position": 4 },
+    { "id": "node-5", "label": "House 5", "container": "digitalheat-node-5", "position": 5, "device": "peer" },
+    { "id": "node-6", "label": "House 6", "container": "digitalheat-node-6", "position": 6, "device": "peer" },
+    { "id": "node-7", "label": "House 7", "container": "digitalheat-node-7", "position": 7, "device": "peer" },
+    { "id": "node-8", "label": "House 8", "container": "digitalheat-node-8", "position": 8, "device": "peer" }
+  ]
+}

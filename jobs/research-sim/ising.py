@@ -281,12 +281,14 @@ def _claim_next(queue: Path, running: Path) -> list[Path] | None:
 def calibrate() -> None:
     """Print the sweep count for which one task takes TARGET_SECONDS on this CPU (live-demo setting)."""
     target = float(os.environ.get("TARGET_SECONDS", "4"))
+    probe_sweeps = int(os.environ.get("PROBE_SWEEPS", "2000"))
     probe = {"id": "calibrate", "temperature": 2.3, "seed": BASE_SEED, "lattice_size": LATTICE_SIZE,
-             "sweeps": 2000, "thermalisation_sweeps": 200}
+             "sweeps": probe_sweeps, "thermalisation_sweeps": probe_sweeps // 10}
     _, start, end = _calculate(probe)
     seconds = (end - start) / 1e9
     sweeps = max(10, round(probe["sweeps"] * target / seconds))
-    print(json.dumps({"lattice_size": LATTICE_SIZE, "probe_sweeps": 2200, "probe_seconds": round(seconds, 3),
+    print(json.dumps({"lattice_size": LATTICE_SIZE, "probe_sweeps": probe_sweeps,
+                      "probe_total_sweeps": probe_sweeps + probe_sweeps // 10, "probe_seconds": round(seconds, 3),
                       "target_seconds": target, "sweeps": sweeps, "thermalisation_sweeps": sweeps // 10}))
 
 

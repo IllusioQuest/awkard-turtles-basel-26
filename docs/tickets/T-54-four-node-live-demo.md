@@ -35,6 +35,15 @@ each.
 - Tests: `LiveNetworkTests` (C#), `jobs/research-sim/test_fleet.py` (queues under concurrent moves).
 - Next: rehearse on the demo laptop (Docker Desktop on Windows), then two devices (plan in 0042).
 
+## Two-device extension (decision 0044)
+
+- Eight-node config and a peer Compose file start four physical containers on each laptop.
+- Laptop A keeps the only scheduler and clock; laptop B's agent owns its queues and Docker calls.
+- A waiting task crosses devices through a source outbox and a destination queue acknowledgment.
+- Two browser pages show nodes 1–4 and 5–8 from A's one API. The link requires a shared runtime token.
+- Locally checked with eight containers and both processes on one machine; physical two-laptop
+  connection, firewall and peer CPU calibration remain to verify.
+
 ## Implementation notes (pilot, superseded by 0042)
 
 - Four-node local task claims and result commits are described in decision

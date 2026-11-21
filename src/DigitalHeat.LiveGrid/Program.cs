@@ -9,15 +9,10 @@ using DigitalHeat.Network;
 // Options: --config config/live-demo-four-node.json  --port 5087  --no-browser
 var root = FindRoot();
 bool up = args.Contains("--up");
+bool agent = args.Contains("--agent");
+string composeFile = agent ? "compose.live-demo-peer.yml" : "compose.live-demo.yml";
 string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
-if (up)
-{
-    // Containers with the demo's names left over from another checkout would block `compose up`.
-    RemoveStale(JsonDocument.Parse(File.ReadAllText(configPath)).RootElement.GetProperty("nodes")
-        .EnumerateArray().Select(n => n.GetProperty("container").GetString()!).ToArray());
-    Compose("up", "-d", "--build");
-}
-int port = int.Parse(Arg("--port") ?? "5087");
+int port = int.Parse(Arg("--port") ?? (agent ? "5088" : "5087"));
 if (Arg("--replay") is { } replayArgument)
 {
     string replayPath = Path.GetFullPath(Path.IsPathRooted(replayArgument)
@@ -51,9 +46,37 @@ var config = JsonSerializer.Deserialize<DemoConfig>(File.ReadAllText(configPath)
     new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
     ?? throw new InvalidDataException("Empty live demo config.");
 config.Validate();
+ValidateScale(config, Path.Combine(root, "config", "live-demo-scale.json"));
 if (config.ReferenceServerElectricKw.Value != reference.ServerElectricKw.Value
     || config.HeatRecoveryShare.Value != reference.HeatRecoveryShare.Value)
     throw new InvalidDataException("The live demo's reference values must match config/reference-house.json.");
+
+string? peerUrl = Arg("--peer-url");
+string? agentToken = Arg("--agent-token") ?? Environment.GetEnvironmentVariable("DIGITALHEAT_AGENT_TOKEN");
+if ((agent || config.Nodes.Any(n => n.Device == "peer")) && string.IsNullOrWhiteSpace(agentToken))
+    throw new InvalidDataException("Two-device mode requires DIGITALHEAT_AGENT_TOKEN on both laptops.");
+if (!agent && config.Nodes.Any(n => n.Device == "peer") && string.IsNullOrWhiteSpace(peerUrl))
+    throw new InvalidDataException("Two-device coordinator requires --peer-url http://<laptop-B-ip>:5088.");
+if (up)
+{
+    // Containers with these names left over from another checkout would block `compose up`.
+    RemoveStale(config.Nodes.Where(n => (n.Device == "peer") == agent).Select(n => n.Container).ToArray());
+    Compose("up", "-d", "--build");
+}
+if (agent)
+{
+    try { LiveNodeAgent.Run(root, config, port, agentToken!); }
+    finally { if (up) Compose("stop", "-t", "1"); }
+    return;
+}
+
+using var peer = peerUrl is null ? null : new PeerClient(peerUrl, agentToken!);
+if (peer is not null)
+{
+    string[] expected = config.Nodes.Where(n => n.Device == "peer").Select(n => n.Id).Order().ToArray();
+    if (!peer.Health().Order().SequenceEqual(expected))
+        throw new InvalidDataException("Peer agent does not own the expected four nodes.");
+}
 
 var cal = new LiveCalibration(config.ReferenceServerElectricKw.Value, config.HeatRecoveryShare.Value,
     config.ServerHoursPerTask.Value, (int)config.ForecastHorizonSteps.Value,
@@ -61,20 +84,23 @@ var cal = new LiveCalibration(config.ReferenceServerElectricKw.Value, config.Hea
     (int)config.ServersPerNode.Value, config.FillerAvailability.Value);
 var docker = new CachedDockerControl(new DockerCliContainerControl());
 double cores = config.AllowedCpuCoresPerContainer.Value;
-var executors = config.Nodes.Select(n => (IExecutor)new DockerJobExecutor(docker, n.Container, cores, supportsThrottle: true)).ToArray();
+var executors = config.Nodes.Select(n => n.Device == "peer"
+    ? (IExecutor)new RemoteExecutor(peer!, n.Id)
+    : new DockerJobExecutor(docker, n.Container, cores, supportsThrottle: true)).ToArray();
 string work = Path.Combine(root, "data", "external", "research-sim", "live-demo-work");
-var coordinator = new LiveCoordinator(config, cal, work, executors)
+var coordinator = new LiveCoordinator(config, cal, new LiveWorkStore(work, config.Nodes, peer), executors)
 {
-    ActualLoad = container => docker.Load(container, cores),
+    ActualLoad = container => config.Nodes.First(n => n.Container == container) is { } n && n.Device == "peer"
+        ? peer!.Cpu(n.Id) : docker.Load(container, cores),
 };
-string[] containers = config.Nodes.Select(n => n.Container).ToArray();
+string[] containers = config.Nodes.Where(n => n.Device != "peer").Select(n => n.Container).ToArray();
 // Start paused (no work yet), so a worker cannot claim a task before the first scheduler decision.
 foreach (var e in executors) e.ApplyTargetLoad(0);
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.SetMinimumLevel(LogLevel.Warning);
 builder.WebHost.UseWebRoot(Path.Combine(root, "src", "DigitalHeat.LiveGrid", "wwwroot"));
-builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+builder.WebHost.UseUrls($"http://{(args.Contains("--listen-lan") ? "0.0.0.0" : "127.0.0.1")}:{port}");
 var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -98,6 +124,17 @@ app.MapPost("/api/reset", () => { coordinator.Reset(); return Results.NoContent(
 
 using var stop = new CancellationTokenSource();
 app.Lifetime.ApplicationStopping.Register(() => stop.Cancel());
+if (peer is not null) _ = Task.Run(async () =>
+{
+    bool wasOnline = true;
+    while (!stop.IsCancellationRequested)
+    {
+        bool online = peer.RefreshHealth();
+        if (online != wasOnline) Console.WriteLine(online ? "Peer reconnected" : "Peer offline: its nodes have no new heat capacity");
+        wasOnline = online;
+        try { await Task.Delay(1000, stop.Token); } catch (OperationCanceledException) { break; }
+    }
+});
 _ = Task.Run(async () =>   // the scheduler clock
 {
     using var timer = new PeriodicTimer(TimeSpan.FromSeconds(config.StepSeconds.Value));
@@ -126,17 +163,20 @@ _ = Task.Run(async () =>   // batched CPU observation, never on the request path
 });
 Console.WriteLine($"Live demo on http://127.0.0.1:{port}  ({config.Nodes.Length} nodes, scheduler {config.Scheduler}, "
     + $"1 step = {config.StepSeconds.Value} s)");
+Console.WriteLine($"Measured workload: {config.TasksPerJob.Value} real Ising tasks/job × {config.ServerHoursPerTask.Value} model server-hours; "
+    + $"deadline {config.DeadlineSteps.Value} model hours (synthetic scenario). Source: config/live-demo-scale.json");
 if (up)
 {
     app.Lifetime.ApplicationStopping.Register(() => Compose("stop", "-t", "1"));
-    if (!args.Contains("--no-browser")) app.Lifetime.ApplicationStarted.Register(() => OpenBrowser($"http://127.0.0.1:{port}"));
+    if (!args.Contains("--no-browser")) app.Lifetime.ApplicationStarted.Register(() =>
+        OpenBrowser($"http://127.0.0.1:{port}" + (config.Nodes.Length == 8 ? "/?nodes=1-4" : "")));
 }
 app.Run();
 
 void Compose(params string[] verb)
 {
     var psi = new System.Diagnostics.ProcessStartInfo("docker") { WorkingDirectory = root };
-    foreach (var a in new[] { "compose", "-f", "compose.live-demo.yml" }.Concat(verb)) psi.ArgumentList.Add(a);
+    foreach (var a in new[] { "compose", "-f", composeFile }.Concat(verb)) psi.ArgumentList.Add(a);
     using var p = System.Diagnostics.Process.Start(psi) ?? throw new InvalidOperationException("docker not found");
     p.WaitForExit();
     if (p.ExitCode != 0) throw new InvalidOperationException($"docker compose {string.Join(' ', verb)} failed (is Docker running?)");
@@ -173,10 +213,31 @@ static string FindRoot()
     throw new DirectoryNotFoundException("Start LiveGrid from the repository root.");
 }
 
+static void ValidateScale(DemoConfig cfg, string manifestPath)
+{
+    using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+    var scale = document.RootElement;
+    double Number(string key) => scale.GetProperty(key).GetDouble();
+    double modelWallSecondsPerTask = cfg.ServerHoursPerTask.Value * cfg.StepSeconds.Value;
+    double measuredSeconds = Number("medianTaskSeconds");
+    // The actual single-slot sample must agree with the model's task duration within calibration noise.
+    const double MaxCalibrationErrorShare = 0.25;
+    if (Number("jobTasks") != cfg.TasksPerJob.Value
+        || Number("taskMeasurementSweeps") != cfg.TaskSweeps.Value
+        || Number("taskThermalisationSweeps") != (int)cfg.TaskSweeps.Value / 10
+        || Number("modelServerHoursPerTask") != cfg.ServerHoursPerTask.Value
+        || Number("wallSecondsPerModelHour") != cfg.StepSeconds.Value
+        || Number("modelServerHoursPerJob") != cfg.TasksPerJob.Value * cfg.ServerHoursPerTask.Value
+        || Number("syntheticDeadlineModelHours") != cfg.DeadlineSteps.Value
+        || Number("syntheticDeadlineWallSeconds") != cfg.DeadlineSteps.Value * cfg.StepSeconds.Value
+        || Math.Abs(measuredSeconds - modelWallSecondsPerTask) > modelWallSecondsPerTask * MaxCalibrationErrorShare)
+        throw new InvalidDataException("Live demo config and config/live-demo-scale.json disagree; recalibrate and update both together.");
+}
+
 sealed record TargetRequest(double TemperatureC);
 sealed record ToggleRequest(bool On);
 sealed record SchedulerRequest(string Id);
-sealed record DemoNodeConfig(string Id, string Label, string Container, int Position);
+sealed record DemoNodeConfig(string Id, string Label, string Container, int Position, string? Device = null);
 sealed record DemoConfig(Parameter MinimumLoadShare, Parameter AllowedCpuCoresPerContainer,
     Parameter ReferenceServerElectricKw, Parameter HeatRecoveryShare, Parameter TargetTemperatureMinC,
     Parameter TargetTemperatureMaxC, Parameter StepSeconds, Parameter ServerHoursPerTask, Parameter TaskLatticeSize,
@@ -192,6 +253,7 @@ sealed record DemoConfig(Parameter MinimumLoadShare, Parameter AllowedCpuCoresPe
                 throw new InvalidDataException("Every demo parameter needs a finite value, unit and source.");
         if (Nodes.Length is < 2 or > 16 || Nodes.Select(n => n.Id).Distinct().Count() != Nodes.Length
             || Nodes.Select(n => n.Container).Distinct().Count() != Nodes.Length
+            || Nodes.Any(n => n.Device is not (null or "local" or "peer"))
             || MinimumLoadShare.Value != 0 || AllowedCpuCoresPerContainer.Value <= 0
             || TargetTemperatureMaxC.Value <= TargetTemperatureMinC.Value || StepSeconds.Value < 0.5
             || ServerHoursPerTask.Value <= 0 || TasksPerJob.Value < 1 || DeadlineSteps.Value < 1
