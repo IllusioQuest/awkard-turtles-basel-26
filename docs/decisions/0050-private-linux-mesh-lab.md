@@ -2,7 +2,7 @@
 
 - Status: proposed; user approved real CPU batch executors with separate nested Docker
   engines, private HTTP peer messaging and a shared lab token, 2026-11-21.
-- Ticket: T-63; branch feat/T-60-unified-scheduler, following T-62/ADR 0049.
+- Ticket: T-64; branch feat/T-60-unified-scheduler, following T-62/ADR 0049.
 
 Use built-in ASP.NET Core/HttpClient for a thin adapter around the same MeshPeer. Serialize
 all incoming messages, submissions and timer ticks through one actor loop; MeshPeer's protocol
@@ -35,4 +35,6 @@ seamless migration, fractional-load, two-physical-device or production-security 
 
 ## Review
 
-Pending fresh limited-context review.
+Fresh limited-context review: go with changes. Require inner daemon/image readiness and persistent engine identity before reconciliation; enqueue outbound HTTP separately from the peer actor; pin a finite single-worker Ising profile and retain per-job /work results. Include target-restart recovery after create, not only origin-restart testing. Implementation and real execution checks are in progress.
+
+

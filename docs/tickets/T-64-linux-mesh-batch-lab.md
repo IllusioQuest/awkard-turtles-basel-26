@@ -1,4 +1,4 @@
-# T-63 — Linux peer messaging and real batch execution
+# T-64 — Linux peer messaging and real batch execution
 
 - Owner: Nikita / Codex
 - Status: in progress; user approved real batch executors and nested engines.
@@ -14,3 +14,4 @@ deployment limits. Preserve heat priority and durable origin ownership.
 Done: reviewed decision, verified isolated Linux lab, meaningful checks and reproducible
 commands/evidence; code pushed for review and documentation on main. This does not close
 T-61's finite/mixed scored equivalence or establish multi-device operation.
+
