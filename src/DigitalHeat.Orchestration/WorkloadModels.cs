@@ -36,12 +36,17 @@ public sealed record WorkloadInventory(long Revision, DateTimeOffset IntervalSta
     public DateTimeOffset? ResourceValidUntilUtc { get; init; }
 }
 public sealed record LifecyclePolicy(bool AllowPause, bool AllowStop, bool Restartable);
+/// <summary>Absolute operator-submitted batch budget; never renewed by retry, pause or restart.</summary>
+public sealed record JobDeadline(DateTimeOffset SubmittedAtUtc, DateTimeOffset DueAtUtc, string Source, bool StopWhenOverdue);
 public sealed record WorkloadRequest(string Id, string Kind, string OriginSiteId, JobPlacementPolicy PlacementPolicy,
     ResourceAmount Resources, string ResourceSource, double RecoverableHeatKwhPerHour, string HeatSource,
     string[] RequiredCapabilities, string? GpuCapability, string? PinnedNodeId, string? StorageId,
     LatencyLimit[] LatencyLimits, LifecyclePolicy Lifecycle)
 {
     public long? MinGpuVramMib { get; init; }
+    // Omit only this new optional field: legacy container spec hashes must remain byte-compatible.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public JobDeadline? Deadline { get; init; }
 }
 public sealed record WorkloadReservation(string WorkloadId, string SiteId, string NodeId, string DomainId,
     string? GpuDeviceId, double RecoverableHeatKwhPerHour, double AvailableHeatKwhBeforeReservation);

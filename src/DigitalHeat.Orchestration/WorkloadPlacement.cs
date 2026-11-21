@@ -42,7 +42,7 @@ public sealed class WorkloadPlacement
                     throw new InvalidDataException("Workload ID reused with changed parameters.");
                 return existing.Reservation;
             }
-            if (!Fresh(nowUtc) || request.Kind != "legacy" && !ResourcesFresh(nowUtc)) return null;
+            if (!DeadlineOpen(request, nowUtc) || !Fresh(nowUtc) || request.Kind != "legacy" && !ResourcesFresh(nowUtc)) return null;
             if (inventory!.ExternalAllocations.Any(e => e.Id == request.Id))
                 throw new InvalidDataException("Workload ID is already externally allocated.");
             var best = Candidates(request).OrderByDescending(c => c.AvailableHeatKwhBeforeReservation)
@@ -59,7 +59,7 @@ public sealed class WorkloadPlacement
         ValidateRequest(request);
         lock (gate)
         {
-            if (!Fresh(nowUtc) || !ResourcesFresh(nowUtc)) return false;
+            if (!DeadlineOpen(request, nowUtc) || !Fresh(nowUtc) || !ResourcesFresh(nowUtc)) return false;
             var original = held.ToArray();
             try
             {
@@ -92,6 +92,7 @@ public sealed class WorkloadPlacement
         lock (gate)
         {
             var claim = held[id];
+            if (!DeadlineOpen(claim.Request, nowUtc)) return false;
             if (!claim.Paused) return true;
             if (!Fresh(nowUtc) || !ResourcesFresh(nowUtc)) return false;
             if (!Candidates(claim.Request, id).Any(c => c.NodeId == claim.Reservation.NodeId && c.GpuDeviceId == claim.Reservation.GpuDeviceId)) return false;
@@ -106,7 +107,7 @@ public sealed class WorkloadPlacement
         {
             if (!Fresh(nowUtc) || !ResourcesFresh(nowUtc)) return false;
             var claim = held[id];
-            return Candidates(claim.Request, id).Any(c => c.NodeId == claim.Reservation.NodeId && c.GpuDeviceId == claim.Reservation.GpuDeviceId);
+            return DeadlineOpen(claim.Request, nowUtc) && Candidates(claim.Request, id).Any(c => c.NodeId == claim.Reservation.NodeId && c.GpuDeviceId == claim.Reservation.GpuDeviceId);
         }
     }
 
@@ -139,6 +140,7 @@ public sealed class WorkloadPlacement
     private bool Fresh(DateTimeOffset now) => inventory is {} i && now >= i.IntervalStartUtc && now < i.IntervalEndUtc;
     private bool ResourcesFresh(DateTimeOffset now) => inventory is { ResourceObservedAtUtc: {} observed, ResourceValidUntilUtc: {} until }
         && now >= observed && now < until;
+    public static bool DeadlineOpen(WorkloadRequest request, DateTimeOffset now) => request.Deadline is not {} d || now >= d.SubmittedAtUtc && now < d.DueAtUtc;
 
     private IEnumerable<WorkloadReservation> Candidates(WorkloadRequest request, string? ignoreId = null)
     {
@@ -205,6 +207,10 @@ public sealed class WorkloadPlacement
             || request.Kind != "legacy" && (request.Resources.CpuCores <= 0 || request.Resources.RamMib <= 0))
             throw new InvalidDataException("Invalid workload requirements, units, sources or lifecycle constraints.");
         request.PlacementPolicy.Validate();
+        if (request.Deadline is {} deadline && (request.Kind != "batch" || deadline.SubmittedAtUtc.Offset != TimeSpan.Zero
+            || deadline.DueAtUtc.Offset != TimeSpan.Zero || deadline.DueAtUtc <= deadline.SubmittedAtUtc
+            || string.IsNullOrWhiteSpace(deadline.Source) || deadline.Source.Contains("TODO(source)", StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidDataException("Only batch work may have a sourced, positive absolute UTC completion deadline.");
     }
 
     private static bool ValidResources(ResourceAmount? r) => r is not null && double.IsFinite(r.CpuCores) && r.CpuCores >= 0 && r.RamMib >= 0 && r.Slots >= 0;
