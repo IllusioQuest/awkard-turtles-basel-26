@@ -21,7 +21,7 @@
 \hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=green!40!black,
   urlcolor=blue!60!black}
 
-\sisetup{group-separator={,}, group-minimum-digits=4, detect-all}
+\sisetup{group-separator={,}, group-minimum-digits=4, group-digits=integer, detect-all}
 \DeclareSIUnit\chf{CHF}
 
 % Long file paths in \texttt: allow line breaks rather than overfull lines.
@@ -82,12 +82,12 @@ claim realised profitability.
 \input{sections/07-demonstrator}
 \input{sections/08-evaluation}
 \clearpage % Keep evaluation tables before the next section.
-\input{sections/09-federation}
 \input{sections/09-limits}
 \input{sections/10-conclusion}
 
 \appendix
 \input{sections/appendix-reproducibility}
+\clearpage % Keep the reproducibility table ahead of the references.
 
 \bibliographystyle{unsrt}
 \bibliography{references}

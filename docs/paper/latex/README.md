@@ -17,6 +17,8 @@ The paper combines three evidence levels: case-defined reference-house parameter
 | Mixed queue | The two `DigitalHeat.YearRun` commands in `docs/model/mixed-job-queue.md` |
 | Operator and small-node sensitivities | Worked arithmetic and source ledger in `docs/research/free-heat-viability.md` and `docs/research/profitable-home-path.md` |
 | Measured demo jobs | Commands and traces in `docs/jobs/` and `sections/appendix-reproducibility.tex` |
-| Federated admission model | `dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj`; scope and assumptions in `sections/09-federation.tex` |
+
+The federated-admission draft in `sections/09-federation.tex` is a separate systems note and is
+not part of this paper's PDF.
 
 All monetary scenarios are conditional on the documented input prices. The case's abstract 1 kW server and the proposed physical four-L4 node are different systems.

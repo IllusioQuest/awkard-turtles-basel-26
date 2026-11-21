@@ -8,6 +8,18 @@ wall power or a quoted liquid-cooled build. Its calculated heat fits the constan
 base load; actual draw timing, delivery temperature, thermal losses and water hygiene require
 engineering validation. Neither normalised 1~kW L4 profile nor the candidate four-card host is
 an installed bill of materials.
+The case also omits tank standby losses, circulation-pump electricity and the temperatures
+required to deliver space heat or hygienic domestic hot water. Its constant \qty{80}{\percent}
+recovery is independent of load and temperature. The reported useful heat is therefore an
+idealised upper bound until these quantities are measured. The comparison heat pump has a
+fixed coefficient of performance (COP) of 2.5: at another COP, the host's avoided electricity
+cost per useful kWh is $e/\mathrm{COP}$, while the free-heat operator threshold in
+\eqref{eq:operator-break-even} is unchanged.
+
+The LP also permits continuous part load and immediate shutoff. Real nodes draw idle power,
+start over finite time and may need discrete on/off decisions. Their electricity costs and
+switching constraints require a measured node profile and a mixed-integer extension before
+the model can predict shoulder-season operation.
 
 \paragraph{Work and markets.} The reference-house maximum assumes unlimited paid work. The
 mixed-queue run uses a medical-dictation arrival fixture for technical validation, not the
