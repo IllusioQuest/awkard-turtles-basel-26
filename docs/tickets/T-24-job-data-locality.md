@@ -40,3 +40,6 @@ the limitations of the current single-site runtime are documented.
 - T-01 owns the broader catalog and always-on representation. T-24 changes only location policy.
 - A country or site identifier must come from a trusted deployment inventory before this can be
   presented as a legal or security guarantee; the current CLI values are demo inputs only.
+
+Implementation is in draft PR #9. T-01/T-02 descriptor migration is needed before merging;
+the location check itself passed 31 .NET tests and a pre-Docker LiveRun denial smoke test.
