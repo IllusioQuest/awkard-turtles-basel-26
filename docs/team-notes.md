@@ -28,6 +28,9 @@
   wollen und Unternehmen die private Server wollen, das muss eigentlich sehr separat behandelt
   werden.
 
+### Präsentaiton
+- Video oder In-Person Vorführung besser?
+
 ### Wärmebedarf und Scheduling
 
 - Wie wissen wir wann ein Haushalt Wärme braucht, weil sie die Heizung anstellen?
