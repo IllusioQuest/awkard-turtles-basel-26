@@ -16,6 +16,9 @@ visual/data source, not the final medium. The live job pause/resume remains part
 - [ ] Agree the clip's exact placement, duration, aspect ratio and visual style with the T-21 owner.
 - [ ] Use the T-21 storyboard and source-backed figures. Show simulated house heat and
       real job control as distinct layers; do not animate claims unsupported by the C# export.
+- [ ] Label a manual "tank full" override if it triggers the live pause. The selected January and
+      July year-export days do not naturally reach a zero server target; the clip must not imply
+      that the exported heat trace caused a real job to stop on its own.
 - [ ] Incorporate a real T-02 pause/resume recording (PR #15 has January and July LiveRun logs)
       and, if useful, footage from Nikita's hosting work without duplicating their implementation.
 - [ ] Export an offline local video plus a fallback recording for the live demo; document source
