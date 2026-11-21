@@ -76,3 +76,12 @@ Pending user approval: ordinary inner bridges plus per-engine firewall rules tha
 HTTP and established replies but block new app-initiated connections to host, peer nodes and
 internet. No unrestricted-network fallback has been deployed. Full four-node routing and failure
 tests remain pending. Existing lab gateways were not stopped by the experiment.
+
+## Approved revision and first successful network check
+User approved normal inner bridges with per-node firewall rules. Internal bridge proposal is
+superseded after the ingress failure. The frontend now returns HTTP 200 through its published
+port; app-namespace probes to the engine bridge host and internet timed out, with matching
+DROP counters in INPUT/DOCKER-USER chains. Full pool/failure checks are next.
+Application restart policy is no: after engine failure, Start-IsolatedNetwork.ps1 reapplies
+rules before starting the app. The other pool replica serves traffic during manual recovery.
+No automatic node re-provisioning is claimed.
