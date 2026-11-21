@@ -19,3 +19,7 @@ GPU follow-up in progress: correct probe bindings/backend diagnostics and error 
 Eevee capability tests did not pass (OpenGL 4.1 limit; Vulkan missing features). Evidence in docs/performance/render-gpu-compatibility-2026-11-21.json; diagnostic patch 931912c pushed, not deployed over active comparison. Awaiting hardware/compatibility path choice.
 
 Current-upstream check completed: Blender 5.3.0 also fails (missing dual-source blending); Mesa 26.3.0 source explicitly disables that feature. No successful GPU render. Compatible worker path is the remaining design choice; evidence updated.
+
+Linux worker packaging prepared under reviewed ADR 0056 after user selected this path and confirmed no GPU host. Same scheduler/executor, current pinned Blender 5.3, shared render-probe CLI, loopback/local-engine defaults and remote UI disabled. Deployment/hardware execution remains unverified. See docs/jobs/linux-render-worker.md.
+
+Linux worker checks complete: image build, one real CPU frame, Linux archive/apphost smoke, negative GPU probes/cleanup, 88 tests plus 4 focused regressions. See docs/performance/linux-render-worker-2026-11-21.json. GPU execution/cross-host deployment awaits hardware; ticket remains in progress.

@@ -64,3 +64,5 @@ later.
 | [0054](0054-failed-render-cancellation.md) | Cancel only a failed render comparison, retain data | user approved; reviewed with changes; T-66 |
 
 - [0055 — Verified Eevee rendering for Intel WSL graphics](0055-eevee-intel-render.md): proposed; user-approved capability test, reviewed with changes.
+
+- [0056 — Portable Linux render worker packaging](0056-linux-render-worker.md): proposed; user chose compatible Linux worker, reviewed with changes; hardware unavailable.
