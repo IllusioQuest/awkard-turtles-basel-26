@@ -96,7 +96,7 @@ function renderTopology(s){
  }
  const durations=(s.frames||[]).map(f=>f.metadata.render_seconds).filter(v=>typeof v==='number'&&Number.isFinite(v));
  el('meanFrame').textContent=durations.length?seconds(durations.reduce((a,b)=>a+b,0)/durations.length):'—';
- el('frameRange').textContent=durations.length?durations.length+' completed frames · range '+seconds(Math.min(...durations))+'–'+seconds(Math.max(...durations))+'. Blender render calls only; excludes pauses, process startup and queueing.':'Available after the first measured frame completes.';
+ el('frameRange').textContent=durations.length?durations.length+' completed frames · range '+seconds(Math.min(...durations))+'–'+seconds(Math.max(...durations))+'. Blender render calls only; excludes pauses, process startup and queueing.'+((s.frames||[]).some(f=>'warm_scene_reused' in f.metadata)?' Cached scene reused for '+s.frames.filter(f=>f.metadata.warm_scene_reused===true).length+' frame(s).':''):'Available after the first measured frame completes.';
 }
 async function refresh(){
  if(refreshing)return;refreshing=true;

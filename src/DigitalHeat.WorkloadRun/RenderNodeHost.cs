@@ -104,13 +104,14 @@ internal static class RenderNodeHost
         peer.SetHold(true);
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
         RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
-            gpuBackend is null?(cfg.PreparedSceneMode?gpuDiagnostic:"CPU fallback: "+gpuDiagnostic):gpuBackend+" verified GPU; CPU available",error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
+            gpuBackend is null?(cfg.PreparedSceneMode?gpuDiagnostic:"CPU fallback: "+gpuDiagnostic):gpuBackend+" verified GPU; "+(cfg.Native is {EnableGpu:true,KeepGpuWarm:true}?"warm frame process":"CPU available"),error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
             {RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
         var published=CaptureStatus();
         RenderPeerStatus Status()=>Volatile.Read(ref published);
         var builder=WebApplication.CreateBuilder();builder.Logging.SetMinimumLevel(LogLevel.Warning);
         builder.Services.ConfigureHttpJsonOptions(o=>o.SerializerOptions.PropertyNamingPolicy=JsonNamingPolicy.SnakeCaseLower);
-        var app=builder.Build();var stop=app.Lifetime.ApplicationStopping;
+        var app=builder.Build();
+        app.Lifetime.ApplicationStopped.Register(()=>native?.Dispose());var stop=app.Lifetime.ApplicationStopping;
         app.Use(async(ctx,next)=>{
             // Browser UI is reachable only through the local-only published home peer.
             bool browser=ctx.Request.Path.StartsWithSegments("/ui");
