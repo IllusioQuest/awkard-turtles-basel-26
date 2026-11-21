@@ -59,3 +59,6 @@ coordination channel, not evidence that they have responded.
 
 User clarification: service/vision/hardware-direction decisions are for Ennio's agent. No approval of those recommendations was given. Nikita asked agents to coordinate the missing submission/ownership facts; no answer is available on the fetched branches as of 2026-11-21 01:03. Ennio's agent should record its human's decisions here. These tasks are not being implemented by the T-09 agent.
 
+
+Coordination update: main now records Ennio / Claude on feat/T-02-transcription-job as measurement owner, and Jona's real-job executor/replay merged in PR #3. This resolves the earlier missing measurement-owner fact. Organiser deliverables and submission owner remain unconfirmed in the documents read. Shared branch feat/T-05-job-queue is also present; its author should claim T-05 rather than duplicate that work.
+
