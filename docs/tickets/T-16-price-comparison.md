@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Market / presentation
 - **Depends on:** T-02, T-14
-- **Suggested owner:** anyone  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (Claude; approach proposed, waiting for approval)
 
 ## Goal
 
