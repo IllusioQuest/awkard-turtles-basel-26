@@ -84,3 +84,27 @@ Exclusive host-port ownership is not cross-host consensus/fencing; late remote D
 may survive a killed gateway. Interrupted-transition recovery must be tested, and transient errors
 remain possible. The physical laptop and Docker Desktop remain shared dependencies.
 
+
+## Verified results and catalog implementation (2026-11-21)
+- 45 hosting tests and 51 shared-core/catalog tests pass.
+- Real Docker runner passed eight recorded checks: baseline actual pause, heat swap with a
+  six-second in-flight request drained, zero demand availability, expired signals restoring all,
+  partial API signals restoring that pool, locality denial (API 503/frontend 200), gateway kill
+  immediately after an observed pause phase, and restoration of the original plan.
+- Independent network checks passed on all six temporarily awake replicas: separate component
+  routes, non-root/read-only/no-socket settings, peer positive control, app-to-peer/host/internet
+  blocking with firewall drop counters. The original heat plan was restored.
+- Evidence: webhosting/TestResults/scheduler-results.json and isolation-results.json (local/ignored).
+  These are controlled lab tests, not energy measurements or availability guarantees.
+
+The common catalog implementation adds optional serviceMode (batch by default). Existing input
+field naming remains camelCase for compatibility; hosting plans and result exports use snake_case.
+config/jobs/webhosting-frontend.json and webhosting-api.json are always-on entries; both components
+are required for this website. Work units are component service-hours, not a new billing formula.
+Runtime and energy measurements remain null: TODO(source), no values invented.
+LiveRun rejects always-on immediately after load, before constructing Docker control or entering
+executor cleanup. The availability-aware hosting lifecycle is the execution path for these services.
+The JSON schema accepts both entries and rejects contradictory interruptible always-on inputs.
+T-01 broad research/catalog completeness remains separate; its owner was notified before changes.
+
+Hosting ticket was renumbered from T-29 to T-36 to avoid the separately started local-LLM branch.

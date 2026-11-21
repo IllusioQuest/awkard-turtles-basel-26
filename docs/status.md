@@ -108,3 +108,4 @@ T-23/T-01 handoff: no unmerged implementation exists on feat/T-01-job-catalog (t
 against main empty). Nikita now implements the narrow approved serviceMode loader/schema guard
 and frontend/API catalog descriptors to finish the requested integration; Claude retains broader
 catalog/research ownership. No new economic or measurement values are invented.
+T-36/T-23: six-node real Docker lifecycle and failover checks pass; 45 hosting + 51 core/catalog tests pass. Narrow common catalog extension implemented, T-01 notified; always-on is blocked from LiveRun batch freeze. Final startup recovery check and PR publication next.

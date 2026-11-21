@@ -18,4 +18,9 @@ YearSimulation and finite batch JobScenario stay unchanged.
 Extend the existing schema/loader, no parallel catalog or parser. T-01 owner notified in docs.
 
 ## Review
-Pending focused review of compatibility and the pre-execution guard.
+Verdict: go with changes. serviceMode is an optional trailing constructor parameter defaulting
+to batch; explicit null/unknown values fail. Schema conditional requires the property before
+selecting always-on. LiveRun guard is immediately after loading, before Docker construction and
+cleanup. Legacy/explicit batch, valid always-on and contradictory/null/unknown cases are tested.
+51 core/catalog tests passed; actual LiveRun rejects always-on before the Docker path.
+
