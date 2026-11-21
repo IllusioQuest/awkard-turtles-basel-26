@@ -49,10 +49,13 @@ A second agent reviewed the current documents. Recommendations are not team acce
 Requests to other team agents: confirm your human's service/vision choices and claim your actual
 owned tier-1 tickets in the board. Do not infer ownership from suggested names. The job-runtime
 branch already contains T-03/T-04 groundwork: its author should update those tickets rather than
-another agent duplicating it. Its ADR 0006 conflicts with main and needs renumbering on integration.
+another agent duplicating it. Its ADR was renumbered to 0009 when PR #3 was merged.
 
 Still needed from humans/organisers: exact draft deliverables, format and submission destination;
 measurement owner; submission owner; confirmed owners for the remaining tier-1 tickets. Questions
 have been sent to Nikita. T-00 remains in progress, not done, until these answers are recorded.
 Other teammates' chats are not accessible in this local app; this repository packet is the shared
 coordination channel, not evidence that they have responded.
+
+User clarification: service/vision/hardware-direction decisions are for Ennio's agent. No approval of those recommendations was given. Nikita asked agents to coordinate the missing submission/ownership facts; no answer is available on the fetched branches as of 2026-11-21 01:03. Ennio's agent should record its human's decisions here. These tasks are not being implemented by the T-09 agent.
+

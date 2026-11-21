@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DigitalHeat job descriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "interruptible", "supportedControlLevels", "workUnit"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "containerImage": { "type": ["string", "null"] },
+    "command": { "type": ["array", "null"], "items": { "type": "string" }, "minItems": 1 },
+    "interruptible": { "const": true },
+    "supportedControlLevels": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["freeze", "throttle", "checkpoint"] },
+      "contains": { "const": "freeze" }
+    },
+    "deadlineHours": { "$ref": "#/$defs/hoursOrMissing" },
+    "workUnit": { "type": "string", "minLength": 1 },
+    "runtimeSecondsPerWorkUnit": { "$ref": "#/$defs/secondsOrMissing" },
+    "energyKwhPerWorkUnit": { "$ref": "#/$defs/energyOrMissing" },
+    "progressFile": { "type": ["string", "null"] }
+  },
+  "anyOf": [
+    { "required": ["containerImage"], "properties": { "containerImage": { "type": "string", "minLength": 1 } } },
+    { "required": ["command"], "properties": { "command": { "type": "array", "minItems": 1 } } }
+  ],
+  "$defs": {
+    "hoursOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantityHours" }] },
+    "secondsOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantitySeconds" }] },
+    "energyOrMissing": { "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/quantityEnergy" }] },
+    "quantityHours": { "type": "object", "required": ["value", "unit", "source"], "properties": { "value": { "type": "number", "exclusiveMinimum": 0 }, "unit": { "const": "hours" }, "source": { "type": "string", "minLength": 1 } } },
+    "quantitySeconds": { "type": "object", "required": ["value", "unit", "source"], "properties": { "value": { "type": "number", "minimum": 0 }, "unit": { "const": "s/work unit" }, "source": { "type": "string", "minLength": 1 } } },
+    "quantityEnergy": { "type": "object", "required": ["value", "unit", "source"], "properties": { "value": { "type": "number", "minimum": 0 }, "unit": { "const": "kWh/work unit" }, "source": { "type": "string", "minLength": 1 } } }
+  }
+}
