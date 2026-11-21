@@ -123,15 +123,17 @@ static void RunScenario(string root, string scenarioPath, string[] strategyIds, 
     }
     Console.WriteLine($"Scenario {scenario.Id}: {sites.Count} sites, {sites[0].Demand.Count} h, phi={phi:R}, " +
         $"Type 1 jobs/day: {string.Join(", ", specs.Select((s, i) => $"{sites[i].Id}={s?.JobsPerDay.ToString() ?? "-"}"))}");
-    Console.WriteLine("strategy coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
+    Console.WriteLine("strategy   coverage  dumped kWh  server-h   util.   T1 missed %  moved T1 server-h  runtime");
     foreach (var id in strategyIds)
     {
         INetworkScheduler scheduler = id switch
         {
             "B1" => new LocalGreedyJobsScheduler(),
             "B2" => new NetworkGreedyJobsScheduler(),
+            "B1-reserve" => new LocalGreedyJobsScheduler(reserveForType1: true),
+            "B2-reserve" => new NetworkGreedyJobsScheduler(reserveForType1: true),
             "LP" => new RollingHorizonWorkLpScheduler(),
-            _ => throw new ArgumentException($"Unknown strategy {id} (B1, B2, LP).")
+            _ => throw new ArgumentException($"Unknown strategy {id} (B1, B1-reserve, B2, B2-reserve, LP).")
         };
         var ledger = new WorkLedger(sites, specs, sites.Select(_ => phi).ToArray(), sites[0].Demand.Count,
             NetworkScenarioLoader.HoursPerDay);
@@ -142,7 +144,7 @@ static void RunScenario(string root, string scenarioPath, string[] strategyIds, 
             id == "LP" ? horizon : 1, work: ledger);
         var n = NetworkExport.Network(result);
         var t1 = result.Work!.Type1;
-        Console.WriteLine($"{id,-8} {n.Coverage,8:P2} {n.DumpedHeatKwh,11:F1} {n.ServerHours,9:F0} {n.Utilisation,7:P2} " +
+        Console.WriteLine($"{id,-10} {n.Coverage,8:P2} {n.DumpedHeatKwh,11:F1} {n.ServerHours,9:F0} {n.Utilisation,7:P2} " +
             $"{(t1.MissedDeadlinePercent is double m ? m.ToString("F2", CultureInfo.InvariantCulture) : "n/a"),12} " +
             $"{t1.MovedServerHours,18:F1} {sw.Elapsed.TotalSeconds,7:F1}s");
         if (export)
