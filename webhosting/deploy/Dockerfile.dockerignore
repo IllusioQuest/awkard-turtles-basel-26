@@ -1,0 +1,13 @@
+**
+!src/
+!src/DigitalHeat.Core/
+!src/DigitalHeat.Core/**
+!webhosting/
+!webhosting/src/
+!webhosting/src/**
+!webhosting/samples/
+!webhosting/samples/**
+**/bin/
+**/obj/
+!webhosting/deploy/
+!webhosting/deploy/Dockerfile

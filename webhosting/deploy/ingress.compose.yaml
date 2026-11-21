@@ -4,8 +4,8 @@ services:
   gateway-a:
     image: webhosting-gateway:local
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile
+      context: ../..
+      dockerfile: webhosting/deploy/Dockerfile
     network_mode: host
     environment:
       Gateway__InstanceId: gateway-a
@@ -23,8 +23,8 @@ services:
   sample-a:
     image: webhosting-sample:local
     build:
-      context: ..
-      dockerfile: deploy/Dockerfile
+      context: ../..
+      dockerfile: webhosting/deploy/Dockerfile
       args:
         PROJECT: samples/Webhosting.Sample/Webhosting.Sample.csproj
         ENTRY_DLL: Webhosting.Sample.dll

@@ -1,10 +1,11 @@
-param([switch]$FailureTests, [int]$RecoveryTimeoutSeconds = 75)
+param([switch]$FailureTests, [int]$RecoveryTimeoutSeconds = 75,
+    [ValidateSet('isolation','scheduler')][string]$Topology = 'isolation')
 $ErrorActionPreference = 'Stop'
 $labRoot = Split-Path -Parent $PSScriptRoot
-$compose = Join-Path $labRoot 'deploy/isolation.compose.yaml'
+$compose = Join-Path $labRoot "deploy/$Topology.compose.yaml"
 $config = & docker compose -f $compose config --format json | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw 'Cannot read Compose config' }
-$gatewayConfig = Get-Content "$labRoot/deploy/isolation-gateway.json" -Raw | ConvertFrom-Json
+$gatewayConfig = Get-Content "$labRoot/deploy/$Topology-gateway.json" -Raw | ConvertFrom-Json
 $baseUrl = "http://127.0.0.1:$($gatewayConfig.Gateway.Port)"
 function Engine([string]$Node) {
     $id = (& docker compose -f $compose ps -aq $Node).Trim()
@@ -36,7 +37,10 @@ function Wait-Website {
 $results = @()
 $null = Wait-Website
 $engineIds = @()
-foreach ($node in @('frontend-a','frontend-b','api-c','api-d')) {
+$nodes = @($config.services.PSObject.Properties | Where-Object {
+    $_.Value.labels.'webhosting.component'
+} | ForEach-Object Name)
+foreach ($node in $nodes) {
     $engine = Engine $node
     $identity = & docker exec $engine docker info --format '{{.ID}}'
     if ($LASTEXITCODE -ne 0) { throw "Cannot read engine identity: $node" }
@@ -75,7 +79,7 @@ foreach ($node in @('frontend-a','frontend-b','api-c','api-d')) {
 }
 if (@($engineIds | Sort-Object -Unique).Count -ne $engineIds.Count) { throw 'Engines are not independent' }
 if ($FailureTests) {
-    foreach ($node in @('frontend-a','frontend-b','api-c','api-d')) {
+    foreach ($node in $nodes) {
         $engine = Engine $node
         try {
             & docker kill $engine | Out-Null
@@ -83,7 +87,7 @@ if ($FailureTests) {
             $recovery = Wait-Website
             $results += [pscustomobject]@{ failed_node=$node; recovery=$recovery }
         } finally {
-            & "$PSScriptRoot/Start-IsolatedNetwork.ps1" -Nodes $node -SkipGatewaySwitch
+            & "$PSScriptRoot/Start-IsolatedNetwork.ps1" -Nodes $node -Topology $Topology -SkipGatewaySwitch
         }
         $null = Wait-Website
     }

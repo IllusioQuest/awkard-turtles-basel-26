@@ -1,0 +1,108 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "PassiveHealthPolicy": {
+    "DetectionWindowSize": "00:00:05"
+  },
+  "Gateway": {
+    "InstanceId": "gateway-local",
+    "ListenAddress": "127.0.0.1",
+    "Port": 18080,
+    "BindRetrySeconds": 1,
+    "Watchdog": {
+      "Enabled": false,
+      "IntervalSeconds": 1,
+      "TimeoutSeconds": 1,
+      "FailureThreshold": 3
+    }
+  },
+  "ReverseProxy": {
+    "Routes": {
+      "api": {
+        "Match": {
+          "Path": "/api/{**catch-all}"
+        },
+        "Order": 0,
+        "ClusterId": "api"
+      },
+      "frontend": {
+        "Match": {
+          "Path": "{**catch-all}"
+        },
+        "Order": 10,
+        "ClusterId": "frontend"
+      }
+    },
+    "Clusters": {
+      "api": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "HealthCheck": {
+          "Active": {
+            "Enabled": true,
+            "Interval": "00:00:01",
+            "Timeout": "00:00:01",
+            "Policy": "ConsecutiveFailures",
+            "Path": "/health"
+          },
+          "Passive": {
+            "Enabled": true,
+            "Policy": "TransportFailureRate",
+            "ReactivationPeriod": "00:00:05"
+          }
+        },
+        "Destinations": {
+          "api-f": {
+            "Address": "http://127.0.0.1:18586/"
+          },
+          "api-d": {
+            "Address": "http://127.0.0.1:18584/"
+          },
+          "api-c": {
+            "Address": "http://127.0.0.1:18583/"
+          }
+        }
+      },
+      "frontend": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "HealthCheck": {
+          "Active": {
+            "Enabled": true,
+            "Interval": "00:00:01",
+            "Timeout": "00:00:01",
+            "Policy": "ConsecutiveFailures",
+            "Path": "/health"
+          },
+          "Passive": {
+            "Enabled": true,
+            "Policy": "TransportFailureRate",
+            "ReactivationPeriod": "00:00:05"
+          }
+        },
+        "Destinations": {
+          "frontend-b": {
+            "Address": "http://127.0.0.1:18582/"
+          },
+          "frontend-a": {
+            "Address": "http://127.0.0.1:18581/"
+          },
+          "frontend-e": {
+            "Address": "http://127.0.0.1:18585/"
+          }
+        }
+      }
+    }
+  },
+  "Hosting": {
+    "ControlTimeoutSeconds": 2,
+    "Project": "webhosting-scheduler",
+    "DrainTimeoutSeconds": 12,
+    "IntervalSeconds": 1,
+    "Enabled": true,
+    "PlanPath": "/hosting-state/plan.json"
+  }
+}

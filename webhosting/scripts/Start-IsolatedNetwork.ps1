@@ -1,13 +1,15 @@
 param(
-    [ValidateSet('frontend-a','frontend-b','api-c','api-d')]
-    [string[]]$Nodes = @('frontend-a','frontend-b','api-c','api-d'),
+    [ValidateSet('frontend-a','frontend-b','api-c','api-d','frontend-e','api-f')]
+    [string[]]$Nodes,
+    [ValidateSet('isolation','scheduler')][string]$Topology = 'isolation',
     [switch]$Build,
     [switch]$SkipGatewaySwitch,
     [double]$EngineReadyTimeoutSeconds = 60
 )
 $ErrorActionPreference = 'Stop'
 $labRoot = Split-Path -Parent $PSScriptRoot
-$compose = Join-Path $labRoot 'deploy/isolation.compose.yaml'
+$repositoryRoot = Split-Path -Parent $labRoot
+$compose = Join-Path $labRoot "deploy/$Topology.compose.yaml"
 function Invoke-Docker([string[]]$Arguments) {
     & docker @Arguments
     if ($LASTEXITCODE -ne 0) { throw "Docker command failed: $Arguments" }
@@ -16,12 +18,17 @@ if ($Build) {
     foreach ($component in @('Frontend','Api')) {
         Invoke-Docker @('build','-f',"$labRoot/deploy/Dockerfile",'--build-arg',
             "PROJECT=samples/Webhosting.$component/Webhosting.$component.csproj",'--build-arg',
-            "ENTRY_DLL=Webhosting.$component.dll",'-t',"webhosting-$($component.ToLowerInvariant()):local",$labRoot)
+            "ENTRY_DLL=Webhosting.$component.dll",'-t',"webhosting-$($component.ToLowerInvariant()):local",$repositoryRoot)
     }
-    Invoke-Docker @('build','-f',"$labRoot/deploy/Dockerfile",'-t','webhosting-gateway:local',$labRoot)
+    Invoke-Docker @('build','-f',"$labRoot/deploy/Dockerfile",'-t','webhosting-gateway:local',$repositoryRoot)
 }
 $configuration = & docker compose -f $compose config --format json | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw 'Invalid isolation compose configuration' }
+if (-not $Nodes) {
+    $Nodes = @($configuration.services.PSObject.Properties | Where-Object {
+        $_.Value.labels.'webhosting.component'
+    } | ForEach-Object Name)
+}
 $results = Join-Path $labRoot 'TestResults'
 New-Item -ItemType Directory -Force $results | Out-Null
 foreach ($node in $Nodes) {
@@ -55,14 +62,17 @@ foreach ($node in $Nodes) {
     Invoke-Docker @('exec',$engine,'docker','run','-d','--name','webhosting-component',
         '--network','bridge','--publish',"${appPort}:${appPort}",'--restart','no','--read-only','--tmpfs','/tmp:rw,noexec,nosuid',
         '--cap-drop','ALL','--security-opt','no-new-privileges','--env',"ASPNETCORE_URLS=http://0.0.0.0:$appPort",
+        '--label',"webhosting.component=$component",'--env','Demo__SlowRequestSeconds=6',
         '--env',"NodeId=$node",$image)
 }
 if (-not $SkipGatewaySwitch) {
     # Only explicitly named old lab services; unrelated containers are never stopped.
     Invoke-Docker @('compose','-f',"$labRoot/deploy/monitors.compose.yaml",'stop')
     Invoke-Docker @('compose','-f',"$labRoot/deploy/ingress.compose.yaml",'stop','gateway-a','gateway-b')
+    $other = if ($Topology -eq 'scheduler') { 'isolation' } else { 'scheduler' }
+    Invoke-Docker @('compose','-f',"$labRoot/deploy/$other.compose.yaml",'stop','gateway-a','gateway-b','monitor-a','monitor-b')
     # Gateway port is inherited from the mounted configuration, not Compose environment.
-    $gateway = Get-Content "$labRoot/deploy/isolation-gateway.json" -Raw | ConvertFrom-Json
+    $gateway = Get-Content "$labRoot/deploy/$Topology-gateway.json" -Raw | ConvertFrom-Json
     $listener = Get-NetTCPConnection -State Listen -LocalPort $gateway.Gateway.Port -ErrorAction SilentlyContinue
     if ($listener) {
         $own = & docker compose -f $compose ps -q gateway-a gateway-b

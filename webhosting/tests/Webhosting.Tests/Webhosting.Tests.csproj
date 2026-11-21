@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Webhosting.Core\Webhosting.Core.csproj" />
+    <ProjectReference Include="../../src/Webhosting.Gateway/Webhosting.Gateway.csproj" />
     <ProjectReference Include="..\..\src\Webhosting.Contracts\Webhosting.Contracts.csproj" />
   </ItemGroup>
 

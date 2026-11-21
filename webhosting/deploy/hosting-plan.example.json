@@ -1,0 +1,125 @@
+{
+  "source": "Controlled six-node lab fixture: illustrative hourly heat, not sensor readings or scored reference data; docs/webhosting-scheduler.md",
+  "nodes": [
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18581/",
+      "component": "frontend",
+      "site_id": "frontend-a",
+      "id": "frontend-a",
+      "container_port": 8080
+    },
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18582/",
+      "component": "frontend",
+      "site_id": "frontend-b",
+      "id": "frontend-b",
+      "container_port": 8080
+    },
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18585/",
+      "component": "frontend",
+      "site_id": "frontend-e",
+      "id": "frontend-e",
+      "container_port": 8080
+    },
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18583/",
+      "component": "api",
+      "site_id": "api-c",
+      "id": "api-c",
+      "container_port": 8080
+    },
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18584/",
+      "component": "api",
+      "site_id": "api-d",
+      "id": "api-d",
+      "container_port": 8080
+    },
+    {
+      "country_code": "CH",
+      "address": "http://127.0.0.1:18586/",
+      "component": "api",
+      "site_id": "api-f",
+      "id": "api-f",
+      "container_port": 8080
+    }
+  ],
+  "heat_signals": {
+    "frontend-b": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.4,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    },
+    "api-c": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.8,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    },
+    "api-f": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.1,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    },
+    "api-d": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.4,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    },
+    "frontend-e": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.1,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    },
+    "frontend-a": {
+      "tank_stored_kwh": 0,
+      "demand_kwh": 0.8,
+      "tank_capacity_kwh": 0,
+      "server_count": 1,
+      "recoverable_kwh_per_server_at_full_load": 0.8
+    }
+  },
+  "minimum_load_share": 0,
+  "services": [
+    {
+      "component": "frontend",
+      "placement_policy": {
+        "mode": "country-allowlist",
+        "allowed_country_codes": [
+          "CH"
+        ],
+        "source": "User-approved trusted local lab; synthetic CH inventory only"
+      },
+      "data_origin_site_id": "frontend-a"
+    },
+    {
+      "component": "api",
+      "placement_policy": {
+        "mode": "country-allowlist",
+        "allowed_country_codes": [
+          "CH"
+        ],
+        "source": "User-approved trusted local lab; synthetic CH inventory only"
+      },
+      "data_origin_site_id": "api-c"
+    }
+  ],
+  "revision": "synthetic-baseline-v1",
+  "valid_until_utc": "2000-01-01T00:00:00Z",
+  "minimum_serving_replicas": 2
+}

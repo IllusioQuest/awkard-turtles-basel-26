@@ -1,7 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 string node = System.Net.WebUtility.HtmlEncode(builder.Configuration["NodeId"] ?? "frontend");
-app.MapGet("/health", () => Results.Ok());
+app.MapGet("/health", () => new { node_id = builder.Configuration["NodeId"] ?? "frontend", component = "frontend" });
 app.MapGet("/", () => Results.Content("""
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Separated hosting lab</title><style>body{font:18px system-ui;max-width:760px;margin:60px auto;padding:24px;background:#101820;color:#eaf2f8}pre{padding:24px;background:#1c2c38;white-space:pre-wrap}</style>
