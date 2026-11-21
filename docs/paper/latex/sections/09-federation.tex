@@ -1,0 +1,90 @@
+\section{Federated admission: model, guarantees and validation}
+\label{sec:federation}
+
+Residential sites may lose connectivity while jobs and thermal processes continue. We separate
+local heat control from placement and ownership. This section specifies an implemented,
+deterministic admission model and the assumptions needed for a distributed runtime. It reports
+no deployed federation or measured economic advantage (decision 0035).
+
+\subsection{System and failure assumptions}
+Each site uses the existing greedy scheduler and executor path. A trusted ownership service must
+supply unique durable generations and complete previous-attempt evidence. Replicated consensus
+is a possible implementation: Raft provides agreement under non-Byzantine failures, with progress
+requiring a reachable majority under suitable timing conditions~\cite{ongaro2014raft}. Such a
+service, authentication, transport and recovery are not implemented here.
+
+We assume authentic site identities, customer policies and heat observations. A local clock has
+absolute error at most $\epsilon\ge0$ relative to a common time reference throughout a claim.
+This is stronger than merely bounded clock drift. Lease exclusion depends on timing and
+persistence assumptions~\cite{gray1989leases}. Malicious nodes and clock-bound violations are
+outside our guarantees; a runtime must detect loss of its clock bound and stop granting authority.
+
+\subsection{Deterministic offer selection}
+Each offer identifies a site, country, policy revision, observation $a_i$, expiry $b_i$, heat
+signal and committed recoverable heat $c_i$. At local time $t$ it is eligible only if
+\begin{equation}
+ t-\epsilon\ge a_i,\qquad t+\epsilon<b_i,\qquad
+ \mathrm{eligible}(\mathrm{policy},\mathrm{origin},i).
+\end{equation}
+The selector also checks the policy revision, nonempty identity and valid heat signal. Identical
+retransmissions are deduplicated; unequal reports for one site exclude it from that selection.
+This conservative choice needs a versioned observation protocol to recover from conflicting updates.
+The existing shared helper computes useful headroom:
+\begin{equation}
+ h_i=\max\{0,D_i+B_i-S_i-c_i\}\quad[\mathrm{kWh}].
+\end{equation}
+Select the greatest positive $h_i$, with ordinal site ID breaking ties. Selection is invariant to
+input order and identical retransmission. The implementation takes $O(n\log n)$ time and $O(n)$
+space. This thermal ranking does not reserve resources or optimise deadlines: CPU/GPU feasibility,
+transfer costs and reservations remain runtime responsibilities. An offer cannot authorize execution.
+
+\subsection{Claim admission and conditional safety}
+A claim binds job ID, generation $g$, owner, policy revision and interval $[v_f,v_u)$. The gate
+requires externally confirmed quorum evidence, matching owner and policy, valid locality and
+\begin{equation}
+ t-\epsilon\ge v_f,\qquad t+\epsilon<v_u. \label{eq:federated-admission}
+\end{equation}
+Only generation one may omit previous-attempt evidence. Otherwise the previous record must name
+the same job and a strictly smaller valid generation. The supplied quorum Boolean is a trust
+boundary, not a consensus proof verified by this implementation.
+
+Without confirmed previous termination, every job requires a trusted latest execution end $E$,
+including watchdog, scheduling and stop latency. Interruptibility alone supplies no such bound.
+For previous claim expiry $v_u^{old}$, admission additionally requires
+\begin{equation}
+ t\ge\max\{E,v_u^{old}\}+2\epsilon. \label{eq:federated-reassignment}
+\end{equation}
+Tick differences avoid timestamp overflow. Under the clock bound,
+\eqref{eq:federated-admission} places admission inside its interval; the two-clock margin in
+\eqref{eq:federated-reassignment} prevents a successor passing the time check while the previous
+bounded clock can still precede the supplied end. Conditional non-overlap additionally requires
+unique issuance, complete evidence and actual enforcement of that end. These premises are not
+established by a stateless gate, and the gate does not enforce the new process's lifetime.
+
+Unique authorization, at-most-once process creation and non-overlapping execution are distinct.
+Replaying the same valid claim can repeatedly pass this gate. A runtime needs atomic durable start
+deduplication, reconciliation of uncertain starts, expiry enforcement and generation checks at
+protected outputs. Chubby sequencers illustrate why receivers must reject stale-owner operations
+\cite{burrows2006chubby}; a generation field alone cannot kill an isolated process.
+
+\subsection{Validation and experimental design}
+Reproduce local checks with
+\texttt{dotnet test src/DigitalHeat.Network.Tests/DigitalHeat.Network.Tests.csproj}.
+Cases cover missing policy revisions and heat signals, retransmission, conflicting offers,
+locality, timestamp extremes, incomplete predecessor evidence and execution-end bounds. A finite
+sweep enumerates clock-error bounds zero through five seconds and successor local times minus
+fifteen through fifteen seconds around expiry, then checks every integer pair of clock offsets
+within the bound. These are synthetic test parameters, not measured clock errors. The sweep tests
+a conditional time predicate, not physical termination or all distributed execution histories.
+A Boolean quorum-loss test is not a real network partition; a local scheduler call does not
+establish an autonomous production controller.
+
+Future experiments must hold placement strategy constant when comparing central and replicated
+ownership, and vary local heat autonomy separately. Comparing offer-greedy with B2/LP alone would
+confound resilience and optimisation. Keep weather, arrivals, resources, policies and economics
+identical; inject minority isolation, leader isolation, loss of majority, lost start responses,
+stale restarts, clock-bound violations and stop latency. Report useful heat, dumping, deadlines,
+sold work, availability and recovery time. Count repeated requests, created processes, overlapping
+runs and accepted duplicate results separately. Three independent voting failure domains retain a
+majority after one voter fails; three processes on one laptop do not demonstrate that resilience.
+No field or profit improvement is claimed.
