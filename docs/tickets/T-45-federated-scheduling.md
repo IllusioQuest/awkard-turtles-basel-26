@@ -34,3 +34,11 @@ send messages or form a quorum. Network tests cover both pieces.
 - A job cannot start twice under the modelled failure cases; invalid locality cannot be bypassed.
 - A disconnected node retains safe local heat control; claims and unknown outcomes fail closed.
 - Tests, reproducible command, limitations and open production questions are recorded.
+
+## Boundary review update
+
+- [x] Reject missing policy revisions, require predecessor evidence for generations above one, and validate malformed prior attempts.
+- [x] Skip offers without a heat signal; deduplicate identical retransmissions; retain fail-closed behavior for conflicting reports.
+- [x] Require a trusted stop-time bound for reassignment even when work is labelled interruptible; apply the clock margin without timestamp overflow.
+- [x] Expand tests for these boundaries and a finite clock-offset sweep.
+- [x] Replace broad prose with a conditional safety argument, explicit assumptions, experiment controls and primary literature.

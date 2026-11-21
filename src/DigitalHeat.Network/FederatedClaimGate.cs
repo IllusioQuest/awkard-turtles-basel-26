@@ -25,13 +25,15 @@ public static class FederatedClaimGate
         ArgumentNullException.ThrowIfNull(evidence);
         if (maximumClockError < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(maximumClockError));
         var claim = evidence.Claim;
-        if (!evidence.QuorumConfirmed || string.IsNullOrWhiteSpace(claim.JobId)
+        if (claim is null || evidence.PlacementPolicy is null
+            || !evidence.QuorumConfirmed || string.IsNullOrWhiteSpace(claim.JobId)
             || claim.Generation < 1 || string.IsNullOrWhiteSpace(claim.OwnerSiteId)
+            || string.IsNullOrWhiteSpace(claim.PolicyRevision)
+            || string.IsNullOrWhiteSpace(evidence.CurrentPolicyRevision)
             || claim.ValidFrom >= claim.ValidUntil
             || !string.Equals(claim.OwnerSiteId, nodeSiteId, StringComparison.Ordinal)
             || !string.Equals(claim.PolicyRevision, evidence.CurrentPolicyRevision, StringComparison.Ordinal)
-            || now - maximumClockError < claim.ValidFrom
-            || now + maximumClockError >= claim.ValidUntil)
+            || !FederatedTime.Contains(claim.ValidFrom, claim.ValidUntil, now, maximumClockError))
             return false;
 
         if (!JobPlacement.IsEligible(evidence.PlacementPolicy,
@@ -39,14 +41,26 @@ public static class FederatedClaimGate
             return false;
 
         var prior = evidence.Previous;
-        if (prior is null) return true;
-        if (prior.Claim.JobId != claim.JobId || prior.Claim.Generation >= claim.Generation)
+        if (prior is null) return claim.Generation == 1;
+        if (prior.Claim is null || prior.Claim.ValidFrom >= prior.Claim.ValidUntil
+            || prior.Claim.Generation < 1 || string.IsNullOrWhiteSpace(prior.Claim.OwnerSiteId)
+            || prior.Claim.JobId != claim.JobId || prior.Claim.Generation >= claim.Generation)
             return false;
         if (prior.TerminationConfirmed) return true;
-        // A non-interruptible old process may outlive its lease. Only a trusted execution bound
-        // permits reassignment without a confirmed stop.
-        if (!prior.Interruptible && prior.ProvenExecutionEnd is null) return false;
-        var previousEnd = prior.Interruptible ? prior.Claim.ValidUntil : prior.ProvenExecutionEnd!.Value;
-        return now - maximumClockError >= previousEnd + maximumClockError;
+        // Interruptibility alone proves no stop deadline. A trusted bound must include watchdog,
+        // scheduling and process-stop latency, even for a pausable job.
+        if (prior.ProvenExecutionEnd is null || prior.ProvenExecutionEnd < prior.Claim.ValidFrom) return false;
+        var previousEnd = prior.ProvenExecutionEnd > prior.Claim.ValidUntil
+            ? prior.ProvenExecutionEnd.Value : prior.Claim.ValidUntil;
+        long elapsedTicks = now.UtcTicks - previousEnd.UtcTicks;
+        return elapsedTicks >= 0 && maximumClockError.Ticks <= elapsedTicks / 2;
     }
+}
+
+/// <summary>Compare intervals without overflowing DateTimeOffset or doubling a TimeSpan.</summary>
+internal static class FederatedTime
+{
+    internal static bool Contains(DateTimeOffset start, DateTimeOffset end, DateTimeOffset now,
+        TimeSpan error) => now.UtcTicks - start.UtcTicks >= error.Ticks
+            && end.UtcTicks - now.UtcTicks > error.Ticks;
 }

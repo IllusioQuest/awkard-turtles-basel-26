@@ -24,17 +24,17 @@ public static class FederatedOfferSelection
         if (string.IsNullOrWhiteSpace(policyRevision)) throw new ArgumentException("Policy revision is required.", nameof(policyRevision));
 
         // Conflicting reports for one site cannot establish a trusted current inventory.
-        var ambiguousSites = offers.Where(o => o is not null && !string.IsNullOrWhiteSpace(o.SiteId))
+        var distinctOffers = offers.Distinct().ToArray();
+        var ambiguousSites = distinctOffers.Where(o => o is not null && !string.IsNullOrWhiteSpace(o.SiteId))
             .GroupBy(o => o.SiteId, StringComparer.Ordinal)
             .Where(g => g.Count() > 1).Select(g => g.Key).ToHashSet(StringComparer.Ordinal);
         var candidates = new List<(FederatedCapacityOffer Offer, double HeadroomKwh)>();
-        foreach (var offer in offers)
+        foreach (var offer in distinctOffers)
         {
-            if (offer is null || string.IsNullOrWhiteSpace(offer.SiteId)
+            if (offer is null || offer.HeatSignal is null || string.IsNullOrWhiteSpace(offer.SiteId)
                 || ambiguousSites.Contains(offer.SiteId)
                 || !string.Equals(offer.PolicyRevision, policyRevision, StringComparison.Ordinal)
-                || offer.ObservedAt > now - maximumClockError
-                || offer.ExpiresAt <= now + maximumClockError
+                || !FederatedTime.Contains(offer.ObservedAt, offer.ExpiresAt, now, maximumClockError)
                 || offer.ExpiresAt <= offer.ObservedAt
                 || !JobPlacement.IsEligible(policy,
                     new JobPlacementContext(originSiteId, offer.SiteId, offer.CountryCode)))

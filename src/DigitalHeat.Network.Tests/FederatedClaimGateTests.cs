@@ -11,7 +11,7 @@ public class FederatedClaimGateTests
     private static readonly JobPlacementPolicy SwissOnly = new("country-allowlist", "test contract", ["CH"]);
 
     private static ClaimEvidence Evidence(PreviousAttempt? previous = null) => new(
-        new FederatedClaim("job-1", 2, "basel", "policy-1", Now.AddMinutes(-1), Now.AddMinutes(1)),
+        new FederatedClaim("job-1", previous is null ? 1 : previous.Claim.Generation + 1, "basel", "policy-1", Now.AddMinutes(-1), Now.AddMinutes(1)),
         true, previous, "policy-1", "origin", "CH", SwissOnly);
 
     [Fact]
@@ -37,10 +37,10 @@ public class FederatedClaimGateTests
     public void UncertainOldProcessBlocksNewGenerationUntilSafeExpiry()
     {
         var old = new FederatedClaim("job-1", 1, "zurich", "policy-1", Now.AddMinutes(-3), Now.AddSeconds(-1));
-        var prior = new PreviousAttempt(old, false, true, null);
+        var prior = new PreviousAttempt(old, false, true, old.ValidUntil);
         Assert.False(FederatedClaimGate.CanStart(Evidence(prior), "basel", Now, ClockError));
         Assert.True(FederatedClaimGate.CanStart(Evidence(prior), "basel", Now.AddSeconds(2), ClockError));
-        Assert.False(FederatedClaimGate.CanStart(Evidence(prior with { Interruptible = false }), "basel", Now.AddSeconds(2), ClockError));
+        Assert.False(FederatedClaimGate.CanStart(Evidence(prior with { ProvenExecutionEnd = null }), "basel", Now.AddSeconds(2), ClockError));
         Assert.True(FederatedClaimGate.CanStart(Evidence(prior with { TerminationConfirmed = true }), "basel", Now, ClockError));
     }
 

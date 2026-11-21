@@ -45,3 +45,15 @@ Lease safety requires bounded clock error or a service-issued monotonic lease me
 ## Review
 
 Fresh-context review verdict: **go with changes**. The reviewer noted that command fencing cannot stop an isolated older process; reassignment now waits for confirmed stop or lease expiry plus a clock margin, and non-interruptible jobs need a proven execution bound. The current coordinator remains the pitch implementation. The ADR and ticket were renumbered to 0035/T-45 because Minecraft already owns 0034/T-44.
+
+The executable predicate was tightened after boundary review: blank policy revisions fail closed;
+only generation one may omit predecessor evidence; and reassignment without confirmed termination
+requires a trusted execution-end bound for every workload (interruptibility alone is insufficient).
+The bound is combined with lease expiry and a two-sided clock-error margin. Extreme timestamps are
+compared as elapsed ticks to avoid arithmetic overflow. Identical offer retransmissions are
+idempotent; conflicting reports for a site remain unavailable.
+
+This remains conditional admission logic. It does not issue quorum decisions, authenticate evidence,
+persist start deduplication, or terminate processes. The paper now states the premises and the
+three distinct properties: unique authorization, at-most-once process creation, and non-overlapping
+execution.
