@@ -1,4 +1,4 @@
-param([string]$OutputPath,[string]$SourceRoot)
+param([string]$OutputPath,[string]$SourceRoot,[ValidateSet('Placement','NodeFeedback')][string]$Probe='Placement')
 $ErrorActionPreference='Stop'
 $harnessRoot=Split-Path -Parent $PSScriptRoot
 $root=if($SourceRoot){[IO.Path]::GetFullPath($SourceRoot)}else{$harnessRoot}
@@ -9,7 +9,9 @@ function Xml([string]$s){[Security.SecurityElement]::Escape($s)}
 $core=Xml (Join-Path $root 'src/DigitalHeat.Core/DigitalHeat.Core.csproj')
 $network=Xml (Join-Path $root 'src/DigitalHeat.Network/DigitalHeat.Network.csproj')
 $orchestration=Xml (Join-Path $root 'src/DigitalHeat.Orchestration/DigitalHeat.Orchestration.csproj')
-$source=Xml (Join-Path $harnessRoot 'scripts/performance/SchedulerProbe.cs')
+$probeFile=if($Probe -eq 'NodeFeedback'){'NodeFeedbackProbe.cs'}else{'SchedulerProbe.cs'}
+$probePath=Join-Path $harnessRoot "scripts/performance/$probeFile"
+$source=Xml $probePath
 @"
 <Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
@@ -30,7 +32,7 @@ try {
 $report=Get-Content $OutputPath -Raw | ConvertFrom-Json
 $cpuName=(Get-CimInstance Win32_Processor | Select-Object -First 1).Name
 $report | Add-Member -NotePropertyName machine_cpu_name -NotePropertyValue $cpuName
-$report | Add-Member -NotePropertyName probe_source_sha256 -NotePropertyValue (Get-FileHash (Join-Path $harnessRoot 'scripts/performance/SchedulerProbe.cs') -Algorithm SHA256).Hash.ToLowerInvariant()
+$report | Add-Member -NotePropertyName probe_source_sha256 -NotePropertyValue (Get-FileHash $probePath -Algorithm SHA256).Hash.ToLowerInvariant()
 $report | Add-Member -NotePropertyName tiered_compilation -NotePropertyValue 'Disabled explicitly (DOTNET_TieredCompilation=0); optimized steady-state, not default startup behavior'
 $report | ConvertTo-Json -Depth 12 | Set-Content -Encoding UTF8 $OutputPath
 Write-Output "Saved diagnostic report: $OutputPath"
