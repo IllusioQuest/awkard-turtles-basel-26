@@ -120,3 +120,5 @@ per-attempt GPU ownership/results. Do not overlap runs.
 Package deployment files with `./rendering/Publish-LinuxWorker.ps1 -Native`.
 The bundle includes both trusted worker scripts; Linux GPU deployment remains
 subject to the prerequisites in [GPU server network](gpu-server-network.md).
+
+Follow-up review after recurring AccessDenied (b521e52, PR #62): fixed two confirmed warm-completion/assignment races by publishing completion and clearing assignment under the shared gate, and rechecking completion after acquiring it. Moved scene registration under the host gate to prevent concurrent registration/write collisions. Added full exception logging. 106 tests pass. These defects do not establish the exact AccessDenied source; live deployment/reproduction is still required. Do not describe the live error as resolved, resume as a fix, or three GPU workers as deployed. The user has approved three local GPU workers sharing Iris Xe and increased CPU budgets; that work remains pending.
