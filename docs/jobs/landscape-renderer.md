@@ -161,3 +161,12 @@ remains held and cannot enable a new run. Games/Minecraft are excluded. ADR 0054
 The earlier failed run contained a nonzero frame exit after a renderer-node restart; its failed
 result must not be relabelled successful. The user explicitly approved cancelling its unfinished
 jobs and preparing a clean run. This is separate from the successful four-frame verification.
+
+Follow-up validation: 84 orchestration tests pass; WorkloadRun builds cleanly. Ten direct-loopback
+status requests during actual Blender rendering had maximum observed response 102.2412 ms.
+A separate paused-peer test returned all 12 localhost status responses with stable schema and a
+visible connection warning, maximum 2122.0586 ms including host connection/address-resolution
+overhead. These are local samples, not an SLA or directly comparable probes. Raw evidence:
+../performance/render-status-responsiveness-2026-11-21.json. The exact user-failed comparison
+9ba15c1288a1 was cancelled after explicit approval; its completed hotel PNG and logs remain.
+A clean Run comparison is permitted only after cancellation is confirmed on all render peers.
