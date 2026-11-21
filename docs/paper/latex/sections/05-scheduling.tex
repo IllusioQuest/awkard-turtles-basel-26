@@ -7,6 +7,17 @@ tank, \qty{80}{\percent} recovery, backup heater for the rest) and one actuation
 scheduler that computes the year is the one that drives a real container in the demonstrator
 (Section~\ref{sec:demonstrator}).
 
+\paragraph{When a strategy decides.} The hour is the settlement interval of the heat balance, not
+the only moment a decision may be taken. A strategy may be called again within an hour whenever its
+inputs change: a job arrives, a server finishes or starts a task, or the heat demand changes. It
+then sees the same state as on the hour (remaining work, deadlines, heat demand) and the heat budget
+of the current hour still applies; work it moves becomes the receiving site's work from then on. The
+event-driven admission of interactive workloads works the same way: it is called when a request
+arrives and checks the heat left in the current hour (\texttt{WorkloadPlacement.TryReserve} in
+\texttt{DigitalHeat.Orchestration}). The yearly results in Section~\ref{sec:evaluation} use one
+decision per hour, because weather and demand are hourly data; decisions within the hour are used by
+the live demonstrator but not evaluated over a year.
+
 \subsection{Five strategies}
 
 We compare strategies of increasing intelligence.

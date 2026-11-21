@@ -10,6 +10,14 @@ a \texttt{DockerJobExecutor} that pauses and resumes a container (decisions 0005
 network simulation, an adapter feeds each site's committed decision through this unchanged path and
 rejects any signal that differs from the one the decision was made on.
 
+\paragraph{Live network demonstrator.} Four Docker containers on one laptop act as four houses with
+three servers each and run real Monte Carlo tasks of the research job (decision 0042, ticket T-54).
+A slider per house sets its heat demand. The network scheduler (B2, the LP or B1) decides on every
+change (job arrival, task start or finish, slider move) and at least once per demo hour (2~s); waiting
+task files move to the house its allocation names, and each house's load goes through the same
+\texttt{SchedulerController.Apply} path to Docker (pause, CPU quota). Running tasks do not migrate:
+a house that wants no heat freezes its running task until heat is wanted again.
+
 \todo{measured workloads: whisper.cpp transcription (\texttt{docs/jobs/transcription.md}),
 Apertus 8B summaries (\texttt{docs/jobs/llm-summary.md}), research simulation (T-30)}
 
