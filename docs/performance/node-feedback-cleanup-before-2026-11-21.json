@@ -1,0 +1,64 @@
+{
+  "generated_utc": "2026-11-21T14:30:02.7513231+01:00",
+  "source_commit": "c26c2f6c243869c8714cec5b7599ea785bd42828",
+  "runtime": ".NET 8.0.31",
+  "os": "Microsoft Windows 10.0.26200",
+  "logical_processors": 16,
+  "warmup_calls": 5,
+  "samples": 31,
+  "method": "Warm synchronous NodeFeedbackOwner.Tick, including real temporary-file reads/validation, fake runtime reconciliation and blocked queue admission. Initial publication/journal writes, constructor, build, fixture setup and JIT warmup excluded. Median and nearest-rank p95; current-thread managed allocations.",
+  "caveat": "Synthetic fixed-clock fixture on a non-dedicated Windows laptop; no Docker/network/graphics/stream latency or event-delivery SLA. Existing game containers stay running. Steady duplicate reports only: new-report fsync and new-job runtime/journal startup are not timed. Same numeric fixtures for both source revisions.",
+  "measurements": [
+    {
+      "nodes": 4,
+      "held_jobs": 0,
+      "waiting_jobs": 0,
+      "median_ms": 0.6731,
+      "p95_ms": 2.0729,
+      "median_allocated_bytes": 75984
+    },
+    {
+      "nodes": 4,
+      "held_jobs": 4,
+      "waiting_jobs": 32,
+      "median_ms": 22.1038,
+      "p95_ms": 41.9492,
+      "median_allocated_bytes": 2960136
+    },
+    {
+      "nodes": 32,
+      "held_jobs": 0,
+      "waiting_jobs": 0,
+      "median_ms": 8.907,
+      "p95_ms": 18.5218,
+      "median_allocated_bytes": 436216
+    },
+    {
+      "nodes": 32,
+      "held_jobs": 16,
+      "waiting_jobs": 32,
+      "median_ms": 82.2537,
+      "p95_ms": 177.3091,
+      "median_allocated_bytes": 18738528
+    },
+    {
+      "nodes": 128,
+      "held_jobs": 0,
+      "waiting_jobs": 0,
+      "median_ms": 13.6753,
+      "p95_ms": 22.0762,
+      "median_allocated_bytes": 1684976
+    },
+    {
+      "nodes": 128,
+      "held_jobs": 16,
+      "waiting_jobs": 32,
+      "median_ms": 194.7157,
+      "p95_ms": 231.5739,
+      "median_allocated_bytes": 87309360
+    }
+  ],
+  "machine_cpu_name": "12th Gen Intel(R) Core(TM) i5-1240P",
+  "probe_source_sha256": "2d27a4d95f4cf48eb98e8e071ff83324978cd05e6c58364bd26d4b902491ef58",
+  "tiered_compilation": "Disabled explicitly (DOTNET_TieredCompilation=0); optimized steady-state, not default startup behavior"
+}

@@ -1,7 +1,7 @@
 # T-56 — Event-driven scheduler updates from node feedback
 
 - Owner: Nikita / Codex
-- Status: implementation complete; PR #45 in review (not merged)
+- Status: done; PR #45 merged
 - Branch: feat/T-56-node-feedback, from latest main
 - Decision: 0044, user approved local JSON adapter and shared C# contract.
 
