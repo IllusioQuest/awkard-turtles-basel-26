@@ -98,10 +98,10 @@ All results below are **scenarios**, not forecasts of a real network.
 
 | Type 1 share | B1 missed | B2 missed | B2 moved server-h | B2-reserve moved | LP missed / moved |
 |---:|---:|---:|---:|---:|---|
-| 10 % | 0 % | 0 % | 7,725 | 7,725 | pending |
-| 30 % | 15.69 % | 0 % | 102,754 | 64,230 | pending |
-| 50 % | 25.19 % | 0 % | 205,267 | 161,968 | pending |
-| 70 % | 29.47 % | 0 % | 309,325 | 265,260 | pending |
+| 10 % | 0 % | 0 % | 7,725 | 7,725 | 0 % / 0 |
+| 30 % | 15.69 % | 0 % | 102,754 | 64,230 | 0 % / 49,884 |
+| 50 % | 25.19 % | 0 % | 205,267 | 161,968 | 0 % / 149,009 |
+| 70 % | 29.47 % | 0 % | 309,325 | 265,260 | 0 % / 253,300 |
 
 Coverage is 83.42 % and dumped heat 0 kWh in every run (B2-reserve 83.40 %): Type 1 volume does not
 change how much heat is produced, only which work makes it.
@@ -117,10 +117,10 @@ change how much heat is produced, only which work makes it.
 
 ### D. Network mix (Type 1 share 30 %, φ = 1)
 
-| Network | Sites | B1 missed | B2 missed | B2 moved server-h | Coverage |
-|---|---:|---:|---:|---:|---:|
-| all sites | 33 | 15.69 % | **0 %** | 102,754 | 83.42 % |
-| residential only (no hotels, no pools) | 19 | 15.69 % | **13.80 %** | 63,333 | 63.18 % |
+| Network | Sites | B1 missed | B2 missed | B2 moved server-h | LP missed | LP moved server-h | Coverage |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| all sites | 33 | 15.69 % | **0 %** | 102,754 | 0 % | 49,884 | 83.42 % |
+| residential only (no hotels, no pools) | 19 | 15.69 % | **13.80 %** | 63,333 | 13.07 % | 3,001 | 63.18 % |
 
 ### E. Transfer delay (decision 0030, assumption sweep; Type 1 share 30 %, φ = 1)
 
@@ -158,6 +158,10 @@ Pending (full-year LP runs with σ24 = 0.05 / 0.10 / 0.20, ρ = 0.8, seed 202511
 - **Timing at home is not a substitute** (decision 0029). B1-reserve keeps tank room for the next
   cohort and saves only 0.07 points of missed deadlines, because a daily shortfall returns the next
   day. Combined with moves (B2-reserve) it saves 37 % of the moved server-hours.
+- **The LP moves much less work for the same result.** It misses no more deadlines than B2 and moves
+  51 % fewer server-hours at a 30 % Type 1 share (27 % at 50 %, 18 % at 70 %). In the residential-only
+  network it moves only 3,001 server-hours (B2: 63,333) and misses slightly fewer jobs: moving between
+  houses that are all short of summer heat barely helps, and the LP sees that.
 - **B2 helps coverage a little when filler is scarce** (B: +0.5 to +0.9 points), because moved Type 1
   work runs where heat is needed and filler would otherwise be missing.
 
@@ -165,7 +169,7 @@ Pending (full-year LP runs with σ24 = 0.05 / 0.10 / 0.20, ρ = 0.8, seed 202511
 
 - B1 and B2 reproduce the values of step 2 exactly (83.42 %, 0 kWh, 15.69 % / 0 %, 102,754 h).
 - LP runtime on 33 sites: about 0.22 s per hour in January and 0.38 s per hour in July (Debug build,
-  one core), i.e. roughly 30–60 min per year. No window shortening or clustering was needed.
+  one core); full-year runs took 72–81 min each (Release, four runs in parallel on four cores). No window shortening or clustering was needed.
 - A 72-hour July window (`--start 4704 --hours 72`) showed LP 0 % missed without moves; this was an
   artefact of the empty starting tank and does not hold over a year (decision 0029).
 

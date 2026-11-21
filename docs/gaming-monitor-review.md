@@ -1,5 +1,8 @@
 # Gaming console review and data clarity (T-42)
 
+Historical console guide. T-46 replaces the terminal entry point with a data section in the existing
+admin web dashboard while keeping logic files in place. See [current web monitoring guide](monitoring-web.md).
+
 Implementation ready in [PR #32](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/32), commit 2a4f9b2; code integration pending. Documentation is on main.
 
 ## Review

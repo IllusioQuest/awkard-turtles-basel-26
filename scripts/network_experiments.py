@@ -34,7 +34,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO = "config/network/switzerland-test.json"
 OUT = ROOT / "data" / "derived" / "network" / "experiments"
-BINARY = ROOT / "src" / "DigitalHeat.NetworkRun" / "bin" / "Release" / "net8.0" / "DigitalHeat.NetworkRun"
+# Runs use a private copy of the Release build, so rebuilding the solution during long LP runs cannot
+# replace assemblies under running processes.
+BIN_DIR = ROOT / "results" / "network" / "experiment-bin"
+BINARY = BIN_DIR / "DigitalHeat.NetworkRun"
+RUNS = OUT / "runs"  # one JSON file per finished run; finished runs are skipped on restart
 SEED = 20251121
 RHO = 0.8
 GREEDY = "B1,B1-reserve,B2,B2-reserve"
@@ -66,13 +70,22 @@ def runs(with_lp: bool) -> list[tuple[str, list[str]]]:
 
 
 def run_one(exp: str, args: list[str]) -> list[dict]:
+    name = exp + "__" + "_".join(a.strip("-").replace(",", "+") for a in args) + ".json"
+    done = RUNS / name
+    if done.exists():
+        return json.loads(done.read_text())
     with tempfile.TemporaryDirectory() as tmp:
         summary = Path(tmp) / "summary.jsonl"
         cmd = [str(BINARY), ".", "--scenario", SCENARIO, *args, "--summary-json", str(summary)]
-        subprocess.run(cmd, cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
+        proc = subprocess.run(cmd, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        if proc.returncode != 0:
+            print(f"[FAILED] {exp} {' '.join(args)}: {proc.stderr[-500:]}", flush=True)
+            return []
         rows = [json.loads(line) for line in summary.read_text().splitlines() if line.strip()]
     for row in rows:
         row["experiment"] = exp
+    RUNS.mkdir(parents=True, exist_ok=True)
+    done.write_text(json.dumps(rows))
     print(f"[done] {exp} {' '.join(args)}", flush=True)
     return rows
 
@@ -83,8 +96,8 @@ def main() -> int:
     ap.add_argument("--jobs", type=int, default=1, help="parallel runs (LP runs are single-threaded)")
     a = ap.parse_args()
 
-    subprocess.run(["dotnet", "build", "-c", "Release", "src/DigitalHeat.NetworkRun"], cwd=ROOT, check=True,
-                   stdout=subprocess.DEVNULL)
+    subprocess.run(["dotnet", "publish", "-c", "Release", "src/DigitalHeat.NetworkRun", "-o", str(BIN_DIR)],
+                   cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
                             text=True).stdout.strip()
     todo = runs(a.lp)

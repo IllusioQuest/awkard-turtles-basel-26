@@ -31,3 +31,6 @@ __pycache__/
 
 # Mock map export (regenerate: python scripts/make_network_mock_export.py)
 data/derived/network/*/mock-export/
+
+# Per-run cache of scripts/network_experiments.py (aggregated CSV/JSONL are committed)
+data/derived/network/experiments/runs/
