@@ -6,6 +6,7 @@ internal sealed record RenderPeerConnection(string PeerId,string State,DateTimeO
 
 internal sealed record RenderSessionState(string Id,string Phase,bool Held,RenderArtifact[] Frames,string? Error=null)
 {
+    public RenderArtifact? Video { get; init; }
     public PreparedScene? Scene { get; init; }
     public DateTimeOffset? PreparationStartedUtc { get; init; }
     public DateTimeOffset? PreparationFinishedUtc { get; init; }
@@ -33,6 +34,8 @@ internal sealed class RenderSession
     private DateTimeOffset? peerSnapshotUtc;
     private Task? running;
     private volatile bool stopRequested;
+    private int restartPending;
+    private readonly SemaphoreSlim queuedControls=new(1);
     public RenderSession(RenderConfig cfg,HttpClient http)
     {
         this.cfg=cfg;this.http=http;path=Path.Combine(cfg.StateDirectory,"render-session.json");
@@ -69,6 +72,8 @@ internal sealed class RenderSession
                 var ids=Enumerable.Range(1,state.FrameCount??cfg.Frames).Select(f=>cfg.Id+"."+state.Id+"-"+f.ToString("D3")).ToHashSet(StringComparer.Ordinal);
                 var finished=peers.SelectMany(p=>p.Results).Where(f=>ids.Contains(f.JobId)).OrderBy(f=>f.JobId,StringComparer.Ordinal).ToArray();
                 if(finished.Length!=state.Frames.Length)Update(s=>s with{Frames=finished});
+                var video=peers.SelectMany(p=>p.Results).FirstOrDefault(r=>r.JobId==cfg.Id+"."+state.Id+"-assemble");
+                if(video is not null&&state.Video is null)Update(s=>s with{Video=video});
             }
         }catch(Exception e){pollingError="Waiting for peer; no replacement work dispatched: "+e.Message;}
         finally{poll.Release();}
@@ -78,10 +83,10 @@ internal sealed class RenderSession
     {
         RenderSessionState s;lock(stateGate)s=state;
         var timing=Timing(s,DateTimeOffset.UtcNow);
-        return new{s.Id,s.Phase,s.Held,s.Error,can_start_new=CanStart,configured_peers=cfg.Peers.Count,peer_connection_error=pollingError,
+        return new{s.Id,s.Phase,s.Held,s.Error,restart_pending=Volatile.Read(ref restartPending)!=0,can_start_new=CanStart,configured_peers=cfg.Peers.Count,peer_connection_error=pollingError,
             network=new{origin_peer_id=cfg.Id,configured_peer_ids=cfg.Peers.Keys.ToArray(),planned_gpu_peers=cfg.PlannedGpuPeers,
                 connections,peer_snapshot_utc=peerSnapshotUtc,work_data_stale=pollingError is not null},
-            mode="multiple",frames_per_run=s.FrameCount??cfg.Frames,completed=s.Frames.Length,frames=s.Frames,width=640,height=360,samples=32,
+            mode="multiple",frames_per_run=s.FrameCount??cfg.Frames,completed=s.Frames.Length,frames=s.Frames,video=s.Video,width=640,height=360,samples=32,
             engine=cfg.PreparedSceneMode?"Eevee":"Cycles",device=cfg.PreparedSceneMode?"CPU scene preparation → verified GPU frames":"Capability-gated multi-node frame jobs",
             elapsed_seconds=timing.Elapsed,paused_seconds=timing.Paused,active_seconds=timing.Active,
             preparation=s.Scene,preparation_started_utc=s.PreparationStartedUtc,preparation_finished_utc=s.PreparationFinishedUtc,
@@ -106,9 +111,7 @@ internal sealed class RenderSession
             await RefreshPeers();if(pollingError is not null||peers.Length!=cfg.Peers.Count)throw new IOException("Wait for all configured peers");
             if(peers.Any(p=>p.Attempts.Any(a=>a.Phase!="released")))throw new IOException("An owned peer job is still active; reconcile first");
             if(peers.Select(p=>p.Image).Distinct().Count()!=1||peers.Any(p=>p.Image!=cfg.Image))throw new InvalidDataException("Renderer recipe/image differs between peers");
-            var gpuIds=peers.Where(p=>p.PhysicalGpuId!=null).Select(p=>p.PhysicalGpuId).ToArray();
-            if(peers.Where(p=>p.PhysicalGpuId is not null).GroupBy(p=>p.PhysicalHostId).Any(g=>g.Count()>1&&g.Any(p=>p.FrameBoundaryPause)))throw new InvalidDataException("Native adapter currently supports one GPU peer per physical host; multi-adapter selection is not implemented");
-            if(gpuIds.Distinct().Count()!=gpuIds.Length)throw new InvalidDataException("One physical GPU cannot be advertised in multiple independent domains");
+            RenderGpuLayout.Validate(cfg,peers);
             if(cfg.PreparedSceneMode&&(!peers.Any(p=>p.VerifiedBackends.Contains("EEVEE"))||peers.Any(p=>p.RecipeId is null)||peers.Select(p=>p.RendererBuildHash).Distinct().Count()!=1))
                 throw new InvalidDataException("Prepared-scene mode needs a verified GPU and matching Blender build/recipe");
             if(state.Id!="")NativeRenderRuntime.WriteJson(Path.Combine(cfg.StateDirectory,"render-session-"+state.Id+".json"),state);
@@ -116,9 +119,15 @@ internal sealed class RenderSession
             running=Task.Run(Execute);
         }finally{controls.Release();}
     }
+    public void RequestStart()=>Queue(Start);
     public void RequestHold(bool hold)=>Queue(()=>Hold(hold));
     public void RequestStop()=>Queue(Stop);
-    private void Queue(Func<Task> action)=>_=Task.Run(async()=>{try{await action();}catch(Exception e){Update(s=>s with{Error=e.Message});}});
+    public void RequestRestart()
+    {
+        if(Interlocked.CompareExchange(ref restartPending,1,0)!=0)return;
+        Queue(async()=>{try{await Stop();await Start();}finally{Volatile.Write(ref restartPending,0);}});
+    }
+    private void Queue(Func<Task> action)=>_=Task.Run(async()=>{await queuedControls.WaitAsync();try{await action();}catch(Exception e){Update(s=>s with{Error=e.Message});}finally{queuedControls.Release();}});
     private async Task SetPeersHold(bool hold)
     {
         var replies=await Task.WhenAll(cfg.Peers.Values.Select(async url=>{
@@ -150,7 +159,7 @@ internal sealed class RenderSession
             stopRequested=true;Update(s=>s with{Held=true,Error="Stopping after current frame; keeping results…"});
             await SetPeersHold(true);if(running is {} task)await task;
             string prefix=cfg.Id+"."+state.Id+"-";
-            string[] ids=Enumerable.Range(1,state.FrameCount??cfg.Frames).Select(f=>prefix+f.ToString("D3")).Append(prefix+"prepare").ToArray();
+            string[] ids=Enumerable.Range(1,state.FrameCount??cfg.Frames).Select(f=>prefix+f.ToString("D3")).Append(prefix+"prepare").Append(prefix+"assemble").ToArray();
             foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/cancel",new RenderCancel(ids),RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
             await RefreshPeers();if(pollingError is not null||peers.SelectMany(p=>p.Attempts).Any(a=>ids.Contains(a.Attempt.Request.Id)&&a.Phase!="released"))throw new IOException("Cancellation uncertain; keep held");
             var finished=DateTimeOffset.UtcNow;
@@ -183,6 +192,36 @@ internal sealed class RenderSession
         if(stopRequested)return;
         foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/prepared-scene",state.Scene,RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
     }
+    private async Task Assemble()
+    {
+        Update(s=>s with{Phase="assembling"});
+        string assets=cfg.Native!.AssetsDirectory;var entries=new List<object>();
+        foreach(var frame in state.Frames.OrderBy(f=>f.Metadata.GetProperty("frame").GetInt32())){
+            int index=frame.Metadata.GetProperty("frame").GetInt32();
+            if(index!=entries.Count+1)throw new InvalidDataException("Frame manifest is incomplete or duplicated");
+            var bytes=await http.GetByteArrayAsync(cfg.Peers[frame.PeerId]+"/image/"+frame.JobId);
+            string hash=NativeRenderRuntime.Hash(bytes),file="frame-"+hash+".png";string path=Path.Combine(assets,file);
+            if(!File.Exists(path))await File.WriteAllBytesAsync(path,bytes);
+            entries.Add(new{frame=index,file,sha256=hash});
+        }
+        var manifest=new{recipe_id=state.Scene!.RecipeId,build_hash=state.Scene.BuildHash,scene_sha256=state.Scene.SceneSha256,
+            fps=state.Frames[0].Metadata.GetProperty("fps").GetInt32(),frames=entries};
+        byte[] json=JsonSerializer.SerializeToUtf8Bytes(manifest,RenderNodeHost.Json);string identity=NativeRenderRuntime.Hash(json);
+        await File.WriteAllBytesAsync(Path.Combine(assets,identity+".frames.json"),json);
+        foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/assembly-manifest",new AssemblyManifest(identity),RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
+        string id=state.Id+"-assemble",global=cfg.Id+"."+id;
+        while(!stopRequested){
+            if(state.Held){await Task.Delay(250);continue;}
+            await RefreshPeers();if(pollingError is not null){await Task.Delay(500);continue;}
+            var video=peers.SelectMany(p=>p.Results).FirstOrDefault(r=>r.JobId==global);
+            if(video is not null){Update(s=>s with{Video=video});return;}
+            CheckFailure([global],[]);
+            if(!peers.SelectMany(p=>p.Jobs).Any(j=>j.Request.Id==global)){
+                using var r=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+"/assemble",new AssemblySubmit(id,identity),RenderNodeHost.Json);r.EnsureSuccessStatusCode();
+            }
+            await Task.Delay(500);
+        }
+    }
     private void CheckFailure(string[] ids,RenderArtifact[] done)
     {
         if(peers.Any(p=>p.Error is not null))throw new IOException("Peer error: "+string.Join("; ",peers.Where(p=>p.Error!=null).Select(p=>p.PeerId+": "+p.Error)));
@@ -204,7 +243,7 @@ internal sealed class RenderSession
                 CheckFailure(ids,done);
                 if(cfg.PreparedSceneMode&&done.Any(f=>f.Metadata.GetProperty("scene_sha256").GetString()!=state.Scene!.SceneSha256||f.Metadata.GetProperty("recipe_id").GetString()!=state.Scene.RecipeId||f.Metadata.GetProperty("engine").GetString()!="BLENDER_EEVEE"||f.Metadata.GetProperty("build_hash").GetString()!=state.Scene.BuildHash))throw new IOException("Frame manifest differs from the prepared scene");
                 Update(s=>s with{Frames=done});
-                if(done.Length==cfg.Frames){Update(s=>s with{Phase="complete",FinishedUtc=DateTimeOffset.UtcNow,Held=false});return;}
+                if(done.Length==cfg.Frames){if(cfg.AssembleVideo){await Assemble();if(stopRequested)return;}Update(s=>s with{Phase="complete",FinishedUtc=DateTimeOffset.UtcNow,Held=false});return;}
                 var known=peers.SelectMany(p=>p.Jobs).Select(j=>j.Request.Id).ToHashSet(StringComparer.Ordinal);
                 for(int frame=1;frame<=cfg.Frames;frame++){
                     string id=state.Id+"-"+frame.ToString("D3");if(known.Contains(cfg.Id+"."+id))continue;

@@ -63,6 +63,16 @@ public sealed class NativeRenderRuntimeTests:IDisposable
         var a=Attempt();a=a with{Request=a.Request with{Lifecycle=new(false,false,false)}};
         Assert.Throws<InvalidOperationException>(()=>runtime.Stop(a));
     }
+    [Fact] public void FrameOnlyWorkerCannotPrepareScene()
+    {
+        using var worker=new NativeRenderRuntime(config with{WorkerRole="render"});
+        Assert.Throws<InvalidDataException>(()=>worker.Preflight(Attempt()));
+    }
+    [Fact] public void AssemblyOnlyWorkerCannotPrepareScene()
+    {
+        using var worker=new NativeRenderRuntime(config with{WorkerRole="assemble"});
+        Assert.Throws<InvalidDataException>(()=>worker.Preflight(Attempt()));
+    }
     private (NativeRenderRuntime Runtime,RuntimeAttempt Attempt,NativeOwnership Owned) WarmFrame()
     {
         var warm=new NativeRenderRuntime(config with{Native=config.Native! with{EnableGpu=true,KeepGpuWarm=true}});
