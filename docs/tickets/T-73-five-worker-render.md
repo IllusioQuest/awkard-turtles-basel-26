@@ -1,6 +1,6 @@
 # T-73 — Restart and five-worker render presentation
 
-Owner: Nikita/Codex. Status: in progress. Branch: feat/T-73-five-worker-render.
+Owner: Nikita/Codex. Status: in review; PR #65. Branch: feat/T-73-five-worker-render.
 Depends on PR #64 journal fix. User confirmed three concurrent local GPU workers
 sharing Iris Xe and two CPU workers: scene preparation and final video assembly.
 GPU work weights 1.1/1/.9; increase CPU allowance within laptop budget. Add Restart
@@ -13,3 +13,7 @@ GPU, not three hardware devices. One synthetic 500kWh total is partitioned once
 as 100/100/110/100/90kWh logical quotas, not measured recovered heat. Actual GPU
 percentages are neither set nor fabricated. Verify all roles contribute, complete
 MP4, restart/pause, sustained journal behavior before replacing presentation app.
+
+Implemented and live at localhost:18950/ui. All five roles contributed in a real
+48-frame complete run; 114 tests, pause/restart and MP4 validation pass.
+See docs/jobs/five-worker-renderer.md and sanitized performance evidence.
