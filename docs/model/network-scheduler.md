@@ -122,6 +122,23 @@ change how much heat is produced, only which work makes it.
 | all sites | 33 | 15.69 % | **0 %** | 102,754 | 83.42 % |
 | residential only (no hotels, no pools) | 19 | 15.69 % | **13.80 %** | 63,333 | 63.18 % |
 
+### E. Transfer delay (decision 0030, assumption sweep; Type 1 share 30 %, φ = 1)
+
+"Data staged at arrival": moved work may run elsewhere only from arrival + d (a lower bound on friction).
+
+| d | B2 missed | B2 moved server-h | moved per avoided job | B2-reserve moved | B2-reserve per avoided job |
+|---:|---:|---:|---:|---:|---:|
+| 0 h | 0 % | 102,754 | 1.57 | 64,230 | 0.98 |
+| 1 h | 0 % | 102,771 | 1.57 | 64,230 | 0.98 |
+| 4 h | 0 % | 76,680 | 1.17 | 60,527 | 0.93 |
+| 12 h | 0 % | 61,727 | 0.95 | 58,775 | 0.90 |
+
+"Avoided jobs" = B1's missed jobs minus the strategy's missed jobs (65,352 at every d). Even 12 h of
+delay costs no deadline here, because the year-round sinks have enough free summer capacity to finish
+the excess in the remaining 12 h. B2 even moves less with a delay: without it, its persistence test
+sends work away that would still have finished at home. With d ≥ 24 h (the deadline) no work can move
+and missed deadlines return to B1's level. LP for d = 4 and 12 h: pending.
+
 ### C. Forecast error (LP, Type 1 share 30 %)
 
 Pending (full-year LP runs with σ24 = 0.05 / 0.10 / 0.20, ρ = 0.8, seed 20251121; both are
@@ -155,8 +172,8 @@ Pending (full-year LP runs with σ24 = 0.05 / 0.10 / 0.20, ρ = 0.8, seed 202511
 ### Limits
 
 - Synthetic site locations and sizes; Type 1 volume is a share, not a sourced demand.
-- Moves have no transfer delay or cost yet (`TODO(source)`), so B2 and the LP are optimistic for
-  distant sites.
+- Transfer delay is a uniform assumption sweep counted from arrival (decision 0030), no distance model;
+  transfer cost is not modelled (moved server-hours are reported; CHF needs a sourced data volume, T-14).
 - Persistence estimates (B2, reserves) assume daily cohorts.
 - The LP knows arrived work only; perfect heat foresight unless a forecast error is set.
 

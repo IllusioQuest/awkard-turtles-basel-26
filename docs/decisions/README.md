@@ -42,3 +42,5 @@ later.
 | [0023](0023-intel-dozen-vulkan-experiment.md) | Isolated Mesa Dozen Vulkan build for Intel WSL | proposed; user approved experiment, reviewed with changes |
 
 | [0026](0026-profile-driven-gaming-runtime.md) | Profile-driven C# gaming runtime and retirement of webhosting | proposed; user authorized, reviewed with changes, implemented PR #22; team acceptance pending |
+| [0029](0029-type1-heat-budget-reservation.md) | Reserve heat-led capacity for Type 1 (B1-reserve/B2-reserve control; LP-persist dropped) | accepted as control experiment (T-12) |
+| [0030](0030-transfer-delay.md) | Transfer delay for moved Type 1 work (amends 0025 §3; data staged at arrival) | proposed; reviewed with changes (T-12) |
