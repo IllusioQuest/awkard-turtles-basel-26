@@ -24,6 +24,7 @@ changes an interface, and when it finishes (see `AGENTS.md` §9a).
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none yet; proposes interface changes for T-12 in the decision record | in progress |
 | team lead / Claude (subagent) | `data/T-15-hardware-profiles` | T-15: hardware profiles (CPU server, GPU inference server) in `config/hardware/*.json`, loader + test, `docs/research/hardware.md` | new files only; reference house keeps the case's 1 kW server | in progress |
 | team lead / Claude (subagent) | `docs/T-11-routing-model` | T-11: formal routing optimisation model (`docs/model/routing-optimisation.md`) and decision record; document only, no code | none; decision 0014 proposes `INetworkScheduler`/`NetworkState`/`NetworkDecision` and an allocation-aware queue for T-12 (own ADR there) | draft ready for team review; 3 team questions in model §11 |
+| team lead / Claude (subagent) | `data/T-35-refurbished-hardware` | T-35: refurbished/second-life hardware (lever D): prices, wear model, `config/hardware/*-refurbished.json`, `docs/research/refurbished-hardware.md` | new profile files only; reuses T-15 `HardwareProfile` loader and schema | in progress |
 | flerovium11 | `main` | `docs/todos.md`, `docs/questions.md` | none | ongoing; no names assigned to todos yet |
 
 ## Open coordination
