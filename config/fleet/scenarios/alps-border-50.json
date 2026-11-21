@@ -1,0 +1,50 @@
+{
+  "_note": "T-67 variant, not a scored figure. 50 case reference houses (config/fleet/houses/alps-border-50.json from config/fleet/regions/alps-border-50.json): Interlaken cluster (il), Brig-Goms cluster (br), spread across Switzerland (mid). Visualization variant: job volume x4 on every type (not a sourced volume; at x1 every house stays below 10 % load), as ch-100 uses x10. Constant customer demand (user choice, T-67): elasticity 0 and no reference-price noise, so every Type 2 job is accepted; the load-based price still sets Type 2 income.",
+  "run": {
+    "start_local": "2025-01-01T00:00",
+    "end_local": "2026-01-01T00:00",
+    "mode": "event",
+    "tick_ms": 1000,
+    "seed": 20261121
+  },
+  "houses": {
+    "file": "config/fleet/houses/alps-border-50.json"
+  },
+  "servers": {
+    "policy": "from_file",
+    "hardware_profile": "config/hardware/gpu-inference-l4.json"
+  },
+  "jobTypes": [
+    "config/fleet/job-types/transcription-whisper-large-v3.json",
+    "config/fleet/job-types/llm-inference-apertus-8b.json",
+    "config/fleet/job-types/research-sim-montecarlo.json"
+  ],
+  "demand": {
+    "from_file": null,
+    "volume_scale": {
+      "transcription-whisper-large-v3": 4,
+      "llm-inference-apertus-8b": 4,
+      "research-sim-montecarlo": 4
+    }
+  },
+  "pricing": {
+    "id": "mock-load",
+    "p_min_chf": 0.226,
+    "p_max_chf": 1.2,
+    "gamma": 1,
+    "p_ref_chf": 0.82,
+    "p_ref_noise_sd": 0,
+    "elasticity": 0
+  },
+  "forecast": {
+    "kind": "archived"
+  },
+  "scheduler": {
+    "id": "mesh-heat-first",
+    "chunk_target_s": 3600
+  },
+  "logging": {
+    "house_timeseries": "hourly",
+    "out_dir": "data/derived/fleet"
+  }
+}
