@@ -1,0 +1,323 @@
+{
+  "source_commit": "593fe8b",
+  "method": "Two consecutive actual 48-frame presentation runs, 640x360/32samples/12fps, 3 logical GPU workers on one Iris Xe, CPU prepare+MP4 assembly. Poll real /ui/status. Scene identity verified equal; per-stage timings read from owned artifacts. Not randomized matched trials.",
+  "runs": [
+    {
+      "phase": "complete",
+      "error": null,
+      "completed": 48,
+      "active_seconds": 93.3555137,
+      "preparation_seconds": 2.0330301,
+      "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+      "preparation_metadata": {
+        "blender": "5.3.0",
+        "build_hash": "02f0899d78e3",
+        "completed_utc": "2026-11-21T22:45:11.875426+00:00",
+        "dispatch_to_execute_seconds": 0.577139,
+        "external_assets": "none; packed procedural scene",
+        "ffmpeg_available": true,
+        "fps": 12,
+        "frames": 48,
+        "height": 360,
+        "prepare_seconds": 0.9946863999357447,
+        "prepared_scene_reused": false,
+        "recipe_id": "3a407df8b5ac1cc7ee48de7cc3b37cd00cbe65d9b6e078ad6b6e02b8a8b33bc0",
+        "samples": 32,
+        "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+        "seed": 66,
+        "stage": "prepare",
+        "width": 640,
+        "worker_seconds": 0.9946942999958992
+      },
+      "warm_frames": 45,
+      "frames_by_worker": {
+        "demo-gpu-1": 16,
+        "demo-gpu-2": 16,
+        "demo-gpu-3": 16
+      },
+      "frame_timings": {
+        "scene_verify_seconds": {
+          "sum": 0.6059800995280966,
+          "median": 0.01304915000218898
+        },
+        "scene_load_seconds": {
+          "sum": 0.08310589997563511,
+          "median": 0.0
+        },
+        "frame_setup_seconds": {
+          "sum": 0.1789767004083842,
+          "median": 0.003076949971728027
+        },
+        "render_seconds": {
+          "sum": 229.57158799958415,
+          "median": 3.0867032999522053
+        },
+        "worker_seconds": {
+          "sum": 230.44919299974572,
+          "median": 3.108597549959086
+        },
+        "dispatch_to_execute_seconds": {
+          "sum": 24.205508000000002,
+          "median": 0.0778945
+        }
+      },
+      "video": {
+        "job_id": "demo-cpu-prepare.e9910b5b3576-assemble",
+        "peer_id": "demo-cpu-video",
+        "metadata": {
+          "blender": "5.3.0",
+          "build_hash": "02f0899d78e3",
+          "completed_utc": "2026-11-21T22:46:45.279379+00:00",
+          "device": "CPU video encoding",
+          "dispatch_to_execute_seconds": 0.594323,
+          "encode_seconds": 0.6650696999859065,
+          "encoded_frames": 48,
+          "ffmpeg_available": true,
+          "fps": 12,
+          "frames": 48,
+          "height": 360,
+          "manifest_sha256": "6815bf6702d2595de9ba75707d33ff9a26db4ba8eaa8d6f9e72272616f5dd4d2",
+          "recipe_id": "3a407df8b5ac1cc7ee48de7cc3b37cd00cbe65d9b6e078ad6b6e02b8a8b33bc0",
+          "samples": 32,
+          "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+          "seed": 66,
+          "stage": "assemble",
+          "width": 640,
+          "worker_seconds": 0.8500556000508368
+        }
+      }
+    },
+    {
+      "phase": "complete",
+      "error": null,
+      "completed": 48,
+      "active_seconds": 131.3246429,
+      "preparation_seconds": 1.0102862,
+      "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+      "preparation_metadata": {
+        "blender": "5.3.0",
+        "build_hash": "02f0899d78e3",
+        "completed_utc": "2026-11-21T22:46:52.312971+00:00",
+        "dispatch_to_execute_seconds": 0.558387,
+        "external_assets": "none; packed procedural scene",
+        "ffmpeg_available": true,
+        "fps": 12,
+        "frames": 48,
+        "height": 360,
+        "prepare_seconds": 0.009723499999381602,
+        "prepared_scene_reused": true,
+        "recipe_id": "3a407df8b5ac1cc7ee48de7cc3b37cd00cbe65d9b6e078ad6b6e02b8a8b33bc0",
+        "samples": 32,
+        "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+        "seed": 66,
+        "stage": "prepare",
+        "width": 640,
+        "worker_seconds": 0.009728500037454069
+      },
+      "warm_frames": 48,
+      "frames_by_worker": {
+        "demo-gpu-1": 16,
+        "demo-gpu-2": 16,
+        "demo-gpu-3": 16
+      },
+      "frame_timings": {
+        "scene_verify_seconds": {
+          "sum": 0.540887999930419,
+          "median": 0.011679849994834512
+        },
+        "scene_load_seconds": {
+          "sum": 0,
+          "median": 0.0
+        },
+        "frame_setup_seconds": {
+          "sum": 0.13173349970020354,
+          "median": 0.0025223000557161868
+        },
+        "render_seconds": {
+          "sum": 341.9091635000659,
+          "median": 2.6831388500286266
+        },
+        "worker_seconds": {
+          "sum": 342.5898711992195,
+          "median": 2.6975700500188395
+        },
+        "dispatch_to_execute_seconds": {
+          "sum": 23.004232000000002,
+          "median": 0.0632915
+        }
+      },
+      "video": {
+        "job_id": "demo-cpu-prepare.be1bee6d207a-assemble",
+        "peer_id": "demo-cpu-video",
+        "metadata": {
+          "blender": "5.3.0",
+          "build_hash": "02f0899d78e3",
+          "completed_utc": "2026-11-21T22:49:03.803124+00:00",
+          "device": "CPU video encoding",
+          "dispatch_to_execute_seconds": 0.779036,
+          "encode_seconds": 0.619070699904114,
+          "encoded_frames": 48,
+          "ffmpeg_available": true,
+          "fps": 12,
+          "frames": 48,
+          "height": 360,
+          "manifest_sha256": "c0869aa03f68c1db51f3e4d23984c19bceec3fa7d4d3c823d604df85bf6e859f",
+          "recipe_id": "3a407df8b5ac1cc7ee48de7cc3b37cd00cbe65d9b6e078ad6b6e02b8a8b33bc0",
+          "samples": 32,
+          "scene_sha256": "c078015c6a179bd484297bb5e86aa77ad3375840f6bc38366d728a2c9a728d9f",
+          "seed": 66,
+          "stage": "assemble",
+          "width": 640,
+          "worker_seconds": 0.788347200024873
+        }
+      }
+    }
+  ],
+  "initial_profiled_active_seconds": 80.7852944,
+  "previous_unmatched_active_seconds": 133.7016684,
+  "test_count": 117,
+  "concurrency_result": "Completed 6-frame ordered samples1,2,2,1: medians9.9772s for1 and7.8012s for2. Three-worker warmup hit60s timeout; cancelled owned diagnostic jobs. Incomplete3-worker sample cannot support a precise speedup ratio. User explicitly chose to retain3 simultaneous renders after seeing the findings.",
+  "timing_caveats": "Render call includes shaders and PNG writes. Worker sums overlap and must not be summed into wall time. Dispatch timing is local wall-clock launch/activation latency, not scheduler queue time. CPU cache speedup is not an overall GPU speedup.",
+  "concurrency_reports": [
+    {
+      "method": "Existing heat-first MeshPeer, benchmark-only pinned worker subset, identical prepared scene and frame range. Includes normal admission and dispatch. Dispatch wall clock is not scheduler microbenchmark latency.",
+      "order": [
+        3,
+        3
+      ],
+      "frames_per_sample": 6,
+      "job_ids": [
+        "demo-cpu-prepare.bench-1efd812c9e-warmup-0",
+        "demo-cpu-prepare.bench-1efd812c9e-warmup-1",
+        "demo-cpu-prepare.bench-1efd812c9e-warmup-2"
+      ],
+      "samples": [],
+      "limitations": "One Iris Xe. Warm scene reuse recorded per sample; first-frame compilation included. No default concurrency change.",
+      "partial_sample": {
+        "label": "warmup",
+        "gpu_workers": 3,
+        "completed": 0,
+        "job_ids": [
+          "demo-cpu-prepare.bench-1efd812c9e-warmup-0",
+          "demo-cpu-prepare.bench-1efd812c9e-warmup-1",
+          "demo-cpu-prepare.bench-1efd812c9e-warmup-2"
+        ]
+      },
+      "status": "failed",
+      "error": "Benchmark jobs timed out; retained IDs: ['demo-cpu-prepare.bench-1efd812c9e-warmup-0', 'demo-cpu-prepare.bench-1efd812c9e-warmup-1', 'demo-cpu-prepare.bench-1efd812c9e-warmup-2']",
+      "cancel_error": "timed out"
+    },
+    {
+      "method": "Existing heat-first MeshPeer, benchmark-only pinned worker subset, identical prepared scene and frame range. Includes normal admission and dispatch. Dispatch wall clock is not scheduler microbenchmark latency.",
+      "order": [
+        1,
+        2,
+        2,
+        1
+      ],
+      "frames_per_sample": 6,
+      "job_ids": [
+        "demo-cpu-prepare.bench-2e794bf6dc-warmup-0",
+        "demo-cpu-prepare.bench-2e794bf6dc-warmup-1",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-0",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-1",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-2",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-3",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-4",
+        "demo-cpu-prepare.bench-2e794bf6dc-0-5",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-0",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-1",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-2",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-3",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-4",
+        "demo-cpu-prepare.bench-2e794bf6dc-1-5",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-0",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-1",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-2",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-3",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-4",
+        "demo-cpu-prepare.bench-2e794bf6dc-2-5",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-0",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-1",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-2",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-3",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-4",
+        "demo-cpu-prepare.bench-2e794bf6dc-3-5"
+      ],
+      "samples": [
+        {
+          "gpu_workers": 1,
+          "frames": 6,
+          "wall_seconds": 11.558785500004888,
+          "render_seconds_sum": 7.342334399931133,
+          "warm_scene_reused_frames": 6,
+          "frames_by_worker": {
+            "demo-gpu-1": 6
+          }
+        },
+        {
+          "gpu_workers": 2,
+          "frames": 6,
+          "wall_seconds": 7.067425900022499,
+          "render_seconds_sum": 8.472965799970552,
+          "warm_scene_reused_frames": 6,
+          "frames_by_worker": {
+            "demo-gpu-1": 3,
+            "demo-gpu-2": 3
+          }
+        },
+        {
+          "gpu_workers": 2,
+          "frames": 6,
+          "wall_seconds": 8.535003999946639,
+          "render_seconds_sum": 9.1728631000733,
+          "warm_scene_reused_frames": 6,
+          "frames_by_worker": {
+            "demo-gpu-1": 3,
+            "demo-gpu-2": 3
+          }
+        },
+        {
+          "gpu_workers": 1,
+          "frames": 6,
+          "wall_seconds": 8.395570199936628,
+          "render_seconds_sum": 6.975251899915747,
+          "warm_scene_reused_frames": 6,
+          "frames_by_worker": {
+            "demo-gpu-1": 6
+          }
+        }
+      ],
+      "limitations": "One Iris Xe. Warm scene reuse recorded per sample; first-frame compilation included. No default concurrency change.",
+      "partial_sample": {
+        "label": "3",
+        "gpu_workers": 1,
+        "completed": 5,
+        "job_ids": [
+          "demo-cpu-prepare.bench-2e794bf6dc-3-0",
+          "demo-cpu-prepare.bench-2e794bf6dc-3-1",
+          "demo-cpu-prepare.bench-2e794bf6dc-3-2",
+          "demo-cpu-prepare.bench-2e794bf6dc-3-3",
+          "demo-cpu-prepare.bench-2e794bf6dc-3-4",
+          "demo-cpu-prepare.bench-2e794bf6dc-3-5"
+        ]
+      },
+      "warmup": {
+        "gpu_workers": 2,
+        "frames": 2,
+        "wall_seconds": 9.586492499918677,
+        "render_seconds_sum": 18.46748850005679,
+        "warm_scene_reused_frames": 2,
+        "frames_by_worker": {
+          "demo-gpu-1": 1,
+          "demo-gpu-2": 1
+        }
+      },
+      "median_wall_seconds_by_concurrency": {
+        "1": 9.977177849970758,
+        "2": 7.801214949984569
+      },
+      "status": "complete"
+    }
+  ]
+}

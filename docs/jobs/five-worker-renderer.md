@@ -66,3 +66,7 @@ both the graph and cards, separately from activity-state indicators.
 Prior complete output retained when renderer hosts were restarted. Minecraft
 was not changed. Browser visual access is unavailable; live HTML/JavaScript
 and real pipeline validation are the available checks.
+
+T-77 runtime profiling, verified scene reuse and current measurements: see
+[render-runtime.md](render-runtime.md). CPU scene reuse is enabled in the lab;
+all five roles and GPU budgets remain unchanged.
