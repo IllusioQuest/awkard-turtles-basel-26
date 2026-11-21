@@ -15,6 +15,8 @@
 | T-37 | Profitability inputs: R1 power, R2 purchase cost, R3 household capacity (Basel-Stadt → CH), R4 compute demand, R5 trends to 2030 | 1 + 2 | Ennio / Claude subagents (first version, 2026-11-21) | `power-efficiency.md`, `purchase-cost.md`, `household-capacity.md`, `demand.md` (R4, merged with the job and filler demand notes), `trends-2030.md`, synthesis [`profitability-inputs.md`](profitability-inputs.md); one CSV each in `data/raw/market/` |
 | T-51 | Time-dependent demand and prices for the three job types (8B LLM batch inference, Whisper transcription, research GPU/CPU): Azure LLM 2024, BurstGPT, Alibaba GPU 2020 shapes, GPU price history, Swiss sovereign LLM/STT and academic HPC prices | 2 + 3 | Claude subagent (first version, 2026-11-21) | [`compute-demand-traces.md`](compute-demand-traces.md), `data/raw/demand-traces/`, `data/derived/demand/`, rows appended to `ai-services.csv`, `compute-prices.csv`, `compute-demand.csv` |
 
+Type 2 dynamic pricing (competitor prices CSCS/SCITAS/spot/Salad, cloud price elasticity, spot price variation): [`compute-price-elasticity.md`](compute-price-elasticity.md) (T-52).
+
 Ideas (service brainstorm and current main plan: audio to text, document AI; residential profit ideas): [`ideas.md`](ideas.md). Demand (sourced transcription scenario, compute demand to 2030, filler marketplaces, fill rate and price): [`demand.md`](demand.md); it feeds WP1 (income) and T-37 R4.
 
 Not planned yet (later or on request): competitors in heat-from-compute (Qarnot, Heata, Deep Green,

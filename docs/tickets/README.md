@@ -86,3 +86,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-49](T-49-admission-performance.md) | Indexed admission and safe copy optimization | Nikita / Codex | PR #38 in review; depends on #37; identical-probe evidence published |
 | [T-50](T-50-docker-observation-performance.md) | Faster local Docker observations | Nikita / Codex | in progress; depends on PR #35; ADR 0039 |
 | [T-51](T-51-swiss-grid-data.md) | Data for the Swiss-wide simulation: weather grid + forecasts, buildings and heat demand, ElCom per municipality, compute demand and prices | Ennio / Claude | in review |
+| [T-52](T-52-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | spec agreed; build next |
