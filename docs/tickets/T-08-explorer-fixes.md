@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Prototype
 - **Depends on:** –
-- **Suggested owner:** Claude (team lead's session)  ·  **Owner:** Codex  ·  **Status:** in progress
+- **Suggested owner:** Claude (team lead's session)  ·  **Owner:** Codex  ·  **Status:** in review (PR #43)
 
 ## Goal
 
