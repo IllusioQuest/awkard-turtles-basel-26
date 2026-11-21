@@ -4,5 +4,5 @@ COPY landscape.py /opt/render/landscape.py
 RUN mkdir /work && chown 65534:65534 /work
 USER 65534:65534
 VOLUME ["/work"]
-ENTRYPOINT ["blender","--background","--threads","1","--python","/opt/render/landscape.py","--"]
+ENTRYPOINT ["blender","--background","--threads","1","--python-exit-code","1","--python","/opt/render/landscape.py","--"]
 

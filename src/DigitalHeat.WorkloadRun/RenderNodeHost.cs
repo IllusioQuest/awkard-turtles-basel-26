@@ -50,20 +50,39 @@ internal static class RenderNodeHost
         string enginePath=Path.Combine(cfg.StateDirectory,"engine-id");
         if(File.Exists(enginePath)&&File.ReadAllText(enginePath)!=engine)throw new InvalidDataException("Engine changed; inspect before recovery");
         File.WriteAllText(enginePath,engine);
-        // This first portable image supports CPU. GPU is never advertised from OpenGL capability.
-        string probe=docker.Run(["run","--rm","--network","none",cfg.Image,"--probe"]);
+        // Enumerate with the SAME bindings used for frame execution. A host OpenGL device is
+        // not proof of Cycles compute support; the selected backend must render successfully.
+        List<string> ProbeArguments()
+        {
+            var args=new List<string>{"run","--rm","--network","none"};
+            if(cfg.Gpu is {} binding){
+                if(binding.NvidiaDeviceId is {} nvidia)args.AddRange(["--gpus","device="+nvidia]);
+                foreach(var d in binding.LinuxDevices)args.AddRange(["--device",d]);
+                foreach(var bind in binding.ReadOnlyBinds)args.AddRange(["--volume",bind+":ro"]);
+            }
+            args.Add(cfg.Image);
+            return args;
+        }
+        var probeArgs=ProbeArguments();probeArgs.Add("--probe");
+        string probe=docker.Run(probeArgs);
         string device=probe.Split('\n').FirstOrDefault(l=>l.StartsWith("RENDER_DEVICES=")) ?? throw new InvalidDataException("No Blender device report");
         File.WriteAllText(Path.Combine(cfg.StateDirectory,"devices.json"),device["RENDER_DEVICES=".Length..]);
+        using var report=JsonDocument.Parse(device["RENDER_DEVICES=".Length..]);
+        string compiled=report.RootElement.TryGetProperty("compiled_backends",out var compiledElement)
+            ?string.Join(", ",compiledElement.EnumerateArray().Select(x=>x.GetString())):"not reported by image";
         string? gpuBackend=null;
-        if(cfg.Gpu is {} gpu && cfg.GpuBackend is {} backend){
+        string gpuDiagnostic=$"GPU binding/backend not configured. Image Cycles backends: {compiled}.";
+        if(cfg.Gpu is not null && cfg.GpuBackend is {} backend){
             try{
-                var args=new List<string>{"run","--rm","--network","none"};
-                if(gpu.NvidiaDeviceId is {} nvidia)args.AddRange(["--gpus","device="+nvidia]);
-                foreach(var d in gpu.LinuxDevices)args.AddRange(["--device",d]);
-                foreach(var b in gpu.ReadOnlyBinds)args.AddRange(["--volume",b+":ro"]);
-                args.AddRange([cfg.Image,"--verify-gpu",backend]);
-                if(docker.Run(args).Contains("RENDER_GPU_VERIFIED="+backend,StringComparison.Ordinal))gpuBackend=backend;
-            }catch(Exception e){Console.Error.WriteLine("GPU probe failed; explicit CPU fallback: "+e.Message);}
+                var args=ProbeArguments();args.AddRange(["--verify-gpu",backend]);
+                string verification=docker.Run(args);
+                if(!verification.Contains("RENDER_GPU_VERIFIED="+backend,StringComparison.Ordinal))
+                    throw new InvalidOperationException("GPU probe did not confirm a completed render");
+                gpuBackend=backend;gpuDiagnostic=backend+" passed an actual Cycles render.";
+            }catch(Exception e){
+                gpuDiagnostic=$"{backend} verification failed: {e.Message}. Image Cycles backends: {compiled}.";
+                Console.Error.WriteLine(gpuDiagnostic);
+            }
         }
         string output=Path.Combine(cfg.StateDirectory,"frames");Directory.CreateDirectory(output);
         var runtime=new ArtifactRuntime(docker,output,cfg.Id);
@@ -92,7 +111,7 @@ internal static class RenderNodeHost
         peer.SetHold(true);
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
         RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
-            gpuBackend is null?"CPU fallback (no verified Cycles GPU)":gpuBackend+" verified GPU; CPU available",error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
+            gpuBackend is null?"CPU fallback: "+gpuDiagnostic:gpuBackend+" verified GPU; CPU available",error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
             {VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
         var published=CaptureStatus();
         RenderPeerStatus Status()=>Volatile.Read(ref published);

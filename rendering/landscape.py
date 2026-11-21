@@ -2,27 +2,30 @@ import bpy, math, random, sys, json, time, os
 from mathutils import Vector
 args=sys.argv[sys.argv.index('--')+1:]
 random.seed(66)
-def devices():
+def device_report():
     prefs=bpy.context.preferences.addons['cycles'].preferences
-    found=[]
-    for backend in ('OPTIX','CUDA','HIP','ONEAPI'):
+    supported=[item[0] for item in prefs.get_device_types(bpy.context) if item[0]!='NONE']
+    found=[]; errors={}
+    for backend in supported:
         try:
             prefs.compute_device_type=backend
             prefs.get_devices()
             for d in prefs.devices:
-                if d.type!='CPU': found.append({'name':d.name,'backend':backend,'id':d.id})
-        except Exception: pass
-    return found
+                if d.type==backend: found.append({'name':d.name,'backend':backend,'id':d.id})
+        except Exception as error: errors[backend]=str(error)
+    return {'blender':bpy.app.version_string,'compiled_backends':supported,
+            'gpus':found,'backend_errors':errors,'cpu':True}
+
 if '--probe' in args:
-    print('RENDER_DEVICES='+json.dumps({'blender':bpy.app.version_string,'gpus':devices(),'cpu':True}))
+    print('RENDER_DEVICES='+json.dumps(device_report()))
     sys.exit(0)
 if '--verify-gpu' in args:
     backend=args[1]
     prefs=bpy.context.preferences.addons['cycles'].preferences
     prefs.compute_device_type=backend;prefs.get_devices()
-    gpu=[d for d in prefs.devices if d.type!='CPU']
+    gpu=[d for d in prefs.devices if d.type==backend]
     if not gpu:raise RuntimeError('No compatible GPU')
-    for d in prefs.devices:d.use=d.type!='CPU'
+    for d in prefs.devices:d.use=d.type==backend
     s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.device='GPU';s.cycles.samples=1;s.cycles.use_denoising=False
     s.render.resolution_x=8;s.render.resolution_y=8;s.render.resolution_percentage=100
     bpy.ops.render.render()
@@ -38,9 +41,9 @@ scene.render.image_settings.file_format='PNG';scene.render.fps=12
 used='CPU';device='CPU fallback'
 if backend!='CPU':
     prefs=bpy.context.preferences.addons['cycles'].preferences;prefs.compute_device_type=backend;prefs.get_devices()
-    gpu=[d for d in prefs.devices if d.type!='CPU']
+    gpu=[d for d in prefs.devices if d.type==backend]
     if not gpu:raise RuntimeError('Requested GPU unavailable; do not silently change comparison devices')
-    for d in prefs.devices:d.use=d.type!='CPU'
+    for d in prefs.devices:d.use=d.type==backend
     scene.cycles.device='GPU';used=backend;device=', '.join(d.name for d in gpu)
 else:scene.cycles.device='CPU'
 def mat(name,color,rough=.7,metal=0):
