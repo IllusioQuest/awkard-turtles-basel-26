@@ -4,6 +4,8 @@
 Usage:
     python3 scripts/fetch_data.py           # download all sources, then validate
     python3 scripts/fetch_data.py --check   # validate the files already in data/raw/
+    python3 scripts/fetch_data.py --prices  # new Azure price snapshot + derived computing price
+                                            # (scripts/fetch_prices.py, ticket T-28)
 
 Standard library only, so it runs on any machine with Python 3.9+.
 Sources, parameters and expected values are defined in SOURCES / EXPECTED below
@@ -22,6 +24,8 @@ import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+
+import fetch_prices
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RAW = REPO_ROOT / "data" / "raw"
@@ -167,13 +171,19 @@ def check_elcom() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--check", action="store_true", help="only validate existing files, do not download")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--check", action="store_true", help="only validate existing files, do not download")
+    mode.add_argument("--prices", action="store_true",
+                      help="only fetch a new Azure price snapshot and derive the computing price")
     args = parser.parse_args()
 
+    if args.prices:
+        fetch_prices.refresh()
+        return 0 if fetch_prices.check_derived() else 1
     if not args.check:
         fetch_open_meteo()
         fetch_elcom()
-    ok = check_open_meteo() & check_elcom()
+    ok = check_open_meteo() & check_elcom() & fetch_prices.check_derived()
     official = sorted((RAW / "official").glob("*.csv"))
     if official:
         print(f"[info]  official profile present: {[p.name for p in official]} "

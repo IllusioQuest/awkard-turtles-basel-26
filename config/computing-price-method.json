@@ -1,0 +1,27 @@
+{
+  "description": "Parameters for deriving the computing price per 1 kW server-hour from an Azure Retail Prices snapshot (ticket T-28). Method: docs/research/computing-price.md §2 (mapping), §3 A1/A2 (Swiss on-demand/spot per server-hour) and C1 (spot x home-host ratio). Read by scripts/fetch_prices.py. Server power comes from config/reference-house.json (ServerElectricKw), not from here.",
+  "AzureRetailPricesUrl": { "value": "https://prices.azure.com/api/retail/prices", "unit": "URL", "source": "https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices (public, no login), accessed 2026-11-21" },
+  "AzureRegion": { "value": "switzerlandnorth", "unit": "armRegionName", "source": "docs/research/computing-price.md §3 A2: Azure Switzerland North spot prices" },
+  "AzureCurrency": { "value": "USD", "unit": "ISO 4217", "source": "API default currency; converted with UsdToChf below as in WP1 (data/raw/market/compute-prices.csv)" },
+  "Instances": {
+    "value": [
+      { "armSkuName": "Standard_D32as_v5", "vcpu": 32, "ram_gb": 128, "source": "data/raw/market/compute-prices.csv row cp-cpu-azure-d32as-v5-chn-od (32 vCPU, 128 GiB, AMD), accessed 2026-11-20" },
+      { "armSkuName": "Standard_D32s_v5", "vcpu": 32, "ram_gb": 128, "source": "data/raw/market/compute-prices.csv row cp-cpu-azure-d32s-v5-chn-od (32 vCPU, 128 GiB, Intel), accessed 2026-11-20" }
+    ],
+    "unit": "Azure VM sizes with vCPU count and RAM in GB",
+    "source": "docs/research/computing-price.md §2-§3 A2: the 32-vCPU Azure sizes used for the 1 kW mapping (GiB used as GB, as in that note)"
+  },
+  "WattsPerVcpuAtFullLoad": { "value": 3.74, "unit": "W/vCPU", "source": "Cloud Carbon Footprint methodology, Appendix I, Azure max W per vCPU, https://github.com/cloud-carbon-footprint/cloud-carbon-footprint/blob/e48c659f6dafc8b783e570053024f28b88aafc79/microsite/docs/Methodology.md (accessed 2026-11-21), as used in docs/research/computing-price.md §2" },
+  "WattsPerGbMemory": { "value": 0.392, "unit": "W/GB", "source": "same Cloud Carbon Footprint methodology, memory coefficient, as used in docs/research/computing-price.md §2" },
+  "WattsPerKw": { "value": 1000, "unit": "W/kW", "source": "SI unit definition" },
+  "UsdToChf": { "value": 0.8402, "unit": "CHF/USD", "source": "docs/research/ai-services.md 'Exchange rate': ECB reference rate 2026-11-17 cross rate 0.9233 / 1.0989 (confidence medium)" },
+  "HomeHostRatioPairs": {
+    "value": [
+      { "community_id": "cp-mkt-runpod-4090-community", "datacentre_id": "cp-mkt-runpod-4090-secure" },
+      { "community_id": "cp-mkt-runpod-l4-community", "datacentre_id": "cp-mkt-runpod-l4-secure" }
+    ],
+    "unit": "row ids in data/raw/market/compute-prices.csv; ratio = community value / datacentre value, the lowest ratio is used",
+    "source": "docs/research/computing-price.md §3 C1/C2: community/datacentre price ratio from RunPod (lowest ratio, RTX 4090, 0.38); only pairs with both prices as CSV rows are listed (GPU evidence applied to CPU: assumption)"
+  },
+  "AdoptedComputePriceChfPerServerHour": { "value": 0.66, "unit": "CHF/server-hour", "source": "docs/research/computing-price.md: team decision 2026-11-21 (anchor A3, Hetzner dedicated server; no public price API, so not updated automatically). Used here only for comparison." }
+}
