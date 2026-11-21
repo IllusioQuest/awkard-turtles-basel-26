@@ -2,7 +2,7 @@
 
 - **Tier:** 1 Draft  ·  **Area:** Core
 - **Depends on:** T-01
-- **Suggested owner:** Codex  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Codex  ·  **Status:** in progress (T-01 input pending)
 
 ## Goal
 
