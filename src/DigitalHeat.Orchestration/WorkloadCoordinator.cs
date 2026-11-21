@@ -496,7 +496,7 @@ public sealed class WorkloadCoordinator : IDisposable
         string temporary = journalPath + ".tmp";
         using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
         { stream.Write(bytes); stream.Flush(flushToDisk: true); }
-        File.Move(temporary, journalPath, overwrite: true);
+        JournalReplace.Move(temporary, journalPath);
     }
     public void Dispose() { lock (gate) { disposed = true; reconciled = false; fleetLock.Dispose(); } }
 }
