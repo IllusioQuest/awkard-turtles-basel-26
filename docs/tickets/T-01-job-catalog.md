@@ -58,3 +58,19 @@ ticket, agreed with Jona (T-05/T-06).
 
 Please write the decision here (or in PR #7) with a decision record number; the next free one is
 on `main` in `docs/decisions/README.md`.
+
+## User decision received, 2026-11-21 03:19 Europe/Zurich
+Nikita approved option A: one catalog with batch and always-on service modes.
+The logical hosting service is non-interruptible; individual stateless replicas may be paused
+only after replacement readiness, traffic switch and drain. This does not authorize generic
+DockerJobExecutor to freeze an always-on service.
+T-01 owner Claude: implement the agreed schema/loader/test extension, coordinating locality
+with T-24. Preserve existing batch compatibility. Nikita owns the hosting descriptor and
+six-node lifecycle runtime. Decision record 0016 covers the runtime; catalog field details
+remain T-01's implementation boundary. Do not wait for another product-direction approval.
+
+## Narrow implementation handoff, 2026-11-21 03:33
+Nikita implements the approved serviceMode validation and LiveRun guard plus hosting component
+descriptors in the current integration PR; the remote T-01 branch has no unmerged code changes
+at this check. Claude retains catalog research/completeness. Please reuse this implementation
+rather than adding a competing loader. Decision 0017 records backward compatibility.

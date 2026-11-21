@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Model / paper
 - **Depends on:** T-09, T-10
-- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** in progress
+- **Suggested owner:** team + Claude (needs discussion)  ·  **Owner:** Team lead / Claude (subagent)  ·  **Status:** draft ready for team review (PR, decision 0014)
 
 ## Goal
 
@@ -10,11 +10,18 @@ Write down the 'highly complex optimisation problem' from the whiteboard precise
 
 ## Tasks
 
-- [ ] Decision variables: which job (part) runs on which server/site in which hour, at which load.
-- [ ] Objective: minimise electricity cost − value of heat that replaces heating cost (oil / gas / heat pump, per site) + penalties for dumped heat and missed deadlines; or maximise system surplus.
-- [ ] Constraints: heat demand per site incl. forecast, tank limits, server capacity / utilisation, delay and distance vs. deadline, data eligibility, splittability of jobs (work units).
-- [ ] Choose solution approaches: greedy baselines, rolling-horizon optimisation (LP/MILP, e.g. OR-Tools / Google.OrTools for .NET), maybe a heuristic for large networks.
-- [ ] Write `docs/model/routing-optimisation.md` (math + plain words + small worked example) and a decision record; run the fresh-context review.
+- [x] Decision variables: which job (part) runs on which server/site in which hour, at which load.
+- [x] Objective: minimise electricity cost − value of heat that replaces heating cost (oil / gas / heat pump, per site) + penalties for dumped heat and missed deadlines; or maximise system surplus.
+- [x] Constraints: heat demand per site incl. forecast, tank limits, server capacity / utilisation, delay and distance vs. deadline, data eligibility, splittability of jobs (work units).
+- [x] Choose solution approaches: greedy baselines, rolling-horizon optimisation (LP/MILP, e.g. OR-Tools / Google.OrTools for .NET), maybe a heuristic for large networks.
+- [x] Write `docs/model/routing-optimisation.md` (math + plain words + small worked example) and a decision record; run the fresh-context review.
+
+## Result (2026-11-21)
+
+- Model: [`docs/model/routing-optimisation.md`](../model/routing-optimisation.md); decision record
+  [0014](../decisions/0014-routing-optimisation-model.md) (proposed, fresh-context review: go with changes, applied).
+- Open for the team (model §11): objective mode (economic vs. heat-led), premium SLA / penalty,
+  filler availability and price.
 
 ## Done when
 

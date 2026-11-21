@@ -115,3 +115,13 @@ location. For internet/monitoring services, processing geography is recorded onl
 where the provider states it; Swiss retail availability alone is not evidence of
 Swiss-only processing. Obtain installation quotations and contract terms before
 using these observations as a project budget.
+
+## T-15 hardware profiles — first version
+
+Collected by Claude (team lead's subagent, ticket T-15) on 2026-11-21 into `hardware.csv`, same
+schema as the other files. Purpose: power, card prices and transcription throughput for the
+hardware profiles in `config/hardware/` (see `docs/research/hardware.md`). Several hosts
+(bechtle.com, e2enetworks.com, huggingface.co) were blocked in our session, so those rows rest on
+search-result snippets and are marked `low`; re-open the pages before quoting them. Throughput rows
+are third-party benchmarks with other models than our own measurement (`whisper.cpp base`, branch
+`feat/T-02-transcription-job`), so compare quality as well as speed.

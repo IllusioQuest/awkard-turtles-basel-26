@@ -7,6 +7,12 @@
 
 ## Current main plan (may change)
 
+> **Update 2026-11-21 (decision 0018, proposed by Ennio):** two job types. **Type 1** = mainly
+> transcription and a batch LLM service (T-33), OCR later; it earns the margin but fills only a tiny
+> share of a house's capacity (T-02, `job-demand.md`). **Type 2** = batch compute filler (Monte Carlo,
+> simulations, research computing) sold through our own broker at a heat-led price; it makes the heat.
+> The text below describes Type 1.
+
 **Confidential batch AI for Swiss customers with sensitive data:**
 
 - **Audio to text** (transcription, incl. Swiss German dialects): meetings, dictations, hearings,

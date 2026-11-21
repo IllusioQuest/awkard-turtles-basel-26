@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DigitalHeat hardware profile (T-15)",
+  "description": "Hardware variant normalised to one case server (1 kW electric load). Loaded by DigitalHeat.Core.HardwareProfile, which also checks the units and that derived values match their parts. A value may be null only when its source starts with TODO(source).",
+  "type": "object",
+  "$defs": {
+    "value": {
+      "type": "object",
+      "required": ["value", "unit", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": ["number", "null"], "minimum": 0 },
+        "unit": { "type": "string" },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    },
+    "v": { "$ref": "#/$defs/value" }
+  },
+  "required": ["Id", "Label", "Status", "Description", "TranscriptionModel",
+    "UnitsPerServer", "UnitElectricKw", "UnitPurchasePriceChf", "HostElectricKw", "HostPurchasePriceChf",
+    "ServerElectricKw", "IdleElectricKw", "HeatRecoveryShare", "PurchasePriceChfPerServer", "LifetimeYears",
+    "OpsChfPerServerYear", "TranscriptionAudioHoursPerServerHour", "WebhostingSitesPerServer",
+    "SpotPriceChfPerServerHour", "OnDemandPriceChfPerServerHour", "HomeHostPriceChfPerServerHour"],
+  "properties": {
+    "Id": { "type": "string" },
+    "Label": { "type": "string" },
+    "Status": { "type": "string", "pattern": "^variant" },
+    "Description": { "type": "string" },
+    "TranscriptionModel": { "type": "string" },
+    "UnitsPerServer": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "units/server" } } },
+    "UnitElectricKw": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "kW/unit" } } },
+    "UnitPurchasePriceChf": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/unit" } } },
+    "HostElectricKw": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "kW/server" } } },
+    "HostPurchasePriceChf": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server" } } },
+    "ServerElectricKw": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "kW/server" } } },
+    "IdleElectricKw": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "kW/server" } } },
+    "HeatRecoveryShare": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "fraction" } } },
+    "PurchasePriceChfPerServer": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server" } } },
+    "LifetimeYears": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "years" } } },
+    "OpsChfPerServerYear": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-year" } } },
+    "TranscriptionAudioHoursPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "audio hours/server-hour" } } },
+    "WebhostingSitesPerServer": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "sites/server" } } },
+    "SpotPriceChfPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-hour" } } },
+    "OnDemandPriceChfPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-hour" } } },
+    "HomeHostPriceChfPerServerHour": { "$ref": "#/$defs/v", "properties": { "unit": { "const": "CHF/server-hour" } } }
+  }
+}
