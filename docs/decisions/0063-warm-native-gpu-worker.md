@@ -1,6 +1,6 @@
-# 0062 — Reuse one owned native Blender GPU process across frame jobs
+# 0063 — Reuse one owned native Blender GPU process across frame jobs
 
-Status: proposed. T-70, Nikita/Codex. User chose to speed up the existing renderer
+Status: proposed. T-71, Nikita/Codex. User chose to speed up the existing renderer
 before adding logical workers. The two-frame probe measured 8.257s first render,
 1.015s second in the same process at unchanged 640x360/32 samples. Diagnostic,
 not a full-animation benchmark or SLA. Existing run/results must be preserved.
@@ -35,4 +35,8 @@ Prepare/frame entry points share code so cold and warm renders cannot drift.
 No recovered heat, extra GPU, parallelism or full-animation speedup claim.
 
 ## Review
-Pending fresh limited-context review.
+Fresh limited-context verdict: go with changes. Require a shared cross-process
+file-lock gate for dispatch, idle retirement and stop; fence stop by active
+activation as well as PID identity; accept activation-matching completion before
+process-death handling and durably clear active assignment before slot release.
+The implementation and real verification must cover these conditions.

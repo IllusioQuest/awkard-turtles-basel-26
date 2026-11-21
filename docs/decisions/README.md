@@ -81,4 +81,4 @@ later.
 
 - [0062 - Size servers per house by marginal value](0062-marginal-value-server-sizing.md): proposed; T-70; Core `ServerSizing` + reference-house report; reviewed with changes; scored figures unchanged.
 
-- [0062 — Warm native GPU worker](0062-warm-native-gpu-worker.md): proposed; user chose existing-renderer speed first; fresh review pending.
+- [0063 — Warm native GPU worker](0063-warm-native-gpu-worker.md): proposed; user chose existing-renderer speed first; fresh review pending.
