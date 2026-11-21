@@ -36,7 +36,8 @@
       "weight": 0.5
     }
   ],
-  "source": "User-approved one-laptop presentation: two CPU roles and three concurrent GPU workers share one Iris Xe. Equal base work units with GPU weights 1.5/1/.5. Synthetic total 500kWh inherited from old 300+200 lab, divided once among five logical quotas; NOT measured heat. Abstract case 0.8kWh/job-hour retained commitment. Four Blender threads per process, at most 12 in GPU phase; CPU stages do not overlap frame phase. Admission settings are not OS/driver quotas or promised utilization.",
+  "source": "User-approved one-laptop presentation: two CPU roles and three concurrent GPU workers share one Iris Xe. Equal base work units with GPU weights 1.5/1/.5. Synthetic total 500kWh inherited from old 300+200 lab, divided once among five logical quotas; NOT measured heat. Abstract case 0.8kWh/job-hour retained commitment. Four Blender threads per process, at most 12 in GPU phase; CPU stages do not overlap frame phase. Admission settings are not OS/driver quotas or promised utilization. User-approved verification/reuse of unchanged recipe/build scenes.",
   "expected_blender_version": "5.3.0",
-  "graphics_api": "opengl"
+  "graphics_api": "opengl",
+  "reuse_prepared_scene": true
 }
