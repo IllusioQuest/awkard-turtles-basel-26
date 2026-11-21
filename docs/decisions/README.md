@@ -34,3 +34,4 @@ later.
 | [0020](0020-business-model-operator-two-job-types.md) | Business model (provisional): operator model, Type 1 = batch LLM on non-personal documents, Type 2 = research simulations | proposed (Jona); partly supersedes 0018; reviewed (go with changes); team confirmation pending |
 
 | [0021](0021-selkies-gaming-lab.md) | Selkies compatibility lab and multi-node session placement | proposed; user approved direction, reviewed with changes |
+| [0022](0022-web-dashboard-stack.md) | One Vite/React/TypeScript app for the three demo dashboards | proposed (user approved; review applied); team confirmation pending |

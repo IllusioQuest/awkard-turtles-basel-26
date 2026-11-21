@@ -2,7 +2,7 @@
 
 - **Tier:** 3 Pitch stretch  ·  **Area:** UI
 - **Depends on:** T-13
-- **Suggested owner:** anyone  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone  ·  **Owner:** Ennio / Claude  ·  **Status:** in progress (scaffold with sourced figures; decision 0022)
 
 ## Goal
 

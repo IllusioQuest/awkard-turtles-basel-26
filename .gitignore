@@ -26,5 +26,8 @@ __pycache__/
 **/obj/
 /results/
 
+# Web app dependencies (dist is kept as the offline demo fallback)
+web/node_modules/
+
 # Agent worktrees (temporary)
 .claude/worktrees/

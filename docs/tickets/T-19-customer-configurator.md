@@ -2,7 +2,7 @@
 
 - **Tier:** 3 Pitch stretch  ·  **Area:** UI / core
 - **Depends on:** T-10, T-14
-- **Suggested owner:** anyone  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** anyone  ·  **Owner:** Ennio / Claude  ·  **Status:** in progress (scenario viewer only; full configurator blocked on T-10/T-14, decision 0022)
 
 ## Goal
 
