@@ -1,0 +1,23 @@
+{
+  "Id": "gpu-inference-l4",
+  "Label": "GPU inference server with NVIDIA L4 cards, scaled to 1 kW",
+  "Status": "variant: not the case's reference server; the reference house keeps the abstract 1 kW server of config/reference-house.json for scored figures",
+  "Description": "One 'server' = 1 kW of electric load: one host (Dell R570 class, price and power as in cpu-server) plus as many 72 W L4 cards as fit in the remaining power (11.6, fractional like the case's 12.5 servers). A real build is rounded and may need a GPU-dense chassis; slot count per host is TODO(source).",
+  "TranscriptionModel": "whisper-large-v3-turbo (GPU), third-party benchmark, batch 4",
+  "UnitsPerServer": { "value": 11.6313, "unit": "units/server", "source": "derived: (ServerElectricKw - HostElectricKw) / UnitElectricKw = (1 - 0.1625) / 0.072" },
+  "UnitElectricKw": { "value": 0.072, "unit": "kW/unit", "source": "data/raw/market/hardware.csv hw-power-nvidia-l4-tdp: max TDP 72 W (high); board limit used as loaded power, measured inference draw TODO(source)" },
+  "UnitPurchasePriceChf": { "value": 2235, "unit": "CHF/unit", "source": "data/raw/market/hardware.csv hw-cost-bechtle-pny-l4: CHF 2235 excl. VAT (low: search snippet, out of stock)" },
+  "HostElectricKw": { "value": 0.1625, "unit": "kW/server", "source": "same estimate as config/hardware/cpu-server.json UnitElectricKw (Xeon 6507P TDP + memory); host draw under GPU load TODO(source)" },
+  "HostPurchasePriceChf": { "value": 8248.03, "unit": "CHF/server", "source": "data/raw/market/costs.csv cost-server-dell-r570 as lower bound for a GPU host; a GPU-dense 2U chassis starts at CHF 28,720 (cost-server-brentford-s240-from, configuration unverified)" },
+  "ServerElectricKw": { "value": 1, "unit": "kW/server", "source": "docs/case/challenge.md: rack-server reference (1 kW), used as normalisation" },
+  "IdleElectricKw": { "value": null, "unit": "kW/server", "source": "TODO(source): idle draw of L4 cards and host not sourced (a reseller lists a 40 W configurable minimum per card, unverified)" },
+  "HeatRecoveryShare": { "value": 0.8, "unit": "fraction", "source": "docs/case/challenge.md: 80 percent recoverable into water (assumes liquid cooling; L4 cards are passively air-cooled, TODO(source) water-block option)" },
+  "PurchasePriceChfPerServer": { "value": 34244.06, "unit": "CHF/server", "source": "derived: 11.6313 x CHF 2235 + CHF 8248.03 (host)" },
+  "LifetimeYears": { "value": 6, "unit": "years", "source": "data/raw/market/costs.csv lifetime-coreweave-technology-accounting (accounting life incl. GPU infrastructure, not physical life)" },
+  "OpsChfPerServerYear": { "value": 708, "unit": "CHF/server-year", "source": "derived: 1 host x CHF 59 per server-month x 12 (data/raw/market/costs.csv cost-ops-smartsolution-server-basic); assumes one physical host per kW" },
+  "TranscriptionAudioHoursPerServerHour": { "value": 469.9, "unit": "audio hours/server-hour", "source": "derived: 11.6313 cards x 40.4 audio h per GPU-hour (data/raw/market/hardware.csv hw-perf-e2e-l4-whisper-turbo-b4, low: vendor blog via snippet); larger model than cpu-server's whisper base" },
+  "WebhostingSitesPerServer": { "value": null, "unit": "sites/server", "source": "TODO(source): GPUs add nothing to webhosting; host CPU only" },
+  "SpotPriceChfPerServerHour": { "value": 2.23, "unit": "CHF/server-hour", "source": "derived: 11.6313 x CHF 0.1914 per hour AWS g6.xlarge spot eu-central-2 (data/raw/market/compute-prices.csv cp-gpu-aws-g6-xlarge-euc2-spot, medium); one g6.xlarge = 1 L4 + 4 vCPU" },
+  "OnDemandPriceChfPerServerHour": { "value": 10.60, "unit": "CHF/server-hour", "source": "derived: 11.6313 x CHF 0.9116 per hour AWS g6.xlarge on-demand eu-central-2 (cp-gpu-aws-g6-xlarge-euc2-od, high)" },
+  "HomeHostPriceChfPerServerHour": { "value": 4.30, "unit": "CHF/server-hour", "source": "derived: 11.6313 x CHF 0.3697 per GPU-hour RunPod L4 community cloud (cp-mkt-runpod-l4-community, high); Infomaniak Swiss L4 from CHF 0.3053/h gives 3.55" }
+}

@@ -17,6 +17,7 @@ data/
 | [`raw/elcom/`](raw/elcom/SOURCE.md) | Electricity price 2026, IWB Basel, category H4, incl. price components | `python3 scripts/fetch_data.py` (ElCom GraphQL API) | yes (snapshot) |
 | `raw/market/` | Researched prices (AI services, compute, costs, energy), one CSV per topic | collected by hand, schema in [`docs/research/README.md`](../docs/research/README.md) | yes |
 | [`raw/market/price-snapshots/`](raw/market/price-snapshots/SOURCE.md) | Dated Azure Retail Prices snapshots, Switzerland North VM sizes for the computing price (T-28); never overwritten | `python3 scripts/fetch_data.py --prices` (Azure Retail Prices API, no login) | yes (~12 KB each) |
+| [`raw/market/hardware.csv`](raw/market/SOURCE.md) | Hardware power, GPU card price and Whisper throughput benchmarks for the T-15 hardware profiles (`config/hardware/`) | collected by hand, see `raw/market/SOURCE.md` (T-15) | yes |
 | `raw/sites/` | Researched site types and heat-demand profile values; [`when2heat/`](raw/sites/when2heat/SOURCE.md): hourly CH heat profiles 2022 (extract) | collected by hand, see `docs/research/README.md` (WP3); extract command in its `SOURCE.md` | yes (~1 MB) |
 | [`raw/official/`](raw/official/README.md) | Official hourly profile CSV provided by the organisers with the case | from the organisers (not public) | yes, once we have it |
 | `derived/` | Outputs of our scripts (profiles, results) | rerun the producing script | decided per file, see [`derived/README.md`](derived/README.md) |
