@@ -107,3 +107,6 @@ Follow-up review after recurring AccessDenied (b521e52, PR #62): fixed two confi
 
 
 Journal error follow-up (9b43089): pulled main, reproduced failure at frame 11, captured full traces locating Windows File.Move replacement failures in WorkloadCoordinator.Save and MeshPeer.Save. Added bounded Windows-only replacement retry (500ms, errors 5/32/33), retains flushed temp journal and propagates persistent errors. 106 tests pass. A full real 48-frame run now completes without error in 109.8757s active workflow at localhost:18950/ui. One separate startup probe crashed in the Intel driver; retry startup passed. No reliability SLA or three-worker rollout claim. Previous runs preserved. Evidence: docs/performance/journal-replacement-fix-2026-11-21.json.
+
+
+T-73 Nikita/Codex, feat/T-73-five-worker-render: user approved 3 concurrent shared-Iris GPU workers + CPU scene preparation + CPU MP4 assembly, Restart, GPU work weights1.1/1/.9. ADR0065 reviewed with changes; native role/manifest/shared-group checks implemented, isolated five-process verification next. Same heat-first mesh; one synthetic500kWh total partitioned, no extra physical GPU or utilization claim. Depends PR64 journal replacement fix; old outputs preserved.

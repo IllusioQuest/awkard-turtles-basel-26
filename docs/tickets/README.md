@@ -106,3 +106,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-71](T-71-warm-gpu-worker.md) | Keep native GPU renderer warm across frame jobs | Nikita / Codex | in review; PR #62; 106 tests and real warm GPU lifecycle checks pass |
 | [T-72](T-72-live-household-demo.md) | Live one-house request and dashboard | Codex | done (PR #61) |
+
+
+| [T-73](T-73-five-worker-render.md) | Restart and five-worker render pipeline | Nikita / Codex | in progress; ADR 0065 reviewed |
