@@ -63,6 +63,9 @@ function period(s: Site, h: number): HousePeriod {
     incomeChf: st.incomeChfPerHour,
     electricityCostChf: st.electricityChfPerHour,
     lateWorkKwh: st.missedPerHour,
+    heatValueChf: 0,
+    jobsOnTime: 0,
+    deadlinesMissed: 0,
   }
 }
 

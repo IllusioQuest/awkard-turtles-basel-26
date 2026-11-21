@@ -22,6 +22,9 @@ import DateRangePicker, { type Preset, type TimeRange } from './DateRangePicker'
 import { householdSeries, resolution, totals } from './series'
 import './household.css'
 
+const chf3 = new Intl.NumberFormat('de-CH', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
+// Missed shares are often far below 1 %: two significant digits instead of a rounded 0 %.
+const pctSmall = new Intl.NumberFormat('de-CH', { style: 'percent', maximumSignificantDigits: 2 })
 const fmtHour = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })
 const fmtDay = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })
 const fmtMonth = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', month: 'short', year: '2-digit' })
@@ -81,13 +84,13 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
   const [range, setRange] = useState<TimeRange>({ from: minMs, to: maxMs, preset: 'run' })
 
   const data = useMemo(() => householdSeries(run, house, periods, range.from, range.to), [run, house, periods, range])
-  const sum = useMemo(() => totals(data), [data])
+  const sum = useMemo(() => totals(data, run.maxElectricKwPerServer), [data, run.maxElectricKwPerServer])
   const span = range.to - range.from
   const { unit } = resolution(span, run.periodHours)
   const tickFormat = (v: number) => (span <= 2 * DAY_MS ? fmtHour : span <= 180 * DAY_MS ? fmtDay : fmtMonth).format(v)
   const selectedInRange = selectedMs >= range.from && selectedMs < range.to
 
-  const chart = (children: ReactNode, yFormat: (v: number) => string, domain?: [number, number], showLegend = false) => (
+  const chart = (children: ReactNode, yFormat: (v: number) => string, domain?: [number, number], showLegend = false, integerY = false) => (
     <ResponsiveContainer width="100%" height={220}>
       <ComposedChart data={data} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
         <CartesianGrid stroke="var(--grid)" vertical={false} />
@@ -101,7 +104,7 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           minTickGap={32}
           {...axis}
         />
-        <YAxis tickFormatter={yFormat} domain={domain} axisLine={false} width={52} {...axis} />
+        <YAxis tickFormatter={yFormat} domain={domain} allowDecimals={!integerY} axisLine={false} width={52} {...axis} />
         <Tooltip
           {...tooltip}
           labelFormatter={(v) => fmtFull.format(Number(v))}
@@ -149,9 +152,23 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
         <Stat label="Power used by servers" value={`${num.format(sum.powerKwh)} kWh`} note="paid by DigitalHeat" />
         <Stat label="Heat dumped" value={`${num.format(sum.heatDumpedKwh)} kWh`} />
         <Stat label="Outdoor temperature" value={`${dec1.format(sum.avgTemperatureC)} °C`} note="average" />
+        <Stat
+          label="Deadlines missed"
+          value={sum.missedShare === null ? '–' : pctSmall.format(sum.missedShare)}
+          note={sum.deadlinesKnown ? `${num.format(sum.deadlinesMissed)} of ${num.format(sum.jobsDue)} jobs` : 'not in this run (re-run or restart the API)'}
+        />
+        <Stat
+          label="Break even kWh price"
+          value={sum.breakEvenChfPerServerHour === null ? '–' : `CHF ${chf3.format(sum.breakEvenChfPerServerHour)}`}
+          note={
+            sum.breakEvenChfPerServerHour === null && sum.serverHours > 0
+              ? 'no heat value in this run (re-run or restart the API)'
+              : `per server-hour, ${num.format(sum.serverHours)} sold`
+          }
+        />
       </section>
 
-      <p className="note forecast-note">Values per {unit}. Dashed line: hour selected on the network page.</p>
+      <p className="note forecast-note">Dashed line: hour selected on the network page.</p>
 
       <section className="charts">
         <div className="card">
@@ -191,6 +208,16 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           {chart(
             <Line legendType="plainline" dataKey="temperatureC" name="Temperature" stroke="var(--series-1)" strokeWidth={2} dot={false} isAnimationActive={false} />,
             (v) => dec1.format(v),
+          )}
+        </div>
+        <div className="card wide">
+          <span className="label">Deadlines missed (jobs per {unit})</span>
+          {chart(
+            <Area legendType="square" dataKey="deadlinesMissed" name="Missed" stroke="var(--series-2)" fill="var(--series-2)" fillOpacity={0.4} strokeWidth={2} isAnimationActive={false} />,
+            (v) => num.format(v),
+            undefined,
+            false,
+            true,
           )}
         </div>
       </section>

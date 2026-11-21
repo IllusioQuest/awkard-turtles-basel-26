@@ -18,7 +18,7 @@ public sealed record NetworkHour(int H, double HeatDemandKwh, double HeatProduce
 
 public sealed record HousePeriod(int H, double Load, double TemperatureC, double HeatDemandKwh, double HeatProducedKwh,
     double HeatUsedKwh, double HeatDumpedKwh, double HeatBackupKwh, double ElectricKwh, double TankEndKwh, double IncomeChf,
-    double ElectricityCostChf, double LateWorkKwh);
+    double ElectricityCostChf, double LateWorkKwh, double HeatValueChf, double JobsOnTime, double DeadlinesMissed);
 
 public sealed record Snapshot(int H, int PeriodStartH, int PeriodHours, HousePeriod[] Houses);
 

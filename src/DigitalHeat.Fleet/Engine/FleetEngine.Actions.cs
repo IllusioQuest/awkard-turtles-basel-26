@@ -66,6 +66,7 @@ public sealed partial class FleetEngine
         job.Chunks++;
         job.FirstStartMs ??= _nowMs;
         if (!job.HousesUsed.Contains(house.Index)) job.HousesUsed.Add(house.Index);
+        job.LastHouse = house.Index;
         if (job.LastCheckpointHouse >= 0)
         {
             if (job.LastCheckpointHouse != house.Index) job.Moves++;

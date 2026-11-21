@@ -3,6 +3,8 @@ import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YA
 import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
 import { chf, dateTime, dec1, num, pct, wallMs } from './format'
 
+const pctSmall = new Intl.NumberFormat('de-CH', { style: 'percent', maximumSignificantDigits: 2 })
+
 interface Props {
   run: RunInfo
   house: HouseInfo
@@ -28,12 +30,13 @@ export default function SitePanel({ run, house, state, series, t, onMore, onClos
 
   // Hourly runs: the 24 hours up to t; daily runs: the day starting at t.
   const day = useMemo(() => {
-    const totals = { used: 0, dumped: 0, late: 0, income: 0, cost: 0 }
+    const totals = { used: 0, dumped: 0, missed: 0, onTime: 0, income: 0, cost: 0 }
     for (const p of series ?? []) {
       if (p.h > t || p.h <= t - HOURS_PER_DAY) continue
       totals.used += p.heatUsedKwh
       totals.dumped += p.heatDumpedKwh
-      totals.late += p.lateWorkKwh
+      totals.missed += p.deadlinesMissed
+      totals.onTime += p.jobsOnTime
       totals.income += p.incomeChf
       totals.cost += p.electricityCostChf
     }
@@ -56,7 +59,8 @@ export default function SitePanel({ run, house, state, series, t, onMore, onClos
   const dayRows: [string, string][] = [
     ['Heat delivered', `${num.format(day.used)} kWh`],
     ['Heat dumped', `${num.format(day.dumped)} kWh`],
-    ['Late work', `${dec1.format(day.late)} kWh`],
+    // Jobs attributed to this house (last house that ran them): missed ÷ (missed + on time).
+    ['Deadlines missed', Number.isFinite(day.missed + day.onTime) && day.missed + day.onTime > 0 ? `${pctSmall.format(day.missed / (day.missed + day.onTime))} (${num.format(day.missed)} of ${num.format(day.missed + day.onTime)})` : '–'],
     ['Computing income', chf.format(day.income)],
     ['Electricity cost', chf.format(day.cost)],
   ]
