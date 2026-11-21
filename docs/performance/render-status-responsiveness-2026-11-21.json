@@ -1,0 +1,139 @@
+{
+  "source": "Actual shared Windows laptop, Linux Docker render peers. Control/status response samples, not render speed or SLA. Active-render direct-loopback probe: 10 sequential requests with 300ms spacing; held-peer probe: 12 localhost requests with 500ms spacing, spa temporarily paused and always restored. Localhost address resolution/connection overhead is included; probes are not directly equivalent.",
+  "active_render_status": [
+    {
+      "ms": 102.2412,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 42.3778,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 41.1743,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 23.375,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 73.5275,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 46.5707,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 41.2193,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 59.291,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 24.5217,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    },
+    {
+      "ms": 23.3683,
+      "phase": "cancelled",
+      "peer_count": 3,
+      "running": 1
+    }
+  ],
+  "paused_peer_status": [
+    {
+      "elapsed_ms": 2107.3549,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": null
+    },
+    {
+      "elapsed_ms": 2079.6775,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2081.1786,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2043.4498,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2048.7457,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2065.0393,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2082.9387,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2063.1475,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2065.5721,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2067.4853,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2122.0586,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    },
+    {
+      "elapsed_ms": 2075.2184,
+      "phase": "recovery-paused",
+      "has_legs": true,
+      "peer_warning": "Peer status delayed; showing last observation: The operation was canceled."
+    }
+  ]
+}
