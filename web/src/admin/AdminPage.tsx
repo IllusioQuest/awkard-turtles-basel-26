@@ -5,7 +5,6 @@ import type { DataSource, HouseInfo, HousePeriod, NetworkHour, RunInfo } from '.
 import MapView, { type HeatLayer, type MapState } from './MapView'
 import MockBanner from './MockBanner'
 import SitePanel from './SitePanel'
-import MonitoringPanel from './monitoring/MonitoringPanel'
 import { EconomicsChart, HeatChart, LoadChart, MissedChart, type MissedPoint, type MonthlyPoint, type SeriesPoint } from './charts'
 import { DAY_MS, HOURS_PER_DAY, alignHour, chf, dateTime, dayTick, dec1, lastHour, monthTick, num, pct, wallMs } from './format'
 import {
@@ -224,14 +223,10 @@ function RunView({ source, run, runs, houses, network }: Props) {
         </div>
       </div>
 
-      <MonitoringPanel />
-
-      <MonitoringPanel />
-
       <section className="stats">
         <Stat label="Houses" value={num.format(run.houses)} note={`${num.format(run.servers)} servers`} />
         <Stat label="Average load" value={pct.format(totals.n ? totals.load / totals.n : 0)} note={`at selected hour ${pct.format(network[t]?.load ?? 0)}`} />
-        <Stat label="Heat delivered" value={`${dec1.format(totals.used / 1000)} MWh`} />
+        <Stat label="Heat delivered" value={totals.used > 1000 ? dec1.format(totals.used / 1000) + ' MWh' : dec1.format(totals.used) + ' kWh'} />
         <Stat label="Heat dumped" value={pct.format(dumpedShare)} note={`${num.format(totals.dumped)} kWh`} />
         <Stat label="Missed deadlines" value={pct.format(missedShare)} note={`${num.format(totals.misses)} of ${num.format(totals.completions + totals.misses)} deadlines`} />
         <Stat label="Computing income" value={chf.format(totals.income)} />
