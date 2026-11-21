@@ -3,7 +3,7 @@
 
 .topology-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.topology-head h2{margin-bottom:4px}.flow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0;color:var(--ink-2);font-size:13px}.flow span{background:var(--surface-2);padding:6px 10px;border-radius:6px}.flow .arrow{background:none;padding:0;color:var(--muted)}.hosts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}.host{border:1px solid var(--grid);border-radius:8px;padding:10px;min-width:0}.host-name{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin-bottom:12px}.node-list{display:grid;min-width:0;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px}.node{border:1px solid var(--axis);border-left:3px solid var(--axis);border-radius:6px;padding:10px;min-width:0;background:var(--surface-2)}.node.busy{border-left-color:var(--series-2)}.node.finished{border-left-color:var(--accent)}.node-name{display:flex;flex-wrap:wrap;font-size:13px;justify-content:space-between;gap:4px;overflow-wrap:anywhere}.node-state{font-size:12px;color:var(--ink-2);margin:8px 0}.node-detail{font-size:12px;color:var(--muted);margin-top:4px}.node-meter{height:4px;background:var(--axis);margin:12px 0 5px;border-radius:2px;overflow:hidden}.node-meter>span{display:block;height:100%;background:var(--accent)}.frame-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(18px,1fr));gap:5px;margin:16px 0 10px}.frame-cell{height:18px;border:1px solid var(--axis);border-radius:3px;background:var(--surface-2)}.frame-cell.done{background:var(--accent);border-color:var(--accent)}.frame-cell.busy{background:var(--series-2);border-color:var(--series-2);animation:working 1.5s ease-in-out infinite}.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:9px;height:9px;border:1px solid var(--axis);border-radius:2px;margin-right:5px}.legend .done{background:var(--accent)}.legend .busy{background:var(--series-2)}#topologyNote{margin:12px 0 0;font-size:13px;color:var(--muted)}@keyframes working{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.frame-cell.busy{animation:none}}
 .network-svg{width:100%;height:auto;max-height:340px;display:block;margin:16px 0}.network-svg line{stroke:var(--axis);stroke-width:2}.network-svg line.planned{stroke-dasharray:6 6}.network-svg circle{fill:var(--surface-2);stroke:var(--muted);stroke-width:2}.network-svg .reachable{stroke:var(--accent)}.network-svg .executing{stroke:var(--series-2);stroke-width:4}.network-svg .planned{stroke-dasharray:5 4}.network-svg text{fill:var(--ink);font-size:14px;text-anchor:middle}.network-svg .caption{fill:var(--muted);font-size:11px}.host.planned,.node.planned{border-style:dashed}.node.planned{opacity:.75}
-</style><body><div class="page renderer"><header><div><small>DIGITALHEAT / REAL COMPUTE LAB</small><h1>Distributed landscape render</h1><span class="muted">CPU preparation. GPU frames. Heat-first node placement.</span></div></header>
+.node.gpu-worker{border-top:3px solid var(--worker-tint)}.node.gpu-worker .node-name small{color:var(--worker-tint);font-weight:600}.network-svg circle.gpu-worker{fill:color-mix(in srgb,var(--worker-tint) 30%,var(--surface-2))}.network-svg text.gpu-label{fill:var(--worker-tint);font-weight:600}</style><body><div class="page renderer"><header><div><small>DIGITALHEAT / REAL COMPUTE LAB</small><h1>Distributed landscape render</h1><span class="muted">CPU preparation. GPU frames. Heat-first node placement.</span></div></header>
 <div class="actions"><button class="primary" id="render">Render</button><button id="restart">Restart render</button><button id="pause">Pause</button><button id="resume">Resume</button><button id="stop">Stop after current frame</button></div><div id="error" role="alert"></div><div class="notice" id="device"></div>
 <section class="card" aria-labelledby="topologyTitle"><div class="topology-head"><h2 id="topologyTitle">Where your render runs</h2><small id="nodeSummary">Reading node status…</small></div>
 <div class="flow" aria-label="Work stages"><span>CPU scene preparation</span><b class="arrow" aria-hidden="true">→</b><span>Shared scene</span><b class="arrow" aria-hidden="true">→</b><span>GPU frame jobs</span><b class="arrow" aria-hidden="true">→</b><span>Frame preview</span></div>
@@ -24,6 +24,14 @@ el('scrub').oninput=e=>{idx=+e.target.value;image()};el('play').onclick=()=>{pla
 const activePhases=new Set(['starting','running','resuming','pausing','paused']);
 function currentJob(s,id){return Boolean(s.id&&id&&id.includes('.'+s.id+'-'))}
 function element(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e}
+// Stable identity shades, independent of the current executing/idle state.
+function gpuIdentity(s,n){
+ if(!n?.physical_gpu_id)return null;
+ const ids=s.peers.filter(p=>p.physical_gpu_id).map(p=>p.peer_id).sort();
+ const index=ids.indexOf(n.peer_id);
+ const shades=['color-mix(in srgb,var(--accent) 70%,white)','var(--accent)','color-mix(in srgb,var(--accent) 65%,black)'];
+ return {label:'GPU '+(index+1),style:'--worker-tint:'+shades[index%shades.length]};
+}
 // Edges show only this owner's configured links: other peers' adjacency is not observed.
 function renderNetwork(s){
  const network=s.network||{},origin=network.origin_peer_id||s.peers[0]?.peer_id;
@@ -41,7 +49,8 @@ function renderNetwork(s){
   const p=positions.get(id),n=status.get(id),check=checks.get(id),intent=planned.includes(id);
   const busy=!network.work_data_stale&&!s.peer_connection_error&&(n?.attempts||[]).some(a=>activePhases.has(a.phase)&&a.phase!=='paused'&&currentJob(s,a.attempt.request.id));
   const state=intent?'Planned · not connected':check?.state==='reachable'?(busy?'Executing':'Reachable')+(network.work_data_stale?' · work data stale':''):check?.state==='unreachable'?'Unreachable':'Not checked';
-  const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});circle.append(shape('title',{},id+' · '+state));svg.append(circle);
+  const identity=gpuIdentity(s,n);
+  const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});if(identity){circle.classList.add('gpu-worker');circle.setAttribute('style',identity.style);svg.append(shape('text',{x:p.x,y:p.y-32,class:'gpu-label',style:identity.style},identity.label))}circle.append(shape('title',{},id+' · '+state));svg.append(circle);
   svg.append(shape('text',{x:p.x,y:p.y+39},id),shape('text',{x:p.x,y:p.y+56,class:'caption'},id===origin?'Initial job provider · '+state:state));
  }
  return {configured,planned,checks};
@@ -74,7 +83,8 @@ function renderTopology(s){
    if(!stale)for(const a of active)if(a.phase!=='paused')executing.set(frameNumber(a.attempt.request.id),{peer:n.peer_id,phase:a.phase});
    const busy=active.some(a=>a.phase!=='paused')&&!stale;
    const card=element('div','node'+(busy?' busy':done.length?' finished':''));
-   const title=element('div','node-name');title.append(element('b','',n.peer_id),element('small','',n.physical_gpu_id?'GPU + CPU':'CPU'));card.append(title);
+   const identity=gpuIdentity(s,n);if(identity){card.classList.add('gpu-worker');card.setAttribute('style',identity.style)}
+   const title=element('div','node-name');title.append(element('b','',n.peer_id),element('small','',identity?identity.label:'CPU'));card.append(title);
    let state=stale?'Status stale — waiting for peers':n.error?'Worker error':busy?active.map(a=>a.attempt.profile.command[0]==='prepare'?'Preparing shared scene':a.attempt.profile.command[0]==='assemble'?'Assembling video':'Frame '+Number(a.attempt.profile.command[0])+' · '+a.phase).join(', '):s.held&&!ended?'Paused · no executing job':done.length?'Idle · contributed to this run':'Idle · no contribution yet';
    if(busy&&s.pause_pending)state+=' · pause pending';
    card.append(element('div','node-state',state));
