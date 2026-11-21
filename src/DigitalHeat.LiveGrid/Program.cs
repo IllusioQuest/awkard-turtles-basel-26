@@ -10,8 +10,36 @@ using DigitalHeat.Network;
 var root = FindRoot();
 bool up = args.Contains("--up");
 if (up) Compose("up", "-d", "--build");
-string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
 int port = int.Parse(Arg("--port") ?? "5087");
+if (Arg("--replay") is { } replayArgument)
+{
+    string replayPath = Path.GetFullPath(Path.IsPathRooted(replayArgument)
+        ? replayArgument : Path.Combine(root, replayArgument));
+    JsonElement[] frames = File.ReadLines(replayPath)
+        .Where(line => !string.IsNullOrWhiteSpace(line))
+        .Select(line => JsonDocument.Parse(line).RootElement.Clone()).ToArray();
+    if (frames.Length == 0) throw new InvalidDataException($"Replay file has no frames: {replayPath}");
+
+    long frameIndex = 0;
+    var replayBuilder = WebApplication.CreateBuilder(args);
+    replayBuilder.Logging.SetMinimumLevel(LogLevel.Warning);
+    replayBuilder.WebHost.UseWebRoot(Path.Combine(root, "src", "DigitalHeat.LiveGrid", "wwwroot"));
+    replayBuilder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+    var replayApp = replayBuilder.Build();
+    replayApp.UseDefaultFiles();
+    replayApp.UseStaticFiles();
+    replayApp.MapGet("/api/state", () =>
+    {
+        long next = Interlocked.Increment(ref frameIndex) - 1;
+        return Results.Json(frames[(int)(next % frames.Length)]);
+    });
+    // Keep the unchanged page usable during playback; controls are intentionally inert.
+    replayApp.MapPost("/api/{**path}", () => Results.NoContent());
+    Console.WriteLine($"Replaying {frames.Length} frames from {replayPath} on http://127.0.0.1:{port}");
+    await replayApp.RunAsync();
+    return;
+}
+string configPath = Path.Combine(root, Arg("--config") ?? Path.Combine("config", "live-demo-four-node.json"));
 var reference = ReferenceParameters.Load(Path.Combine(root, "config", "reference-house.json"));
 var config = JsonSerializer.Deserialize<DemoConfig>(File.ReadAllText(configPath),
     new JsonSerializerOptions { PropertyNameCaseInsensitive = true })

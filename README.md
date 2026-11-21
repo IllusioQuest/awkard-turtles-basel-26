@@ -80,6 +80,16 @@ houses (flying tokens; the reason appears in the receiving house and in the log)
 network" (B1) and repeat: the job stays and misses its deadline. Keys: 1–4 new job, A auto-spawn,
 S scheduler. Reset empties all queues.
 
+**Recorded fallback:** while LiveGrid is running, record two minutes and replay the same page without
+Docker. Replay serves the saved frames in a loop; controls are inert during playback.
+
+```
+python scripts/record_live_demo.py --minutes 2
+dotnet run --project src/DigitalHeat.LiveGrid -- --replay data/derived/live-demo/recording.jsonl
+```
+
+The recorder polls `/api/state` every 0.4 seconds. Use `--output` to choose another recording path.
+
 **Task size on a new laptop:** one task should take about one step (4 s) at one full core. Measure
 once and put the printed `sweeps` into `taskSweeps` in `config/live-demo-four-node.json`:
 
