@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your home · DigitalHeat</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">D<span>H</span></span><span>DIGITALHEAT</span></div>
+      <div class="masthead-right"><span class="prototype-tag">SIMULATION REPLAY</span><label class="folder-button">Open another run<input id="run-folder" type="file" webkitdirectory directory multiple aria-label="Open a T-13 result bundle folder"></label></div>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A YEAR OF HEAT AT HOME</p>
+      <h1 id="page-title">How much heating came from computing?</h1>
+      <p class="intro-note">Servers do useful work. The heat they release helps warm this home. A regular heater supplies the rest.</p>
+      <p id="run-note" class="run-note" role="status">Loading the reference-house example…</p>
+    </section>
+
+    <section class="year-overview" aria-labelledby="year-title">
+      <div class="coverage-lead">
+        <p class="section-label" id="year-title">THE YEAR IN ONE LOOK</p>
+        <div class="coverage-number"><span id="coverage">—</span><span class="percent">%</span></div>
+        <p class="coverage-caption">of this home's heat demand supplied by computing</p>
+      </div>
+      <div class="year-detail">
+        <div class="heat-bar" role="img" aria-label="Annual heat supplied by computing versus backup heater"><span id="bar-computing"></span><span id="bar-backup"></span></div>
+        <div class="bar-legend"><span><i class="swatch computing"></i>Computing <strong id="year-computing">—</strong></span><span><i class="swatch backup"></i>Regular heater <strong id="year-backup">—</strong></span></div>
+        <div class="year-facts">
+          <div><span class="fact-label">Heat delivered by servers</span><strong id="delivered-year">—</strong></div>
+          <div><span class="fact-label">Modelled heat value</span><strong id="heat-value">—</strong><small>Equivalent heat-pump electricity cost avoided; your bill depends on the contract.</small></div>
+          <div><span class="fact-label">Servers in this example</span><strong id="server-count">—</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="replay" aria-labelledby="replay-title">
+      <div class="replay-head"><div><p class="section-label">EXPLORE A DAY</p><h2 id="replay-title">What happens hour by hour?</h2></div><div class="day-buttons"><button id="january" type="button">15 January</button><button id="july" type="button">15 July</button></div></div>
+      <div class="replay-layout">
+        <div class="day-chart-wrap">
+          <div class="chart-title"><strong id="selected-day">—</strong><span>Heat supplied each hour · kWh</span></div>
+          <div id="day-chart" class="day-chart" role="img" aria-label="Hourly heat from computing and regular heater"></div>
+          <div class="chart-hours"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span></div>
+          <div class="hour-slider"><label for="hour-range">Hour</label><input id="hour-range" type="range" min="0" max="23" value="18"><output id="hour-output" for="hour-range">18:00</output></div>
+        </div>
+        <div class="hour-card">
+          <p class="hour-time" id="hour-time">—</p>
+          <p class="hour-message" id="hour-message">—</p>
+          <dl class="hour-facts">
+            <div><dt>Heat from computing</dt><dd id="hour-computing">—</dd></div>
+            <div><dt>Useful heat rate</dt><dd id="hour-rate">—</dd></div>
+            <div><dt>Regular heating</dt><dd id="hour-backup">—</dd></div>
+            <div><dt>Server load</dt><dd id="hour-load">—</dd></div>
+            <div><dt>Heat in storage</dt><dd id="hour-tank">—</dd></div>
+            <div><dt>Server heat today</dt><dd id="day-computing">—</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footnote"><p>This is a model replay, not a measured home or live telemetry. Storage is shown as usable energy; tank temperature was not modelled. <span id="job-note">Job supply is stated in the selected run.</span> <a href="../../docs/model/data-contract.md">Data contract</a> · <a href="../../docs/case/challenge.md">Case inputs</a></p><p id="provenance">—</p></footer>
+  </main>
+</body>
+</html>
