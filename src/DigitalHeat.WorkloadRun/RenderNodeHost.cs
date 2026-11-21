@@ -183,8 +183,9 @@ internal static class RenderNodeHost
         public double ApplyBatchLoad(RuntimeAttempt a,double load)=>inner.ApplyBatchLoad(a,load);
         public void Remove(RuntimeAttempt a){
             var observed=inner.Observe(a);
+            string dest=Path.Combine(directory,a.Request.Id);Directory.CreateDirectory(dest);
+            File.WriteAllText(Path.Combine(dest,"render.log"),docker.Run(["logs",observed.ContainerId!]));
             if(observed.ExitCode==0){
-                string dest=Path.Combine(directory,a.Request.Id);Directory.CreateDirectory(dest);
                 docker.Run(["cp",observed.ContainerId+":/work/.",dest]);
                 if(!File.Exists(Path.Combine(dest,"frame.png"))||!File.Exists(Path.Combine(dest,"result.json")))
                     throw new InvalidDataException("Successful process has no complete render output");

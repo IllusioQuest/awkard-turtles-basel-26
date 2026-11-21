@@ -23,14 +23,14 @@ if '--verify-gpu' in args:
     gpu=[d for d in prefs.devices if d.type!='CPU']
     if not gpu:raise RuntimeError('No compatible GPU')
     for d in prefs.devices:d.use=d.type!='CPU'
-    s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.device='GPU';s.cycles.samples=1
+    s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.device='GPU';s.cycles.samples=1;s.cycles.use_denoising=False
     s.render.resolution_x=8;s.render.resolution_y=8;s.render.resolution_percentage=100
     bpy.ops.render.render()
     print('RENDER_GPU_VERIFIED='+backend)
     sys.exit(0)
 frame=int(args[0]); backend=args[1] if len(args)>1 else 'CPU'
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
-scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=32
+scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=32;scene.cycles.use_denoising=False
 scene.cycles.seed=66;scene.cycles.use_animated_seed=False
 scene.render.resolution_x=640;scene.render.resolution_y=360;scene.render.resolution_percentage=100
 scene.render.threads_mode='FIXED';scene.render.threads=1

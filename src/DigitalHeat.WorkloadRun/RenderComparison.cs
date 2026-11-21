@@ -16,6 +16,34 @@ internal sealed record ComparisonState(string Id,string Phase,bool Held,RenderLe
 /// <summary>Benchmark driver only. It submits ordinary frame jobs; MeshPeer owns all placement.</summary>
 internal sealed class RenderComparison(RenderConfig cfg,HttpClient http)
 {
+    public static async Task Verify(string configPath)
+    {
+        var full=JsonSerializer.Deserialize<RenderConfig>(File.ReadAllText(configPath),RenderNodeHost.Json)!;
+        string dir=Path.Combine(full.StateDirectory,"verification-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(dir);
+        using var client=new HttpClient {Timeout=TimeSpan.FromSeconds(20)};
+        client.DefaultRequestHeaders.Add("X-Mesh-Token",Environment.GetEnvironmentVariable("MESH_TOKEN"));
+        var test=new RenderComparison(full with {Frames=2,StateDirectory=dir},client);
+        await test.Start();
+        bool pauseChecked=false;var start=DateTimeOffset.UtcNow;
+        while((DateTimeOffset.UtcNow-start).TotalMinutes<10){
+            await Task.Delay(1000);
+            var current=test.state;
+            if(!pauseChecked&&test.peers.Any(p=>p.Attempts.Any(a=>a.Phase=="running"&&a.Attempt.Request.Id.Contains(current.Id,StringComparison.Ordinal)))){
+                await test.Hold(true);await Task.Delay(4000);
+                var held=await test.ReadPeers();
+                if(held.Any(p=>!p.Held||p.Attempts.Any(a=>a.Phase=="running")))throw new IOException("Real pause did not persist");
+                await test.Hold(false);pauseChecked=true;
+            }
+            if(current.Phase=="failed")throw new IOException(current.Error);
+            if(current.Phase=="complete"){
+                if(!pauseChecked||current.Legs.Any(l=>l.Completed!=2))throw new IOException("Incomplete verification");
+                var report=new {mode="real_two_frames_per_leg_verification_not_48_frame_benchmark",pause_verified=pauseChecked,snapshot=test.Snapshot()};
+                string json=JsonSerializer.Serialize(report,RenderNodeHost.Json);
+                File.WriteAllText(Path.Combine(full.StateDirectory,"verification.json"),json);Console.WriteLine(json);return;
+            }
+        }
+        await test.Hold(true);throw new TimeoutException("Verification exceeded its bounded ten-minute limit; held");
+    }
     private readonly SemaphoreSlim serial=new(1);
     private readonly string path=Path.Combine(cfg.StateDirectory,"comparison.json");
     private ComparisonState state=Load(cfg);
