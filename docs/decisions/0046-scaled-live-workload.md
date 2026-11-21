@@ -1,4 +1,4 @@
-# 0043: Measured workload scaling for the live network demo
+# 0046: Measured workload scaling for the live network demo
 
 - **Status:** proposed
 - **Date:** 2026-11-21

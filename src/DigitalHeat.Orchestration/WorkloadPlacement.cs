@@ -49,6 +49,8 @@ public sealed class WorkloadPlacement
             if (index!.ExternalIds.Contains(request.Id))
                 throw new InvalidDataException("Workload ID is already externally allocated.");
             WorkloadReservation? best = null;
+            // Heat is the ranking priority. Latency is only a configured eligibility limit in
+            // Candidates; a faster eligible node must not outrank one with more useful heat.
             foreach (var candidate in Candidates(request))
                 if (best is null || candidate.AvailableHeatKwhBeforeReservation > best.AvailableHeatKwhBeforeReservation
                     || candidate.AvailableHeatKwhBeforeReservation == best.AvailableHeatKwhBeforeReservation
@@ -226,7 +228,8 @@ public sealed class WorkloadPlacement
 
     private static bool ValidResources(ResourceAmount? r) => r is not null && double.IsFinite(r.CpuCores) && r.CpuCores >= 0 && r.RamMib >= 0 && r.Slots >= 0;
     private static bool Unique(IEnumerable<string> ids) { var all = ids.ToArray(); return all.All(id => !string.IsNullOrWhiteSpace(id)) && all.Distinct(StringComparer.Ordinal).Count() == all.Length; }
-    private static void ValidateInventory(WorkloadInventory i, DateTimeOffset now)
+    // Validation must not construct an AdmissionIndex. Only installing a snapshot needs that work.
+    internal static void ValidateInventory(WorkloadInventory i, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(i);
         if (i.ResourceObservedAtUtc.HasValue != i.ResourceValidUntilUtc.HasValue

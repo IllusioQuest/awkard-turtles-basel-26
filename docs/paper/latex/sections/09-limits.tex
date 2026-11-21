@@ -19,7 +19,10 @@ error is set, and the error parameters are not sourced. Work is ``unlimited'' ($
 stated, and the Type~1 volume is a share, not a sourced demand. The transfer delay is one uniform
 assumption counted from arrival (a lower bound on friction), with no distance model, and transfer
 cost is not modelled, so B2 and the LP remain optimistic for distant sites. Persistence estimates (B2, reserves) assume daily
-cohorts. The LP knows arrived work only. Sites of the test network are synthetic.
+cohorts. The LP knows arrived work only. Sites of the test network are synthetic. The yearly runs take one
+decision per hour; re-deciding within the hour on events (Section~\ref{sec:scheduling}) is
+implemented in the live demonstrator but not evaluated. Running tasks are frozen, not migrated, when
+their site stops wanting heat.
 
 \paragraph{Measurements and inputs.} Marketplace fill rates come from search snippets; laptop
 measurements are scaled linearly to \qty{1}{kW}. \todo{complete after the demonstrator section}

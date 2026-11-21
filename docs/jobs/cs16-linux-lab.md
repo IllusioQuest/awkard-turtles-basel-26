@@ -193,3 +193,35 @@ vertical aiming and the F8 console is pending; launch arguments alone do not pro
 Close the existing game explicitly before using that launcher; do not silently replace an active
 match. On a laptop with media keys, the F8 key may require Fn+F8. Two-finger scrolling remains weapon
 selection by user preference; one-finger movement is the aiming test.
+
+## Loading freeze recovery and low-FPS investigation
+
+After a later restart, the user reported a persistent “Validating game resources” screen. The
+appended Wine log contained crash-dump attempts followed by repeated loader-lock waits; Docker
+reported no OOM kill, under 1 GiB usage against its 2 GiB memory limit. A scoped game stop succeeded.
+The new `local-gl-check` variant selects OpenGL, enables an engine console log and loads the
+provided `de_dust2` map as a four-slot LAN test. The engine log reported world/server initialization
+and local player connection. UDP readiness queries did not return during the probe, so those alone
+were not treated as success. The user then confirmed the map/team screen was visible **and aiming
+worked**. OpenGL is now in the base CS launch arguments (`c4291b8`); the diagnostic variant remains
+available. Renderer and local/server scenario changed together, so this is a recovered test setup,
+not proof that the renderer alone caused every previous hang. Missing Gecko HTML support was also
+logged, but was not established as the freeze cause and no dependency was installed for it.
+
+The remaining user report is low FPS. Actual operational checks on Node D:
+
+- CPU observation: 202.23% while configured for 2 CPU equivalents (shared quota, not dedicated cores).
+- Two-second cgroup delta: `usage_usec=3985066`, `nr_periods=20`, `nr_throttled=20`,
+  `throttled_usec=6537968`. Thus CPU use was approximately `3985066 / 2000000 = 1.99` core-equivalents,
+  and all observed quota periods throttled. Throttled time aggregates threads and can exceed wall
+  time; it is not a wall-clock percentage or a measured FPS loss.
+- Desktop dimensions: 1280x720. Game config `fps_max=100`; observed stream configuration is 20 FPS
+  with software x264. Rendering is software llvmpipe and no GPU device is exposed to these nodes.
+
+This identifies a CPU bottleneck and a separate stream ceiling; it is not an actual game-FPS
+measurement or a scheduler benchmark. Proposed first experiment: raise **only D** from 2 to 4 CPU
+equivalents live, keeping its stream at 20 FPS, then repeat the cgroup sample. User approval is
+pending because resource choices are reviewed with the human. A generic policy-based
+`Set-LabNodeCpu.ps1` was prepared and plan-only checked against the selected engine (16 logical
+CPUs); no CPU allowance has changed yet. Do not claim a speedup, raise both nodes or expose a GPU
+without the relevant decision/test. Minecraft and scored hardware/heat parameters remain unchanged.

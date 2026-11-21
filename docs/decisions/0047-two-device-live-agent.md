@@ -1,4 +1,4 @@
-# 0044: One scheduler and a node agent across two demo laptops
+# 0047: One scheduler and a node agent across two demo laptops
 
 - **Status:** proposed
 - **Date:** 2026-11-21

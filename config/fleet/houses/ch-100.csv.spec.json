@@ -1,0 +1,26 @@
+{
+  "spec": {
+    "count": 100,
+    "distribution": "proportional_to_single_family",
+    "cantons": null,
+    "weather": "data/raw/swiss-grid/weather-2025-hourly.csv.gz",
+    "design_heating_kw": "cell_median",
+    "design_heating_spread": 0,
+    "formula_divisor_c": 25.6,
+    "hot_water_kwh_per_day": 12,
+    "tank_kwh": 35,
+    "tank_initial_kwh": 0,
+    "electricity_price": {
+      "per_municipality": "data/derived/elcom/price-per-municipality-2026.csv",
+      "category": "H4"
+    },
+    "seed": 20261121,
+    "resolved": {
+      "cells_available": 390,
+      "cells_used": 81,
+      "electricity_canton_median_fallbacks": 0
+    }
+  },
+  "seed": 20261121,
+  "houses": []
+}

@@ -49,10 +49,13 @@ later.
 | [0035](0035-federated-job-ownership.md) | Federated job ownership and node-local heat control | proposed; reviewed with changes; T-45 |
 | [0040](0040-local-four-node-demo.md) | Local four-node demo queue and shared C# live control | superseded for the live demo by 0042 (T-54) |
 | [0042](0042-live-demo-network-scheduler.md) | Live demo driven by the network scheduler | proposed; T-54; reviewed with changes |
-| [0043](0043-scaled-live-workload.md) | Measured workload scaling for the live network demo | proposed; T-54; reviewed with changes |
-| [0044](0044-two-device-live-agent.md) | One scheduler and a node agent across two demo laptops | proposed; T-54; reviewed with changes |
 | [0036](0036-monitor-ui-neutral-contract.md) | UI-independent monitor contract and read-only admin API | proposed; user approved; reviewed with changes; PR #35 |
 | [0037](0037-minute-live-job-deadlines.md) | Minute-level bounded live-job deadlines | proposed; user approved; reviewed with changes; PR #37 |
 | [0038](0038-indexed-safe-admission.md) | Indexed admission and typed defensive copies | proposed; reviewed with changes; PR #38 depends on #37 |
 | [0039](0039-local-docker-observation-client.md) | Reusable local Docker observation transport | proposed; user approved; reviewed with changes; PR #40 depends on #35 |
 | [0041](0041-cs16-linux-compatibility.md) | Isolated CS 1.6 Linux compatibility trial | proposed; user approved two-node Wine trial; reviewed with changes; T-53 |
+| [0043](0043-gaming-gpu-eligibility.md) | Gaming GPU eligibility with existing heat ranking | proposed; user approved; T-55 |
+| [0044](0044-event-driven-node-feedback.md) | Event-driven workload-owner node feedback | proposed; user approved; T-56 |
+| [0045](0045-bfs-residential-population.md) | Separate sourced residential-stock composition profile | proposed; user approved; T-59 |
+| [0046](0046-scaled-live-workload.md) | Measured workload scaling for the live network demo | proposed; T-54; reviewed with changes |
+| [0047](0047-two-device-live-agent.md) | One scheduler and a node agent across two demo laptops | proposed; T-54; reviewed with changes |

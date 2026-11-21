@@ -9,8 +9,11 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Jona / Codex | `feat/T-51-four-node-live-demo` (ticket T-54) | Live network demo: one B2/LP scheduler moves measured Ising tasks among eight containers on two devices (decisions 0042–0044) | `LiveNetwork`/`LiveTaskPlanner` (Network), LiveGrid coordinator/peer agent API, physical per-node queues in ising.py | in progress; eight-container local integration passed; physical two-laptop LAN/firewall and peer CPU rehearsal open |
-| Nikita / Codex | feat/T-53-cs16-linux | CS installed/running on D; two desktops, generic relay/network/exit helpers; Minecraft unchanged | existing C# profile launcher + indexed admission reused | draft PR #42; user confirms Internet servers/clicks work; user-approved CS-only restart with input-check/F8 applied, aiming/console feedback pending; E game install/two-client/loaded timing pending; docs/jobs/cs16-linux-lab.md |
+| Jona / Codex | `feat/T-51-four-node-live-demo` (ticket T-54) | Live network demo: one B2/LP scheduler moves measured Ising tasks among eight containers on two devices (decisions 0042, 0046–0047) | `LiveNetwork`/`LiveTaskPlanner` (Network), LiveGrid coordinator/peer agent API, physical per-node queues in ising.py | in progress; eight-container local integration passed; physical two-laptop LAN/firewall and peer CPU rehearsal open |
+| Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | in progress; distinguish private ownership from single-family category; current fleet is SFH-only |
+| Nikita / Codex | fix/T-57-scheduler-cleanup | Remove redundant validation/indexing and clarify event loop | no public interface/model changes | PR #46 in review; 61 orchestration + 46 Core tests; queued owner about half median runtime in both run orders, allocations down 83%; mixed idle timings documented; live games untouched |
+| Nikita / Codex | feat/T-53-cs16-linux | CS on D recovered in OpenGL local test; aiming works; low-FPS investigation | existing C# profile launcher + indexed admission reused | draft PR #42; user confirms map/aiming and prior Internet access; 2-CPU quota saturated/throttled, 20-FPS software stream; CPU increase superseded by user-approved GPU direction; E accelerated GL verified in T-55; actual CS GPU/FPS pending; Minecraft unchanged |
+| Nikita / Codex | feat/T-55-gaming-gpu-eligibility | GPU eligibility with unchanged heat ranking | no production scheduler/interface edits; ADR 0043 reviewed | PR #44; 49 tests; E Intel accelerated GL verified; timing 6.25 ms p95 exceeded threshold during probe, 4.14 ms steady follow-up passed; actual CS GPU/heat/occupancy remain gates |
 | Nikita / Codex | docs/T-52-reborn-assessment | Inspected supplied ReBorn mod; public/community compatibility required | none | user declined isolated Steam/CS:GO setup; no replacement started; Minecraft and Xonotic unchanged; docs/jobs/reborn-compatibility-assessment.md |
 | Nikita / Codex | feat/T-50-docker-observations | T-48 deadlines #37, T-49 indexed admission #38 and T-50 local observation #40 in review | ADRs 0037-0039 reviewed; no scored model change | T-49: 46+36 tests and 62-case comparison; T-50: 57 tests, web/API checks and 531/171 ms first/reused fresh observations; docs/performance evidence on main; games protected |
 | Nikita / Codex | exp/T-47-scheduler-performance | Scheduler latency/scaling investigation complete | none; diagnostics only | 62 cases + raw evidence/recommendations in docs/performance; scripts in PR #36; no production or game changes |
@@ -22,7 +25,6 @@ coordination between people, shared interfaces and integration risks. Keep your 
 | Jona | `feat/T-18-owner-dashboard` | T-18 offline homeowner result view | none | PR #28 open; overlaps `web/` /household (PR #30) |
 | Jona / Codex | `docs/T-41-free-heat-viability` | T-42 free-heat audit and profitable private-home boundary | none | PR #29 in review; Dell R570 card-count mismatch handed to T-14/T-15 |
 | Jona / Claude | `feat/T-12-network-validation` → `main` | T-12 step 3: LP validation, experiments, paper §5/§8 (decisions 0029, 0030) | `NetworkRun` options; map export format unchanged (0025 §7) | in progress |
-| Ennio / Claude | `data/T-51-swiss-grid-data` | T-51 data for the CH-wide simulation (weather grid, forecasts, buildings, ElCom per municipality, demand traces) | new files only in `data/`, `scripts/`; no code interfaces | PR open |
 | Ennio / Claude | `main` (`web/`) | T-17/T-18 web dashboard; next: feed `/admin` from the T-12 dataset (`docs/model/network-map-data.md`) | none | first version merged (PR #30) |
 | team lead / Claude | `docs/T-07-draft-submission` | T-07 draft package, must-have checklist | none | in progress |
 | Nikita / Codex | `featur-gaming` | Gaming lab follow-up: automatic heat-to-launch integration (`docs/gaming.md`) | none | pending |
@@ -70,4 +72,3 @@ coordination between people, shared interfaces and integration risks. Keep your 
    which one the pitch uses.
 3. **Gaming lab:** reservations exist, but automatic reservation-to-launch, failure reconciliation
    and session routing are not integrated (`docs/gaming.md`).
-

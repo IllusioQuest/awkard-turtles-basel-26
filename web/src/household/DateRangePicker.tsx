@@ -24,9 +24,14 @@ interface Props {
 }
 
 const DAY_MS = 86_400_000
-const dateFmt = new Intl.DateTimeFormat('de-CH', { timeZone: 'Europe/Zurich', day: '2-digit', month: '2-digit', year: 'numeric' })
+const dateFmt = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' })
 
-const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+// The picker works in wall ms (local wall time read as UTC); DayPicker works with local dates.
+const startOfDay = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
+const toLocalDate = (ms: number) => {
+  const d = new Date(ms)
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+}
 
 export default function DateRangePicker({ value, onChange, presets, now, min, max }: Props) {
   const [open, setOpen] = useState(false)
@@ -49,7 +54,7 @@ export default function DateRangePicker({ value, onChange, presets, now, min, ma
 
   const preset = presets.find((p) => p.id === value.preset)
   const label = preset ? preset.label : `${dateFmt.format(value.from)} – ${dateFmt.format(value.to - 1)}`
-  const selected: DateRange = draft ?? { from: new Date(value.from), to: new Date(value.to - 1) }
+  const selected: DateRange = draft ?? { from: toLocalDate(value.from), to: toLocalDate(value.to - 1) }
 
   const pick = (range: DateRange | undefined) => {
     setDraft(range)
@@ -99,10 +104,10 @@ export default function DateRangePicker({ value, onChange, presets, now, min, ma
             weekStartsOn={1}
             selected={selected}
             onSelect={pick}
-            defaultMonth={new Date(value.to - DAY_MS * 31)}
-            startMonth={new Date(min)}
-            endMonth={new Date(max)}
-            disabled={[{ before: new Date(min) }, { after: new Date(max) }]}
+            defaultMonth={toLocalDate(Math.max(min, value.to - DAY_MS * 31))}
+            startMonth={toLocalDate(min)}
+            endMonth={toLocalDate(max)}
+            disabled={[{ before: toLocalDate(min) }, { after: toLocalDate(max - 1) }]}
           />
         </div>
       )}

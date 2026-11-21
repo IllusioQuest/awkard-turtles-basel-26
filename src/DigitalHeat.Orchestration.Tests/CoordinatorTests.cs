@@ -152,5 +152,39 @@ public class CoordinatorTests : IDisposable
         Assert.Equal(0, runtime.Starts); Assert.Single(recovered.Allocations());
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void ConfigAndPreflightAgreeOnPhysicalDomainsPerDockerEngine(bool splitDomains, bool splitContexts)
+    {
+        var inventory = PlacementTests.Inventory() with { Revision = 2 };
+        if (splitDomains)
+            inventory = inventory with
+            {
+                Domains = [inventory.Domains[0], inventory.Domains[0] with { Id = "other-host" }],
+                Nodes = [inventory.Nodes[0], inventory.Nodes[1] with { DomainId = "other-host" }]
+            };
+        RuntimeNode[] nodes = [Nodes[0], splitContexts ? Nodes[1] with { DockerContext = "other-context" } : Nodes[1]];
+        var request = PlacementTests.Request();
+        var config = new WorkloadConfiguration(fleet, inventory, nodes, [new(request, Profile)]);
+        var runtime = new Runtime();
+        using var coordinator = Start(runtime);
+        coordinator.Update(inventory, PlacementTests.Now);
+        string path = Path.Combine(directory, "config.json");
+        File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(config, WorkloadJson.Options));
+        if (splitDomains && !splitContexts)
+        {
+            Assert.Throws<InvalidDataException>(() => WorkloadConfiguration.Load(path));
+            Assert.Throws<InvalidDataException>(() => coordinator.TryStart(request, nodes, Profile, PlacementTests.Now));
+            Assert.Equal(0, runtime.Creates);
+        }
+        else
+        {
+            Assert.NotNull(WorkloadConfiguration.Load(path));
+            Assert.NotNull(coordinator.TryStart(request, nodes, Profile, PlacementTests.Now));
+        }
+    }
+
     public void Dispose() { if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true); }
 }

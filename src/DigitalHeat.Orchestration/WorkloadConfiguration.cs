@@ -15,9 +15,21 @@ public sealed record WorkloadConfiguration(string FleetId, WorkloadInventory Inv
             || config.Workloads.Select(w => w.Request.Id).Distinct().Count() != config.Workloads.Length
             || config.Inventory.Nodes.Any(n => config.RuntimeNodes.All(r => r.NodeId != n.Id))) throw new InvalidDataException("Invalid fleet/configuration identity.");
         foreach (var request in config.Workloads.Select(w => w.Request)) WorkloadPlacement.ValidateRequest(request);
-        foreach (var group in config.RuntimeNodes.GroupBy(n => n.DockerContext))
-            if (config.Inventory.Nodes.Where(n => group.Any(r => r.NodeId == n.Id)).Select(n => n.DomainId).Distinct().Count() > 1)
-                throw new InvalidDataException("One Docker context cannot pretend to be multiple independent physical resource domains.");
+        ValidateRuntimeDomains(config.Inventory, config.RuntimeNodes);
         return config;
+    }
+
+    internal static void ValidateRuntimeDomains(WorkloadInventory inventory, IReadOnlyList<RuntimeNode> runtimeNodes)
+    {
+        // Keep this guard shared by load and preflight: one engine must not masquerade as
+        // independent physical pools. Index once rather than scanning all nodes per context.
+        var domainsByNode = inventory.Nodes.ToDictionary(n => n.Id, n => n.DomainId, StringComparer.Ordinal);
+        foreach (var group in runtimeNodes.GroupBy(n => n.DockerContext))
+        {
+            var domains = group.Select(n => domainsByNode.GetValueOrDefault(n.NodeId))
+                .Where(id => id is not null).Distinct(StringComparer.Ordinal).Take(2);
+            if (domains.Count() > 1)
+                throw new InvalidDataException("One Docker context cannot pretend to be multiple independent physical resource domains.");
+        }
     }
 }

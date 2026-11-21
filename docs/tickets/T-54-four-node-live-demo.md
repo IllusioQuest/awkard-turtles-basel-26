@@ -35,7 +35,7 @@ each.
 - Tests: `LiveNetworkTests` (C#), `jobs/research-sim/test_fleet.py` (queues under concurrent moves).
 - Next: rehearse on the demo laptop (Docker Desktop on Windows), then two devices (plan in 0042).
 
-## Two-device extension (decision 0044)
+## Two-device extension (decision 0047)
 
 - Eight-node config and a peer Compose file start four physical containers on each laptop.
 - Laptop A keeps the only scheduler and clock; laptop B's agent owns its queues and Docker calls.
