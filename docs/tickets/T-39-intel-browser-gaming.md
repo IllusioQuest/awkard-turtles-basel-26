@@ -42,3 +42,7 @@ can proceed but a fresh CS2 install needs another storage decision. Existing Ste
 is not evidence of a usable Linux installation and will not be modified automatically.
 
 Dozen experiment now passes Intel GPU enumeration and vkcube render/presentation, including desktop C. Sources, commands and limits in gaming-lab.md; ADR 0023 reviewed. User browser-C visual check requested. No game downloaded. Current C limits (4 GiB, 2 CPU equivalents) are desktop-smoke limits; a CS2 profile must be separately sized against the 8 GB RAM minimum and available host resources before launch.
+
+Dozen experiment code pushed 2e67a0c in PR #22. Final PS5.1 build, enumeration and render pass; login diagnostic helper verifies 200 with local C credentials and 401 without/wrong credentials. User browser login unresolved, asked Incognito + correct C password field. User requested smaller game; recommended Xonotic and asked selection versus SuperTuxKart; no game install yet.
+
+User selected Xonotic instead of CS2 and confirmed C login works. Preparing checksum-verified official original game image; no client install or code modifications. Uniform wallpaper mode applied to C, image sizing issue no longer addressed by stretch. Manual presentation launch first; automatic shared-scheduler runtime integration remains pending.

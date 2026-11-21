@@ -269,3 +269,63 @@ smoke is only a rendering check, not a benchmark or a measurement of useful heat
 Sources checked 2026-11-21: https://archive.mesa3d.org/mesa-26.0.8.tar.xz,
 https://docs.mesa3d.org/meson.html,
 https://store.steampowered.com/app/730/CounterStrike_2/.
+
+Final source-image build and probes were also run under actual Windows PowerShell 5.1. The
+final experiment image ID is sha256:c8bf2c23e41c3142a00b5236e7bbd0f2d220fb90330b842287552523eb928c26.
+The current running C may retain the earlier tested build until Start-DozenDesktop is rerun;
+the driver source/options are the same. Latest image includes compile timeout and Mesa license.
+
+User reported inability to log into C. Direct checks against the running C: correct credentials
+from dozen-credentials.json -> HTTP 200; no credentials -> 401; deliberately wrong password ->
+401. This proves server-side HTTP auth works, not that the user's browser login issue is solved.
+C uses username player and the field password in dozen-credentials.json, distinct from A/B's
+password_a/password_b. User asked to retry in Incognito to avoid cached credentials. Do not
+request the password in chat or remove authentication to mask the issue. Repeat:
+
+    .\gaming\scripts\Test-DozenDesktop.ps1
+
+The helper verifies local credentials without printing them and is tested on Windows PowerShell
+5.1. If the browser still fails, inspect a screenshot of the login/error state with password hidden.
+
+User requested a smaller presentation game instead of CS2. Recommended Xonotic (original Linux
+binary, FPS) uses OpenGL 2.1 and its official 0.8.6 download is 1182 MiB. This fits the previously
+working OpenGL 4.1 path in principle, but original-game performance/input still needs testing.
+SuperTuxKart is a racing alternative. Selection requested; neither game has been downloaded or
+installed. Browser clients still install nothing and no game source modifications are planned.
+Sources checked 2026-11-21: https://xonotic.org/download/ (size, Linux/OpenGL requirements),
+https://supertuxkart.net/Download (Linux release availability).
+
+## Selected presentation game: Xonotic
+
+User selected Xonotic and confirmed Node C login now works. Desktop wallpaper repair now uses
+PCManFM's uniform-color mode rather than image stretching, including C, without restarting a
+session. It removes the mis-sized image; visual confirmation remains with the browser user.
+
+Prepare an original, unmodified Xonotic 0.8.6 Linux release in a derived image. Official archive
+https://dl.xonotic.org/xonotic-0.8.6.zip is verified against the publisher's SHA512 listing at
+https://dl.xonotic.org/xonotic-0.8.6.sha512 before extraction. No Steam account, game source edits
+or browser-client install. This game uses OpenGL; Dozen is not required by Xonotic itself, though
+C retains the tested experimental graphics image. No game-performance claim before launch.
+
+Commands once image build is complete:
+
+    .\gaming\scripts\Build-Xonotic.ps1
+    .\gaming\scripts\Start-DozenDesktop.ps1 -Xonotic
+    .\gaming\scripts\Start-Xonotic.ps1
+
+Optional offline local-match startup:
+
+    .\gaming\scripts\Start-Xonotic.ps1 -StartMatch
+
+A small sourced-as-demo-settings JSON defines 1280x720, 30 FPS cap, stormkeep and two bots;
+these are configuration choices, not measured hardware throughput. The derived image records
+its graphics base image ID and startup checks matching prior Vulkan enumeration/render evidence.
+Start-DozenDesktop -Xonotic recreates only C to use the game image, retaining its home and login;
+A/B remain untouched. Never run a recreation while protecting a real active match: this is the
+initial presentation setup, not a session-migration mechanism. Game launch uses an exclusive
+process lock to avoid two instances on the same desktop; stdout/stderr go to the desktop user's
+xonotic-demo.log. Dispatch success alone does not prove successful gameplay.
+
+This is still a manually launched presentation node. Automatic launch following shared heat
+reservation, observed batch preemption, termination reconciliation and remote-node adapters
+remain pending. Do not imply that the game is already orchestrated by the scheduler.
