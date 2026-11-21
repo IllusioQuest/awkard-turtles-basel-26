@@ -9,7 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Nikita / Codex | feat/T-48-live-job-deadlines | Minute-level live batch deadline contract/enforcement, then T-49 admission and T-50 Docker observation improvements | additive deadline metadata/owner polling; ADRs 0037-0039 proposed | T-48 PR #37 verified; T-49 indexing in progress; T-50 queued; games protected |
+| Nikita / Codex | feat/T-50-docker-observations | T-48 deadlines PR #37 and T-49 indexed admission PR #38 verified; T-50 local observation adapter in progress | ADRs 0037-0039 reviewed; API transport only in current task | T-49: 46+36 tests and 62-case comparison; T-50 native/fallback tests underway; games protected |
 | Nikita / Codex | exp/T-47-scheduler-performance | Scheduler latency/scaling investigation complete | none; diagnostics only | 62 cases + raw evidence/recommendations in docs/performance; scripts in PR #36; no production or game changes |
 | Nikita / Codex | feat/T-46-monitor-value-labels | Transfer monitor data into /admin; keep logic in place; retire terminal UI | snake_case inputs/snapshots + thin read-only API; ADR 0036 | implementation checked; 42 tests + web build/lint + HTTP/browser checks; PR #35 in review |
 | Nikita / Codex | feat/T-44-minecraft-server | Minecraft world server plus browser client on Node A | T-43 / PR #33; existing desktop runtime, no new shared interfaces | code integrated into main by user request; gameplay unverified; rejected battery measurement blocks heat placement |
