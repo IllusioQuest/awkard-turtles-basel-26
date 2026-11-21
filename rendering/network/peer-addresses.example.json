@@ -1,0 +1,6 @@
+{
+  "cpu": "http://presentation-laptop.invalid:18910",
+  "gpu": "http://presentation-laptop.invalid:18911",
+  "gpu-server-1": "http://gpu-server-1.invalid:18911",
+  "gpu-server-2": "http://gpu-server-2.invalid:18911"
+}

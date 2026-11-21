@@ -2,11 +2,12 @@
 .page.renderer{max-width:1200px}header{margin-bottom:24px}header h1{margin:6px 0 8px}h2{font-size:18px;font-weight:600;margin:0 0 16px}small,.muted{color:var(--muted)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}button{border:0;border-radius:8px;background:var(--surface-2);padding:10px 16px;cursor:pointer}button:hover{filter:brightness(1.15)}button.primary{background:var(--accent);font-weight:600}button:disabled{opacity:.4;cursor:default}.grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:var(--gap)}.card{background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:24px}#preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:var(--surface-2);border-radius:8px}.placeholder{padding:64px 16px;text-align:center;color:var(--muted)}.row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:12px 0}.row h2{margin:0}.big{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}progress{width:100%;height:10px;accent-color:var(--accent)}.pill{font-size:12px;color:var(--accent)}.notice{border-left:3px solid var(--accent);padding-left:14px;margin:24px 0;color:var(--ink-2)}#error{white-space:pre-wrap;color:var(--muted);margin:0 0 16px}#error:empty{display:none}#error.failure{color:var(--series-2)}footer{color:var(--muted);font-size:13px;line-height:1.6}#scrub{margin:10px 0}#play{font-size:13px}@media(max-width:850px){.grid{grid-template-columns:1fr}.page.renderer{padding:32px 20px}.row{align-items:flex-start;flex-wrap:wrap}}
 
 .topology-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.topology-head h2{margin-bottom:4px}.flow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0;color:var(--ink-2);font-size:13px}.flow span{background:var(--surface-2);padding:6px 10px;border-radius:6px}.flow .arrow{background:none;padding:0;color:var(--muted)}.hosts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}.host{border:1px solid var(--grid);border-radius:8px;padding:16px}.host-name{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin-bottom:12px}.node-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}.node{border:1px solid var(--axis);border-left:3px solid var(--axis);border-radius:6px;padding:14px;background:var(--surface-2)}.node.busy{border-left-color:var(--series-2)}.node.finished{border-left-color:var(--accent)}.node-name{display:flex;justify-content:space-between;gap:10px;overflow-wrap:anywhere}.node-state{font-size:12px;color:var(--ink-2);margin:8px 0}.node-detail{font-size:12px;color:var(--muted);margin-top:4px}.node-meter{height:4px;background:var(--axis);margin:12px 0 5px;border-radius:2px;overflow:hidden}.node-meter>span{display:block;height:100%;background:var(--accent)}.frame-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(18px,1fr));gap:5px;margin:16px 0 10px}.frame-cell{height:18px;border:1px solid var(--axis);border-radius:3px;background:var(--surface-2)}.frame-cell.done{background:var(--accent);border-color:var(--accent)}.frame-cell.busy{background:var(--series-2);border-color:var(--series-2);animation:working 1.5s ease-in-out infinite}.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:9px;height:9px;border:1px solid var(--axis);border-radius:2px;margin-right:5px}.legend .done{background:var(--accent)}.legend .busy{background:var(--series-2)}#topologyNote{margin:12px 0 0;font-size:13px;color:var(--muted)}@keyframes working{50%{opacity:.45}}@media(prefers-reduced-motion:reduce){.frame-cell.busy{animation:none}}
+.network-svg{width:100%;height:auto;max-height:340px;display:block;margin:16px 0}.network-svg line{stroke:var(--axis);stroke-width:2}.network-svg line.planned{stroke-dasharray:6 6}.network-svg circle{fill:var(--surface-2);stroke:var(--muted);stroke-width:2}.network-svg .reachable{stroke:var(--accent)}.network-svg .executing{stroke:var(--series-2);stroke-width:4}.network-svg .planned{stroke-dasharray:5 4}.network-svg text{fill:var(--ink);font-size:14px;text-anchor:middle}.network-svg .caption{fill:var(--muted);font-size:11px}.host.planned,.node.planned{border-style:dashed}.node.planned{opacity:.75}
 </style><body><div class="page renderer"><header><div><small>DIGITALHEAT / REAL COMPUTE LAB</small><h1>Distributed landscape render</h1><span class="muted">CPU preparation. GPU frames. Heat-first node placement.</span></div></header>
 <div class="actions"><button class="primary" id="render">Render</button><button id="pause">Pause</button><button id="resume">Resume</button><button id="stop">Stop after current frame</button></div><div id="error" role="alert"></div><div class="notice" id="device"></div>
 <section class="card" aria-labelledby="topologyTitle"><div class="topology-head"><h2 id="topologyTitle">Where your render runs</h2><small id="nodeSummary">Reading node status…</small></div>
 <div class="flow" aria-label="Work stages"><span>CPU scene preparation</span><b class="arrow" aria-hidden="true">→</b><span>Shared scene</span><b class="arrow" aria-hidden="true">→</b><span>GPU frame jobs</span><b class="arrow" aria-hidden="true">→</b><span>Frame preview</span></div>
-<div id="hostMap" class="hosts"></div><p id="topologyNote"></p><div id="frameMap" class="frame-map" role="list" aria-label="Frame placement and progress"></div>
+<svg id="networkMap" class="network-svg" viewBox="0 0 900 340" role="img" aria-label="Configured peer links from this UI node; planned servers are dashed"></svg><small id="networkCaption"></small><div id="hostMap" class="hosts"></div><p id="topologyNote"></p><div id="frameMap" class="frame-map" role="list" aria-label="Frame placement and progress"></div>
 <div class="legend"><span><i class="done"></i>Completed</span><span><i class="busy"></i>Executing</span><span><i></i>Pending</span></div><small>Node borders show active work or completed contributions. Frame colors show work state, not GPU utilization.</small></section>
 <div class="grid"><main><div class="card"><div class="row"><h2>Rendered landscape</h2><span class="muted" id="frameLabel">Waiting for the first completed frame</span></div><div id="empty" class="placeholder">Mountains · lake · forest · moving camera<br><br>48 frames · 640 × 360 · 32 samples</div><img id="preview" alt="Completed Blender landscape frame" hidden><input id="scrub" type="range" min="0" max="0" value="0" aria-label="Preview frame"><button id="play">Play completed frames</button></div>
 <div class="card"><h2>Measured render time</h2><div class="row"><span>CPU scene preparation</span><b id="prepTime">—</b></div><div class="row"><span>Active render workflow</span><b class="big" id="activeTime">—</b></div><div class="row"><span>Mean completed-frame render</span><b id="meanFrame">—</b></div><small id="frameRange"></small><div class="row"><span>Confirmed pause</span><b id="pausedTime">—</b></div><div class="row"><span>Total render elapsed</span><b id="elapsedTime">—</b></div><small>Preparation is measured separately. Render time includes queueing, startup, shaders and result collection.</small></div></main>
@@ -23,7 +24,31 @@ el('scrub').oninput=e=>{idx=+e.target.value;image()};el('play').onclick=()=>{pla
 const activePhases=new Set(['starting','running','resuming','pausing','paused']);
 function currentJob(s,id){return Boolean(s.id&&id&&id.includes('.'+s.id+'-'))}
 function element(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e}
+// Edges show only this owner's configured links: other peers' adjacency is not observed.
+function renderNetwork(s){
+ const network=s.network||{},origin=network.origin_peer_id||s.peers[0]?.peer_id;
+ const configured=network.configured_peer_ids||s.peers.map(p=>p.peer_id);
+ const planned=(network.planned_gpu_peers||[]).filter(id=>!configured.includes(id));
+ const checks=new Map((network.connections||[]).map(c=>[c.peer_id,c]));
+ const status=new Map(s.peers.map(p=>[p.peer_id,p]));
+ const ids=[...configured,...planned],others=ids.filter(id=>id!==origin),positions=new Map();
+ positions.set(origin,{x:450,y:170});
+ others.forEach((id,i)=>{const a=-Math.PI/2+i*2*Math.PI/Math.max(1,others.length);positions.set(id,{x:450+310*Math.cos(a),y:170+105*Math.sin(a)})});
+ const svg=el('networkMap');svg.replaceChildren();
+ function shape(tag,attributes,text){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attributes))e.setAttribute(k,String(v));if(text!==undefined)e.textContent=text;return e}
+ for(const id of others){const p=positions.get(id);svg.append(shape('line',{x1:450,y1:170,x2:p.x,y2:p.y,class:planned.includes(id)?'planned':''}))}
+ for(const id of ids){
+  const p=positions.get(id),n=status.get(id),check=checks.get(id),intent=planned.includes(id);
+  const busy=!network.work_data_stale&&!s.peer_connection_error&&(n?.attempts||[]).some(a=>activePhases.has(a.phase)&&a.phase!=='paused'&&currentJob(s,a.attempt.request.id));
+  const state=intent?'Planned · not connected':check?.state==='reachable'?(busy?'Executing':'Reachable')+(network.work_data_stale?' · work data stale':''):check?.state==='unreachable'?'Unreachable':'Not checked';
+  const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});circle.append(shape('title',{},id+' · '+state));svg.append(circle);
+  svg.append(shape('text',{x:p.x,y:p.y+39},id+(id===origin?' · UI origin':'')),shape('text',{x:p.x,y:p.y+56,class:'caption'},state));
+ }
+ el('networkCaption').textContent='Lines show this UI node’s configured peer links; they do not prove links between other servers. Blue: reachable · orange: executing · dashed: planned. '+(network.work_data_stale?'Work/device data retained from '+(network.peer_snapshot_utc||'no complete snapshot')+'.':'');
+ return {configured,planned,checks};
+}
 function renderTopology(s){
+ const network=renderNetwork(s);
  const hosts=new Map(),executing=new Map(),completed=new Map();
  const frameNumber=id=>Number(id.match(/-(\d+)$/)?.[1]);
  for(const f of s.frames||[])completed.set(frameNumber(f.job_id),f);
@@ -32,13 +57,17 @@ function renderTopology(s){
   const host=peer.physical_host_id||'Unreported physical host';
   if(!hosts.has(host))hosts.set(host,[]);hosts.get(host).push(peer);
  }
+ const liveHostCount=hosts.size;
+ for(const id of network.configured.filter(id=>!s.peers.some(p=>p.peer_id===id))){hosts.set('Unreported host · '+id,[{peer_id:id,unreported:true,attempts:[],results:[]}])}
+ for(const id of network.planned){hosts.set('Planned host · '+id,[{peer_id:id,planned:true,attempts:[],results:[]}])}
  const gpuDevices=new Set(s.peers.filter(p=>p.physical_gpu_id).map(p=>p.physical_host_id+'/'+p.physical_gpu_id));
- el('nodeSummary').textContent=s.peers.length+' / '+s.configured_peers+' logical nodes reporting · '+hosts.size+' physical host(s) · '+gpuDevices.size+' reported GPU device(s)';
+ el('nodeSummary').textContent=Array.from(network.checks.values()).filter(c=>c.state==='reachable').length+' / '+s.configured_peers+' configured peers reachable · '+network.planned.length+' planned GPU servers · '+liveHostCount+' reported physical host(s)';
  el('hostMap').replaceChildren();
  for(const [host,peers] of hosts){
-  const group=element('div','host');group.append(element('div','host-name','PHYSICAL HOST · '+host));
+  const group=element('div','host'+(peers[0]?.planned?' planned':''));group.append(element('div','host-name',peers[0]?.planned?host:'PHYSICAL HOST · '+host));
   const list=element('div','node-list');
   for(const n of peers){
+   if(n.planned||n.unreported){const card=element('div','node planned');card.append(element('b','',n.peer_id),element('div','node-state',n.planned?'Planned GPU server · not connected':network.checks.get(n.peer_id)?.state||'Not checked'),element('div','node-detail','No verified hardware, heat capacity or executed work reported.'));list.append(card);continue}
    const active=(n.attempts||[]).filter(a=>activePhases.has(a.phase)&&currentJob(s,a.attempt.request.id));
    const done=(n.results||[]).filter(f=>currentJob(s,f.job_id));
    const frameCount=done.filter(f=>f.metadata.stage!=='prepare').length;
@@ -58,7 +87,7 @@ function renderTopology(s){
   }
   group.append(list);el('hostMap').append(group);
  }
- el('topologyNote').textContent=stale?'Peer status is stale; placements below show the last reported results.':hosts.size===1&&gpuDevices.size===1?'These logical nodes share one physical host and one GPU. CPU preparation is distributed separately; additional logical nodes do not add GPU capacity.':'Nodes are grouped by physical host. Frames can run in parallel on eligible GPU workers admitted by the heat-first mesh.';
+ el('topologyNote').textContent=stale?'Peer status is stale; placements below show the last reported results.':liveHostCount===1&&gpuDevices.size===1?'Currently connected nodes share one physical host and one GPU. Planned GPU servers add no current capacity.':'Nodes are grouped by physical host. Frames can run in parallel on eligible GPU workers admitted by the heat-first mesh.';
  el('frameMap').replaceChildren();
  for(let i=1;i<=s.frames_per_run;i++){
   const done=completed.get(i),active=executing.get(i);

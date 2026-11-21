@@ -1,4 +1,4 @@
-param([ValidateSet('linux-x64','linux-arm64')][string]$Runtime='linux-x64')
+param([ValidateSet('linux-x64','linux-arm64')][string]$Runtime='linux-x64',[switch]$Native)
 $ErrorActionPreference='Stop'
 # Official Blender archive in this preset is x64; never claim ARM GPU compatibility.
 if($Runtime -ne 'linux-x64'){throw 'The pinned Blender image is x64; supply and verify a separate ARM image first.'}
@@ -10,12 +10,15 @@ dotnet publish "$root/src/DigitalHeat.WorkloadRun" -c Release -r $Runtime --self
 if($LASTEXITCODE -ne 0){throw 'Worker publish failed'}
 Copy-Item "$PSScriptRoot/render.html" "$out/app/render.html"
 foreach($name in @('landscape.py','native_worker.py','scene_builder.py','scene_settings.json')){Copy-Item "$PSScriptRoot/$name" "$out/$name"}
-Copy-Item "$PSScriptRoot/linux-worker/*" $out
+if($Native){
+ Copy-Item "$PSScriptRoot/network/*.example.json" $out
+ Copy-Item "$PSScriptRoot/network/start-native-worker.sh" $out
+}else{Copy-Item "$PSScriptRoot/linux-worker/*" $out}
 Get-ChildItem $out -Filter '*.sh' | ForEach-Object {
  $body=[IO.File]::ReadAllText($_.FullName).Replace("`r`n","`n")
  [IO.File]::WriteAllText($_.FullName,$body,(New-Object Text.UTF8Encoding $false))
 }
-$archive=Join-Path $PSScriptRoot 'TestResults/linux-render-worker.tar.gz'
+$archive=Join-Path $PSScriptRoot $(if($Native){'TestResults/linux-native-render-worker.tar.gz'}else{'TestResults/linux-render-worker.tar.gz'})
 & tar -czf $archive -C $out .
 if($LASTEXITCODE -ne 0){throw 'Bundle archive failed'}
 Write-Host "Prepared $archive. No remote host was contacted; GPU verification is still required."
