@@ -65,7 +65,7 @@ public sealed class WorkloadCoordinator : IDisposable
                     throw new InvalidDataException("Cannot change hourly heat accounting mode on an existing journal.");
                 foreach (var record in state.Attempts)
                 {
-                    DockerWorkloadRuntime.Validate(record.Attempt);
+                    runtime.ValidateAttempt(record.Attempt);
                     if (retainHourlyHeat && (record.CommittedHeatIntervalsUtc is null || record.CommittedHeatIntervalsUtc.Length == 0
                         || record.CommittedHeatIntervalsUtc.Any(t => t.Offset != TimeSpan.Zero || t.Ticks % TimeSpan.TicksPerHour != 0)
                         || record.CommittedHeatIntervalsUtc.Distinct().Count() != record.CommittedHeatIntervalsUtc.Length))
@@ -280,7 +280,7 @@ public sealed class WorkloadCoordinator : IDisposable
             {
                 attempt = new(fleetId, Guid.NewGuid().ToString("N"), WorkloadJson.Copy(request), reservation,
                     WorkloadJson.Copy(nodes.Single(n => n.NodeId == reservation.NodeId)), WorkloadJson.Copy(profile));
-                DockerWorkloadRuntime.Validate(attempt);
+                runtime.ValidateAttempt(attempt);
             }
             catch { placement.Release(request.Id); throw; } // No Docker mutation or journal intent yet.
             records.Add(new(attempt, "reserved"));

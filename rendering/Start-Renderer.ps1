@@ -49,5 +49,5 @@ try{
   D @('exec',$container,'docker','load','-i','/var/lib/mesh/render.tar')
   D @('exec',$container,'rm','/var/lib/mesh/render.tar')
  }
- Write-Host 'Open http://localhost:18900/ui after device probing. Run comparison starts 48 + 48 real frames.'
+ Write-Host 'Open http://localhost:18900/ui after device probing. Render dispatches one multi-node frame run.'
 }finally{Pop-Location;Remove-Item Env:MESH_TOKEN,Env:MESH_JOB_IMAGE -ErrorAction SilentlyContinue}

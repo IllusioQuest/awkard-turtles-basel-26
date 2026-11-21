@@ -9,7 +9,7 @@ New-Item -ItemType Directory -Force "$out/app" | Out-Null
 dotnet publish "$root/src/DigitalHeat.WorkloadRun" -c Release -r $Runtime --self-contained true -p:InvariantGlobalization=true -o "$out/app" --nologo -v:q
 if($LASTEXITCODE -ne 0){throw 'Worker publish failed'}
 Copy-Item "$PSScriptRoot/render.html" "$out/app/render.html"
-Copy-Item "$PSScriptRoot/landscape.py" "$out/landscape.py"
+foreach($name in @('landscape.py','native_worker.py','scene_builder.py','scene_settings.json')){Copy-Item "$PSScriptRoot/$name" "$out/$name"}
 Copy-Item "$PSScriptRoot/linux-worker/*" $out
 Get-ChildItem $out -Filter '*.sh' | ForEach-Object {
  $body=[IO.File]::ReadAllText($_.FullName).Replace("`r`n","`n")

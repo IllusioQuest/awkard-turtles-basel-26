@@ -28,7 +28,8 @@ public sealed record ContainerObservation(string State, string? ContainerId, boo
 
 public interface IWorkloadRuntime
 {
-    void Preflight(RuntimeAttempt attempt) => DockerWorkloadRuntime.Validate(attempt);
+    void ValidateAttempt(RuntimeAttempt attempt) => DockerWorkloadRuntime.Validate(attempt);
+    void Preflight(RuntimeAttempt attempt) => ValidateAttempt(attempt);
     IReadOnlyList<string> Discover(string fleetId, IReadOnlyList<RuntimeNode> nodes);
     ContainerObservation Observe(RuntimeAttempt attempt);
     void Create(RuntimeAttempt attempt);
@@ -201,20 +202,8 @@ public sealed class DockerWorkloadRuntime(IDockerCommands docker) : IWorkloadRun
     public static void Validate(RuntimeAttempt a)
     {
         static bool Token(string? value) => value is not null && Regex.IsMatch(value, "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$");
-        static bool Text(string? value) => value is not null && !value.Contains('\0');
-        WorkloadPlacement.ValidateRequest(a.Request);
-        if (!Token(a.FleetId) || !Regex.IsMatch(a.AttemptId, "^[a-f0-9]{32}$") || a.Request.Kind == "legacy"
-            || a.Node.NodeId != a.Reservation.NodeId || !Token(a.Node.DockerContext) || !Token(a.Node.Network)
-            || a.Node.Gpus is null || a.Node.Volumes is null || a.Profile is null || !Token(a.Profile.Id)
-            || string.IsNullOrWhiteSpace(a.Profile.Image) || a.Profile.Image.StartsWith('-') || !Text(a.Profile.Image)
-            || !Token(a.Profile.User) || a.Profile.User is "0" or "root" || a.Request.Resources.CpuCores < 0.01
-            || a.Request.Resources.RamMib > long.MaxValue / BytesPerMib || a.Request.Resources.CpuCores > long.MaxValue / (double)NanoCpuPerCore
-            || a.Profile.ShmMib <= 0 || a.Profile.ShmMib > a.Request.Resources.RamMib
-            || a.Profile.Command is null || a.Profile.Command.Any(x => !Text(x)) || a.Profile.StartupCommand is null || a.Profile.StartupCommand.Any(x => !Text(x))
-            || a.Profile.ReadyCommand is null || a.Profile.ReadyCommand.Any(x => !Text(x)) || a.Profile.LoopbackPorts is null
-            || a.Request.Kind == "interactive" && a.Profile.ReadyCommand.Length == 0
-            || a.Profile.LoopbackPorts.Any(p => !Regex.IsMatch(p, "^127\\.0\\.0\\.1:[0-9]{1,5}:[0-9]{1,5}(/tcp|/udp)?$"))
-            || a.Profile.EnvFile is not null && !Text(a.Profile.EnvFile)) throw new InvalidDataException("Invalid trusted runtime profile.");
+        RuntimeAttemptValidation.Validate(a);
+        if(a.Profile.LoopbackPorts.Any(p => !Regex.IsMatch(p, "^127\\.0\\.0\\.1:[0-9]{1,5}:[0-9]{1,5}(/tcp|/udp)?$")))throw new InvalidDataException("Unsupported Docker loopback mapping");
         foreach (var gpu in a.Node.Gpus)
             if (gpu.LinuxDevices is null || gpu.ReadOnlyBinds is null
                 || gpu.NvidiaDeviceId is null && gpu.LinuxDevices.Length == 0
@@ -222,12 +211,9 @@ public sealed class DockerWorkloadRuntime(IDockerCommands docker) : IWorkloadRun
                 || gpu.LinuxDevices.Any(d => !Regex.IsMatch(d, "^/dev/(dxg|dri/[a-zA-Z0-9_-]+)$"))
                 || gpu.ReadOnlyBinds.Any(b => b is not ("/usr/lib/wsl/lib:/usr/lib/wsl/lib" or "/usr/lib/wsl/drivers:/usr/lib/wsl/drivers")))
                 throw new InvalidDataException("Unsupported GPU device/bind mapping.");
-        if (a.Reservation.GpuDeviceId is {} device && a.Node.Gpus.Count(g => g.DeviceId == device) != 1)
-            throw new InvalidDataException("Selected GPU has no unique runtime binding.");
         foreach (var volume in a.Node.Volumes)
             if (!Token(volume.VolumeName) || string.IsNullOrWhiteSpace(volume.StorageId) || !Regex.IsMatch(volume.ContainerPath, "^/[a-zA-Z0-9_/-]+$")
                 || volume.ContainerPath == "/" || volume.ContainerPath.Contains("..", StringComparison.Ordinal)) throw new InvalidDataException("Unsupported local volume binding.");
-        if (a.Request.StorageId is {} storage && a.Node.Volumes.Count(v => v.StorageId == storage) != 1)
-            throw new InvalidDataException("Missing node-local volume binding.");
+
     }
 }
