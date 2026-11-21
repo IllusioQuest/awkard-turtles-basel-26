@@ -33,7 +33,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-19](T-19-customer-configurator.md) | Customer configurator and cost-benefit analysis (public) | 3 Pitch stretch | T-10, T-14 | anyone | | open |
 | [T-20](T-20-marketing-website.md) | Marketing website | 4 Later | T-19 | open | | open |
 | [T-21](T-21-pitch.md) | Pitch storyboard, demo script and slides | 2 Pitch | T-00 | team lead + Claude | Team lead / Claude | in progress (storyboard direction agreed: docs/pitch/storyboard.md) |
-| [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | | open |
+| [T-22](T-22-paper.md) | Documentation and paper skeleton | 3 Later | T-11, T-13 | open | Jona / Claude | in progress (skeleton on main) |
 | [T-23](T-23-webhosting-integration.md) | Connect the webhosting platform to the heat scheduler | 2 Pitch | T-03 | Nikita | Nikita / Codex | in progress |
 | [T-24](T-24-job-data-locality.md) | Enforce job data locality before execution | 1 Draft | T-01; T-10/T-12 for routing | Codex | Jona / Codex | in progress |
 | [T-25](T-25-animated-example-house.md) | Animated example house (pitch visual) | 2 Pitch | T-04, T-13 | anyone (Lovable possible) | | open |
@@ -42,7 +42,7 @@ Tiers (see `docs/vision.md`): **1 Draft** = needed for the 15:00 draft; **2 Pitc
 | [T-30](T-30-type2-batch-compute-job.md) | Type 2 job: research simulation (Monte Carlo research kernel), measured | 2 Pitch | T-03; decisions 0018, 0020 | anyone with a laptop | | open |
 | [T-31](T-31-mixed-job-queue.md) | Mixed queue: finite Type 1 + Type 2 filler in one year run | 2 Pitch | T-05, T-26; decision 0018 | Jona / Codex | | open |
 | [T-32](T-32-heat-led-dynamic-price.md) | Heat-led dynamic price for Type 2 compute | 3 Pitch stretch | T-31, T-26, T-28 | anyone | | open |
-| [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | in review (branch `feat/T-33-local-llm-job`) |
+| [T-33](T-33-local-llm-job.md) | Local LLM batch service (Apertus 8B, llama.cpp): container and laptop measurement (Type 1) | 2 Pitch | T-02 | Ennio | Ennio / Claude | done (merged 2026-11-21; Type 1 under decision 0020) |
 | [T-37](T-37-profitability-research.md) | Profitability research: power, purchase cost, capacity, demand, trends (Basel-Stadt → CH, 2030) | 2 Pitch | T-15, T-26; decision 0018 | Ennio | Ennio / Claude | done (PR #20) |
 | [T-35](T-35-refurbished-hardware.md) | Refurbished hardware: cost and wear | 2 Pitch | T-15 | Claude | Team lead / Claude (subagent) | in progress |
 

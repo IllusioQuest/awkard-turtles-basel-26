@@ -36,8 +36,7 @@ Docker Desktop 4.94.0, Linux engine 29.8.2, WSL2; Windows Intel Iris Xe driver 3
 
 - Both containers healthy; anonymous HTTP 401, authenticated HTML 200. Separate home volumes
   and localhost-only ports checked. These checks do not establish browser video/input.
-- Browser automation unavailable in this chat. User has been asked to verify video, keyboard
-  and mouse through the actual browser. No successful end-to-end stream claim yet.
+- Browser automation unavailable in this chat. User supplied a screenshot of the streamed desktop and confirmed keyboard/input work on 2026-11-21. This verifies the user-observed desktop path, not CS2 gameplay or measured latency.
 - Software baseline: OpenGL llvmpipe, Accelerated no; Vulkan CPU llvmpipe.
 - Intel experiment: map /dev/dxg, mount /usr/lib/wsl/lib AND /usr/lib/wsl/drivers read-only,
   set LD_LIBRARY_PATH, GALLIUM_DRIVER=d3d12 and Intel adapter selection. Actual glxinfo -B
@@ -97,3 +96,68 @@ Sources checked 2026-11-21: https://docs.selkies.io/latest/start/,
 https://docs.selkies.io/latest/settings/, https://docs.mesa3d.org/drivers/d3d12.html,
 https://devblogs.microsoft.com/commandline/d3d12-gpu-video-acceleration-in-the-windows-subsystem-for-linux-now-available/.
 Decision: decisions/0021-selkies-gaming-lab.md, fresh-context verdict go with changes.
+
+## User-confirmed browser test and summer placement (2026-11-21)
+
+User supplied an actual browser screenshot and reported working keyboard/input. Browser desktop
+smoke is now user-verified. The screenshot's black wallpaper area looked mis-sized. Requested
+PCManFM-Qt wallpaper mode stretch live on A; it accepted/persisted the setting without restarting
+the session. Visual correction awaits user confirmation. Repeat if needed:
+
+    .\gaming\scripts\Repair-SessionWallpaper.ps1 -Node session-a
+
+Summer policy clarification: the gamer and compute/heat site are distinct. A gamer at home can
+stream a game executing at a hotel/spa where hot water is needed, even if no hotel guests game.
+Place NEW sessions on ready, locality-permitted nodes with real capacity and useful heat demand;
+also enforce measured network reachability/latency eligibility. Geography/site type alone does
+not establish low latency or useful heat. There must be provisioned computing hardware and a
+working heat-recovery system at that site. Do not invent a hotel/spa heat profile or hardware.
+The laptop lab will use explicitly synthetic home/hotel/spa signals until sourced data exists.
+
+```mermaid
+flowchart LR
+    Player[Player at home: browser] <-->|Video and input over network| Spa[Spa compute node: original game and Selkies]
+    Spa -->|Recovered heat| Water[Spa water heating]
+    Home[Home site: no summer heat demand] --> Placement[New-session placement]
+    Demand[Spa/hotel: heat demand and free capacity] --> Placement
+    Placement --> Spa
+```
+
+Existing sessions retain their node until session end, even if heat preference changes; batch
+work is preempted first, with observed release before new-session launch. Subsequent sessions
+can move to hotels/spas. This is placement of compute before admission, not transport of heat
+between buildings or live game-state migration. Batch work can be checkpointed/requeued only
+where its declared executor supports it. If every eligible site lacks useful heat or capacity,
+the system cannot guarantee useful heat: user choice between waiting/rejection and explicit
+waste-heat operation remains pending. The user's hotel/spa answer resolves preferred remote
+placement but does not specify this exhausted-capacity fallback.
+
+Controller implementation remains pending; these paragraphs record agreed behavior and test
+requirements, not completed remote-node orchestration. GPU/Vulkan/CS2 gates remain unchanged.
+
+## Case-source clarification: available heat reserve (2026-11-21)
+
+User requests choosing the server whose infrastructure has the largest available heat reserve.
+Read the live sprintd case page (URL below); its summer use case explicitly permits moving jobs
+to hotels, spas, agriculture or businesses with heat demand. It does not define a ranking metric
+called reserved heat. Proposed interpretation awaiting confirmation: remaining useful heat
+absorption capacity over the next one-hour interval, not the amount of heat already in storage.
+
+available_heat_capacity_kwh = max(0, demand_kwh + tank_capacity_kwh - tank_stored_kwh
+    - already_committed_recoverable_heat_kwh).
+
+All terms must refer to the same site and interval. Commitments include running sessions and
+other scheduled heat sources; track them once per site, not once independently for every node.
+Rank eligible sites by this remaining amount; then choose a ready node with free compute capacity
+within the site, with stable ID ties. Recheck and reserve compute plus thermal capacity atomically.
+Do not count the full site reserve for every simultaneous admission. Existing shared heat
+scheduler supplies the demand/storage-based load target, but its clipped 0..1 return alone cannot
+rank absolute capacity after saturation. Any needed shared interface extension must be coordinated
+with T-11/T-12 and reviewed before implementation; do not copy the thermal model into gaming.
+
+A full tank has zero storage headroom, but current demand can still absorb heat. When every site's
+reserve is zero, descending ranking alone supplies no meaningful winner: queue versus explicit
+waste-heat execution remains a fallback choice. No queue/waste policy is silently inferred.
+
+Source accessed 2026-11-21:
+https://app.sprintd.org/events/sprintd-basel-greentech/cases/useful-load-useful-heat-can-your-computing-power-heat-a-home

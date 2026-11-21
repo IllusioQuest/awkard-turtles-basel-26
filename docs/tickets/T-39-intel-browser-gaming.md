@@ -23,3 +23,9 @@ Code discovery script committed/pushed ea9c491. No drivers installed, no host co
 User approved Selkies and emphasized multi-server distribution. ADR 0021 reviewed: go with changes. Two session containers are the initial lab, with separate ports/homes/passwords and loopback access. New sessions/batch work distribute; one original CS2 process is not split across hosts. Streaming image downloading; Intel render node reports WSL faux_driver, hardware graphics remain unproven.
 
 Milestone: two Selkies containers running, auth/volume/bind checks pass. Intel OpenGL accelerated after adding read-only host drivers mount; Vulkan CPU-only and VAAPI failed. CPU H.264 encode succeeded. Browser video/input awaits user; no CS2 claim. Reproduction and next decisions: docs/gaming-lab.md. Node-stop test blocked by execution policy before execution. Code f8b318c pushed on featur-gaming.
+
+Compatibility lab review: PR #22, https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/22. Not complete: browser smoke confirmation, accelerated Vulkan/CS2 and multi-node coordinator are pending. ADR renamed to 0021 to avoid collision with the team's business-model ADR 0020. Gaming remains a user-requested experiment, separate from the team business model.
+
+User confirmed actual streamed desktop and keyboard/input via screenshot. Applied live wallpaper stretch on A; visual follow-up pending. Summer placement explicitly prefers eligible hotel/spa heat sites independent of player location. All-sites-unavailable fallback still needs a choice. Non-disruptive repaint helper pushed d37beb2; see gaming-lab.md.
+
+Read linked live case. User requests largest available heat reserve for execution-site selection. Proposed definition and atomic per-site reservation accounting recorded in gaming-lab.md; await confirmation of headroom versus stored heat before changing interfaces. No numeric case parameters changed.

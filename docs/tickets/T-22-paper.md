@@ -2,7 +2,7 @@
 
 - **Tier:** 3 Later  ·  **Area:** Docs / paper
 - **Depends on:** T-11, T-13
-- **Suggested owner:** open  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** open  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (skeleton: `docs/paper/outline.md`)
 
 ## Goal
 
