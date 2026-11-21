@@ -1,5 +1,7 @@
 # Universal workload placement: first executable prototype (T-43)
 
+Implementation: [PR #33](https://github.com/IllusioQuest/awkard-turtles-basel-26/pull/33), branch feat/T-43-universal-workloads. Code merge pending; this guide is committed directly to main.
+
 The same admission engine now handles legacy gaming reservations and explicit CPU/RAM/GPU
 workloads. C# and Docker contexts remain the stack; no Kubernetes/Ray package was added. It
 distributes whole processes/containers, not arbitrary instructions inside an unchanged game.
