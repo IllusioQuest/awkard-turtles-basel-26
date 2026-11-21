@@ -383,12 +383,13 @@ public static class Economics
         Func<EconomicResult, bool> criterion, double step)
     {
         if (step is <= 0 or > 1) throw new ArgumentOutOfRangeException(nameof(step));
-        int n = (int)Math.Round(1 / step);
+        int n = (int)Math.Floor(1 / step);
         for (int i = 0; i <= n; i++)
         {
             double share = Math.Min(1, Math.Round(i * step, 10));
             if (criterion(evaluateAtShare(share))) return share;
         }
+        if (n * step < 1 && criterion(evaluateAtShare(1))) return 1;
         return null;
     }
 

@@ -186,6 +186,7 @@ public sealed class EconomicsTests
             new ActorSplit(1, s - 0.137), new ActorSplit(1, s - 0.137));
         Assert.Equal(0.14, Economics.RequiredType1Share(Fake, r => r.SystemSurplusChf > 0, 0.01)!.Value, 12);
         Assert.Null(Economics.RequiredType1Share(Fake, r => r.SystemSurplusChf > 5, 0.01));
+        Assert.Equal(1, Economics.RequiredType1Share(Fake, r => r.SystemSurplusChf > 0.8, 0.3));
     }
 
     [Fact]
