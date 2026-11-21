@@ -1,4 +1,6 @@
-# Browser gaming prototype (T-39, T-40)
+# Browser gaming prototype (historical T-39, T-40)
+
+**Current 2026-11-21:** user retired the CS/Xonotic/Dozen labs. Keep Minecraft server + Node A client only. See [presentation cleanup](jobs/presentation-cleanup.md). The original prototype description below is historical; removed game scripts are no longer runnable.
 
 Status 2026-11-21: working prototype, merged in PR #22 (`56501a7`). Original, unmodified Xonotic
 0.8.6 runs on a Linux desktop container and is streamed to a browser with Selkies; the user
