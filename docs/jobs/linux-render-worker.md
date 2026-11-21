@@ -1,6 +1,6 @@
-# Linux GPU render worker — prepared, not hardware-verified
+# Linux GPU render worker â€” prepared, not hardware-verified
 
-T-66 / PR #54 / ADR 0056. User selected a compatible Linux GPU worker on
+T-66 / PR #54 / ADR 0057. User selected a compatible Linux GPU worker on
 2026-11-21; no such machine is currently available. The laptop remains CPU-only.
 A deployment bundle is prepared; no remote host was contacted. GPU acceleration
 must not be claimed until `render-probe` exits 0 on the actual worker.
