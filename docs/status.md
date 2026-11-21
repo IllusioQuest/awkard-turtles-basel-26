@@ -122,3 +122,5 @@ T-75 Nikita/Codex, fix/T-75-compact-render-map: bottom Physical hosts footer rem
 
 
 T-76 Nikita/Codex, fix/T-76-gpu-worker-shades: user-approved related GPU shades and weights1.5/1/.5. Preserves synthetic total500kWh, heat-first policy, CPU roles and prior outputs. Renderer-only restart/validation underway; Minecraft untouched. Depends PR67.
+
+T-76 verified PR68 /21b0769: 48-frame pipeline and MP4 complete in133.7017 active seconds, GPU counts17/15/16. Approved work budgets1.5/1/.5 live (GPU150/100/50 of total500kWh). Accent shades and GPU identity labels served; no visual preview access. Docs/evidence on main.

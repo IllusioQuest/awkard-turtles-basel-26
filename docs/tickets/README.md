@@ -114,4 +114,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-75](T-75-compact-render-map.md) | Compact render cards and identify initial job provider | Nikita / Codex | in review |
 
-| [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in progress |
+| [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in review; PR #68 |
