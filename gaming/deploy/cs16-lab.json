@@ -6,6 +6,7 @@
   "memory_limit_mib_per_node": 2048,
   "pids_limit_per_node": 512,
   "installer_timeout_seconds": 180,
+  "max_installer_log_bytes": 1048576,
   "relay_image": "digitalheat-tcp-relay:lab",
   "relay_cpu_limit": 0.25,
   "relay_memory_limit_mib": 128,

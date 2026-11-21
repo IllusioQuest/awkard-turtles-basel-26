@@ -10,6 +10,7 @@ RUN dpkg --add-architecture i386 && apt-get update \
     && rm -rf /var/lib/apt/lists/*
 ENV WINEDEBUG=-all WINEPREFIX=/home/ubuntu/.wine-cs16
 COPY desktop-background.py /opt/digitalheat/desktop-background.py
+COPY run-with-bounded-log.py /opt/digitalheat/run-with-bounded-log.py
 # Apply before the desktop process starts, including when a persisted home has old wallpaper settings.
 RUN sed -i 's|^Exec=.*|Exec=python3 /opt/digitalheat/desktop-background.py --desktop|' /etc/xdg/autostart/lxqt-desktop.desktop
 USER ubuntu

@@ -11,15 +11,14 @@ if($LASTEXITCODE -ne 0 -or $hash -ne $policy.installer_sha256){throw 'Staged ins
 # Non-root, offline, bounded, interactive trial. Never add silent license-acceptance arguments.
 $trial=@'
 exec flock -n /tmp/digitalheat-installer.lock sh -c '
-ulimit -f 8192
 : > /home/ubuntu/cs16-install-exit.txt
-timeout -k 5 "$CS16_INSTALL_TIMEOUT_SECONDS" wine /home/ubuntu/cs16-installer.exe > /home/ubuntu/cs16-install.log 2>&1
+python3 /opt/digitalheat/run-with-bounded-log.py --timeout-seconds "$CS16_INSTALL_TIMEOUT_SECONDS" --max-log-bytes "$CS16_MAX_LOG_BYTES" --log /home/ubuntu/cs16-install.log -- wine /home/ubuntu/cs16-installer.exe
 result=$?
 printf "%s\n" "$result" > /home/ubuntu/cs16-install-exit.txt
 wineboot -k >/dev/null 2>&1
 '
 '@
 & docker --context desktop-linux exec -d --user ubuntu --env DISPLAY=:20 --env WINEDEBUG=err+all --env WINEPREFIX=/home/ubuntu/.wine-cs16 `
-  --env "CS16_INSTALL_TIMEOUT_SECONDS=$($policy.installer_timeout_seconds)" $ids[0] sh -c $trial
+  --env "CS16_INSTALL_TIMEOUT_SECONDS=$($policy.installer_timeout_seconds)" --env "CS16_MAX_LOG_BYTES=$($policy.max_installer_log_bytes)" $ids[0] sh -c $trial
 if($LASTEXITCODE -ne 0){throw 'Installer trial could not be dispatched.'}
 Write-Output 'Interactive installer dispatched; check its desktop. Acknowledgment is not installation success. Handle any license terms yourself; no silent acceptance is performed.'
