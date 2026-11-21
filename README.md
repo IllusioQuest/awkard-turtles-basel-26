@@ -74,6 +74,10 @@ dotnet run --project src/DigitalHeat.LiveGrid -- --up
 It builds and starts the four containers, opens <http://127.0.0.1:5087> and stops the containers on
 **Ctrl+C**. Press **F11** for full screen.
 
+The terminal prints one line per scheduler hour with each house's heat request, planned load and
+observed Docker CPU load. Job arrivals, real task moves, completions and missed deadlines appear
+as separate event lines; the CPU figure is a measurement, not a heat reading.
+
 **Showing it:** set House 1 to 0 % heat and House 2 to 100 %, then press **1**. Job 1 arrives at
 House 1 (blue banner); House 1 pauses and the scheduler sends its tasks one by one to the warm
 houses (flying tokens; the reason appears in the receiving house and in the log). Switch to "No

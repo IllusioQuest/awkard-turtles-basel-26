@@ -223,6 +223,20 @@ sealed class LiveCoordinator
                 }
             }
         });
+        if (newHour)
+        {
+            // One line per demo hour: planned load comes from the network decision; observed
+            // CPU is the latest Docker measurement, not an estimate of delivered heat.
+            lock (gate)
+            {
+                string nodes = string.Join("  ", ids.Select((id, i) =>
+                {
+                    double? observed = ActualLoad?.Invoke(cfg.Nodes[i].Container);
+                    return $"{Label(i)} heat {HeatShare(i):P0} → target {targetLoad[i]:P0} / CPU {(observed is null ? "—" : observed.Value.ToString("P0"))}";
+                }));
+                Console.WriteLine($"[hour {step:000} · {scheduler.Id}] {nodes}");
+            }
+        }
         }
     }
 
@@ -358,6 +372,7 @@ sealed class LiveCoordinator
     {
         events.Add(new LiveEvent(nextEvent++, step, kind, job, from is null ? null : ids[from.Value],
             to is null ? null : ids[to.Value], task, jobs.TryGetValue(job ?? -1, out var j) ? ids[j.Origin] : null, text));
+        Console.WriteLine($"[hour {step:000} · {kind}] {text}");
         if (events.Count > 400) events.RemoveRange(0, events.Count - 400);
     }
 
