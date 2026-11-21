@@ -25,6 +25,7 @@ public sealed class EngineInputs
     public required IPricing Pricing { get; init; }
     public required IForecastProvider Forecast { get; init; }
     public required TimeseriesMode Timeseries { get; init; }
+    public bool CaptureJobEvents { get; init; }
 }
 
 /// <summary>
@@ -125,12 +126,16 @@ public sealed record NetworkHourRow(
 /// <summary>One timeseries row: house, period [StartMs, EndMs), its account and tank at EndMs.</summary>
 public sealed record HouseTimeseriesRow(int HouseIndex, long StartMs, long EndMs, EnergyAccount Account, double TankEndKwh);
 
+/// <summary>Ordered simulated lifecycle action; chunk is null for job completion.</summary>
+public sealed record JobEventRow(long TimeMs, string HouseId, string JobId, string JobType, int? ChunkId, string Kind);
+
 public sealed class FleetRunResult
 {
     public required IReadOnlyList<HouseResult> Houses { get; init; }
     public required IReadOnlyList<JobResult> Jobs { get; init; }
     public required IReadOnlyList<NetworkHourRow> NetworkHours { get; init; }
     public required IReadOnlyList<HouseTimeseriesRow> HouseTimeseries { get; init; }
+    public IReadOnlyList<JobEventRow> JobEvents { get; init; } = [];
     public required long EventCount { get; init; }
     public required long SchedulerCalls { get; init; }
     public required double WallTimeS { get; init; }

@@ -99,3 +99,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-65](T-65-one-heat-first-policy.md) | Retire competing scheduler policies; one heat-first policy | Nikita / Codex | in progress; ADR 0051; explicit user request |
 | [T-66](T-66-landscape-render.md) | Landscape render comparison on heat-first mesh | Nikita / Codex | in progress; ADR 0052; depends PR #52 |
 | [T-67](T-67-local-fleet-scenarios.md) | Local fleet scenarios around a point (first: FHNW Dreispitz + indoor pool) | Ennio / Claude | in progress; variant only |
+| [T-68](T-68-household-job-log.md) | Household simulated job event log and two-day examples | Codex | in progress |

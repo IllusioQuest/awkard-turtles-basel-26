@@ -1,0 +1,126 @@
+{
+  "id": "research-sim-full-load",
+  "class": "type2",
+  "work_unit": "simulation_task",
+  "description": "Single-server research simulation configured to run at full load or pause, for the reference-house examples.",
+  "energy_kwh_per_work_unit": {
+    "value": 4.09e-06,
+    "unit": "kWh/simulation task",
+    "source": "labelled placeholder: CPU laptop value, config/jobs/research-sim-montecarlo.json. Own measurement 2026-11-21, Intel Core Ultra 7 255H laptop (Windows 11, Docker Desktop), --cpus 8, 8 workers, 320 tasks per run; run 2 (steady state) of data/raw/measurements/research-sim-ising/energy-2026-11-21, docs/jobs/research-sim.md (whole laptop, gross, battery meter: 1.3089 Wh / 320 tasks). TODO(source): no GPU measurement of this job exists"
+  },
+  "size": {
+    "dist": "empirical",
+    "file": "data/derived/demand/job-durations.csv",
+    "filter": {
+      "source": "alibaba2020",
+      "series": "gpu tasks"
+    },
+    "bin_column": "duration_bin",
+    "weight_column": "share_jobs",
+    "scale": "work_units_per_second_at_1_kw",
+    "min_s": {
+      "value": 1,
+      "unit": "s",
+      "source": "TODO(source): lower end of the '<1 min' bin; Alibaba trace bin edge only, 1 s is an assumption"
+    },
+    "max_s": {
+      "value": 604800,
+      "unit": "s",
+      "source": "TODO(source): upper end of the '>3 d' bin; 7 days is an assumption, the trace gives no upper edge"
+    },
+    "unit": "simulation tasks/job",
+    "source": "Alibaba PAI GPU cluster trace 2020, task durations per bin, share of tasks (data/derived/demand/job-durations.csv; data/raw/demand-traces/alibaba-gpu-2020/SOURCE.md, https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2020, Weng et al., NSDI 2022, retrieved 2026-11-21; TODO(licence) before redistribution). Log-uniform within a bin. Converted to tasks at load 1 on a 1 kW server: tasks = duration_s x 1 / (kWh per task x 3600 s/h / 1 kW) = duration_s x 67.92 tasks/s, so a job's server-hours equal its duration in hours"
+  },
+  "batch_size": {
+    "dist": "fixed",
+    "value": 1,
+    "unit": "jobs/request",
+    "source": "docs/model/fleet-simulation.md section 5.2: batch size 1 for research jobs"
+  },
+  "deadline_s": {
+    "dist": "uniform",
+    "min": 7200,
+    "max": 259200,
+    "unit": "s",
+    "source": "team range 2026-11-21, docs/model/fleet-simulation.md §5.1"
+  },
+  "max_chunks": {
+    "value": 1,
+    "unit": "chunks",
+    "source": "User requirement: keep each research job on one server."
+  },
+  "min_chunk_work_units": {
+    "value": 1,
+    "unit": "simulation tasks",
+    "source": "one simulation task is the split granularity (docs/model/fleet-simulation.md section 5.2)"
+  },
+  "start_overhead_s": {
+    "value": 0,
+    "unit": "s",
+    "source": "TODO(source): container start time not sourced; 0 = not modelled"
+  },
+  "lifecycle": {
+    "allow_pause": true,
+    "checkpointable": true,
+    "min_load": {
+      "value": 1,
+      "unit": "fraction",
+      "source": "User-selected full-load-or-paused scenario assumption; TODO(source): minimum sustainable load is not measured."
+    },
+    "resume_overhead_s": {
+      "value": 0,
+      "unit": "s",
+      "source": "TODO(source): 0 = not modelled"
+    },
+    "checkpoint_overhead_s": {
+      "value": 0,
+      "unit": "s",
+      "source": "TODO(source): 0 = not modelled"
+    },
+    "source": "allow_pause: interruptible = true in config/jobs/research-sim-montecarlo.json; checkpointable: each task result is written atomically, progress survives a kill (docs/jobs/research-sim.md)"
+  },
+  "input_mb_per_work_unit": {
+    "value": 0,
+    "unit": "MB/task",
+    "source": "TODO(source): input data size not in the repo; 0 = not modelled (not used by the engine)"
+  },
+  "state_mb": {
+    "value": 0,
+    "unit": "MB",
+    "source": "TODO(source): checkpoint size not in the repo; 0 = not modelled (not used by the engine)"
+  },
+  "placement_policy": {
+    "mode": "anywhere",
+    "source": "config/jobs/research-sim-montecarlo.json: demo workload only (synthetic 2D Ising model), no personal data and no customer contract; a real customer job must carry the policy from its contract (decision 0013)"
+  },
+  "volume": {
+    "kind": "server_hours_per_year",
+    "server_hours_per_year": {
+      "value": 80000,
+      "unit": "server-hours/year",
+      "source": "cd-d-scicore-sh-energy (data/raw/market/compute-demand.csv): sciCORE Basel consumption in 1 kW server-hour equivalents, energy basis 79,920 (low), central value 80,000 (docs/research/demand.md section on research demand)"
+    },
+    "volume_scale": {
+      "value": 1,
+      "unit": "factor",
+      "source": "scenario value: reference volume, no scaling"
+    }
+  },
+  "arrival_shape": {
+    "file": "data/derived/demand/research-alibaba2020-hour-of-week.csv",
+    "index_column": "hour_of_week_local",
+    "column": "arrivals_rel",
+    "source": "Alibaba PAI GPU cluster trace 2020, task arrivals per hour of week (data/raw/demand-traces/alibaba-gpu-2020/SOURCE.md, retrieved 2026-11-21); a hyperscaler's internal ML platform, not academic research compute"
+  },
+  "origin_mix": {
+    "client_site_share": {
+      "value": 0,
+      "unit": "fraction",
+      "source": "scenario value: research jobs have no data-origin constraint (placement anywhere)"
+    }
+  },
+  "price": {
+    "kind": "dynamic",
+    "source": "quoted per billed server-hour by the pricing function (docs/model/fleet-simulation.md section 7)"
+  }
+}

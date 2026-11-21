@@ -1,0 +1,40 @@
+{
+  "_note": "Reference-house summer day, actual Basel 2025 weather and case house parameters; one illustrative research job and initial tank state from the reference annual simulation. Simulated, not a live job.",
+  "run": {
+    "start_local": "2025-07-15T00:00",
+    "end_local": "2025-07-16T00:00",
+    "mode": "event",
+    "tick_ms": 1000,
+    "seed": 20261121
+  },
+  "houses": {
+    "file": "config/fleet/houses/reference-demo-summer.json"
+  },
+  "servers": {
+    "policy": "fixed",
+    "n": 4,
+    "hardware_profile": "config/hardware/gpu-inference-l4.json"
+  },
+  "jobTypes": [
+    "config/fleet/job-types/research-sim-full-load.json"
+  ],
+  "demand": {
+    "from_file": "config/fleet/demo/summer-jobs.csv"
+  },
+  "pricing": {
+    "id": "fixed-only",
+    "p_min_chf": 0.226
+  },
+  "forecast": {
+    "kind": "archived"
+  },
+  "scheduler": {
+    "id": "mesh-heat-first",
+    "chunk_target_s": 86400
+  },
+  "logging": {
+    "house_timeseries": "hourly",
+    "out_dir": "data/derived/fleet",
+    "job_events": true
+  }
+}

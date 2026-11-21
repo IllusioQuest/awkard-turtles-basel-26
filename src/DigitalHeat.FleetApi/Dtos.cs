@@ -25,3 +25,6 @@ public sealed record Snapshot(int H, int PeriodStartH, int PeriodHours, HousePer
 public sealed record WeatherPoint(string Id, double Lat, double Lon);
 
 public sealed record WeatherHours(int FromH, float[][] TemperatureC);
+
+public sealed record JobEvent(long TimeMs, string JobId, string JobType, int? ChunkId, string Kind);
+public sealed record JobEventLog(bool Available, bool Truncated, JobEvent[] Events);
