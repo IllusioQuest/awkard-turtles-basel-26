@@ -17,3 +17,5 @@ Reported timeout repaired and node split reverified: 84 tests pass; status stays
 GPU follow-up in progress: correct probe bindings/backend diagnostics and error exit codes; isolated user-approved Eevee capability experiment under ADR 0055. Existing active comparison and games preserved.
 
 Eevee capability tests did not pass (OpenGL 4.1 limit; Vulkan missing features). Evidence in docs/performance/render-gpu-compatibility-2026-11-21.json; diagnostic patch 931912c pushed, not deployed over active comparison. Awaiting hardware/compatibility path choice.
+
+Current-upstream check completed: Blender 5.3.0 also fails (missing dual-source blending); Mesa 26.3.0 source explicitly disables that feature. No successful GPU render. Compatible worker path is the remaining design choice; evidence updated.

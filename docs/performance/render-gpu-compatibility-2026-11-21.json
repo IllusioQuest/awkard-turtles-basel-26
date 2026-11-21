@@ -30,7 +30,25 @@
       "VK_EXT_provoking_vertex"
     ]
   },
-  "scope": "Isolated containers with /dev/dxg and read-only WSL libraries; no games changed. Newest Blender 5.3 and Mesa 26.2.3 were discovered in official sources but NOT tested. Do not claim all possible drivers/backends were exhausted.",
+  "scope": "Bounded isolated Linux containers with /dev/dxg and read-only WSL libraries. Blender 5.3.0 official archive checksum verified. Neither game containers nor active comparison changed. Mesa 26.3.0 source checked, not compiled. No successful hardware Eevee render.",
   "diagnostic_fix_commit": "931912c",
-  "validation": "WorkloadRun clean build; 84 orchestration tests pass; corrected probe reports compiled backends. Fix not deployed over active comparison."
+  "validation": "WorkloadRun clean build; 84 orchestration tests pass; corrected probe reports compiled backends. Fix not deployed over active comparison.",
+  "eevee_latest_vulkan": {
+    "blender": "5.3.0",
+    "blender_hash": "02f0899d78e3",
+    "archive_sha256": "dacb8264197a3f7fda6001285a5a506fc97ee943881261c2c3bd63c882f22e05",
+    "mesa_dozen": "26.0.8",
+    "completed_render": false,
+    "missing_features": [
+      "dual source blending"
+    ],
+    "failure": "No Vulkan device meets minimum requirements; Blender segfaulted after rejecting device"
+  },
+  "newer_driver_source_check": {
+    "version": "Mesa 26.3.0",
+    "url": "https://gitlab.freedesktop.org/mesa/mesa/-/raw/mesa-26.3.0/src/microsoft/vulkan/dzn_device.c",
+    "line": 679,
+    "source": ".dualSrcBlend = false,",
+    "method": "Read upstream source; newer driver not rebuilt"
+  }
 }
