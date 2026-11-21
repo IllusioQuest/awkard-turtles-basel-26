@@ -2,7 +2,7 @@
 
 - **Tier:** 2 Pitch  ·  **Area:** Core / algorithms
 - **Depends on:** T-11, T-05
-- **Suggested owner:** Codex  ·  **Owner:**  ·  **Status:** open
+- **Suggested owner:** Codex  ·  **Owner:** Jona / Claude  ·  **Status:** in progress (step 1 done: engine, B0/B1, rolling-horizon LP, UB; decision 0024, `docs/model/network-scheduler.md`)
 
 ## Goal
 

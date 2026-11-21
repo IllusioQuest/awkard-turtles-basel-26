@@ -143,3 +143,8 @@ whole laptop), January/July LiveRun with forced pause through the shared schedul
 meter `scripts/measure_job_windows_battery.ps1`. 40 .NET tests pass. No shared interface changed.
 
 T-39 Dozen milestone: source build succeeded, hardware Vulkan identifies Intel Iris Xe (API 1.2.335), vkcube succeeds headlessly and in separate Selkies desktop C (18883), A/B untouched. Experimental/non-conformant; VAAPI still unavailable, no CS2 claim. User cube-stream confirmation and storage choice pending; current C: ~20 GB versus Valve's 85 GB requirement.
+## T-12 network scheduler (2026-11-21, Jona / Claude)
+Decision 0024 (reviewed). New projects `DigitalHeat.Network` (no third-party deps), `DigitalHeat.Network.Lp`
+(OR-Tools GLOP), `DigitalHeat.NetworkRun`, `DigitalHeat.Network.Tests`; `HeatBalance.Step` and `WeatherCsv` moved into Core
+(scored outputs bit-identical). Step 1: B0/B1/rolling-horizon LP/UB on the reference house, B1 = UB. Next: jobs with
+deadlines (step 2), Swiss multi-site dataset and map export (step 3). `docs/model/network-scheduler.md`.
