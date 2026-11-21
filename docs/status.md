@@ -100,3 +100,6 @@ T-69 expanded by user: PR #59 / `757a56b`, ADR 0061 reviewed go with changes. Ad
 
 
 T-71, Nikita/Codex, `feat/T-71-warm-gpu-worker`: user chose existing-renderer speed before extra workers. Isolated same-process diagnostic: 8.257s first / 1.015s second frame on Iris Xe, 640x360/32 samples; only two camera frames, not SLA. Warm per-frame execution under ADR 0063 review; preserve current run/results, heat-first policy and frame-boundary pause. No new workers. Depends PR #59 for current UI; evidence in `docs/performance/warm-frame-probe-2026-11-21.json`.
+
+
+T-71 verified/in review: PR #62 / `180de77`, depends PR #59; ADR 0063 go with changes applied. Owned warm GPU process, per-frame completion/active-stop fencing, event wakeups, same heat commitments and MeshPeer. 106 orchestration tests, actual scheduled pause/reuse, owner restart, stop/rerun, idle loop and Linux native package pass. Warm app 18920, original paused 14 frames at 18910 preserved. Five warm frames 7.5053s active, mean render 1.0577s (short local portion, not SLA). No extra workers. Method/limitations: `docs/jobs/warm-renderer.md`; preserve this work when integrating the household live demo, whose code/formulas were not changed.
