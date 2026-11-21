@@ -1,0 +1,42 @@
+name: digitalheat-gaming
+x-session: &session
+  image: ${GAMING_IMAGE:?Run Start-GamingLab.ps1 to resolve the pinned image}
+  shm_size: 1gb
+  mem_limit: 3g
+  cpus: 2
+  restart: "no"
+  security_opt: ["no-new-privileges:true"]
+  environment: &environment
+    SELKIES_ENABLE_HTTPS: "false"
+    SELKIES_BASIC_AUTH_USER: player
+    SELKIES_USE_CPU: "true"
+    SELKIES_ENCODER: h264enc
+    SELKIES_FRAMERATE: "20-20"
+    SELKIES_MANUAL_WIDTH: "1280"
+    SELKIES_MANUAL_HEIGHT: "720"
+    SELKIES_ENABLE_CLIPBOARD: "false"
+    SELKIES_ENABLE_BINARY_CLIPBOARD: "false"
+    SELKIES_FILE_TRANSFERS: none
+    SELKIES_MICROPHONE_ENABLED: "false"
+    SELKIES_WEBCAM_ENABLED: "false"
+    SELKIES_PRINTING_ENABLED: "false"
+services:
+  session-a:
+    <<: *session
+    ports: ["127.0.0.1:18881:8080"]
+    environment:
+      <<: *environment
+      SELKIES_BASIC_AUTH_PASSWORD: ${GAMING_PASSWORD_A:?Missing local password}
+    volumes: ["session-a-home:/home/ubuntu"]
+    labels: { digitalheat.gaming.node: session-a }
+  session-b:
+    <<: *session
+    ports: ["127.0.0.1:18882:8080"]
+    environment:
+      <<: *environment
+      SELKIES_BASIC_AUTH_PASSWORD: ${GAMING_PASSWORD_B:?Missing local password}
+    volumes: ["session-b-home:/home/ubuntu"]
+    labels: { digitalheat.gaming.node: session-b }
+volumes:
+  session-a-home:
+  session-b-home:

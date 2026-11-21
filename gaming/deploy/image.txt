@@ -1,0 +1,1 @@
+ghcr.io/selkies-project/selkies/desktop@sha256:5e877dfc8280afc2326bb24a3a57d37d2edb081e595014842aff1d6cd3569015
