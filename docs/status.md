@@ -9,6 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
+| Jona / Codex | `docs/T-64-pitch-film-treatment` | T-64: proposed 5-minute film treatment and two narrative voices for T-21 owner | `docs/pitch/` only; no scored model or UI changes | draft for team lead / Claude review |
 | Nikita / Codex | feat/T-60-unified-scheduler | T-62 mesh prototype on Jona T-60 boundary; heat-first shared selection | Core ranking, peer offers/origin intents, retained-heat selected-site binding | in progress; ADR 0049; user selected deterministic mesh first, no reassignment while origin is down; T-61 equivalence remains open |
 | Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | PR #49 in review; 125 source rows + deterministic 1000-building composition; ADR 0045 reviewed; Ennio/T-58 notified on PR #48; mixed thermal integration awaits category heat/spatial inputs |
 | Nikita / Codex | fix/T-57-scheduler-cleanup | Remove redundant validation/indexing and clarify event loop | no public interface/model changes | PR #46 in review; 61 orchestration + 46 Core tests; queued owner about half median runtime in both run orders, allocations down 83%; mixed idle timings documented; live games untouched |

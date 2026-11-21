@@ -94,3 +94,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-58](T-58-fleet-simulation.md) | Fleet simulation: event-driven, many houses, mock scheduler and pricing, per-house logging | Ennio / Claude | done |
 | [T-59](T-59-swiss-building-mix.md) | Swiss building and ownership weights for simulation nodes | Nikita / Codex; coordinate T-58 | PR #49 in review; composition prepared; mixed thermal inputs pending T-58 |
 | [T-62](T-62-origin-owned-mesh.md) | Shared heat-first policy and deterministic peer mesh | Nikita / Codex; coordinate Jona T-60/T-61 | in progress; simulation first, origin ownership retained |
+| [T-64](T-64-pitch-film-treatment.md) | Pitch film treatment and narrative options | Jona / Codex; coordinate T-21 owner | in progress — proposal |
