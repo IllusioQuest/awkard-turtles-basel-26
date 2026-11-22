@@ -42,4 +42,21 @@ restart intent recovery, heat conservation, and kill during real GPU3 rendering;
 complete48frame video on remaining nodes and verify controller actually stopped.
 
 ## Review
-Pending fresh limited-context review.
+Fresh limited-context review: **go with changes**. Applied all three clarifications:
+
+1. Fence launch races by stopping the controller first, then reconciling every
+   unreleased native/warm ownership record against retained process identities.
+   A PID-less launch that cannot be tied to a proven warm process blocks retries.
+2. Publish shared PNG bytes and discovery metadata before released success; scan
+   durable successful records after fencing so a completion missed by polling is
+   retained. Verify scene/build/frame/hash before reuse.
+3. Persist one retry/heat plan before cancellation, registration or submission.
+   Count completed and accepted survivor work before weighted unstarted allocation.
+   Partial-registration replay reuses the same plan and original frame deadlines.
+
+Implemented in `6119140`, PR77.148 tests passed, including registration recovery
+and hour-boundary heat accounting. Actual GPU3 controller+renderer termination
+and frame5 retry verified;48-frame video completed28/19/1. A separate new run
+survived origin restart with GPU3 off and completed29/19. See
+[verification and limitations](../jobs/node-shutdown.md). Status remains proposed
+for team confirmation; the user approved implementation before coding.

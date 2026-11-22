@@ -134,4 +134,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-85](T-85-active-bookkeeping.md) | Reduce active-job bookkeeping | Nikita / Codex | in review; PR #76 |
 
-| [T-86](T-86-node-shutdown.md) | Whole-node shutdown and confirmed frame retry | Nikita / Codex | in progress |
+| [T-86](T-86-node-shutdown.md) | Whole-node shutdown and confirmed frame retry | Nikita / Codex | in review; PR #77 |
