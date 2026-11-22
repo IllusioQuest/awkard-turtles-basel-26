@@ -1,6 +1,6 @@
 # T-88 — Repository hygiene and mesh scheduler runtime
 
-Owner: Nikita / Claude. Status: in progress. Branch: claude/beautiful-allen-ukjq15.
+Owner: Nikita / Claude. Status: done (PR #78). Branch: claude/beautiful-allen-ukjq15.
 User-approved scope (2026-11-22): no changes in areas other agents are working on (renderer,
 scheduler core T-85/T-86, web/fleet/pitch).
 

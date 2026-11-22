@@ -1,6 +1,6 @@
 # T-87 — Switch a fenced GPU worker back on
 
-Owner: Nikita/Claude (taken over from Codex on 2026-11-22 by user decision; no Codex code had been pushed). Status: in review. Branch: claude/beautiful-allen-ukjq15.
+Owner: Nikita/Claude (taken over from Codex on 2026-11-22 by user decision; no Codex code had been pushed). Status: done (PR #78). Branch: claude/beautiful-allen-ukjq15.
 Depends on merged T-86 / PR77. User wants the same power button to restart GPU3;
 approved rejoining the current render for unstarted frames only. Preserve completed
 and running/accepted work, original deadlines, heat-first policy and the existing
