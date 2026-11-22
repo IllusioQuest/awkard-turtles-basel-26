@@ -1,0 +1,45 @@
+{
+  "_note": "Variant of dreispitz-5-pool.json with 1 server per house (the pool keeps 20): houses file config/fleet/houses/dreispitz-5-pool-1-server.json. Everything else unchanged. T-67 variant, not a scored figure: houses file config/fleet/houses/dreispitz-5-pool.json from config/fleet/local/dreispitz.json. Job volumes as basel-region-100 (sourced Basel volumes, scale 1). Constant customer demand (user choice, T-67): elasticity 0 and no reference-price noise, so every Type 2 job is accepted; the load-based price still sets Type 2 income.",
+  "run": {
+    "start_local": "2025-01-01T00:00",
+    "end_local": "2026-01-01T00:00",
+    "mode": "event",
+    "tick_ms": 1000,
+    "seed": 20261121
+  },
+  "houses": {
+    "file": "config/fleet/houses/dreispitz-5-pool-1-server.json"
+  },
+  "servers": {
+    "policy": "from_file",
+    "hardware_profile": "config/hardware/gpu-inference-l4.json"
+  },
+  "jobTypes": [
+    "config/fleet/job-types/transcription-whisper-large-v3.json",
+    "config/fleet/job-types/llm-inference-apertus-8b.json",
+    "config/fleet/job-types/research-sim-montecarlo.json"
+  ],
+  "demand": {
+    "from_file": null
+  },
+  "pricing": {
+    "id": "mock-load",
+    "p_min_chf": 0.226,
+    "p_max_chf": 1.2,
+    "gamma": 1,
+    "p_ref_chf": 0.82,
+    "p_ref_noise_sd": 0,
+    "elasticity": 0
+  },
+  "forecast": {
+    "kind": "archived"
+  },
+  "scheduler": {
+    "id": "mesh-heat-first",
+    "chunk_target_s": 3600
+  },
+  "logging": {
+    "house_timeseries": "daily",
+    "out_dir": "data/derived/fleet"
+  }
+}

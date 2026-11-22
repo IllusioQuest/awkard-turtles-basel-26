@@ -510,6 +510,16 @@ paid in the model (without that, the 4-server break-even moves to ≈ 0.30); few
 slightly higher Type 2 quotes through the pricing's capacity term (not traced further). The 1-server
 case was re-run independently and matches.
 
+### One server per house (scenarios `*-1-server.json`, 2026-11-22)
+
+| Run | Coverage | Utilisation | Late jobs | Income | Net after hardware (combined) |
+|---|---:|---:|---:|---:|---:|
+| `reference-1-server` | 18.9 % | 84.1 % | 4,622 (5.9 %) | CHF 13,333 | +CHF 5,252 (payback 3.1 y; operator +CHF 4,470, 3.4 y) |
+| `real-house-1-server` | 16.1 % | 95.0 % | 956 (1.2 %) | CHF 14,628 | +CHF 6,332 (payback 2.8 y; heat value CHF 885) |
+| `dreispitz-5-pool-1-server` | houses 17.9 %, pool 11.0 % | houses ≈ 80 %, pool 49 % | 126 of 778,536 (0.016 %) | CHF 170,564 (all sites) | houses ≈ +CHF 1,770 each; pool (20 servers) −CHF 24,937 |
+
+In the one-server neighbourhood the pool does 68 % of the work in January and 76 % in July.
+
 ### Real house variant (`config/fleet/scenarios/real-house.json`, T-82, 2026-11-22)
 
 The hackathon organisers provided measured data of a real house (`data/raw/housedata/SOURCE.md`;

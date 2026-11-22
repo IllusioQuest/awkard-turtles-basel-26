@@ -13,19 +13,23 @@ the model does not pay off (feasibility, 25 %). Every number on screen comes fro
 
 ## Flow
 
-| Time | Scene | On screen | What we say (one message per scene) |
-|---|---|---|---|
-| 0:00–0:48 | **1. Intro film, cut after the `dive` beat** | the rendered film (`feat/T-78-intro-film`), 0:00–0:48: Basel in January, Bob, the data centre, the dive into the basement with four servers, tank and radiators | (voice-over of the film) |
-| 0:48–1:30 | **2. Key figures: the reference house** | dashboard, household page of run `reference`, whole year 2025 | The case house with 4 servers for a simulated year: the numbers the case asks for (table below). One sentence on the organisers' real house: it uses three times more heat in summer, and its missed deadlines drop from 6,905 to 11 (run `real-house`). |
-| 1:30–2:30 | **3. Map: January day vs July day** | admin map, run `dreispitz-5-pool` (5 houses and the indoor pool at FHNW Dreispitz), slider on 15 January, then on 15 July | January: every house wants heat, the work spreads over all of them. July: the houses only need hot water, three quarters of the work moves to the pool. The heat stays where it is needed; the work moves. Almost nothing is late (0.02 %). |
-| 2:30–2:55 | **4. Where it stops paying off** | money chart (income vs electricity) and the net after hardware | Four GPU servers in a family house are too many: at our assumed demand they lose CHF 14,000 a year after hardware. One server earns about the same income and keeps CHF 5,200 a year after hardware, payback in about three years. Four servers only pay off at 2.8 times today's demand. |
-| 2:55–3:15 | **5. Zoom out to the globe** | the map itself zooms out to a turning globe | Any place with weather data runs the same model. |
-| 3:15–4:40 | **6. Interactive demo via QR** | QR code to `/speak`; split screen: runner console left, `/live` right | Scan and ask the house a question. Your request runs for real on this laptop, on the July day you just saw. At 13:00 nobody uses hot water and the tank is full: the scheduler freezes the job. The 14:30 draw brings useful heat back: it continues. At the end the console shows how many kWh it really used. |
-| 4:40–5:00 | **7. Close** | one sentence on screen | Pilot ask: which houses, which customers, what we measure. |
+The spoken words are in [`script.md`](script.md) (version 3, after two juror tests); this table is the
+scene plan.
+
+| Time | Scene | On screen |
+|---|---|---|
+| 0:00–0:48 | **1. Intro film**, cut after the `dive` beat | the film; for its first 7 s a strip with the key figures of the reference house with one server |
+| 0:48–1:20 | **2. Key figures: one server** | household page of run `reference-1-server`, whole year |
+| 1:20–1:40 | **3. The real house** | household page of run `real-house-1-server` |
+| 1:40–2:25 | **4. Map: January day vs July day** | run `dreispitz-5-pool-1-server`, slider 15 January, then 15 July |
+| 2:25–2:50 | **5. Does one server pay?** | money chart, then a strip with the money split |
+| 2:50–2:57 | **6. Globe bridge** | the map zooms out to a globe, the QR code fades in |
+| 2:57–4:25 | **7. Interactive demo via QR** | QR, then split screen: runner console left, `/live` right |
+| 4:25–4:45 | **8. Close** | one line: *Let the house decide.* |
 
 **Case requirement "January day, July day, interrupted job":** the two days are shown on the map
-(scene 3, the same Fleet model and scheduler policy), the interrupted job is the real container in
-scene 6. Scene 6 replays exactly the July day of scene 3, which links the two.
+(scene 4, five houses exactly like the reference house, the same Fleet model and scheduler
+policy), the interrupted job is the real container in scene 7. Scene 7 replays exactly the July day of scene 4, which links the two.
 
 ### Why the film is cut at 0:48 (decided by the team 2026-11-22)
 
@@ -36,35 +40,19 @@ jury would see two different answers for the same house. Cutting at 0:48 keeps t
 outdated numbers; the dashboard then gives all key figures. Alternative: keep the film to 1:08 and
 re-render those two beats with Fleet numbers (`video/blender/prepare_data.py` would read
 `data/derived/fleet/reference/` instead of the year-model files). The film's own map part
-(1:20–1:46) is replaced by the live map in scene 3.
+(1:20–1:46) is replaced by the live map in scene 4.
 
-### Numbers for scene 2 (run `reference`, `main` `dc325db`)
+### Numbers on screen (runs on `main`, 2026-11-22)
 
-| Key figure (case order) | Value |
-|---|---:|
-| Servers per house | 4 |
-| Share of heat demand covered | 22.8 % (7,133 of 31,231 kWh) |
-| Heat dumped | 0 kWh |
-| Utilisation | 25.4 % |
-| Missed deadlines | 8.9 % (6,905 of 77,840 jobs) |
-| Break-even computing price (case formula) | CHF 0.226 per server-hour |
+| Run | Shown in | Key figures |
+|---|---|---|
+| `reference-1-server` | strip in the film, scene 2 | 1 server · 18.9 % covered · 0 kWh dumped · 84.1 % utilisation · 5.9 % late (4,622 of 77,840) · break-even CHF 0.226; income CHF 13,333 (CHF 1.81 per server-hour), after hardware +CHF 5,252 (DigitalHeat +CHF 4,470, payback 3.4 years; Bob CHF 784 of heat) |
+| `reference` (comparison) | one sentence in scene 2 | 4 servers · 22.8 % · 0 · 25.4 % · 8.9 % late · CHF 0.226; after hardware −CHF 14,317 |
+| `real-house-1-server` | scene 3 | 10.13 kW fitted vs case 10 kW, 38.8 kWh/day summer use vs 12; 956 late jobs (1.2 %), +CHF 6,332 after hardware |
+| `dreispitz-5-pool-1-server` | scene 4 | pool share of the work 68 % in January, 76 % in July; 126 of 778,536 jobs late (0.016 %) |
+| break-even sweep | scene 5 | one server stops paying below half of the assumed demand (volume scale 0.05 instead of 0.1) |
 
-For scene 4: 4 servers: income CHF 13,360, electricity CHF 2,965, margin CHF 11,344, L4 hardware
-CHF 25,661 per year → net −CHF 14,317. 1 server (same jobs): income CHF 13,333, margin CHF 11,667,
-hardware CHF 6,415 → net +CHF 5,252, payback 3.1 years, 18.9 % heat covered, 5.9 % missed
-deadlines. 4 servers break even at 2.8 × today's volume. Source: `docs/model/fleet-simulation.md`
-§16 "When the reference house pays for its hardware".
-
-### Numbers for scene 3 (run `dreispitz-5-pool`, re-run on `main` 2026-11-22)
-
-| | January | July |
-|---|---:|---:|
-| Work on the 5 houses | 6,849 kWh | 2,325 kWh |
-| Work on the pool | 3,452 kWh (34 %) | 7,396 kWh (76 %) |
-| Missed deadlines over the year | 125 of 778,536 jobs (0.02 %) | |
-
-Volumes are the sourced Basel volumes (× 1, not × 0.1 as the single house) and customers accept
-every Type 2 price (elasticity 0), as stated in the scenario's `_note`.
+Sources and the full tables: `docs/model/fleet-simulation.md` §16.
 
 ## Transitions
 
@@ -77,8 +65,8 @@ every Type 2 price (elasticity 0), as stated in the scenario's `_note`.
 
 ## Things to decide or prepare
 
-- **Servers per house:** scene 2 shows the case's 4 servers, scene 4 says 1 server is the one that
-  pays. Team decision whether the key figures should also be shown for 1 server.
+- **Servers per house:** decided: scene 2 shows the case's 4 servers as the comparison, scene 5 shows
+  the key figures for 1 server, the configuration that pays.
 - **QR access:** the QR must carry the ngrok URL with the token (`/speak?t=…`); a phone hotspot
   as fallback. If nobody scans, the presenter speaks or types the request.
 - **Fallback:** a screen recording of scenes 2–6, in case the laptop or the network fails.
