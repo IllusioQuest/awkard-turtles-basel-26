@@ -71,7 +71,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const step = run.periodHours
   const maxT = lastHour(run)
   const [t, setT] = useState(() => alignHour(run, Number(params.get('h') ?? run.hours)))
-  const [heatLayer, setHeatLayer] = useState<HeatLayer>(() => (['load', 'capacity'].includes(params.get('layer') ?? '') ? params.get('layer') as HeatLayer : 'none'))
+  const [heatLayer, setHeatLayer] = useState<HeatLayer>('none')
   const [showWeather, setShowWeather] = useState(false)
   const [rangeId, setRangeId] = useState<RangeId>(() => {
     const stored = localStorage.getItem('digitalheat.admin.rangeId')
@@ -83,21 +83,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
     return houses.some((h) => h.id === id) ? id : null
   })
   const [playing, setPlaying] = useState(false)
-  // Pitch mode (decision 0069): the /pitch page drives this page in an iframe by same-origin messages.
-  const [globe, setGlobe] = useState(0)
-  const [fit, setFit] = useState(() => (params.get('fit') === '1' ? 1 : 0))
-  useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return
-      const m = e.data as { source?: string; type?: string; h?: number }
-      if (m?.source !== 'digitalheat-pitch') return
-      if (m.type === 'setHour' && typeof m.h === 'number') { setPlaying(false); setT(alignHour(run, m.h)) }
-      else if (m.type === 'globe') setGlobe((g) => g + 1)
-      else if (m.type === 'fit') setFit((f) => f + 1)
-    }
-    window.addEventListener('message', onMessage)
-    return () => window.removeEventListener('message', onMessage)
-  }, [run])
 
   const [speed, setSpeed] = useState<number>(PLAY_SPEEDS[1])
   useEffect(() => { localStorage.setItem('digitalheat.admin.runId', run.id) }, [run.id])
@@ -224,7 +209,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const wall = wallMs(run, t)
 
   return (
-    <main className={`page admin${globe > 0 ? ' globe-mode' : ''}`}>
+    <main className="page admin">
       {run.mock && <MockBanner />}
       <div className="page-head">
         <div>
@@ -269,8 +254,6 @@ function RunView({ source, run, runs, houses, network }: Props) {
           showWeather={showWeather}
           selectedId={selectedId}
           onSelect={setSelectedId}
-          globe={globe}
-          fit={fit}
         />
 
         <div className="map-controls">

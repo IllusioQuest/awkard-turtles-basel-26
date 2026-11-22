@@ -75,7 +75,6 @@ pages fall back to mock data (yellow banner).
 | `/admin/<run>/houses/<id>` | one household over a chosen period: heat, load, money, deadlines | house series, job events |
 | `/live` | live summer house of the voice demo (or the older T-72 demo) | `data/external/live-household/current.json` via `/api/live-household` |
 | `/speak` | phone page: record or type a request | `POST /api/voice-demo/requests` |
-| `/pitch` | the whole pitch in one tab: film, preloaded pages, map January/July, globe, QR, live console (decision 0069) | `web/public/pitch/pitch.json`, the pages above, `/api/voice-demo/tunnel` |
 
 Code: `web/src/admin/` (network pages, map), `web/src/household/` (house pages, live page), `web/src/voice/`,
 `web/src/data/` (API client, types, mock source).

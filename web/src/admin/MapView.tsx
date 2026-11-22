@@ -36,10 +36,6 @@ interface Props {
   showWeather: boolean
   selectedId: string | null
   onSelect: (id: string | null) => void
-  /** Pitch mode: each increment zooms out to a turning globe. */
-  globe?: number
-  /** Pitch mode: each increment (or 1 at start) fits the view to the houses. */
-  fit?: number
 }
 
 const ONLINE_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
@@ -67,31 +63,16 @@ const siteIcon = (type?: string) => SITE_ICONS[type ?? 'house'] ?? HOUSE_ICON
 
 const ring = (load: number) => `conic-gradient(var(--series-1) ${Math.round(load * 360)}deg, rgba(255,255,255,0.14) 0)`
 
-// Pitch mode (decision 0069, ?pitch=1): offline, the globe still shows land (Natural Earth 110 m,
-// public domain, bundled in public/pitch/) instead of a black ball.
-const PITCH_OFFLINE_STYLE: StyleSpecification = {
-  version: 8,
-  sources: { land: { type: 'geojson', data: '/pitch/ne_110m_land.geojson' } },
-  layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': '#0b1016' } },
-    { id: 'land', type: 'fill', source: 'land', paint: { 'fill-color': '#1d2329' } },
-  ],
-}
-const pitchMode = () => new URLSearchParams(window.location.search).get('pitch') === '1'
-
 async function resolveStyle(): Promise<string | StyleSpecification> {
-  const offline = pitchMode() ? PITCH_OFFLINE_STYLE : OFFLINE_STYLE
-  let online = false
   try {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), STYLE_TIMEOUT_MS)
     const res = await fetch(ONLINE_STYLE, { signal: ctrl.signal })
     clearTimeout(timer)
-    online = res.ok
-  } catch { /* offline */ }
-  if (pitchMode() && window.parent !== window)
-    window.parent.postMessage({ source: 'digitalheat-map', type: 'style', online }, window.location.origin)
-  return online ? ONLINE_STYLE : offline
+    return res.ok ? ONLINE_STYLE : OFFLINE_STYLE
+  } catch {
+    return OFFLINE_STYLE
+  }
 }
 
 function housesGeoJson(houses: MapHouse[], states: Map<string, MapState>): FeatureCollection {
@@ -260,13 +241,6 @@ function renderMarkers(map: MlMap | null, props: Props, markers: { current: Mark
   })
 }
 
-function fitHouses(map: MlMap, houses: MapHouse[], duration: number) {
-  if (houses.length === 0) return
-  const b = new LngLatBounds()
-  houses.forEach((h) => b.extend([h.lon, h.lat]))
-  map.fitBounds(b, { padding: 140, maxZoom: 15, duration })
-}
-
 function syncLayers(map: MlMap | null, props: Props) {
   if (!map || !map.getSource('sites')) return
   const { houses, states, weather, heatLayer, showWeather } = props
@@ -300,7 +274,6 @@ export default function MapView(props: Props) {
         attributionControl: { compact: true },
       })
       mapRef.current = map
-      if (latest.current.fit) fitHouses(map, latest.current.houses, 0)
       renderMarkers(map, latest.current, markers)
       map.on('load', () => {
         addLayers(map)
@@ -324,41 +297,6 @@ export default function MapView(props: Props) {
     syncLayers(mapRef.current, props)
     renderMarkers(mapRef.current, props, markers)
   })
-
-  const { fit, globe, houses } = props
-  useEffect(() => {
-    if (mapRef.current && fit) fitHouses(mapRef.current, houses, 800)
-  }, [fit, houses])
-
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !globe) return
-    let frame = 0
-    let spinFrom = 0
-    const spin = (now: number) => {
-      if (now > spinFrom) {
-        const c = map.getCenter()
-        map.setCenter([c.lng + 0.06, c.lat])
-      }
-      frame = requestAnimationFrame(spin)
-    }
-    let begun = false
-    const start = () => {
-      if (begun) return
-      begun = true
-      map.resize() // the page switches the map to full screen for the globe (globe-mode)
-      map.setProjection({ type: 'globe' })
-      map.easeTo({ zoom: 1.4, pitch: 0, bearing: 0, duration: 6000, essential: true })
-      spinFrom = performance.now() + 6200
-      frame = requestAnimationFrame(spin)
-    }
-    // isStyleLoaded() is false while tiles are still loading; the style itself is ready long before.
-    // Start now if possible, else at the next idle, and at the latest after 1.5 s.
-    const fallback = setTimeout(() => { try { start() } catch { /* style not ready */ } }, 1500)
-    if (map.isStyleLoaded()) start()
-    else map.once('idle', start)
-    return () => { cancelAnimationFrame(frame); clearTimeout(fallback) }
-  }, [globe])
 
   return <div ref={container} className="map" />
 }
