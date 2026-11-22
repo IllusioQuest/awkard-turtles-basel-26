@@ -47,10 +47,10 @@ function renderNetwork(s){
  for(const id of ids){
   const p=positions.get(id),n=status.get(id),check=checks.get(id),intent=planned.includes(id);
   const busy=!network.work_data_stale&&!s.peer_connection_error&&(n?.attempts||[]).some(a=>activePhases.has(a.phase)&&a.phase!=='paused'&&currentJob(s,a.attempt.request.id));
-  const state=intent?'Planned · not connected':check?.state==='reachable'?(busy?'Executing':'Reachable')+(network.work_data_stale?' · work data stale':''):check?.state==='unreachable'?'Unreachable':'Not checked';
+  const state=intent?'Planned · not connected':check?.state==='reachable'?[busy?'Executing':'',network.work_data_stale?'Work data stale':''].filter(Boolean).join(' · '):check?.state==='unreachable'?'Unreachable':'Not checked';
   const identity=gpuIdentity(s,n);
-  const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});if(identity){circle.classList.add('gpu-worker');circle.setAttribute('style',identity.style);svg.append(shape('text',{x:p.x,y:p.y-32,class:'gpu-label',style:identity.style},identity.label))}circle.append(shape('title',{},id+' · '+state));svg.append(circle);
-  svg.append(shape('text',{x:p.x,y:p.y+39},id),shape('text',{x:p.x,y:p.y+56,class:'caption'},id===origin?'Initial job provider · '+state:state));
+  const circle=shape('circle',{cx:p.x,cy:p.y,r:20,class:intent?'planned':busy?'executing':check?.state==='reachable'?'reachable':''});if(identity){circle.classList.add('gpu-worker');circle.setAttribute('style',identity.style);svg.append(shape('text',{x:p.x,y:p.y-32,class:'gpu-label',style:identity.style},identity.label))}circle.append(shape('title',{},[id,state].filter(Boolean).join(' · ')));svg.append(circle);
+  svg.append(shape('text',{x:p.x,y:p.y+39},id),shape('text',{x:p.x,y:p.y+56,class:'caption'},[id===origin?'Initial job provider':'',state].filter(Boolean).join(' · ')));
  }
  return {configured,planned,checks};
 }
@@ -68,7 +68,7 @@ function renderTopology(s){
  for(const id of network.configured.filter(id=>!s.peers.some(p=>p.peer_id===id))){hosts.set('Unreported host · '+id,[{peer_id:id,unreported:true,attempts:[],results:[]}])}
  for(const id of network.planned){hosts.set('Planned host · '+id,[{peer_id:id,planned:true,attempts:[],results:[]}])}
  const gpuDevices=new Set(s.peers.filter(p=>p.physical_gpu_id).map(p=>p.physical_host_id+'/'+p.physical_gpu_id));
- el('nodeSummary').textContent=Array.from(network.checks.values()).filter(c=>c.state==='reachable').length+' / '+s.configured_peers+' configured peers reachable · '+network.planned.length+' planned GPU servers · '+liveHostCount+' reported physical host(s)';
+ el('nodeSummary').textContent=Array.from(network.checks.values()).filter(c=>c.state==='reachable').length+' / '+s.configured_peers+' configured peers · '+network.planned.length+' planned GPU servers · '+liveHostCount+' reported physical host(s)';
  el('hostMap').replaceChildren();
  for(const [host,peers] of hosts){
   const group=element('div','host'+(peers[0]?.planned?' planned':''));
