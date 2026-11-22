@@ -34,7 +34,7 @@ public class RenderHeatNeedMeshTests : IDisposable
     {
         var hour = new DateTimeOffset(clock.Now.Year, clock.Now.Month, clock.Now.Day, clock.Now.Hour, 0, 0, TimeSpan.Zero);
         double demand = id == "o" ? 0 // the origin has no GPU work slot in the presentation lab
-            : RenderHeatNeed.DemandKwh(needs.GetValueOrDefault(id), peers.TryGetValue(id, out var p) ? p.Attempts() : [], hour, 150);
+            : RenderHeatNeed.DemandKwh(needs.GetValueOrDefault(id), peers.TryGetValue(id, out var p) ? p.HeatCommitments() : [], hour, 150);
         return new(revision, hour, hour.AddHours(1), "Synthetic render-need fixture",
             [new(id, "CH", new(demand, 0, 0, 1, FrameHeatKwh), 0)], [new("domain-" + id, new(4, 2048, 1), [])],
             [new("node-" + id, id, "domain-" + id, true, true, new(4, 2048, 1), [], [], [], [])], [])
