@@ -22,4 +22,4 @@ paused, protected, failed-stop and completed jobs. Measure allocation difference
 on released histories. Run existing mesh/deadline tests and an actual renderer.
 
 ## Review
-Pending fresh-context review.
+Verdict go. Applied shared locked deadline core, detached active snapshots preserving every non-released phase/order, full history and runtime checks.141 tests pass, including both deadline entry points, nested-array isolation and released heat still blocking admission. No UI changes.

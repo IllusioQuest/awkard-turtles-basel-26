@@ -1,0 +1,71 @@
+{
+  "method": "50warmed queries over100/500released attempts, same coordinator history. Compare full detached snapshot followed by filter with prefiltered active snapshot, and full deadline API versus same enforcement without returned snapshot. GC.GetAllocatedBytesForCurrentThread; elapsed times under xUnit concurrent execution are diagnostic.",
+  "measurements": [
+    {
+      "history": 500,
+      "queries": 50,
+      "old_active_bytes": 229695440,
+      "active_bytes": 14408,
+      "old_active_ms": 500.3918,
+      "active_ms": 1.1838,
+      "old_deadline_bytes": 229704888,
+      "deadline_bytes": 3600,
+      "old_deadline_ms": 593.0835,
+      "deadline_ms": 0.4883
+    },
+    {
+      "history": 100,
+      "queries": 50,
+      "old_active_bytes": 35960840,
+      "active_bytes": 6800,
+      "old_active_ms": 135.0551,
+      "active_ms": 0.1241,
+      "old_deadline_bytes": 35959056,
+      "deadline_bytes": 3600,
+      "old_deadline_ms": 140.4205,
+      "deadline_ms": 0.0817
+    }
+  ],
+  "tests": 141,
+  "invariants": "Full history and ownership/runtime reconciliation retained; active means phase != released, all uncertain phases included. Both deadline APIs share same locked core. UI unchanged.",
+  "limits": "Released-only benchmark isolates avoided copying; real active jobs still require snapshots and policy work. Scanning, reconciliation and durable journal saves still scale with total history. Not an end-to-end speedup guarantee.",
+  "source_commit": "967cf22",
+  "real_pipeline": {
+    "run_id": "492343cfae36",
+    "phase": "complete",
+    "frames": 48,
+    "error": null,
+    "active_seconds": 84.9242796,
+    "contributions": {
+      "demo-gpu-1": 24,
+      "demo-gpu-2": 16,
+      "demo-gpu-3": 8
+    },
+    "video": {
+      "job_id": "demo-cpu-prepare.492343cfae36-assemble",
+      "peer_id": "demo-cpu-video",
+      "metadata": {
+        "blender": "5.3.0",
+        "build_hash": "02f0899d78e3",
+        "completed_utc": "2026-11-22T04:37:14.893217+00:00",
+        "device": "CPU video encoding",
+        "dispatch_to_execute_seconds": 0.571403,
+        "encode_seconds": 0.6602986000943929,
+        "encoded_frames": 48,
+        "ffmpeg_available": true,
+        "fps": 12,
+        "frames": 48,
+        "height": 360,
+        "manifest_sha256": "1ad717f9be754909446302b8b5e8fea7fe9635d9bf09028b1fb49b2171953be4",
+        "recipe_id": "8c6c516716e3d10ca273690bcfc855c2080eabcdbe975ca79c901d58aa3fe013",
+        "samples": 32,
+        "scene_sha256": "9c3e89483b6b695ae0922d4aac043e4c2521864080bcd4ecdabf81fcb7139d76",
+        "seed": 66,
+        "stage": "assemble",
+        "width": 640,
+        "worker_seconds": 0.839860099949874
+      }
+    }
+  },
+  "ui": "rendering/render.html unchanged"
+}
