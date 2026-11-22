@@ -125,3 +125,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | done; run-scoped status filter merged; heat stall and journal growth need decisions |
 
 | [T-81](T-81-site-type-icons.md) | Site-type icons on the admin network map | Ennio / Claude | done |
+
+| [T-82](T-82-real-house-variant.md) | Real house from the organisers as a Fleet variant | Ennio / Claude | done |

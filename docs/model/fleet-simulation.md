@@ -350,6 +350,8 @@ Scenarios (`config/fleet/scenarios/`; each file's `_note` states what it changes
   constant customer demand (elasticity 0). Houses: `scripts/make_local_fleet.py config/fleet/local/dreispitz.json`.
 - `alps-border-50.json` (T-67): 50 case houses in Interlaken, Brig-Goms and the Mittelland, volumes × 4
   (visualisation, not sourced), elasticity 0. Houses: `scripts/make_climate_fleet.py config/fleet/regions/alps-border-50.json`.
+- `real-house.json` (T-82): the organisers' real house, calibrated to its measured 2025 gas use
+  (`scripts/calibrate_real_house.py` → `config/fleet/houses/real-house.json`); otherwise as `reference.json` (§16).
 - `reference-winter-jobs.json`, `reference-summer-jobs.json`: one-day job examples for the live
   household page (T-68, T-72).
 
@@ -487,6 +489,42 @@ has no useful heat to run them on. A 6-server variant (same inputs, 2026-11-22) 
 income (CHF 13,278) and misses (6,966) at CHF 12,831 more hardware per year: more servers do not
 help a house limited by demand and summer heat. The margin does not cover the L4 hardware at these
 volumes and prices.
+
+### Real house variant (`config/fleet/scenarios/real-house.json`, T-82, 2026-11-22)
+
+The hackathon organisers provided measured data of a real house (`data/raw/housedata/SOURCE.md`;
+the data itself stays local in `data/external/housedata/`). It heats with gas. Method
+(`python3 -I scripts/calibrate_real_house.py`): monthly gas of the main meter, January–September 2025
+(October–December are missing), × 0.86 boiler efficiency (EU 813/2013 minimum for new gas boilers
+≤ 70 kW; the real boiler is unknown) = useful heat. The case formula's two house parameters are fitted
+by least squares on those 9 months, `heat_m = design_kw × S_m + hot_water_kwh_per_day × days_m`, with
+`S_m` from the case formula on Basel 2025 weather. The script reproduces Core's 26,850.55 kWh with the
+case values (cross-check).
+
+| Fit | Real house | Case reference house |
+|---|---:|---:|
+| Design heating power | 10.13 kW | 10 kW |
+| Hot water per day (incl. summer losses) | 38.8 kWh | 12 kWh |
+| Fit quality | R² 0.996, monthly errors −5.9 % … +8.4 % | – |
+| Heat demand 2025 (Oct–Dec from the fit) | 41,356 kWh | 31,231 kWh |
+
+Space heating matches the case almost exactly; the summer use is three times the case's hot water.
+That summer value includes everything the boiler burns outside the heating season (hot water,
+circulation and standby losses), which monthly data cannot separate. Position, weather, price and the
+35 kWh tank are assumed as for the reference house (the address is anonymised).
+
+| Fleet result, 4 servers, same jobs and seed | Reference house | Real house |
+|---|---:|---:|
+| Heat used (coverage) | 7,133 kWh (22.8 %) | 8,931 kWh (21.6 %) |
+| Utilisation | 25.4 % | 31.9 % |
+| Jobs never finished / missed deadlines | 5,771 / 6,905 | 10 / 11 |
+| Rejected on price (Type 2) | 878 | 192 |
+| Computing income / electricity cost | CHF 13,360 / CHF 2,965 | CHF 13,780 / CHF 3,712 |
+| Margin / net after hardware | CHF 11,344 / −CHF 14,317 | CHF 11,256 / −CHF 14,406 |
+
+How to read it: with real summer heat use (≈ 1.6 kW around the clock) the house can absorb the
+summer jobs, so the summer deadline problem of the reference house almost disappears. More work is
+done, but mostly cheap Type 2 work, so the margin does not rise; the hardware is still not covered.
 
 ### Other scenarios
 
