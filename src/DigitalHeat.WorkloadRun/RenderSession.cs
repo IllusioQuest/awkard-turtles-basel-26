@@ -28,6 +28,8 @@ internal sealed class RenderSession
     private readonly object stateGate=new();
     private readonly SemaphoreSlim controls=new(1),poll=new(1);
     private RenderSessionState state;
+    // Workflow poll cadence: short enough that a finished frame or video is noticed promptly.
+    internal static readonly TimeSpan WorkflowPoll=TimeSpan.FromMilliseconds(250);
     private RenderPeerStatus[] peers=[];
     private string? pollingError;
     private RenderPeerConnection[] connections=[];
@@ -50,10 +52,12 @@ internal sealed class RenderSession
         try{
             // Planned peers are intentionally absent here: only runtime Peers are probed.
             // Keep execution's all-or-nothing snapshot; independent probe results are UI facts.
+            // Ask for the current run only (plus unfinished work); older released history is not needed here.
+            string query=state.Id==""?"":"?job_prefix="+Uri.EscapeDataString(cfg.Id+"."+state.Id+"-");
             var checkedPeers=await Task.WhenAll(cfg.Peers.Select(async p=>{
                 try{
                     using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                    var status=await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status",RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
+                    var status=await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status"+query,RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
                     if(status.PeerId!=p.Key)throw new IOException("Peer identity mismatch");
                     return (Status:(RenderPeerStatus?)status,Connection:new RenderPeerConnection(p.Key,"reachable",DateTimeOffset.UtcNow));
                 }catch{
@@ -187,7 +191,7 @@ internal sealed class RenderSession
             }
             CheckFailure([global],[]);
             if(!peers.SelectMany(p=>p.Jobs).Any(j=>j.Request.Id==global))try{await Submit("/prepare",id,0);}catch(HttpRequestException){/* Reconcile this same durable ID next poll. */}
-            await Task.Delay(1000);
+            await Task.Delay(WorkflowPoll);
         }
         if(stopRequested)return;
         foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/prepared-scene",state.Scene,RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
@@ -219,7 +223,7 @@ internal sealed class RenderSession
             if(!peers.SelectMany(p=>p.Jobs).Any(j=>j.Request.Id==global)){
                 using var r=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+"/assemble",new AssemblySubmit(id,identity),RenderNodeHost.Json);r.EnsureSuccessStatusCode();
             }
-            await Task.Delay(500);
+            await Task.Delay(WorkflowPoll);
         }
     }
     private void CheckFailure(string[] ids,RenderArtifact[] done)
@@ -253,7 +257,7 @@ internal sealed class RenderSession
                     string backend=cfg.PreparedSceneMode?"EEVEE":RenderDeviceAllocation.Backend(frame,cfg.Frames,cfg.GpuFrameShare,peers.SelectMany(p=>p.VerifiedBackends).FirstOrDefault(b=>b!="CPU"));
                     try{await Submit("/frames",id,frame,backend,state.Scene?.SceneSha256);remaining--;}catch(Exception e)when(e is HttpRequestException or TaskCanceledException){pollingError="Submission uncertain; reconciling the same frame ID";break;}
                 }
-                await Task.Delay(1000);
+                await Task.Delay(WorkflowPoll);
             }
         }catch(Exception e){
             if(stopRequested)return;
