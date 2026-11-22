@@ -13,3 +13,10 @@ Live HTML, JavaScript syntax (node --check), element references and diff whitesp
 verified. Source commits97d0a66/2724a2c. Refresh localhost:18950/ui to load it.
 Heat quantities remain synthetic lab inputs, documented in ADR0069; shortening
 the labels does not turn these values into measurements.
+
+Follow-up dbfd5fb: remove repeated preparation/frame/video aggregate line while
+keeping the role-specific bottom progress count. Remove Progress explanatory
+small text, completed-frame range/cached-scene note, preparation timing note and
+Total render elapsed row. Removed dead DOM updates; backend timings preserved.
+Live HTML/JS syntax/element references verified; no runtime or model changes.
+Original PR74 merged; follow-up remains in review.
