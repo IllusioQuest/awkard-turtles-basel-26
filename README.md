@@ -73,6 +73,10 @@ dotnet test src/DigitalHeat.sln --no-build
 dotnet run --project src/DigitalHeat.YearRun -- .
 ```
 
+`src/DigitalHeat.sln` also builds and tests the Orchestration core and the render lab. The gaming lab
+has its own solution (`dotnet test gaming/DigitalHeat.Gaming.sln`); the Python script tests run with
+`python3 -m pytest -q scripts/tests`.
+
 The last command reads the committed Basel 2025 hourly weather CSV, checks the
 configured electricity price against the ElCom 2026 Basel H4 snapshot, and writes
 `results/reference-house/hourly.csv` and `summary.json`. Pass another repository

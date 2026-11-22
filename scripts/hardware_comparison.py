@@ -87,7 +87,7 @@ def main():
     print("|---|" + "---:|" * len(profiles))
     for label, f, digits in rows:
         print(f"| {label} | " + " | ".join(fmt(f(p, d), digits) for p, d in zip(profiles, derived)) + " |")
-    print(f"\nTranscription models: " + "; ".join(f"`{p['Id']}` {p['TranscriptionModel']}" for p in profiles))
+    print("\nTranscription models: " + "; ".join(f"`{p['Id']}` {p['TranscriptionModel']}" for p in profiles))
     return 0
 
 

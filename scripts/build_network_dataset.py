@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import csv
 import json
-import math
 import random
 from datetime import date
 from pathlib import Path
@@ -145,7 +144,7 @@ def monthly_hourly_hot_water(weather, annual_kwh, monthly_pct, hourly_pct):
     month_sum, hour_sum = sum(monthly_pct), sum(hourly_pct)
     out = []
     for time, _ in weather:
-        y, m, d = int(time[:4]), int(time[5:7]), int(time[8:10])
+        y, m = int(time[:4]), int(time[5:7])
         days = (date(y + (m == 12), m % 12 + 1, 1) - date(y, m, 1)).days
         out.append(annual_kwh * monthly_pct[m - 1] / month_sum / days * hourly_pct[int(time[11:13])] / hour_sum)
     return out
