@@ -131,3 +131,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-83](T-83-render-efficiency.md) | Renderer efficiency and repeat-run diagnosis | Nikita / Codex | in review; PR #73 |
 
 | [T-84](T-84-render-copy.md) | Simplify renderer heat and explanatory labels | Nikita / Codex | in review; PR #74 |
+
+| [T-85](T-85-active-bookkeeping.md) | Reduce active-job bookkeeping | Nikita / Codex | in progress |
