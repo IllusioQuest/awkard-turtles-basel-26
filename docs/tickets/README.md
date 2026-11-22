@@ -115,8 +115,8 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-75](T-75-compact-render-map.md) | Compact render cards and identify initial job provider | Nikita / Codex | in review |
 
 | [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in review; PR #68 |
-
 | [T-77](T-77-render-runtime.md) | Measure and improve renderer runtime | Nikita / Codex | done; PR #69 and timeout follow-up on main |
+| [T-88](T-88-public-apertus-demo.md) | Public Apertus audience demo with four logical workers | Codex | in progress; ADR 0074 reviewed |
 
 | [T-78](T-78-voice-request-demo.md) | Live voice request on the summer reference house (pitch demo) | Ennio / Claude | done; decision 0068 |
 

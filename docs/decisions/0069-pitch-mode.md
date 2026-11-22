@@ -55,6 +55,9 @@ Fresh-context review (decision-reviewer, 2026-11-22): **go with changes**. Appli
 5. Clicker keys: F5 and Ctrl+R are blocked, `.` and `B` black out, double presses within 250 ms are
    ignored, the scene is kept in the URL hash so a reload resumes there, and the film starts on the
    first key press.
-6. QR: the address comes from ngrok's local API through FleetApi (`GET /api/voice-demo/tunnel`) plus
-   the token from the pitch URL (`/pitch?t=…`); it is printed under the code, and Q overrides it.
-   Key T opens a text field that posts to the same endpoint as the phone.
+6. Phone: the speak page address comes from ngrok's local API through FleetApi
+   (`GET /api/voice-demo/tunnel`) plus the token from the pitch URL (`/pitch?t=…`); Q overrides it.
+   Later change (2026-11-22): the presenter speaks into their own phone, so this code is shown only
+   in the checks screen; the audience QR belongs to the separate audience demo (decision 0074),
+   added as two optional scenes after the close. Key T opens a text field that posts to the same
+   endpoint as the phone.

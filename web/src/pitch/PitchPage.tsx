@@ -43,8 +43,8 @@ export default function PitchPage() {
   const [hud, setHud] = useState(false)
   const [videoTime, setVideoTime] = useState(0)
   const [videoError, setVideoError] = useState(false)
-  const [qrOverride, setQrOverride] = useState(() => localStorage.getItem('digitalheat.pitch.qr') ?? '')
-  const [qrImage, setQrImage] = useState('')
+  const [speakOverride, setSpeakOverride] = useState(() => localStorage.getItem('digitalheat.pitch.speak') ?? '')
+  const [qrImages, setQrImages] = useState<Record<string, string>>({})
   const [live, setLive] = useState<Live | null>(null)
   const [mapOnline, setMapOnline] = useState<boolean | null>(null)
   const [checks, setChecks] = useState<Check[]>([])
@@ -65,22 +65,26 @@ export default function PitchPage() {
   useEffect(() => { loadConfig().then(({ config, fromFile }) => { setConfig(config); setFromFile(fromFile) }) }, [])
   useEffect(() => { window.location.hash = `s=${scene}.${step}` }, [scene, step])
 
-  // The QR address: a manual override (Q), else the configured page (the Lovable site), else the
-  // running ngrok tunnel + /speak. {token} becomes the token of this page's URL.
+  // The presenter's phone page: a manual override (Q), else the running ngrok tunnel + /speak with
+  // the token of this page's URL. Its QR is shown only in the checks screen (H), for the presenter.
   const [tunnel, setTunnel] = useState<{ url: string; addr: string | null } | null>(null)
   useEffect(() => {
     fetch('/api/voice-demo/tunnel').then((r) => (r.ok ? r.json() : null)).then(setTunnel).catch(() => setTunnel(null))
   }, [help])
-  const qrUrl = useMemo(() => {
-    if (qrOverride) return qrOverride
-    const t = TOKEN ? encodeURIComponent(TOKEN) : ''
-    if (config.qrUrl) return t ? config.qrUrl.replace('{token}', t) : config.qrUrl.replace(/[?&]t=\{token\}/, '')
-    return tunnel?.url ? `${tunnel.url}/speak${t ? `?t=${t}` : ''}` : ''
-  }, [qrOverride, config.qrUrl, tunnel])
+  const speakUrl = useMemo(() => {
+    if (speakOverride) return speakOverride
+    const t = TOKEN ? `?t=${encodeURIComponent(TOKEN)}` : ''
+    return tunnel?.url ? `${tunnel.url}/speak${t}` : ''
+  }, [speakOverride, tunnel])
+  // QR images: the speak page and every audience QR scene.
+  const qrTargets = useMemo(() => [speakUrl, ...scenes.flatMap((s) => (s.type === 'qr' ? [s.url] : []))].filter(Boolean), [speakUrl, scenes])
   useEffect(() => {
-    if (!qrUrl) return
-    QRCode.toDataURL(qrUrl, { margin: 1, width: 560, color: { dark: '#0d0d0d', light: '#ffffff' } }).then(setQrImage).catch(() => setQrImage(''))
-  }, [qrUrl])
+    let stop = false
+    Promise.all(qrTargets.map(async (u) => [u, await QRCode.toDataURL(u, { margin: 1, width: 560, color: { dark: '#0d0d0d', light: '#ffffff' } }).catch(() => '')] as const))
+      .then((pairs) => { if (!stop) setQrImages(Object.fromEntries(pairs)) })
+    return () => { stop = true }
+  }, [qrTargets])
+  const externalUrls = useMemo(() => [...new Set(scenes.flatMap((s) => (s.type === 'external' ? [s.url] : [])))], [scenes])
 
   const post = useCallback((url: string, msg: object) => {
     frames.current[url]?.contentWindow?.postMessage({ source: MSG, ...msg }, window.location.origin)
@@ -170,15 +174,15 @@ export default function PitchPage() {
     else if (k === 'v' || k === 'V') setFallback((f) => !f)
     else if (k === 't' || k === 'T') { e.preventDefault(); setTyping(true) }
     else if (k === 'q' || k === 'Q') {
-      const u = window.prompt('QR address (empty = use the ngrok tunnel)', qrUrl)
-      if (u !== null) { localStorage.setItem('digitalheat.pitch.qr', u.trim()); setQrOverride(u.trim()) }
+      const u = window.prompt("Presenter's speak page (empty = ngrok tunnel + /speak)", speakUrl)
+      if (u !== null) { localStorage.setItem('digitalheat.pitch.speak', u.trim()); setSpeakOverride(u.trim()) }
     }
     else if (k === 'r' || k === 'R') {
-      const url = current.type === 'page' ? current.url : current.type === 'demo' ? current.liveUrl : ''
+      const url = current.type === 'page' || current.type === 'external' ? current.url : current.type === 'demo' ? current.liveUrl : ''
       if (url) setReloads((r) => ({ ...r, [url]: (r[url] ?? 0) + 1 }))
     }
     else if (k === 'Escape') { setHelp(false); setFallback(false) }
-  }, [typing, started, go, scenes, current, qrUrl])
+  }, [typing, started, go, scenes, current, speakUrl])
 
   useEffect(() => {
     window.addEventListener('keydown', onKey)
@@ -243,10 +247,14 @@ export default function PitchPage() {
       }
       const fresh = live ? Date.now() - Date.parse(live.updatedUtc) < 15000 : false
       out.push({ name: 'Voice runner', ok: !!live && (fresh || live.status !== 'running'), detail: live ? `${live.status}, updated ${Math.round((Date.now() - Date.parse(live.updatedUtc)) / 1000)} s ago` : 'no live snapshot: start src/DigitalHeat.VoiceDemo' })
-      out.push({ name: 'QR address', ok: !!qrUrl, detail: qrUrl || 'none: set qrUrl in pitch.json, or press Q' })
-      const apiTunnel = !!tunnel && /:?5080$/.test(tunnel.addr ?? '')
-      out.push({ name: 'Public API tunnel', ok: apiTunnel, detail: tunnel ? `${tunnel.url} → ${tunnel.addr ?? '?'}${apiTunnel ? '' : ' (should forward to port 5080)'}` : 'no ngrok tunnel: run "ngrok http --url=<your static domain> 5080"' })
-      out.push({ name: 'Token in QR', ok: !TOKEN ? null : true, detail: TOKEN ? 'set (from ?t= of this page)' : 'none: open /pitch?t=<VOICE_DEMO_TOKEN> if the API uses one' })
+      const webTunnel = !!tunnel && /:?5173$/.test(tunnel.addr ?? '')
+      out.push({ name: 'Speak page (presenter phone)', ok: !!speakUrl && (webTunnel || !!speakOverride), detail: speakUrl ? `${speakUrl.replace(/\?t=.*/, '')}${tunnel && !webTunnel && !speakOverride ? ` (tunnel goes to ${tunnel.addr}, should be 5173)` : ''} · scan the code on the right` : 'no ngrok tunnel: run "ngrok http 5173", or press Q' })
+      out.push({ name: 'Token', ok: !TOKEN ? null : true, detail: TOKEN ? 'set (from ?t= of this page)' : 'none: open /pitch?t=<VOICE_DEMO_TOKEN> if the API uses one' })
+      for (const u of externalUrls) {
+        // Other origin: an opaque no-cors request only tells whether the service answers.
+        const up = await fetch(u, { mode: 'no-cors', cache: 'no-store' }).then(() => true, () => false)
+        out.push({ name: 'Audience demo', ok: up, detail: up ? u : `${u} not reachable: run scripts/Start-AudienceApertus.ps1 (optional segment)` })
+      }
       out.push({ name: 'Map style', ok: mapOnline, detail: mapOnline === null ? 'map not loaded yet' : mapOnline ? 'online (streets)' : 'offline (bundled land)' })
       out.push({ name: 'Config', ok: true, detail: fromFile ? '/pitch/pitch.json' : 'built-in defaults' })
       for (const c of config.checks) {
@@ -260,7 +268,7 @@ export default function PitchPage() {
       if (!stop) setChecks(out)
     })()
     return () => { stop = true }
-  }, [help, scenes, config.checks, live, qrUrl, mapOnline, fromFile, tunnel])
+  }, [help, scenes, config.checks, live, speakUrl, speakOverride, mapOnline, fromFile, tunnel, externalUrls])
 
   const sendTyped = async () => {
     const text = typed.trim()
@@ -280,7 +288,7 @@ export default function PitchPage() {
   return (
     <div className="pitch">
       {pageUrls.map((url) => {
-        const active = (current.type === 'page' && current.url === url) || (current.type === 'demo' && !currentStep.qr && current.liveUrl === url)
+        const active = (current.type === 'page' && current.url === url) || (current.type === 'demo' && current.liveUrl === url)
         return (
           <iframe
             key={`${url}#${reloads[url] ?? 0}`}
@@ -294,6 +302,17 @@ export default function PitchPage() {
         )
       })}
 
+      {externalUrls.map((url) => (
+        <iframe
+          key={`${url}#${reloads[url] ?? 0}`}
+          title={url}
+          src={url}
+          className={`pitch-frame${current.type === 'external' && current.url === url ? ' on' : ''}`}
+          onLoad={() => window.focus()}
+          tabIndex={-1}
+        />
+      ))}
+
       <video
         ref={video}
         className={`pitch-video${current.type === 'video' && !videoError ? ' on' : ''}`}
@@ -305,14 +324,14 @@ export default function PitchPage() {
       />
       {current.type === 'video' && videoError && <div className="pitch-card on"><h1>Bob's house</h1><p>Basel · January 2025</p></div>}
 
-      {current.type === 'demo' && currentStep.qr && (
+      {current.type === 'qr' && (
         <div className="pitch-qr on">
-          {qrUrl && qrImage ? <img src={qrImage} alt="QR code" /> : <div className="pitch-qr-missing">No QR address yet</div>}
-          <p className="pitch-qr-text">Ask Bob's house a question</p>
-          <p className="pitch-qr-url">{qrUrl.replace(/[?&]t=.*/, '').replace(/^https:\/\//, '').replace(/\/$/, '')}</p>
+          {qrImages[current.url] ? <img src={qrImages[current.url]} alt="QR code" /> : <div className="pitch-qr-missing">No QR code</div>}
+          <p className="pitch-qr-text">{current.text}</p>
+          <p className="pitch-qr-url">{current.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
         </div>
       )}
-      {current.type === 'demo' && !currentStep.qr && (
+      {current.type === 'demo' && (
         <div className="pitch-console">
           {consoleLines.length === 0 && <div className="pitch-console-line dim">waiting for a request …</div>}
           {consoleLines.map((l, i) => <div key={i} className={`pitch-console-line ${l.level}`}>{l.text}</div>)}
@@ -344,10 +363,11 @@ export default function PitchPage() {
       {help && (
         <div className="pitch-help">
           <h2>Pitch checks</h2>
+          {speakUrl && qrImages[speakUrl] && <img className="pitch-help-qr" src={qrImages[speakUrl]} alt="Speak page QR for the presenter's phone" />}
           <ul>{checks.map((c) => <li key={c.name} className={c.ok === null ? 'na' : c.ok ? 'ok' : 'bad'}><b>{c.name}</b> {c.detail}</li>)}</ul>
           <h2>Keys</h2>
-          <p>→ Space PageDown next · ← PageUp back · 1–{scenes.length} scene · G globe · B or . black · F fullscreen ·
-            V fallback recording · T type a request · Q QR address · R reload page · H close</p>
+          <p>→ Space PageDown next · ← PageUp back · 1–{Math.min(9, scenes.length)} scene · G globe · B or . black · F fullscreen ·
+            V fallback recording · T type a request · Q speak page address · R reload page · H close</p>
           <p className="dim">Scenes: {scenes.map((s, i) => `${i + 1} ${s.title}`).join(' · ')}</p>
         </div>
       )}

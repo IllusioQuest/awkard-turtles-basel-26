@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DigitalHeat · Four live workers</title>
+<style>
+:root{--ink:#13191c;--paper:#f4f6f6;--muted:#8d9a9f}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#101415}
+body{display:grid;grid-template-rows:1fr auto;padding:8px;gap:8px;font:16px system-ui,sans-serif;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px;min-height:0}
+.node{--room:#e9e3a2;--job:#657f89;position:relative;overflow:hidden;border-radius:14px;background:var(--room);transition:background-color .8s ease;padding:22px}
+.name{font-size:clamp(17px,1.5vw,22px);font-weight:700;opacity:.64}
+.worker{font-size:13px;font-weight:650;opacity:.5;margin-left:8px}
+.demand{font-size:clamp(34px,3.8vw,58px);font-weight:300;line-height:1.05;margin-top:6px;font-variant-numeric:tabular-nums}
+.demand small{font-size:.35em;font-weight:500;opacity:.6;margin-left:5px}
+.demand-label{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;opacity:.56;margin-top:4px}
+.rack{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:6px}
+.waves{height:25px;display:flex;gap:7px;opacity:0;transition:opacity .6s}
+.node.busy .waves{opacity:1}
+.waves i{width:5px;height:23px;border-radius:3px;background:#fff9;animation:rise 1.6s ease-in-out infinite}
+.waves i:nth-child(2){animation-delay:-.55s}.waves i:nth-child(3){animation-delay:-1.1s}
+@keyframes rise{0%{transform:translateY(10px) scaleY(.5);opacity:0}45%{opacity:1}100%{transform:translateY(-12px) scaleY(1);opacity:0}}
+.server{width:clamp(70px,6.5vw,94px);height:clamp(80px,8vw,115px);border-radius:10px;background:#13191c;position:relative;overflow:hidden;box-shadow:0 3px 8px #0004}
+.power{position:absolute;inset:auto 0 0;height:0;background:linear-gradient(to top,#ff6a1f,#ffb56b);transition:height .7s}
+.node.busy .power{height:100%}
+.server-mark{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:27px;font-weight:800;letter-spacing:-.04em}
+.server-mark::after{content:"";position:absolute;bottom:13px;width:55%;height:3px;border-radius:3px;background:#fff9;box-shadow:0 -10px 0 #fff6,0 -20px 0 #fff4}
+.heat{font-size:14px;font-weight:650;white-space:nowrap;opacity:.75}
+.jobs{position:absolute;left:22px;right:22px;bottom:22px;display:grid;gap:7px;max-height:32%;overflow:hidden}
+.job{display:flex;align-items:center;gap:10px;background:#fff9;border-radius:999px;padding:7px 12px;font-size:clamp(12px,1vw,15px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.token{display:grid;place-items:center;width:25px;height:25px;flex:none;border-radius:50%;background:var(--job);color:white;font-size:13px;font-weight:800}
+.job-text{overflow:hidden;text-overflow:ellipsis}
+.ready{font-size:14px;opacity:.55;font-weight:650}
+footer{min-height:34px;display:flex;align-items:center;gap:22px;color:var(--muted);font-size:14px;padding:0 7px;white-space:nowrap;overflow:hidden}
+footer b{color:var(--paper)}
+#queue{flex:1;overflow:hidden;text-overflow:ellipsis;color:var(--paper)}
+.scale{display:flex;align-items:center;gap:7px}
+.swatch{display:block;width:100px;height:8px;border-radius:6px;background:linear-gradient(90deg,#78bfe0,#e9e3a2 50%,#ff9a55)}
+@media(max-width:700px){body{padding:5px;gap:5px}.grid{gap:5px}.node{padding:12px}.rack{top:48%}.jobs{left:12px;right:12px;bottom:12px}.scale{display:none}footer{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+<main class="grid" id="grid"></main>
+<footer><b>DigitalHeat · Live audience jobs</b><span id="queue">Waiting for audience questions</span><span class="scale">Less heat needed <i class="swatch"></i> More</span><span>Illustrative reference-server heat · one laptop</span></footer>
+<script>
+"use strict";
+const grid=document.querySelector('#grid'),queue=document.querySelector('#queue');
+const openedAt=Date.now(),visibleIds=new Set();
+const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function mix(a,b,t){const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));const A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+const room=s=>s<.5?mix('#78bfe0','#e9e3a2',s*2):mix('#e9e3a2','#ff9a55',(s-.5)*2);
+async function update(){try{
+  const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error(r.status);
+  const data=await r.json();
+  // Preserve jobs active when this view opens and all later arrivals, but hide old rehearsals.
+  const visibleJobs=data.jobs.filter(j=>{
+    if(['queued','created','running','paused'].includes(j.state)||Date.parse(j.submittedAtUtc)>=openedAt)visibleIds.add(j.id);
+    return visibleIds.has(j.id);
+  });
+  const queued=visibleJobs.filter(j=>j.state==='queued');
+  queue.textContent=data.error?('Operator attention: '+data.error):queued.length?`${queued.length} incoming · ${queued.map(j=>j.question).slice(0,3).join('  ·  ')}`:'Ready for audience questions';
+  const demands=data.workers.map(w=>Number(w.demand_kwh_per_hour));
+  const lo=Math.min(...demands),hi=Math.max(...demands);
+  grid.innerHTML=data.workers.map(w=>{
+    const active=visibleJobs.filter(j=>j.node===w.id&&['running','queued','created','paused'].includes(j.state));
+    const jobs=(active.length?active:visibleJobs.filter(j=>j.node===w.id&&['completed','failed'].includes(j.state))).slice(0,2);
+    const useful=Number(w.useful_heat_kwh_per_hour),demand=Number(w.demand_kwh_per_hour);
+    const shade=hi===lo?.5:(demand-lo)/(hi-lo);
+    return `<section class="node ${useful>0?'busy':''}" style="--room:${room(shade)};--job:${escape(w.color)}">
+      <div class="name">${escape(w.name)}<span class="worker">Worker ${w.id}</span></div>
+      <div class="demand">${demand.toFixed(1)}<small>kWh/h</small></div><div class="demand-label">Heat needed this hour</div>
+      <div class="rack"><div class="waves"><i></i><i></i><i></i></div><div class="server"><i class="power"></i><span class="server-mark">DH</span></div><div class="heat">${useful.toFixed(1)} kWh/h modelled heat</div></div>
+      <div class="jobs">${jobs.length?jobs.map(j=>`<div class="job"><span class="token">AI</span><span class="job-text">${escape(j.state)} · ${escape(j.question)}</span></div>`).join(''):'<span class="ready">Ready for an eligible job</span>'}</div>
+    </section>`
+  }).join('');
+}catch(e){queue.textContent='Connection lost — '+e.message}}
+update();setInterval(update,2000);
+</script></html>

@@ -21,8 +21,6 @@ export interface Step {
   globe?: boolean
   /** Text strip at the bottom of the screen. */
   strip?: string
-  /** Demo scene: show the QR code (otherwise the split screen). */
-  qr?: boolean
 }
 
 interface SceneBase {
@@ -37,10 +35,12 @@ export type Scene =
   | (SceneBase & { type: 'page'; url: string; steps?: Step[] })
   | (SceneBase & { type: 'demo'; liveUrl: string; steps: Step[] })
   | (SceneBase & { type: 'slide'; text: string; sub?: string })
+  /** A large QR code for the audience, with a caption; the address is shown under it. */
+  | (SceneBase & { type: 'qr'; url: string; text: string })
+  /** A page of another local service (other origin), e.g. the audience demo's operator view. */
+  | (SceneBase & { type: 'external'; url: string })
 
 export interface PitchConfig {
-  /** Address in the QR code. {token} is replaced by ?t= of the pitch URL. Empty: the ngrok tunnel + /speak. */
-  qrUrl?: string
   scenes: Scene[]
   checks: NumberCheck[]
 }
@@ -49,7 +49,6 @@ const JAN_15_NOON = 14 * 24 + 12
 const JUL_15_NOON = 195 * 24 + 12
 
 export const DEFAULT_CONFIG: PitchConfig = {
-  qrUrl: 'https://swiss-heat.lovable.app/?t={token}',
   scenes: [
     {
       id: 'film', type: 'video', title: 'Intro film', src: '/pitch/intro.mp4',
@@ -75,8 +74,12 @@ export const DEFAULT_CONFIG: PitchConfig = {
       id: 'globe', type: 'page', title: 'Globe', url: '/admin/dreispitz-5-pool-1-server?fit=1&layer=load',
       steps: [{ label: 'globe', globe: true }],
     },
-    { id: 'demo', type: 'demo', title: 'Live demo', liveUrl: '/live', steps: [{ label: 'QR', qr: true }, { label: 'live' }] },
+    // The presenter speaks into their own phone (/speak through the ngrok tunnel); no QR on screen.
+    { id: 'demo', type: 'demo', title: 'Live demo', liveUrl: '/live', steps: [{ label: 'live' }] },
     { id: 'close', type: 'slide', title: 'Close', text: 'Let the house decide.' },
+    // After the pitch, optional: the audience demo (decision 0074, DigitalHeat.AudienceDemo).
+    { id: 'audience-qr', type: 'qr', title: 'Audience: QR', url: 'https://swiss-heat.lovable.app', text: 'Ask Apertus a question' },
+    { id: 'audience', type: 'external', title: 'Audience: four workers', url: 'http://127.0.0.1:18970/operator' },
   ],
   checks: [
     { run: 'reference-1-server', house: 'reference', field: 'coverage', shown: 18.9, tolerance: 0.05 },

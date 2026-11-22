@@ -18,29 +18,22 @@ scene plan.
 
 | Time | Scene | On screen |
 |---|---|---|
-| 0:00–0:48 | **1. Intro film**, cut after the `dive` beat | the film; for its first 7 s a strip with the key figures of the reference house with one server |
-| 0:48–1:20 | **2. Key figures: one server** | household page of run `reference-1-server`, whole year |
-| 1:20–1:40 | **3. The real house** | household page of run `real-house-1-server` |
-| 1:40–2:25 | **4. Map: January day vs July day** | run `dreispitz-5-pool-1-server`, slider 15 January, then 15 July |
-| 2:25–2:50 | **5. Does one server pay?** | money chart, then a strip with the money split |
-| 2:50–2:57 | **6. Globe bridge** | the map zooms out to a globe, the QR code fades in |
-| 2:57–4:25 | **7. Interactive demo via QR** | QR, then split screen: runner console left, `/live` right |
-| 4:25–4:45 | **8. Close** | one line: *Let the house decide.* |
+| 0:00–0:38 | **1. Intro film**, cut at about 0:38 on the server/house reveal | the film; first 7 s show key figures for the one-server reference house; no speech before Bob's line at 0:08 |
+| 0:38–1:10 | **2. Key figures: one server** | household page of run `reference-1-server`, whole year |
+| 1:10–1:30 | **3. The real house** | household page of run `real-house-1-server` |
+| 1:30–2:15 | **4. Map: January day vs July day** | run `dreispitz-5-pool-1-server`, slider 15 January, then 15 July |
+| 2:15–2:40 | **5. Does one server pay?** | money chart, then a strip with the money split |
+| 2:40–2:47 | **6. Globe bridge** | the map zooms out to a globe, the QR code fades in |
+| 2:47–4:15 | **7. Interactive demo via QR** | QR, then split screen: runner console left, `/live` right |
+| 4:15–4:45 | **8. Close** | one line: *Let the house decide.* |
 
 **Case requirement "January day, July day, interrupted job":** the two days are shown on the map
 (scene 4, five houses exactly like the reference house, the same Fleet model and scheduler
 policy), the interrupted job is the real container in scene 7. Scene 7 replays exactly the July day of scene 4, which links the two.
 
-### Why the film is cut at 0:48 (decided by the team 2026-11-22)
+### Why the film is cut at about 0:38 (current agreed handoff)
 
-The film's next two beats use numbers of the retired year model: `lapse` (0:48–0:58) says the tank
-is first full on 22 March (Fleet reference run: 14 May), and `figures` (0:58–1:08) says 58 % of the
-heat is covered at 65 % utilisation (Fleet: 22.8 % and 25.4 %). Shown next to the dashboard, the
-jury would see two different answers for the same house. Cutting at 0:48 keeps the film free of
-outdated numbers; the dashboard then gives all key figures. Alternative: keep the film to 1:08 and
-re-render those two beats with Fleet numbers (`video/blender/prepare_data.py` would read
-`data/derived/fleet/reference/` instead of the year-model files). The film's own map part
-(1:20–1:46) is replaced by the live map in scene 4.
+The agreed handoff is during the basement reveal, at about 0:38. The first seven seconds show the current one-server reference-house figures; the first spoken line follows when Bob appears. Cutting before the later `lapse` and `figures` beats keeps retired year-model numbers out of the pitch. The dashboard immediately takes over with the current Fleet results.
 
 ### Numbers on screen (runs on `main`, 2026-11-22)
 

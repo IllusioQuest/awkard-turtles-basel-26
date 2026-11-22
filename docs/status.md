@@ -9,6 +9,7 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
+| Codex (this task) | `feat/T-78-public-apertus-demo` | T-88 public Apertus audience demo | isolated new audience service and launcher; existing heat-first coordinator reused, no shared interface change | .NET build and 117 orchestration tests pass; four real Apertus jobs and public tunnel verified on laptop; answers took 314–442 s; Lovable publication and projector visual review remain; ADR 0074 reviewed with changes |
 | Nikita / Claude | main | T-79 warm-process render penalty benchmark (`rendering/bench_frame.py`), merged with T-80 | none; diagnostic only | software-GL run: warm later frames 19.5 s vs first 6.25 s, identical pixels; laptop (Iris Xe) run pending |
 | Nikita / Codex | feat/T-60-unified-scheduler | T-62/T-64/T-65 unified heat-first adapters and real Linux mesh | shared Core load/rank/EDF, selected-site admission, origin journals; retired old modes | PR #52 draft; 47 Core/44 Network/74 orchestration/99 Fleet/57 gaming pass; Linux batch/pause/recovery pass; 1024-node speed guard remains open; wider T-61 equivalence not claimed |
 | Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | PR #49 in review; 125 source rows + deterministic 1000-building composition; ADR 0045 reviewed; Ennio/T-58 notified on PR #48; mixed thermal integration awaits category heat/spatial inputs |
