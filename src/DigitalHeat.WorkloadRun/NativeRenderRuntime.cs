@@ -215,7 +215,10 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
                 if(File.Exists(target)){if(Hash(File.ReadAllBytes(target))!=hash)throw new InvalidDataException("Immutable scene asset changed");}
                 else{string temp=target+"."+a.AttemptId+".tmp";File.Copy(source,temp,true);JournalReplace.Move(temp,target);}
             }else if(metadata.GetProperty("stage").GetString()=="assemble"){if(!File.Exists(Path.Combine(dir,"video.mp4"))||new FileInfo(Path.Combine(dir,"video.mp4")).Length==0)throw new InvalidDataException("Video output missing");}
-            else if(!File.Exists(Path.Combine(dir,"frame.png")))throw new InvalidDataException("Native output PNG missing");
+            else{
+                var published=RenderFrameStore.Publish(options.AssetsDirectory,Path.Combine(dir,"frame.png"),metadata);
+                WriteJson(Path.Combine(dir,"result.json"),published); // shared bytes and discovery precede released success.
+            }
         }
         if(IsWarm(a))ReleaseWarm(a,r);
         WriteJson(RecordPath(a),r with{Released=true,ExitCode=observed.ExitCode});

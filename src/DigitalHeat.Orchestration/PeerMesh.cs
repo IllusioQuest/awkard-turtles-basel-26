@@ -27,6 +27,7 @@ public sealed record ProposalOutcome(string Origin, string JobId, long Generatio
 public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes)
 {
     public bool OperatorHold { get; init; }
+    public string[] WithdrawnPeers { get; init; } = [];
     public string[] CancelledWorkloads { get; init; } = [];
 }
 
@@ -83,6 +84,14 @@ public sealed class MeshPeer : IDisposable
     public AttemptRecord[] Attempts() => coordinator.Attempts();
     public HeatCommitment[] HeatCommitments() => coordinator.HeatCommitments();
     public bool Held => journal.OperatorHold;
+    public bool IsPeerWithdrawn(string peerId)=>journal.WithdrawnPeers.Contains(peerId,StringComparer.Ordinal);
+    /// <summary>Explicit operator fencing only; not a health-timeout takeover mechanism.</summary>
+    public void WithdrawPeer(string peerId)
+    {
+        if(peerId==Id||!peers.Contains(peerId))throw new ArgumentException("Invalid withdrawal target");
+        if(!IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=[..journal.WithdrawnPeers,peerId]};Save();}
+        offers.Remove(peerId);
+    }
     public void CancelBatchWorkloads(string[] ids)
     {
         if(!journal.OperatorHold)throw new InvalidOperationException("Hold peer before cancelling frame jobs");
@@ -153,7 +162,7 @@ public sealed class MeshPeer : IDisposable
         Save();
         var offer = new PeerOffer(Id, journal.OfferSequence, expiry, snapshot, profiles.Keys.Order(StringComparer.Ordinal).ToArray());
         offers[Id] = offer;
-        foreach (string peer in peers.Where(p => p != Id).Order(StringComparer.Ordinal)) transport.Send(Id, peer, offer);
+        foreach (string peer in peers.Where(p => p != Id&&!IsPeerWithdrawn(p)).Order(StringComparer.Ordinal)) transport.Send(Id, peer, offer);
     }
 
     public void Tick()
@@ -175,10 +184,10 @@ public sealed class MeshPeer : IDisposable
             j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
             if (job.Status is "accepted" or "cancelled") continue;
-            if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
+            if (job.Target is not null) { if(!IsPeerWithdrawn(job.Target))Propose(job); continue; } // Lost reply: retry this target, never reassign.
             if (!WorkloadPlacement.DeadlineOpen(job.Request, clock.GetUtcNow())) continue;
             var now = clock.GetUtcNow();
-            var available = offers.Values.Where(o => now < o.ExpiresAtUtc && o.Profiles.Contains(job.ProfileId)
+            var available = offers.Values.Where(o => !IsPeerWithdrawn(o.PeerId)&&now < o.ExpiresAtUtc && o.Profiles.Contains(job.ProfileId)
                 && o.Inventory.ResourceObservedAtUtc is {} observed && observed <= now
                 && o.Inventory.ResourceValidUntilUtc is {} resourcesUntil && now < resourcesUntil
                 && now >= o.Inventory.IntervalStartUtc && now < o.Inventory.IntervalEndUtc)
@@ -255,7 +264,7 @@ public sealed class MeshPeer : IDisposable
         if (!peers.Contains(from)) throw new InvalidDataException("Unknown peer.");
         switch (message)
         {
-            case PeerOffer offer when offer.PeerId == from:
+            case PeerOffer offer when offer.PeerId == from&&!IsPeerWithdrawn(from):
                 if (!offers.TryGetValue(from, out var old) || offer.Sequence > old.Sequence)
                     offers[from] = WorkloadJson.Copy(offer);
                 break;
