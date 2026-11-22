@@ -1,0 +1,313 @@
+{
+ "ticket": "T-80",
+ "date": "2026-11-22",
+ "environment": "Cloud container, 4 vCPU, Linux. Real C# render lab (5 RenderNodeHost processes, same profile as presentation-profile.json) launched by a test-only Linux replica of Start-PresentationRenderLab.ps1. Blender 5.3.0 = bpy module behind a test-only native launcher; frame render replaced by a fixed 1.0 s sleep (FAKE_RENDER_SECONDS) so only orchestration time remains. NOT the presentation laptop.",
+ "heat_note": "Series run with total_heat_budget_kwh raised to 5000 (test only) so heat quotas never ran out; the stall finding below used the real 500.",
+ "baseline_series": [
+  {
+   "run": 1,
+   "phase": "complete",
+   "active_s": 20.28,
+   "host_cpu_s": 22.5,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 6.1
+  },
+  {
+   "run": 2,
+   "phase": "complete",
+   "active_s": 19.3,
+   "host_cpu_s": 12.6,
+   "ui_status_kb": 1102,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 10.3
+  },
+  {
+   "run": 3,
+   "phase": "complete",
+   "active_s": 19.41,
+   "host_cpu_s": 17.5,
+   "ui_status_kb": 1624,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 13.7
+  },
+  {
+   "run": 4,
+   "phase": "complete",
+   "active_s": 19.4,
+   "host_cpu_s": 24.1,
+   "ui_status_kb": 2145,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 18.7
+  },
+  {
+   "run": 5,
+   "phase": "complete",
+   "active_s": 20.55,
+   "host_cpu_s": 27.2,
+   "ui_status_kb": 2667,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 21.9
+  },
+  {
+   "run": 6,
+   "phase": "complete",
+   "active_s": 20.6,
+   "host_cpu_s": 36.8,
+   "ui_status_kb": 3188,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 29.1
+  },
+  {
+   "run": 7,
+   "phase": "complete",
+   "active_s": 20.68,
+   "host_cpu_s": 42.8,
+   "ui_status_kb": 3710,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 32.5
+  },
+  {
+   "run": 8,
+   "phase": "complete",
+   "active_s": 20.86,
+   "host_cpu_s": 46.5,
+   "ui_status_kb": 4232,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 34.0
+  }
+ ],
+ "filter_series": [
+  {
+   "run": 1,
+   "phase": "complete",
+   "active_s": 19.3,
+   "host_cpu_s": 25.8,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 5.1
+  },
+  {
+   "run": 2,
+   "phase": "complete",
+   "active_s": 19.32,
+   "host_cpu_s": 13.2,
+   "ui_status_kb": 581,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 5.2
+  },
+  {
+   "run": 3,
+   "phase": "complete",
+   "active_s": 19.33,
+   "host_cpu_s": 18.3,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 4.5
+  },
+  {
+   "run": 4,
+   "phase": "complete",
+   "active_s": 20.33,
+   "host_cpu_s": 24.0,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 4.2
+  },
+  {
+   "run": 5,
+   "phase": "complete",
+   "active_s": 20.4,
+   "host_cpu_s": 28.8,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 4.7
+  },
+  {
+   "run": 6,
+   "phase": "complete",
+   "active_s": 20.39,
+   "host_cpu_s": 36.2,
+   "ui_status_kb": 583,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 4.3
+  },
+  {
+   "run": 7,
+   "phase": "complete",
+   "active_s": 21.35,
+   "host_cpu_s": 43.5,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 6.1
+  },
+  {
+   "run": 8,
+   "phase": "complete",
+   "active_s": 21.49,
+   "host_cpu_s": 48.6,
+   "ui_status_kb": 582,
+   "frames_by_worker": {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   "ui_status_ms_median": 6.5
+  }
+ ],
+ "poll_250ms_trial": {
+  "run1": [
+   {
+    "run": 1,
+    "phase": "complete",
+    "active_s": 20.4,
+    "host_cpu_s": 48.0,
+    "ui_status_kb": 582,
+    "frames_by_worker": {
+     "gpu-1": 16,
+     "gpu-2": 16,
+     "gpu-3": 16
+    },
+    "ui_status_ms_median": 6.1
+   },
+   {
+    "run": 2,
+    "phase": "complete",
+    "active_s": 19.0,
+    "host_cpu_s": 41.9,
+    "ui_status_kb": 581,
+    "frames_by_worker": {
+     "gpu-1": 16,
+     "gpu-2": 16,
+     "gpu-3": 16
+    },
+    "ui_status_ms_median": 5.2
+   }
+  ],
+  "phase_last_frame_to_video_s": {
+   "before": 1.707,
+   "poll_250ms": 0.879
+  },
+  "frame_span_s": {
+   "before": 17.336,
+   "poll_250ms": 18.322
+  },
+  "decision": "reverted: more host CPU, no wall-time gain"
+ },
+ "phase_split_run1_baseline_s": {
+  "rendering_start_to_first_frame": 0.85,
+  "first_to_last_frame": 17.336,
+  "last_frame_to_video_start": 1.707,
+  "video_work": 0.162,
+  "video_done_to_complete": 0.271,
+  "active": 20.326,
+  "ideal_frames": 16.0
+ },
+ "per_node_cpu_run9_filter_s": {
+  "cpu-prepare": 11.2,
+  "cpu-video": 2.1,
+  "gpu-1": 13.5,
+  "gpu-2": 13.4,
+  "gpu-3": 13.4
+ },
+ "heat_stall_real_budget": {
+  "frames_by_worker_per_run": [
+   {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   {
+    "gpu-1": 16,
+    "gpu-2": 16,
+    "gpu-3": 16
+   },
+   {
+    "gpu-1": 17,
+    "gpu-2": 17,
+    "gpu-3": 14
+   },
+   {
+    "gpu-1": 24,
+    "gpu-2": 24
+   },
+   {
+    "gpu-1": 24,
+    "gpu-2": 24
+   },
+   {
+    "gpu-1": 36,
+    "gpu-2": 12
+   },
+   {
+    "gpu-1": 38
+   }
+  ],
+  "last_run": "stalled at 38/48 with 10 frames waiting and all GPU workers idle until the next clock hour"
+ }
+}
