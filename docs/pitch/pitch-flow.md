@@ -27,7 +27,7 @@ the model does not pay off (feasibility, 25 %). Every number on screen comes fro
 (scene 3, the same Fleet model and scheduler policy), the interrupted job is the real container in
 scene 6. Scene 6 replays exactly the July day of scene 3, which links the two.
 
-### Why the film is cut at 0:48
+### Why the film is cut at 0:48 (decided by the team 2026-11-22)
 
 The film's next two beats use numbers of the retired year model: `lapse` (0:48–0:58) says the tank
 is first full on 22 March (Fleet reference run: 14 May), and `figures` (0:58–1:08) says 58 % of the
@@ -74,7 +74,6 @@ every Type 2 price (elasticity 0), as stated in the scenario's `_note`.
 
 ## Things to decide or prepare
 
-- **Film:** confirm the cut at 0:48 (or re-render `lapse` and `figures` with Fleet numbers).
 - **Scene 4 sentence:** break-even volume or price from the sweep (in progress).
 - **QR access:** the QR must carry the ngrok URL with the token (`/speak?t=…`); a phone hotspot
   as fallback. If nobody scans, the presenter speaks or types the request.

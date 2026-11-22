@@ -22,4 +22,4 @@ so a subsequent generation cannot overwrite evidence of the observed frame2
 failure. No automatic retry or success claim without a completion marker.
 
 ## Review
-Pending one fresh limited-context review.
+Go with changes: Finished exactly matches released/terminal including failed attempts; preserve record order/heat values; copy all interval arrays under the gate; scalar query includes every phase and has no runtime side effects; capture per-activation log paths before async writes. Applied.132 tests pass, including equivalence, detached arrays and allocation checks.

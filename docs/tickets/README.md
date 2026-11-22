@@ -128,4 +128,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-82](T-82-real-house-variant.md) | Real house from the organisers as a Fleet variant | Ennio / Claude | done |
 
-| [T-83](T-83-render-efficiency.md) | Renderer efficiency and repeat-run diagnosis | Nikita / Codex | in progress |
+| [T-83](T-83-render-efficiency.md) | Renderer efficiency and repeat-run diagnosis | Nikita / Codex | in review; PR #73 |
