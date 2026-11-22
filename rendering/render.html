@@ -89,10 +89,10 @@ function renderTopology(s){
    if(busy&&s.pause_pending)state+=' · pause pending';
    card.append(element('div','node-state',state));
    card.append(element('div','node-detail',preparations+' scene preparation(s) · '+frameCount+' frame(s) · '+done.filter(f=>f.metadata.stage==='assemble').length+' video(s)'));
-   const roleTotal=n.worker_role==='prepare'||n.worker_role==='assemble'?1:s.frames_per_run;
+   const roleTotal=n.worker_role==='prepare'||n.worker_role==='assemble'?1:(n.heat_need_frames??s.frames_per_run);
    const workCount=n.worker_role==='prepare'?preparations:n.worker_role==='assemble'?done.filter(f=>f.metadata.stage==='assemble').length:frameCount;
    const meter=element('div','node-meter');const fill=element('span');fill.style.width=(100*Math.min(workCount,roleTotal)/Math.max(1,roleTotal))+'%';meter.append(fill);card.append(meter);
-   card.append(element('div','node-detail',workCount+' / '+roleTotal+(n.worker_role==='prepare'?' scenes prepared':n.worker_role==='assemble'?' videos assembled':' total frames rendered here')));
+   card.append(element('div','node-detail',workCount+' / '+roleTotal+(n.worker_role==='prepare'?' scenes prepared':n.worker_role==='assemble'?' videos assembled':n.heat_need_frames!=null?' needed frames rendered here':' total frames rendered here')));
    const kwh=Number(n.heat_demand_kwh).toLocaleString(undefined,{maximumFractionDigits:1});
    card.append(element('div','node-detail',n.heat_need_frames!=null?'Heat need: '+n.heat_need_frames+' frames this run ('+kwh+' kWh) · weight '+n.work_weight+' · unmeasured lab input':(n.shared_gpu_group?'Heat quota: ':'Heat demand: ')+kwh+' kWh · unmeasured lab input'));
    list.append(card);
