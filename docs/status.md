@@ -136,3 +136,6 @@ T-77 PR69/593fe8b,0abf3e1:117 tests; native timings, immutable released-result c
 
 
 T-77 integration complete: PR69 merged at c205fc7; user requested pull/push main and the post-merge timeout follow-up0abf3e1 is now included.117 tests previously passed; follow-up changes only diagnostic timeout configuration, Python syntax rechecked. Runtime unchanged by this Git synchronization.
+
+
+T-80 real laptop follow-up, Nikita/Codex: rebuilt main cdd7ac4 at18950. Run1 complete48 frames24/16/8 in153.7926active seconds, MP4 verified; GPU3 finished8 while others continued. Run2 failed at startup: GPU2 frame002 native process ended without completion marker (released exit_code1). Cause unknown; not the old hourly heat stall. No code changes; retain all files and failed state. Evidence docs/jobs/render-heat-need-laptop-test.md and docs/performance/render-heat-need-laptop-2026-11-22.json.
