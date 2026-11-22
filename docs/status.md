@@ -145,3 +145,6 @@ T-83 Nikita/Codex perf/T-83-render-efficiency: user requests speed; running exis
 
 
 T-83 PR73 /8a4e4ad,60fbc70: approved/reviewed compact heat snapshots and zero-allocation scalar sum; unchanged placement/ownership.132tests plus16native recheck.50queries/500attempts:230.63MB old vs2.61MB compact; scalar0B. Two distinct real48-frame MP4 runs74.6994/78.2986s, both24/16/8. No matched end-to-end speedup guarantee. T79 existing hardware probe warm fast, fresh round2C0000005 in Intel driver; no mode change. New generation logs retain exit evidence (also verified after later idle-process crash). Three concurrent GPU workers, quality and Minecraft preserved. Docs/jobs/render-efficiency.md.
+
+
+T-84 Nikita/Codex fix/T-84-render-copy PR74: user-approved Heat needed: xx kWh labels, retain node names/progress, remove flow/footer and healthy Reachable text. Preserve warnings, initial provider and all runtime/heat behavior. Live HTML/JS syntax verified, no restart. Synthetic assumptions remain documented.
