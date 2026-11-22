@@ -66,4 +66,19 @@ again after power-on, 5 controllers at the end, 1 proposal rejected in total. Br
 Evidence: `docs/performance/node-rejoin-2026-11-22.json`. Not yet run on the Windows laptop.
 
 ## Review
-Pending fresh limited-context review.
+Fresh-context `decision-reviewer` on the implementation, 2026-11-22: **go with changes**. Applied:
+
+1. Stop then Start could drop an unfinished power-on, leaving the node polled and given a share but still
+   withdrawn on its peers. Start now refuses while the stage is "starting" or "started" (test added).
+2. Rejoin needs were not saved, so a later `Execute` restart in the same render resent the power-off plan.
+   `RegisterRunNeed` now recomputes `RejoinNeeds` when the stage is "rejoined"; power-on is allowed only while
+   frames render or between renders (test added; the button is disabled otherwise).
+3. A retried power-on read the hold left by the failed attempt as a user pause and left the render held.
+   Only a real pause (`PauseStartedUtc`) now keeps it paused.
+4. The Linux start-time tolerance treats a mismatch as "gone"; a wall-clock step could hide a live controller.
+   Power-on now fails closed if anything still answers at the node's address before spawning.
+
+Not changed: none of this has run on the Windows laptop with real Blender yet. Run a 48-frame off/on there
+before the pitch and keep a recorded run as fallback. Re-check after the fixes on the Linux replica: off/on in
+one render (22/18/8), off during and on after a render (25/19/4), then a normal render (24/16/8), all 48/48
+with video, 5 controllers.

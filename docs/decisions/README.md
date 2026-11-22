@@ -101,7 +101,7 @@ later.
 
 - [0072 — Node shutdown and frame retry](0072-node-shutdown-frame-retry.md): proposed; T-86; user-approved local fencing design, review pending.
 
-- [0073 — Node rejoin](0073-node-rejoin.md): proposed; T-87; current-run rejoin approved, review pending.
+- [0073 — Node rejoin](0073-node-rejoin.md): proposed; T-87 (taken over by Nikita / Claude); implemented, reviewed go with changes (applied); Windows laptop run pending.
 
 - [0074 — Mesh planning counts own proposals](0074-mesh-planning-counts-own-proposals.md): proposed; T-88; user approved; one planner per pass holds the origin's unanswered proposals; reviewed go with changes, applied.
 - [0069 — Pitch mode as one route of the web dashboard](0069-pitch-mode.md): proposed; reviewed go with changes (applied, one documented deviation).

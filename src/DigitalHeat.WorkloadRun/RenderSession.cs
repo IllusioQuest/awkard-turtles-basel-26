@@ -114,6 +114,8 @@ internal sealed partial class RenderSession
     {
         await controls.WaitAsync();try{
             if(!CanStart)throw new InvalidOperationException("Stop the current run before starting another");
+            if(state.Shutdown is {Stage:"starting" or "started"} pending)
+                throw new InvalidOperationException("Finish powering on "+pending.Identity.PeerId+" before starting a render");
             await RefreshPeers();if(pollingError is not null||peers.Length!=ActivePeerCount)throw new IOException("Wait for all configured peers");
             if(peers.Any(p=>p.Attempts.Any(a=>a.Phase!="released")))throw new IOException("An owned peer job is still active; reconcile first");
             if(peers.Select(p=>p.Image).Distinct().Count()!=1||peers.Any(p=>p.Image!=cfg.Image))throw new InvalidDataException("Renderer recipe/image differs between peers");
@@ -212,6 +214,13 @@ internal sealed partial class RenderSession
         // Every render node gets its share, including 0, so no node keeps a previous run's leftover need.
         // A failed registration fails the run visibly rather than splitting it over fewer GPUs silently.
         int frames=state.FrameCount??cfg.Frames;string prefix=RenderHeatNeed.RunPrefix(cfg.Id,state.Id);
+        if(state.Shutdown is {Stage:"rejoined"}){
+            // A powered-on node rejoined this render (ADR 0073): resend the rejoin split, not the power-off plan.
+            foreach(var need in RenderFailoverPlan.RejoinNeeds(frames,FrameIds(),peers,state.FencedFrames,prefix,cfg.FrameHeatKwh)){
+                using var r=await http.PostAsJsonAsync(cfg.Peers[need.Key]+"/run-need",need.Value,RenderNodeHost.Json);r.EnsureSuccessStatusCode();
+            }
+            return;
+        }
         foreach(var share in state.Shutdown?.Plan?.Needs??RenderHeatNeed.Allocate(frames,gpus)){
             using var r=await http.PostAsJsonAsync(cfg.Peers[share.Key]+"/run-need",new RunHeatNeed(prefix,share.Value,cfg.FrameHeatKwh),RenderNodeHost.Json);
             r.EnsureSuccessStatusCode();

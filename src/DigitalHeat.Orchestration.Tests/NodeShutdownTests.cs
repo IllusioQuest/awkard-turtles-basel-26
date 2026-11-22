@@ -81,12 +81,21 @@ public sealed class NodeShutdownTests:IDisposable
     [Fact] public void PowerOnRequiresAFinishedPowerOffAndTheSameNode()
     {
         var cfg=Config();Directory.CreateDirectory(cfg.StateDirectory);var identity=new LocalNodePowerControl(cfg).Prepare("gpu3");
-        foreach(var (stage,peer) in new[]{("planned","gpu3"),("ready","origin")}){
+        foreach(var (stage,peer,phase) in new[]{("planned","gpu3","rendering"),("ready","origin","rendering"),("ready","gpu3","assembling"),("ready","gpu3","failed")}){
             NativeRenderRuntime.WriteJson(Path.Combine(cfg.StateDirectory,"render-session.json"),
-                new RenderSessionState("run","rendering",true,[]){Shutdown=new(stage,identity,Peer("gpu3",.5,[],[]))});
+                new RenderSessionState("run",phase,true,[]){Shutdown=new(stage,identity,Peer("gpu3",.5,[],[]))});
             using var http=new HttpClient();var session=new RenderSession(cfg,http);
             Assert.Throws<InvalidOperationException>(()=>session.StartupCoreForTest(peer).GetAwaiter().GetResult());
         }
+    }
+    [Fact] public async Task UnfinishedPowerOnBlocksANewRender()
+    {
+        // Review of ADR 0073: Start must not drop a "starting"/"started" power-on (the node would stay withdrawn).
+        var cfg=Config();Directory.CreateDirectory(cfg.StateDirectory);var identity=new LocalNodePowerControl(cfg).Prepare("gpu3");
+        NativeRenderRuntime.WriteJson(Path.Combine(cfg.StateDirectory,"render-session.json"),
+            new RenderSessionState("run","complete",true,[]){Shutdown=new("started",identity,Peer("gpu3",.5,[],[]))});
+        using var http=new HttpClient();var session=new RenderSession(cfg,http);
+        var error=await Assert.ThrowsAsync<InvalidOperationException>(session.Start);Assert.Contains("powering on",error.Message);
     }
     [Fact] public void FencedResultsPublishedAfterLastPollRemainDiscoverableAndCorruptionFailsClosed()
     {

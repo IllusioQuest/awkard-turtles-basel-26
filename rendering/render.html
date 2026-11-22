@@ -116,7 +116,7 @@ async function refresh(){
   const stage=s.node_shutdown,off=Boolean(gpu3?.powered_off),poweringOn=['starting','started'].includes(stage);
   el('shutdownNode').hidden=!s.node_shutdown_enabled||!gpu3;
   if(off){
-   el('shutdownNode').disabled=s.node_shutdown_busy||!(stage==='ready'||poweringOn);
+   el('shutdownNode').disabled=s.node_shutdown_busy||!(stage==='ready'||poweringOn)||!['rendering','idle','complete','cancelled'].includes(s.phase);
    el('shutdownNode').textContent=s.node_shutdown_busy?(poweringOn?'Powering on GPU 3…':'Powering off GPU 3…'):'Power on GPU 3';
    el('shutdownNode').onclick=()=>action('nodes/'+encodeURIComponent(gpu3.peer_id)+'/startup');
   }else{

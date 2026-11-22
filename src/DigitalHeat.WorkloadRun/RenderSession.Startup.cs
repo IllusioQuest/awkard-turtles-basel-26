@@ -25,7 +25,10 @@ internal sealed partial class RenderSession
         var off=state.Shutdown??throw new InvalidOperationException("No powered-off node");
         if(off.Identity.PeerId!=peerId)throw new InvalidOperationException("Only the powered-off node can be powered on");
         if(off.Stage is not ("ready" or "starting" or "started"))throw new InvalidOperationException("Power off must finish before power on");
-        bool rendering=state.Phase=="rendering",wasHeld=state.Held;
+        if(state.Phase is not ("rendering" or "idle" or "complete" or "cancelled"))
+            throw new InvalidOperationException("Power on is available while frames render or between renders");
+        // Only a user pause keeps the render paused afterwards; a hold left by an earlier failed power-on does not.
+        bool rendering=state.Phase=="rendering",wasHeld=state.PauseStartedUtc is not null;
         if(rendering)Update(s=>s with{Held=true});
         await dispatch.WaitAsync();
         try{
@@ -33,6 +36,8 @@ internal sealed partial class RenderSession
             if(rendering)await DirectHold(true);
             var power=new LocalNodePowerControl(cfg);
             if(state.Shutdown!.Stage=="ready"){
+                // Fail closed if anything still answers at the node's address (e.g. a controller a clock step hid).
+                if(await Answers(cfg.Peers[peerId]))throw new IOException(peerId+" still answers at its address; power-off is not confirmed");
                 Update(s=>s with{Shutdown=s.Shutdown! with{Stage="starting"},Error="Powering on "+peerId+"…"});
                 var fresh=power.Restart(state.Shutdown!.Identity,(pid,started)=>
                     Update(s=>s with{Shutdown=s.Shutdown! with{Stage="started",Restarted=new(pid,started)}}));
@@ -54,6 +59,13 @@ internal sealed partial class RenderSession
                 if(state.Phase is not ("complete" or "cancelled")&&running is not {IsCompleted:false}){stopRequested=false;running=Task.Run(Execute);}
             }
         }finally{dispatch.Release();}
+    }
+
+    private async Task<bool> Answers(string url)
+    {
+        using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        try{using var r=await http.GetAsync(url+"/status",limit.Token);return true;}
+        catch(Exception e)when(e is HttpRequestException or TaskCanceledException){return false;}
     }
 
     /// <summary>Fresh, verified status of the restarted node with all of its old attempts released.</summary>
