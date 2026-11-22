@@ -1,5 +1,5 @@
 {
-  "_about": "Pitch mode configuration (decision 0069). Edit scenes, runs, hours (since 2025-01-01 00:00) and texts here; the web app reloads it on start. Built-in defaults: web/src/pitch/config.ts. After the close, the optional audience demo (decision 0074): a QR to the Lovable page and the local operator view of DigitalHeat.AudienceDemo.",
+  "_about": "Pitch mode configuration (decision 0069). Edit scenes, runs, hours (since 2025-01-01 00:00) and texts here; the web app reloads it on start. Built-in defaults: web/src/pitch/config.ts. After the close, the optional audience demo QR (decision 0074); its operator view runs on the laptop that hosts DigitalHeat.AudienceDemo (to show it here, add {\"type\": \"external\", \"url\": \"http://127.0.0.1:18970/operator\"} when it runs on this laptop).",
   "scenes": [
     {
       "id": "film",
@@ -90,12 +90,6 @@
       "title": "Audience: QR",
       "url": "https://swiss-heat.lovable.app",
       "text": "Ask Apertus a question"
-    },
-    {
-      "id": "audience",
-      "type": "external",
-      "title": "Audience: four workers",
-      "url": "http://127.0.0.1:18970/operator"
     }
   ],
   "checks": [

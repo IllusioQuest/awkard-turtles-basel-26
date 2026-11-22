@@ -35,7 +35,7 @@ and the audience service is running (checks screen: "Audience demo" green).
 | Screen and action | Spoken |
 |---|---|
 | O presses →: large QR to `swiss-heat.lovable.app` (scene 9). | **O:** Apertus is running on this laptop. Scan this and choose the ready-made question. Our software places each job where heat is useful. |
-| After about 20 s, O presses →: the four-worker operator view (scene 10). | **O:** Four logical workers on this one laptop. The background colour is heat demand, not temperature; the heat figures are an illustrative scenario. Your answers arrive on your phone in a few minutes. |
+| After about 20 s, switch the projector to Jona's laptop: the four-worker operator view (`http://127.0.0.1:18970/operator`). | **O:** Four logical workers on this one laptop. The background colour is heat demand, not temperature; the heat figures are an illustrative scenario. Your answers arrive on your phone in a few minutes. |
 
 Answers take 5–7 minutes (measured 314–442 s for four at once); never wait for them on the projector.
 

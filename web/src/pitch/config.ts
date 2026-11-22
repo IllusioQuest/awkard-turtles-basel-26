@@ -77,9 +77,9 @@ export const DEFAULT_CONFIG: PitchConfig = {
     // The presenter speaks into their own phone (/speak through the ngrok tunnel); no QR on screen.
     { id: 'demo', type: 'demo', title: 'Live demo', liveUrl: '/live', steps: [{ label: 'live' }] },
     { id: 'close', type: 'slide', title: 'Close', text: 'Let the house decide.' },
-    // After the pitch, optional: the audience demo (decision 0074, DigitalHeat.AudienceDemo).
+    // After the pitch, optional: the audience demo (decision 0074, DigitalHeat.AudienceDemo). It runs on
+    // another laptop, which shows its own operator view; add an 'external' scene here if it runs on this one.
     { id: 'audience-qr', type: 'qr', title: 'Audience: QR', url: 'https://swiss-heat.lovable.app', text: 'Ask Apertus a question' },
-    { id: 'audience', type: 'external', title: 'Audience: four workers', url: 'http://127.0.0.1:18970/operator' },
   ],
   checks: [
     { run: 'reference-1-server', house: 'reference', field: 'coverage', shown: 18.9, tolerance: 0.05 },

@@ -123,8 +123,8 @@ Press **H**: every line should be green. **F** fullscreen, **→** start. Keys: 
 next, ← back, 1–9 scene, G globe, B or . black, T type a request, V fallback recording, Q speak
 page address, R reload the page on screen. Scenes, runs and texts: `web/public/pitch/pitch.json`.
 The presenter opens `/speak` on their phone by scanning the small code in the checks screen (H).
-Scenes 9–10 are the optional audience demo after the pitch (`docs/jobs/audience-apertus-demo.md`):
-a QR to the Lovable page and the operator view of `DigitalHeat.AudienceDemo` on port 18970.
+Scene 9 is the optional audience demo after the pitch (`docs/jobs/audience-apertus-demo.md`): a QR
+to the Lovable page. `DigitalHeat.AudienceDemo` and its operator view run on Jona's Windows laptop.
 
 ## 5. Real house calibration (organisers' data)
 

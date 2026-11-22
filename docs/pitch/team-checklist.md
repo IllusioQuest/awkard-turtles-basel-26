@@ -68,11 +68,11 @@ Do this the evening before and again one hour before the pitch.
 7. Phone hotspot ready as internet fallback for ngrok (venue Wi-Fi often blocks it).
 8. Test the full chain once with the operator's phone: open `/speak` (QR in the checks screen,
    key **H**), ask, see freeze and thaw.
-9. Optional audience demo (after the pitch, decision 0074): on the laptop that runs it,
+9. Optional audience demo (after the pitch, decision 0074), on Jona's Windows laptop:
    `scripts/Start-AudienceApertus.ps1`, then set the printed tunnel URL as `DEMO_BASE_URL` in the
-   Lovable page and republish (`docs/jobs/audience-apertus-demo.md`). The pitch app shows its
-   operator view at `http://127.0.0.1:18970/operator` (scene 10), so it must run on the pitch laptop,
-   or change `url` of scene `audience` in `web/public/pitch/pitch.json`.
+   Lovable page and republish (`docs/jobs/audience-apertus-demo.md`). The pitch app shows the QR
+   (scene 9); the four-worker operator view stays on Jona's laptop: plan the projector switch
+   (second HDMI input or a quick cable swap) and rehearse it once.
 
 ## 4. Rehearsal (all)
 
