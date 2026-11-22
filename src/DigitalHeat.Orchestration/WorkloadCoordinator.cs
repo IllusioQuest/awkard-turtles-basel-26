@@ -12,6 +12,9 @@ public sealed record AttemptRecord(RuntimeAttempt Attempt, string Phase)
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public DeadlineOutcome? Deadline { get; init; }
 }
+/// <summary>Detached heat-only read snapshot; does not authorize placement or replace ownership checks.</summary>
+public sealed record HeatCommitment(string WorkloadId,double HeatKwhPerHour,DateTimeOffset[] HourStartsUtc,bool Finished);
+
 public sealed record CoordinatorState(string FleetId, AttemptRecord[] Attempts)
 {
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
@@ -147,6 +150,22 @@ public sealed class WorkloadCoordinator : IDisposable
     }
     public AllocationView[] Allocations() { lock (gate) return placement.Allocations(); }
     public AttemptRecord[] Attempts() { lock (gate) return WorkloadJson.Copy(records.ToArray()); }
+    public HeatCommitment[] HeatCommitments()
+    {
+        lock(gate)return records.Select(r=>new HeatCommitment(r.Attempt.Request.Id,
+            r.Attempt.Reservation.RecoverableHeatKwhPerHour,r.CommittedHeatIntervalsUtc?.ToArray()??[],
+            r.Phase is "released" or "terminal")).ToArray();
+    }
+    public double CommittedHeatKwh(DateTimeOffset hourStartUtc)
+    {
+        lock(gate){
+            double total=0;
+            foreach(var r in records)if(r.CommittedHeatIntervalsUtc?.Contains(hourStartUtc)==true)
+                total+=r.Attempt.Reservation.RecoverableHeatKwhPerHour;
+            return total;
+        }
+    }
+
 
     public void Reconcile(IReadOnlyList<RuntimeNode> configuredNodes)
     {

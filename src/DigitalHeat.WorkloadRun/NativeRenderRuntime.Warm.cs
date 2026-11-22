@@ -55,10 +55,22 @@ internal sealed partial class NativeRenderRuntime
             pool=new(process,owned.Activation,DirectoryFor(a));WriteJson(WarmRecord,pool); // Intent BEFORE spawn.
             File.Delete(Path.Combine(WarmDirectory,"activate"));
             WriteJson(Path.Combine(WarmDirectory,"spec.json"),new{directory=WarmDirectory,activation=process.Activation,recipe_id=RecipeId,idle_timeout_seconds=options.WarmIdleTimeoutSeconds});
+            string logs=Path.Combine(WarmDirectory,"logs",process.Activation);Directory.CreateDirectory(logs);
             var p=new Process{StartInfo=StartInfo(WarmDirectory,"warm_worker.py"),EnableRaisingEvents=true};p.Exited+=(_,_)=>Wake?.Invoke();p.Start();
             pool=pool with{Process=process with{Pid=p.Id,StartedUtc=p.StartTime.ToUniversalTime()}};WriteJson(WarmRecord,pool);
             var output=p.StandardOutput.ReadToEndAsync();var error=p.StandardError.ReadToEndAsync();
-            _=Task.Run(async()=>{File.WriteAllText(Path.Combine(WarmDirectory,"stdout.log"),await output);File.WriteAllText(Path.Combine(WarmDirectory,"stderr.log"),await error);p.Dispose();});
+            // Capture this generation before another StartWarm can replace the active record.
+            string activation=process.Activation;int pid=p.Id;var started=p.StartTime.ToUniversalTime();
+            _=Task.Run(async()=>{
+                try{
+                    File.WriteAllText(Path.Combine(logs,"stdout.log"),await output);
+                    File.WriteAllText(Path.Combine(logs,"stderr.log"),await error);
+                    await p.WaitForExitAsync();
+                    WriteJson(Path.Combine(logs,"process-exit.json"),new{activation,pid,started_utc=started,
+                        native_exit_code=p.ExitCode,native_exit_code_hex=p.ExitCode.ToString("X8"),observed_utc=DateTimeOffset.UtcNow});
+                }catch(Exception e){Console.Error.WriteLine("Warm process diagnostics: "+e);}
+                finally{p.Dispose();}
+            });
         }else{
             pool=pool with{ActiveActivation=owned.Activation,ActiveDirectory=DirectoryFor(a)};WriteJson(WarmRecord,pool);
         }
