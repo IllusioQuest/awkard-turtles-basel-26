@@ -70,18 +70,22 @@ Do this the evening before and again one hour before the pitch.
    Notifications off (Do Not Disturb).
 5. Start, in four terminals: FleetApi with `VOICE_DEMO_TOKEN`, `npm run dev` in `web/`, the voice
    runner, `ngrok http 5173` (QUICKSTART §4).
-6. Phone hotspot ready as internet fallback for ngrok (venue Wi-Fi often blocks it).
-7. Test the full chain once with a phone: scan the QR, ask, see freeze and thaw.
+6. Copy the cut film (`~/pitch/intro.mp4`, steps 1–2) to `web/public/pitch/intro.mp4`. Open
+   `http://127.0.0.1:5173/pitch?t=<token>` in Chrome, press **H**: every line green (fix red ones),
+   **H** again, **F** for fullscreen. The pitch starts with **→** (QUICKSTART §4b lists all keys).
+7. Phone hotspot ready as internet fallback for ngrok (venue Wi-Fi often blocks it).
+8. Test the full chain once with a phone: scan the QR, ask, see freeze and thaw.
 
 ## 4. Rehearsal (all)
 
 1. Two full run-throughs with a stopwatch; target 4:50.
-2. One run-through where the QR fails (operator types the backup question).
+2. One run-through where the QR fails (operator presses **T** and types the backup question).
 3. One run-through where the laptop fails: play the screen recording (step 5).
 
 ## 5. Fallback recording (owner: operator O)
 
-Record one complete good run of scenes 2–7 as a screen video (GNOME: `Ctrl+Shift+Alt+R`; macOS:
+Record one complete good run of scenes 2–7 as a screen video, and, if you like, one per scene
+for key **V** (set `fallback` per scene in `web/public/pitch/pitch.json`) (GNOME: `Ctrl+Shift+Alt+R`; macOS:
 `Cmd+Shift+5`). Keep it on the desktop and on a USB stick.
 
 ## 6. Submission

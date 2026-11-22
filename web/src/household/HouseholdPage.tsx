@@ -88,6 +88,18 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
   const jobLog = useAsync(source ? `job-events:${run.id}:${house.id}:${fromMs}:${toMs}` : null,
     () => source!.jobEvents(run.id, house.id, fromMs, toMs))
 
+  // A single-house run: its missed-deadline share is the network count over all jobs that arrived,
+  // including jobs that never started (as in docs/model/fleet-simulation.md and the paper); the
+  // per-house count below counts only jobs that ran in the house.
+  const network = useAsync(source && run.houses === 1 ? `network:${run.id}` : null, () => source!.network(run.id))
+  const runMissed = useMemo(() => {
+    if (!network.data) return null
+    const h0 = fromMs / 3_600_000, h1 = toMs / 3_600_000
+    let misses = 0, arrivals = 0
+    for (const n of network.data) if (n.h >= h0 && n.h < h1) { misses += n.misses; arrivals += n.arrivals }
+    return arrivals > 0 ? { misses, arrivals } : null
+  }, [network.data, fromMs, toMs])
+
   const data = useMemo(() => householdSeries(run, house, periods, range.from, range.to), [run, house, periods, range])
   const sum = useMemo(() => totals(data, run.maxElectricKwPerServer), [data, run.maxElectricKwPerServer])
   const span = range.to - range.from
@@ -162,8 +174,10 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
         <Stat label="Outdoor temperature" value={`${dec1.format(sum.avgTemperatureC)} °C`} note="average" />
         <Stat
           label="Deadlines missed"
-          value={sum.missedShare === null ? '–' : pctSmall.format(sum.missedShare)}
-          note={sum.deadlinesKnown ? `${num.format(sum.deadlinesMissed)} of ${num.format(sum.jobsDue)} jobs` : 'not in this run (re-run or restart the API)'}
+          value={runMissed ? pctSmall.format(runMissed.misses / runMissed.arrivals) : sum.missedShare === null ? '–' : pctSmall.format(sum.missedShare)}
+          note={runMissed
+            ? `${num.format(runMissed.misses)} of ${num.format(runMissed.arrivals)} jobs, incl. never started`
+            : sum.deadlinesKnown ? `${num.format(sum.deadlinesMissed)} of ${num.format(sum.jobsDue)} jobs` : 'not in this run (re-run or restart the API)'}
         />
         <Stat
           label="Break even kWh price"

@@ -41,6 +41,8 @@ internal sealed class Snapshot
 
     public sealed record Point(double SimulatedMs, double DemandKw, double HeatProducedKw, double TankKwh, double TargetLoad);
     public sealed record LiveEvent(double SimulatedMs, string Kind, string JobId, bool Observed);
+    /// <summary>One terminal line of the runner: level (info, warn, error, out) and the text without colours.</summary>
+    public sealed record ConsoleLine(string Level, string Text);
     public sealed class VoiceState
     {
         public string Stage { get; set; } = "";
@@ -53,6 +55,7 @@ internal sealed class Snapshot
         public double? RequestEnergyKwh { get; set; }
         public string HotWaterProfile { get; set; } = "";
         public string Scheduler { get; set; } = "mesh heat-first (DigitalHeat.Orchestration MeshPeer)";
+        public ConsoleLine[] Console { get; set; } = [];
     }
 
     public static double Ms(double localHour) => localHour * MsPerHour;

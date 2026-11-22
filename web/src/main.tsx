@@ -7,6 +7,7 @@ import AdminPage from './admin/AdminPage.tsx'
 import HouseholdPage from './household/HouseholdPage.tsx'
 import LiveHouseholdPage from './household/LiveHouseholdPage.tsx'
 import SpeakPage from './voice/SpeakPage.tsx'
+import PitchPage from './pitch/PitchPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/admin/:runId/houses/:houseId" element={<HouseholdPage />} />
         <Route path="/live" element={<LiveHouseholdPage />} />
         <Route path="/speak" element={<SpeakPage />} />
+        <Route path="/pitch" element={<PitchPage />} />
         <Route path="/household/*" element={<Navigate to="/admin" replace />} />
       </Routes>
     </BrowserRouter>
