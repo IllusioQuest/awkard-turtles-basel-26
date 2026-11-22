@@ -18,7 +18,7 @@ the model does not pay off (feasibility, 25 %). Every number on screen comes fro
 | 0:00–0:48 | **1. Intro film, cut after the `dive` beat** | the rendered film (`feat/T-78-intro-film`), 0:00–0:48: Basel in January, Bob, the data centre, the dive into the basement with four servers, tank and radiators | (voice-over of the film) |
 | 0:48–1:30 | **2. Key figures: the reference house** | dashboard, household page of run `reference`, whole year 2025 | The case house with 4 servers for a simulated year: the numbers the case asks for (table below). One sentence on the organisers' real house: it uses three times more heat in summer, and its missed deadlines drop from 6,905 to 11 (run `real-house`). |
 | 1:30–2:30 | **3. Map: January day vs July day** | admin map, run `dreispitz-5-pool` (5 houses and the indoor pool at FHNW Dreispitz), slider on 15 January, then on 15 July | January: every house wants heat, the work spreads over all of them. July: the houses only need hot water, three quarters of the work moves to the pool. The heat stays where it is needed; the work moves. Almost nothing is late (0.02 %). |
-| 2:30–2:55 | **4. Where it stops paying off** | money chart (income vs electricity) and the net after hardware | Income covers electricity and the homeowner's heat, but not yet the GPU hardware at today's volumes. It pays off at … (number from the break-even sweep). |
+| 2:30–2:55 | **4. Where it stops paying off** | money chart (income vs electricity) and the net after hardware | Four GPU servers in a family house are too many: at our assumed demand they lose CHF 14,000 a year after hardware. One server earns about the same income and keeps CHF 5,200 a year after hardware, payback in about three years. Four servers only pay off at 2.8 times today's demand. |
 | 2:55–3:15 | **5. Zoom out to the globe** | the map itself zooms out to a turning globe | Any place with weather data runs the same model. |
 | 3:15–4:40 | **6. Interactive demo via QR** | QR code to `/speak`; split screen: runner console left, `/live` right | Scan and ask the house a question. Your request runs for real on this laptop, on the July day you just saw. At 13:00 nobody uses hot water and the tank is full: the scheduler freezes the job. The 14:30 draw brings useful heat back: it continues. At the end the console shows how many kWh it really used. |
 | 4:40–5:00 | **7. Close** | one sentence on screen | Pilot ask: which houses, which customers, what we measure. |
@@ -49,8 +49,11 @@ re-render those two beats with Fleet numbers (`video/blender/prepare_data.py` wo
 | Missed deadlines | 8.9 % (6,905 of 77,840 jobs) |
 | Break-even computing price (case formula) | CHF 0.226 per server-hour |
 
-For scene 4: income CHF 13,360, electricity CHF 2,965, margin CHF 11,344, L4 hardware CHF 25,661
-per year → net −CHF 14,317.
+For scene 4: 4 servers: income CHF 13,360, electricity CHF 2,965, margin CHF 11,344, L4 hardware
+CHF 25,661 per year → net −CHF 14,317. 1 server (same jobs): income CHF 13,333, margin CHF 11,667,
+hardware CHF 6,415 → net +CHF 5,252, payback 3.1 years, 18.9 % heat covered, 5.9 % missed
+deadlines. 4 servers break even at 2.8 × today's volume. Source: `docs/model/fleet-simulation.md`
+§16 "When the reference house pays for its hardware".
 
 ### Numbers for scene 3 (run `dreispitz-5-pool`, re-run on `main` 2026-11-22)
 
@@ -74,7 +77,8 @@ every Type 2 price (elasticity 0), as stated in the scenario's `_note`.
 
 ## Things to decide or prepare
 
-- **Scene 4 sentence:** break-even volume or price from the sweep (in progress).
+- **Servers per house:** scene 2 shows the case's 4 servers, scene 4 says 1 server is the one that
+  pays. Team decision whether the key figures should also be shown for 1 server.
 - **QR access:** the QR must carry the ngrok URL with the token (`/speak?t=…`); a phone hotspot
   as fallback. If nobody scans, the presenter speaks or types the request.
 - **Fallback:** a screen recording of scenes 2–6, in case the laptop or the network fails.

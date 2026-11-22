@@ -490,6 +490,25 @@ income (CHF 13,278) and misses (6,966) at CHF 12,831 more hardware per year: mor
 help a house limited by demand and summer heat. The margin does not cover the L4 hardware at these
 volumes and prices.
 
+### When the reference house pays for its hardware (sweep, 2026-11-22)
+
+Copies of `reference.json` with one input changed at a time, run one by one with `FleetRun run`
+and `post` (L4 hardware CHF 6,415 per server-year). Net = margin − hardware per year.
+
+| Change | Break-even | At break-even |
+|---|---|---|
+| Job volume (all types together), 4 servers | `volume_scale` ≈ 0.28 (2.8 × today's 0.1) | 30 % of jobs miss their deadline (summer heat limit); above ≈ 0.3 the margin levels off near CHF 35k because the house cannot use more heat |
+| Type 1 prices only, volume 0.1, 4 servers | × 2.61 (LLM ≈ CHF 5.81 per L4 server-hour instead of 2.23) | Type 1 has no price response in the model, so this is optimistic |
+| Type 2 price band only | never (elasticity −0.8: revenue grows only with p^0.2 above the competitor price) | — |
+| **Fewer servers**, volume 0.1 | **1 server: net +CHF 5,252/year, payback 3.1 years**; 2 servers ≈ break-even (−CHF 621); 3 servers −CHF 7,654 | 1 server: 18.9 % coverage, 84 % utilisation, 4,622 missed deadlines (5.9 %) |
+
+Break-even volume by server count: 1 ≈ 0.05, 2 ≈ 0.11, 3 ≈ 0.19, 4 ≈ 0.28. At volume 0.1 the
+income barely depends on the server count (CHF 13.3k–14.1k), so the hardware decides the result.
+Caveats: the volume baseline (0.1, and the 1 % × 1 % LLM shares) is a scenario value; late work is
+paid in the model (without that, the 4-server break-even moves to ≈ 0.30); fewer servers get
+slightly higher Type 2 quotes through the pricing's capacity term (not traced further). The 1-server
+case was re-run independently and matches.
+
 ### Real house variant (`config/fleet/scenarios/real-house.json`, T-82, 2026-11-22)
 
 The hackathon organisers provided measured data of a real house (`data/raw/housedata/SOURCE.md`;
