@@ -44,18 +44,25 @@ footer b{color:var(--paper)}
 <script>
 "use strict";
 const grid=document.querySelector('#grid'),queue=document.querySelector('#queue');
+const openedAt=Date.now(),visibleIds=new Set();
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function mix(a,b,t){const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));const A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
 const room=s=>s<.5?mix('#78bfe0','#e9e3a2',s*2):mix('#e9e3a2','#ff9a55',(s-.5)*2);
 async function update(){try{
   const r=await fetch('/api/status',{cache:'no-store'});if(!r.ok)throw Error(r.status);
-  const data=await r.json(),queued=data.jobs.filter(j=>j.state==='queued');
+  const data=await r.json();
+  // Preserve jobs active when this view opens and all later arrivals, but hide old rehearsals.
+  const visibleJobs=data.jobs.filter(j=>{
+    if(['queued','created','running','paused'].includes(j.state)||Date.parse(j.submittedAtUtc)>=openedAt)visibleIds.add(j.id);
+    return visibleIds.has(j.id);
+  });
+  const queued=visibleJobs.filter(j=>j.state==='queued');
   queue.textContent=data.error?('Operator attention: '+data.error):queued.length?`${queued.length} incoming · ${queued.map(j=>j.question).slice(0,3).join('  ·  ')}`:'Ready for audience questions';
   const demands=data.workers.map(w=>Number(w.demand_kwh_per_hour));
   const lo=Math.min(...demands),hi=Math.max(...demands);
   grid.innerHTML=data.workers.map(w=>{
-    const active=data.jobs.filter(j=>j.node===w.id&&['running','queued','created','paused'].includes(j.state));
-    const jobs=(active.length?active:data.jobs.filter(j=>j.node===w.id&&['completed','failed'].includes(j.state))).slice(0,2);
+    const active=visibleJobs.filter(j=>j.node===w.id&&['running','queued','created','paused'].includes(j.state));
+    const jobs=(active.length?active:visibleJobs.filter(j=>j.node===w.id&&['completed','failed'].includes(j.state))).slice(0,2);
     const useful=Number(w.useful_heat_kwh_per_hour),demand=Number(w.demand_kwh_per_hour);
     const shade=hi===lo?.5:(demand-lo)/(hi-lo);
     return `<section class="node ${useful>0?'busy':''}" style="--room:${room(shade)};--job:${escape(w.color)}">
