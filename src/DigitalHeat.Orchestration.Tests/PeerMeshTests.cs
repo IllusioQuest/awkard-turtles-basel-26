@@ -32,17 +32,28 @@ public class PeerMeshTests : IDisposable
             [new(id, "CH", new(heat, 0, 0, 1, .8), 0)], [new("domain-" + id, new(2, 256, 2), [])],
             [new("node-" + id, id, "domain-" + id, ready, true, new(2, 256, 2), [], [], [], [new("player", id == "a" ? 5 : 20)])], [])
         { ResourceObservedAtUtc = clock.Now, ResourceValidUntilUtc = clock.Now.AddMinutes(1) };
-    private MeshPeer Add(string id, double heat, long revision = 1)
+    private MeshPeer Add(string id, double heat, long revision = 1, TimeSpan minimumFreeze = default)
     {
         if (!runtimes.TryGetValue(id, out var runtime)) runtimes[id] = runtime = new();
         var peer = new MeshPeer(fleet, id, Path.Combine(root, id), Inventory(id, heat, revision),
             [CoordinatorTests.Node("node-" + id)], new Dictionary<string, ContainerProfile> { [CoordinatorTests.Profile.Id] = CoordinatorTests.Profile },
-            ["a", "b", "c"], bus, runtime, clock, TimeSpan.FromSeconds(20));
+            ["a", "b", "c"], bus, runtime, clock, TimeSpan.FromSeconds(20), minimumFreeze);
         peers.Add(peer); bus.Peers[id] = peer; return peer;
     }
     private static WorkloadRequest Request(string origin, string id = "job") => PlacementTests.Request(id) with
         { OriginSiteId = origin, Lifecycle = new(false, true, false) };
     private void Publish() { foreach (var peer in peers) peer.Publish(); }
+
+    [Fact] public void WithdrawnPeerCannotBeSelectedFromStaleOffersAndWithdrawalSurvivesRestart()
+    {
+        var a=Add("a",.1);var b=Add("b",10);var c=Add("c",2);Publish();
+        var stale=bus.Messages.Select(m=>m.Message).OfType<PeerOffer>().First(o=>o.PeerId=="b");
+        a.WithdrawPeer("b");a.Receive("b",stale with{Sequence=stale.Sequence+100});
+        a.Submit(Request("a","first"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Equal("c",a.Jobs().Single().Target);Assert.Equal(0,runtimes["b"].Starts);
+        a.Dispose();peers.Remove(a);var recovered=Add("a",.1);
+        Assert.True(recovered.IsPeerWithdrawn("b"));
+    }
 
     [Fact] public void EveryOriginCanReachEveryPeerAndHeatWinsInsideLatencyLimit()
     {
@@ -115,6 +126,8 @@ public class PeerMeshTests : IDisposable
         coordinator.Update(inventory, clock.Now); coordinator.Reconcile(nodes);
         var first = coordinator.TryStartAtSite(Request("a"), nodes, CoordinatorTests.Profile, clock.Now, "a", inventory.Sites[0].Heat, 1, inventory.IntervalStartUtc);
         Assert.NotNull(first); coordinator.StopAndRelease(first!.Attempt.Request.Id);
+        Assert.Empty(coordinator.ActiveAttempts());Assert.Single(coordinator.Attempts());
+        Assert.Equal(.8,coordinator.CommittedHeatKwh(inventory.IntervalStartUtc));
         Assert.Null(coordinator.TryStartAtSite(Request("a", "second"), nodes, CoordinatorTests.Profile, clock.Now, "a", inventory.Sites[0].Heat, 1, inventory.IntervalStartUtc));
     }
 
@@ -147,6 +160,74 @@ public class PeerMeshTests : IDisposable
         b.Update(Inventory("b", 0, 4));
         Assert.Equal("running", b.Attempts().Single(a => a.Attempt.Request.Kind == "interactive").Phase);
         Assert.Equal("paused", b.Attempts().Single(a => a.Attempt.Request.Kind == "batch").Phase);
+    }
+
+    [Fact] public void BatchFreezesWhenItsHeatExceedsWhatCanBeUsedOrStored()
+    {
+        // Decision 0068. 0.8 kWh/h job; the fixture site has no tank, so nothing can be stored.
+        var a = Add("a", .5); var b = Add("b", 8); Publish();
+        var batch = Request("a", "batch") with { Kind = "batch", Lifecycle = new(true, true, false) };
+        a.Submit(batch, CoordinatorTests.Profile.Id); a.Tick();
+        Assert.Equal("running", b.Attempts().Single().Phase);
+        b.Update(Inventory("b", .5, 2));   // useful heat > 0 but below the job's heat: would dump 0.3 kWh/h
+        Assert.Equal("paused", b.Attempts().Single().Phase);
+        b.Update(Inventory("b", .79, 3));  // still too little: no thaw-then-refreeze
+        Assert.Equal("paused", b.Attempts().Single().Phase);
+        b.Update(Inventory("b", .8, 4));   // fits exactly
+        Assert.Equal("running", b.Attempts().Single().Phase);
+    }
+
+    private WorkloadInventory WithTank(string id, double demand, double stored, long revision) => Inventory(id, demand, revision) with
+        { Sites = [new(id, "CH", new(demand, stored, 35, 1, .8), 0)] };
+    private (MeshPeer A, MeshPeer B) TwoBatchJobsOnB()
+    {
+        var a = Add("a", .5); var b = Add("b", 8); Publish();
+        foreach (var name in new[] { "batch1", "batch2" })
+        { a.Submit(Request("a", name) with { Kind = "batch", Lifecycle = new(true, true, false) }, CoordinatorTests.Profile.Id); a.Tick(); }
+        Assert.All(b.Attempts(), r => Assert.Equal("running", r.Phase));
+        return (a, b);
+    }
+    private static string Phase(MeshPeer peer, string job) => peer.Attempts().Single(r => r.Attempt.Request.Id == "a." + job).Phase;
+
+    [Fact] public void BatchKeepsRunningWhileTheTankCanStoreTheSurplus()
+    {
+        var a = Add("a", .5); var b = Add("b", 8); Publish();
+        var batch = Request("a", "batch") with { Kind = "batch", Lifecycle = new(true, true, false) };
+        a.Submit(batch, CoordinatorTests.Profile.Id); a.Tick();
+        b.Update(WithTank("b", .1, 30, 2));     // demand below job heat, but 5 kWh of room: store it
+        Assert.Equal("running", b.Attempts().Single().Phase);
+        b.Update(WithTank("b", .1, 34.5, 3));   // 0.1 + 0.5 kWh room < 0.8 kWh/h: the rest would be dumped
+        Assert.Equal("paused", b.Attempts().Single().Phase);
+        b.Update(WithTank("b", .1, 34.3, 4));   // 0.8 fits again
+        Assert.Equal("running", b.Attempts().Single().Phase);
+    }
+
+    [Fact] public void LowestPriorityBatchFreezesFirstAndOnlyWhatFitsThaws()
+    {
+        var (_, b) = TwoBatchJobsOnB();
+        b.Update(Inventory("b", 1.0, 2));      // room for one 0.8 kWh/h job: the later ID freezes
+        Assert.Equal("running", Phase(b, "batch1")); Assert.Equal("paused", Phase(b, "batch2"));
+        b.Update(Inventory("b", .5, 3));       // neither fits
+        Assert.Equal("paused", Phase(b, "batch1")); Assert.Equal("paused", Phase(b, "batch2"));
+        // Same hour: frozen jobs keep their hourly commitment (pause does not reopen the budget).
+        b.Update(Inventory("b", 1.2, 4));
+        Assert.Equal("paused", Phase(b, "batch1")); Assert.Equal("paused", Phase(b, "batch2"));
+        // Next hour, commitments reset: one fits, so only the higher priority thaws.
+        clock.Now = PlacementTests.Now.AddHours(1);
+        b.Update(Inventory("b", 1.2, 5) with { IntervalStartUtc = clock.Now, IntervalEndUtc = clock.Now.AddHours(1),
+            ResourceObservedAtUtc = clock.Now, ResourceValidUntilUtc = clock.Now.AddMinutes(1) });
+        Assert.Equal("running", Phase(b, "batch1")); Assert.Equal("paused", Phase(b, "batch2"));
+    }
+
+    [Fact] public void FrozenBatchWaitsTheMinimumFreezeTime()
+    {
+        var a = Add("a", .5); var b = Add("b", 8, minimumFreeze: TimeSpan.FromSeconds(30)); Publish();
+        a.Submit(Request("a", "batch") with { Kind = "batch", Lifecycle = new(true, true, false) }, CoordinatorTests.Profile.Id); a.Tick();
+        b.Update(Inventory("b", .5, 2)); Assert.Equal("paused", b.Attempts().Single().Phase);
+        clock.Now = clock.Now.AddSeconds(10);
+        b.Update(Inventory("b", 8, 3)); Assert.Equal("paused", b.Attempts().Single().Phase);
+        clock.Now = clock.Now.AddSeconds(25);
+        b.Update(Inventory("b", 8, 4)); Assert.Equal("running", b.Attempts().Single().Phase);
     }
 
     [Fact] public void RetryingLostReplyStillEnforcesTargetBatchDeadline()

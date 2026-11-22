@@ -1,7 +1,7 @@
 # Servers per household: how many pay off (T-70)
 
 **Variant analysis, not a scored figure.** The scored reference house keeps its draft count and
-the case's abstract 1 kW server ([reference-house.md](reference-house.md)). This page answers
+the case's abstract 1 kW server. **Computed with the year model (`YearRun`), retired 2026-11-22**; current reference-house results come from the Fleet model ([`fleet-simulation.md`](../model/fleet-simulation.md) §16). This page answers
 "how many servers should a house get?" with one rule, computed by the shared C# year model.
 Decision: [0062](../decisions/0062-marginal-value-server-sizing.md).
 
@@ -38,7 +38,7 @@ value (no suspend or power-off, so conservative); unsourced idle draw counts as 
 credited. With idle draw the break-even hours are `(F + idle_kw·elec·8760) / (margin + idle_kw·elec)`. The optimum n* is the argmax of C(n). This is the screening-curve rule of power
 system capacity planning: a unit pays off if its hours on the load-duration curve exceed
 `F / margin` (Stoft, *Power System Economics*, 2002, ch. 3). Here `margin = price − 0.3325 + 0.8 × 0.133
-= price − 0.2261` CHF per server-hour. 0.2261 is the case break-even of reference-house.md, and
+= price − 0.2261` CHF per server-hour. 0.2261 is the case break-even of the reference house (the same in the Fleet run), and
 H(n) shows diminishing returns (`diminishing_returns: true`), so the rule and the argmax agree.
 
 **Worked example (L4, spot).** F = 34,244.06 / 6 + 708 = CHF 6,415.34. Margin = 2.23 − 0.2261 =
@@ -134,7 +134,7 @@ Code: `src/DigitalHeat.Core/ServerSizing.cs`; tests: `src/DigitalHeat.Core.Tests
 
 - **Sold hours are an upper bound.** Sizing assumes every heat-feasible hour is sold. The sourced
   Basel transcription demand alone fills only 38.79 server-hours a year on the same house
-  ([reference-house.md](reference-house.md), finite-demand check), so **demand, not heat, is the
+  (year-model finite-demand check), so **demand, not heat, is the
   binding limit today**. The 6 needs a buyer for about 31,000 server-hours a year.
 - Sizing uses one full year. Fixed cost is pro-rated to the simulated window, so a winter-only
   window would recommend too many servers.

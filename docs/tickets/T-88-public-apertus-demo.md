@@ -1,4 +1,4 @@
-# T-78: Public Apertus audience demo
+# T-88: Public Apertus audience demo
 
 - **Owner:** Codex · **Status:** in progress · **Branch:** `feat/T-78-public-apertus-demo`.
 - **Depends on:** current heat-first `WorkloadCoordinator` and local Apertus measurement in T-33.

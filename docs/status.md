@@ -9,7 +9,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 | Person / agent | Branch | What | Interfaces touched | Status |
 |---|---|---|---|---|
-| Codex (this task) | `feat/T-78-public-apertus-demo` | T-78 public Apertus audience demo | isolated new audience service and launcher; existing heat-first coordinator reused, no shared interface change | .NET build and 117 orchestration tests pass; four real Apertus jobs and public tunnel verified on laptop; answers took 314–442 s; Lovable publication and projector visual review remain; ADR 0068 reviewed with changes |
+| Codex (this task) | `feat/T-78-public-apertus-demo` | T-88 public Apertus audience demo | isolated new audience service and launcher; existing heat-first coordinator reused, no shared interface change | .NET build and 117 orchestration tests pass; four real Apertus jobs and public tunnel verified on laptop; answers took 314–442 s; Lovable publication and projector visual review remain; ADR 0074 reviewed with changes |
+| Nikita / Claude | main | T-79 warm-process render penalty benchmark (`rendering/bench_frame.py`), merged with T-80 | none; diagnostic only | software-GL run: warm later frames 19.5 s vs first 6.25 s, identical pixels; laptop (Iris Xe) run pending |
 | Nikita / Codex | feat/T-60-unified-scheduler | T-62/T-64/T-65 unified heat-first adapters and real Linux mesh | shared Core load/rank/EDF, selected-site admission, origin journals; retired old modes | PR #52 draft; 47 Core/44 Network/74 orchestration/99 Fleet/57 gaming pass; Linux batch/pause/recovery pass; 1024-node speed guard remains open; wider T-61 equivalence not claimed |
 | Nikita / Codex | data/T-59-building-owner-mix | BFS 2020 building/owner mix analysis; coordinate T-58 | data/provenance and proposed generator mapping | PR #49 in review; 125 source rows + deterministic 1000-building composition; ADR 0045 reviewed; Ennio/T-58 notified on PR #48; mixed thermal integration awaits category heat/spatial inputs |
 | Nikita / Codex | fix/T-57-scheduler-cleanup | Remove redundant validation/indexing and clarify event loop | no public interface/model changes | PR #46 in review; 61 orchestration + 46 Core tests; queued owner about half median runtime in both run orders, allocations down 83%; mixed idle timings documented; live games untouched |
@@ -32,6 +33,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 | Jona / Codex | `codex/T-45-federated-scheduling` | T-45 federated job ownership design, offer/claim protocol model and paper proposal | new pure Network offer selector and claim gate; existing Core/T-43 interfaces unchanged | boundary review addressed; 40 Network tests pass; paper compiles; T-43 handoff only for live integration |
 
 ## Open coordination
+
+- **Decision 0068 (mesh rule change, T-78):** mesh batch jobs now freeze when their declared heat exceeds the useful heat (demand + tank room), lowest priority first; thaw in priority order. Lab peers without a tank freeze the lowest-priority job when `/heat` drops below admitted heat. New optional `MeshPeer(..., minimumFreeze)`. Tests in `PeerMeshTests`.
 
 - **T-59 / T-58 (Nikita -> Ennio):** user approved a separate BFS 2020 covered-residential composition profile. PR #49 supplies counts, conditional owner shares and synthetic composition only. Preserve SFH-only scenarios as labelled segments; source excludes ZH/VS. Do not infer private-SFH or hotel/spa shares from ownership totals. See docs/research/swiss-residential-node-mix.md for mapping, source precision and missing mixed-category heat/spatial inputs.
 
@@ -134,3 +137,26 @@ T-77 PR69/593fe8b,0abf3e1:117 tests; native timings, immutable released-result c
 
 
 T-77 integration complete: PR69 merged at c205fc7; user requested pull/push main and the post-merge timeout follow-up0abf3e1 is now included.117 tests previously passed; follow-up changes only diagnostic timeout configuration, Python syntax rechecked. Runtime unchanged by this Git synchronization.
+
+
+T-80 real laptop follow-up, Nikita/Codex: rebuilt main cdd7ac4 at18950. Run1 complete48 frames24/16/8 in153.7926active seconds, MP4 verified; GPU3 finished8 while others continued. Run2 failed at startup: GPU2 frame002 native process ended without completion marker (released exit_code1). Cause unknown; not the old hourly heat stall. No code changes; retain all files and failed state. Evidence docs/jobs/render-heat-need-laptop-test.md and docs/performance/render-heat-need-laptop-2026-11-22.json.
+
+
+T-83 Nikita/Codex perf/T-83-render-efficiency: user requests speed; running existing T-79 warm/fresh hardware benchmark and retaining per-generation native logs. Possible scalar heat-summary API awaits user decision/review. Heat-first policy,24/16/8 need,3GPU workers, quality and Minecraft unchanged. No separate T-79 benchmark implementation.
+
+
+T-83 PR73 /8a4e4ad,60fbc70: approved/reviewed compact heat snapshots and zero-allocation scalar sum; unchanged placement/ownership.132tests plus16native recheck.50queries/500attempts:230.63MB old vs2.61MB compact; scalar0B. Two distinct real48-frame MP4 runs74.6994/78.2986s, both24/16/8. No matched end-to-end speedup guarantee. T79 existing hardware probe warm fast, fresh round2C0000005 in Intel driver; no mode change. New generation logs retain exit evidence (also verified after later idle-process crash). Three concurrent GPU workers, quality and Minecraft preserved. Docs/jobs/render-efficiency.md.
+
+
+T-84 Nikita/Codex fix/T-84-render-copy PR74: user-approved Heat needed: xx kWh labels, retain node names/progress, remove flow/footer and healthy Reachable text. Preserve warnings, initial provider and all runtime/heat behavior. Live HTML/JS syntax verified, no restart. Synthetic assumptions remain documented.
+
+
+T-84 follow-up dbfd5fb: requested duplicate node counts, Progress help, completed-frame range note, preparation timing note and Total render elapsed row removed. Live page verified; remaining node names/progress/heat and backend behavior intact. PR74 merged; follow-up in review.
+
+T-85 Nikita/Codex perf/T-85-active-bookkeeping: selective non-released snapshots and snapshot-free deadline ticks under ADR0071 review. UI unchanged; all heat/ownership/history semantics retained. Shared Orchestration changes; existing mesh/deadline tests and real renderer verification planned.
+
+T-85 PR76/967cf22 verified:141tests, full48-frame video84.9243s and24/16/8. UI unchanged. Active snapshots omit only released history; deadline actions share locked core without unused return copy. Retained heat/ownership/reconciliation intact. New whole-node GPU3shutdown request is a separate pending design; do not mix it into this PR.
+
+T-86 Nikita/Codex feat/T-86-node-shutdown dependsPR76. User approved hard GPU3controller+renderer shutdown, confirmed fencing, shared completed PNGs and new workload IDs for unfinished frames. Heat-first reallocation over remaining nodes. Only requested button added to UI. Remote unconfirmed power-off not covered. ADR0072 reviewed with changes applied. PR77 /6119140:148tests; real shutdown during frame5 retained one frame, retried unfinished work,48-frame MP4 completed28/19/1. Controller+renderer gone and port closed. Second new run with GPU3off recovered through origin restart,48frames29/19. Five nodes restored for user testing. Docs/jobs/node-shutdown.md; code awaits human merge.
+
+T-87 Nikita/Codex feat/T-87-node-rejoin: user approved Power on GPU3 for current-run unstarted frames. Preserve accepted/completed work, cancellation IDs and hourly heat; local restart must prove old execution stopped and durably identify new process before re-admission. ADR0073 review pending. Shared MeshPeer admission and RunHeatNeed contracts; Minecraft excluded.

@@ -54,6 +54,9 @@ def main() -> None:
     lines = ["network B1missed B2missed LPmissed"]
     for label, excl in (("all", ""), ("residential", "hotel-spa,indoor-pool")):
         b1, b2, lp = (pick(d, s, excludeKinds=excl) for s in ("B1", "B2", "LP"))
+        if lp is None and excl == "":
+            # The all-sites LP run (share 0.3, phi 1) is the same setting as experiment A's LP row.
+            lp = pick(a, "LP", type1Share="0.3")
         lines.append(" ".join([label, num(b1, "type1MissedDeadlinePercent"),
                                num(b2, "type1MissedDeadlinePercent"), num(lp, "type1MissedDeadlinePercent")]))
     (OUT / "d_network_mix.dat").write_text("\n".join(lines) + "\n", encoding="utf-8")

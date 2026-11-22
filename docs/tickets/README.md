@@ -116,4 +116,24 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in review; PR #68 |
 | [T-77](T-77-render-runtime.md) | Measure and improve renderer runtime | Nikita / Codex | done; PR #69 and timeout follow-up on main |
-| [T-78](T-78-public-apertus-demo.md) | Public Apertus audience demo with four logical workers | Codex | in progress; ADR 0068 reviewed |
+| [T-88](T-88-public-apertus-demo.md) | Public Apertus audience demo with four logical workers | Codex | in progress; ADR 0074 reviewed |
+
+| [T-78](T-78-voice-request-demo.md) | Live voice request on the summer reference house (pitch demo) | Ennio / Claude | done; decision 0068 |
+
+| [T-79](T-79-warm-render-penalty.md) | Measure the warm-process render penalty on the presentation GPU | Nikita / Claude | in progress; benchmark ready, laptop run pending |
+
+| [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | done; run-scoped status filter merged; heat stall and journal growth need decisions |
+
+| [T-81](T-81-site-type-icons.md) | Site-type icons on the admin network map | Ennio / Claude | done |
+
+| [T-82](T-82-real-house-variant.md) | Real house from the organisers as a Fleet variant | Ennio / Claude | done |
+
+| [T-83](T-83-render-efficiency.md) | Renderer efficiency and repeat-run diagnosis | Nikita / Codex | in review; PR #73 |
+
+| [T-84](T-84-render-copy.md) | Simplify renderer heat and explanatory labels | Nikita / Codex | in review; PR #74 |
+
+| [T-85](T-85-active-bookkeeping.md) | Reduce active-job bookkeeping | Nikita / Codex | in review; PR #76 |
+
+| [T-86](T-86-node-shutdown.md) | Whole-node shutdown and confirmed frame retry | Nikita / Codex | in review; PR #77 |
+
+| [T-87](T-87-node-rejoin.md) | Restart fenced GPU worker and rejoin current render | Nikita / Codex | in progress |

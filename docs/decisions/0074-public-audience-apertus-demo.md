@@ -1,6 +1,6 @@
-# 0068 — Temporary public audience demo on one laptop
+# 0074 — Temporary public audience demo on one laptop
 
-Status: proposed. T-78. The user chose four workers on one laptop, a public visitor page, Apertus, a one-click question, Lovable, and a visible four-panel job/heat display after the main live demo.
+Status: proposed. T-88. The user chose four workers on one laptop, a public visitor page, Apertus, a one-click question, Lovable, and a visible four-panel job/heat display after the main live demo.
 
 ## Decision
 

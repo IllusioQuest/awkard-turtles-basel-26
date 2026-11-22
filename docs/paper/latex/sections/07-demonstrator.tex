@@ -1,15 +1,49 @@
 \section{Demonstrator and measured jobs}
 \label{sec:demonstrator}
 
-The annual run and the laptop demonstration use the same control boundary:
+The simulation and the laptop demonstration share one control boundary:
 \texttt{IScheduler.Decide(HeatSignal)} chooses a target load and
 \texttt{SchedulerController.Apply} sends it to an \texttt{IExecutor}. The simulated executor
-settles the annual heat balance; \texttt{DockerJobExecutor} pauses, resumes or throttles a
-running container. The network adapter commits an hourly decision through this path and rejects
-a changed heat signal. A successful pause/resume demonstrates
-control of a process, not thermal recovery from the laptop.
+settles the heat balance; \texttt{DockerJobExecutor} freezes, resumes or throttles a running
+container. A successful freeze and resume demonstrates control of a process, not thermal recovery
+from the laptop.
 
-The proposed Type~1 service is batch summarisation of non-personal documents with Apertus 8B.
+\paragraph{Live request.} In the pitch demonstrator a spoken or typed request becomes one container
+that transcribes the request with Whisper large-v3 (whisper.cpp) and answers it with Apertus~8B
+(llama.cpp), both offline on the laptop. One mesh peer (\texttt{MeshPeer}) admits, freezes and thaws
+it with the policy of Section~\ref{sec:policy}. The house is a replayed 15~July 2025 at ten seconds per
+simulated hour, the hot-water draws follow the EU standard tapping profile~L scaled to the case's
+\qty{12}{kWh} per day \cite{eu814}, and the house's other servers run heat-first background work
+that yields to the request. In the hour from 13:00, which has no draw, the tank is full and the
+useful heat is zero, so the scheduler freezes the container (\texttt{docker pause}). Draws are
+binned by hour as in the case model; the next hour (14:00--15:00) contains a draw, so the container
+is thawed at 14:00. An independent probe, which read the
+container's kernel counters every \qty{0.5}{s}, confirmed that the freeze stops the computation
+itself (Table~\ref{tab:freeze}). The demonstrator also reports the container's CPU time from its
+cgroup and its energy from the processor's package counter (RAPL), attributed by the container's
+share of busy CPU time: one request used \qty{243}{s} of CPU time and about \qty{0.11}{Wh}. This is
+the laptop's package energy, not that of a \qty{1}{kW} server.
+
+\begin{table}[ht]
+  \centering
+  \caption{Freeze of the demonstrator container, read independently from Docker and the kernel
+    (0.5-second samples; times are when the probe printed each sample, which itself takes a few
+    hundred milliseconds). The CPU counter and the written answer stand still for
+    \qty{9.2}{s}, then the same processes continue.}
+  \label{tab:freeze}
+  \begin{tabular}{lllrr}
+    \toprule
+    Time & Docker state & \texttt{cgroup.freeze} & CPU time [s] & Answer [bytes] \\
+    \midrule
+    02:01:12.7 & running & 0 & 68.80 & 56 \\
+    02:01:13.4 & paused & 1 & 77.48 & 67 \\
+    02:01:22.6 & paused & 1 & 77.48 & 67 \\
+    02:01:23.6 & running & 0 & 86.58 & 73 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Measured jobs.} The proposed Type~1 service is batch summarisation of non-personal documents with Apertus 8B.
 On an eight-thread laptop CPU, a 14.98-minute transcript (3,310 input and 319 output tokens)
 took a mean \qty{133.3}{s} in three runs. Its gross CPU-package energy was approximately
 \qty{0.92}{Wh} per document; the battery meter was invalid with the charger connected
@@ -20,12 +54,11 @@ The Type~2 representative is a checkpointable 2D Ising Monte Carlo parameter swe
 separate laptop, a steady-state run completed 320 tasks in \qty{274.4}{s}, consuming
 \qty{1.3089}{Wh} of gross whole-laptop battery energy, or about \qty{0.00409}{Wh} per task.
 The battery meter updates slowly; a shorter run was discarded for this reason. Completed task
-files are written atomically so a restart repeats only unfinished tasks. The same heat scheduler
-controlled this container in a \texttt{LiveRun} replay (Appendix~\ref{app:repro}).
+files are written atomically so a restart repeats only unfinished tasks. An earlier replay
+(\texttt{LiveRun}) controlled this container with the same load rule (Appendix~\ref{app:repro}).
 Both jobs establish executable workload types and interruption behaviour. Their laptop energy
 figures cannot validate the abstract \qty{1}{kW} server, a liquid-cooled L4 build or a paying
 customer workload.
 
-The January and July replay commands and their deterministic output are documented in the
-\texttt{DigitalHeat.LiveRun} project. A process-control trace is evidence of the common scheduler
-path; the annual heat results remain simulated and should not be read as calorimetric measurements.
+A process-control trace is evidence of the common scheduler path; the annual heat results remain
+simulated and should not be read as calorimetric measurements.

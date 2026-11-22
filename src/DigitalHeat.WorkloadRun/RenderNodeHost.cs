@@ -25,10 +25,15 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     public GpuBinding? Gpu { get; init; }
     public string? GpuBackend { get; init; }
     public double GpuFrameShare { get; init; } = .8; // User-approved workload mix; not a utilization promise.
+    /// <summary>ADR 0069: a render node's heat demand is its weighted share of the current run (heat NEED),
+    /// not a fixed hourly allowance. The origin uses it to register each run's need with the GPU nodes.</summary>
+    public bool HeatNeedPerRun { get; init; }
+    public bool AllowLocalNodeShutdown { get; init; }
 }
-internal sealed record FrameSubmit(string JobId, int Frame, string? PinnedNode, string Backend="CPU",string? SceneSha256=null);
+internal sealed record FrameSubmit(string JobId, int Frame, string? PinnedNode, string Backend="CPU",string? SceneSha256=null,JobDeadline? Deadline=null);
 internal sealed record RenderHold(bool Hold);
 internal sealed record RenderCancel(string[] JobIds);
+internal sealed record RenderWithdraw(string PeerId);
 internal sealed record RenderArtifact(string JobId, string PeerId, JsonElement Metadata);
 internal sealed record RenderGpuStats(double UtilizationPercent,long UsedMib,long TotalMib,DateTimeOffset ObservedUtc,
     string Scope="Physical GPU totals, including any other workloads");
@@ -46,6 +51,9 @@ internal sealed record RenderPeerStatus(string PeerId, string PhysicalHostId, st
     public string[] VerifiedBackends { get; init; } = ["CPU"];
     public string? PhysicalGpuId { get; init; }
     public RenderGpuStats? GpuStats { get; init; }
+    /// <summary>Frames of the current run this node needs (ADR 0069); null when the hourly allowance applies.</summary>
+    public int? HeatNeedFrames { get; init; }
+    public bool PoweredOff { get; init; }
 }
 
 /// <summary>Trusted renderer adapter, not a second scheduler: all frame placement/ownership uses MeshPeer.</summary>
@@ -97,11 +105,16 @@ internal static class RenderNodeHost
             }
         }
         long revision=0;
+        bool needMode=cfg.HeatNeedPerRun&&cfg.WorkerRole=="render";
+        string needPath=Path.Combine(cfg.StateDirectory,"run-heat-need.json");
+        RunHeatNeed? runNeed=needMode&&File.Exists(needPath)?JsonSerializer.Deserialize<RunHeatNeed>(File.ReadAllText(needPath),Json):null;
+        MeshPeer? meshPeer=null; // Set once constructed; its committed-heat records feed the demand below.
         WorkloadInventory Inventory(){
             var now=DateTimeOffset.UtcNow;var hour=new DateTimeOffset(now.Year,now.Month,now.Day,now.Hour,0,0,TimeSpan.Zero);
             var res=new ResourceAmount(cfg.CpuCores,cfg.RamMib,1);
+            double demand=needMode?RenderHeatNeed.DemandKwh(runNeed,meshPeer?.HeatCommitments()??[],hour,cfg.HeatDemandKwh):cfg.HeatDemandKwh;
             return new(++revision,hour,hour.AddHours(1),cfg.Source,
-                [new(cfg.Id,"CH",new(cfg.HeatDemandKwh,0,0,1,.8),0)],
+                [new(cfg.Id,"CH",new(demand,0,0,1,.8),0)],
                 [new(cfg.PhysicalHostId+"-"+cfg.Id,res,gpuBackend is null?[]:[new(cfg.Gpu!.DeviceId,gpuBackend)])],
                 [new(cfg.Id+"-worker",cfg.Id,cfg.PhysicalHostId+"-"+cfg.Id,true,true,res,cfg.PreparedSceneMode?(cfg.WorkerRole=="prepare"?["scene_prepare"]:cfg.WorkerRole=="assemble"?["video_assemble"]:cfg.WorkerRole=="render"?[]:["scene_prepare"]):[],gpuBackend is null?[]:[cfg.Gpu!.DeviceId],[],[])],[])
                 {ResourceObservedAtUtc=now,ResourceValidUntilUtc=now.AddSeconds(30)};
@@ -109,12 +122,13 @@ internal static class RenderNodeHost
         using var peer=new MeshPeer("landscape",cfg.Id,Path.Combine(cfg.StateDirectory,"owner"),Inventory(),
             [new(cfg.Id+"-worker","default","none",gpuBackend is null?[]:[cfg.Gpu!],[])],profiles,cfg.Peers.Keys,
             new Transport(outgoing.Writer),runtime,TimeProvider.System,TimeSpan.FromSeconds(20));
+        meshPeer=peer;if(needMode&&runNeed is not null)peer.Update(Inventory());
         // On restart operator must explicitly resume: no unattended session continuation.
         peer.SetHold(true);
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
-        RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
+        RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,needMode&&runNeed is not null?runNeed.Frames*runNeed.FrameHeatKwh:cfg.HeatDemandKwh,
             gpuBackend is null?(cfg.PreparedSceneMode?gpuDiagnostic:"CPU fallback: "+gpuDiagnostic):gpuBackend+" verified GPU; "+(cfg.Native is {EnableGpu:true,KeepGpuWarm:true}?"warm frame process":"CPU available"),error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
-            {WorkWeight=cfg.WorkWeight,WorkerRole=cfg.WorkerRole,SharedGpuGroup=cfg.SharedGpuGroup,SharedGpuLimit=cfg.SharedGpuLimit,RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
+            {HeatNeedFrames=needMode?runNeed?.Frames:null,WorkWeight=cfg.WorkWeight,WorkerRole=cfg.WorkerRole,SharedGpuGroup=cfg.SharedGpuGroup,SharedGpuLimit=cfg.SharedGpuLimit,RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
         var published=CaptureStatus();
         RenderPeerStatus Status()=>Volatile.Read(ref published);
         var builder=WebApplication.CreateBuilder();builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -131,12 +145,14 @@ internal static class RenderNodeHost
             await next(ctx);
         });
         app.MapGet("/",()=>Results.Redirect("/ui"));
-        app.MapGet("/status",()=>Results.Json(Status(),Json));
+        // Optional run filter keeps owner polling O(current run) instead of O(all runs); unfiltered stays the default.
+        app.MapGet("/status",([Microsoft.AspNetCore.Mvc.FromQuery(Name="job_prefix")] string? jobPrefix)=>Results.Json(jobPrefix is null?Status():ForRun(Status(),jobPrefix),Json));
         app.MapPost("/messages",(MeshEnvelope packet)=>{
             if(!cfg.Peers.ContainsKey(packet.Sender))return Results.BadRequest();
             return inbox.Writer.TryWrite(()=>peer.Receive(packet.Sender,packet.Message))?Results.Accepted():Results.StatusCode(503);
         });
         app.MapPost("/hold",(RenderHold h)=>{lock(gate){peer.SetHold(h.Hold);Volatile.Write(ref published,CaptureStatus());return Results.Json(Status(),Json);}});
+        app.MapPost("/withdraw",(RenderWithdraw w)=>{lock(gate){peer.WithdrawPeer(w.PeerId);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
         app.MapPost("/cancel",(RenderCancel c)=>{lock(gate){peer.CancelBatchWorkloads(c.JobIds);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
         app.MapPost("/frames",(FrameSubmit f)=>{
             if(f.Frame<1||f.Frame>cfg.Frames||!manifestBackends.Contains(f.Backend)||(cfg.PreparedSceneMode&&(f.SceneSha256 is null||!profiles.ContainsKey(PreparedProfile(f.SceneSha256,f.Frame))))||!System.Text.RegularExpressions.Regex.IsMatch(f.JobId,"^[a-z0-9-]{1,80}$"))return Results.BadRequest();
@@ -149,7 +165,7 @@ internal static class RenderNodeHost
                     var now=DateTimeOffset.UtcNow;
                     var r=new WorkloadRequest(f.JobId,"batch",cfg.Id,new("anywhere",cfg.Source,null),
                         new(cfg.CpuCores,cfg.RamMib,1),cfg.Source,cfg.FrameHeatKwh,cfg.Source,[],f.Backend=="CPU"?null:f.Backend,f.PinnedNode,null,[],new(!cfg.PreparedSceneMode,true,false))
-                        {Deadline=new(now,now.AddSeconds(cfg.DeadlineSeconds),cfg.Source,true)};
+                        {Deadline=f.Deadline??new(now,now.AddSeconds(cfg.DeadlineSeconds),cfg.Source,true)};
                     peer.Submit(r,cfg.PreparedSceneMode?PreparedProfile(f.SceneSha256!,f.Frame):"landscape-"+f.Backend+"-"+f.Frame);
                 }
             }))return Results.StatusCode(503);
@@ -179,6 +195,17 @@ internal static class RenderNodeHost
                 peer.Publish();
             }
             return Results.Ok(scene);
+        });
+        // ADR 0069: the origin registers this node's need for the run before submitting its frames.
+        app.MapPost("/run-need",(RunHeatNeed need)=>{
+            if(!needMode)return Results.BadRequest();
+            if(!System.Text.RegularExpressions.Regex.IsMatch(need.RunPrefix,"^[a-z0-9.-]{1,120}$")||need.Frames<0||need.Frames>cfg.Frames
+               ||!double.IsFinite(need.FrameHeatKwh)||need.FrameHeatKwh<=0)return Results.BadRequest();
+            lock(gate){
+                if(runNeed!=need){NativeRenderRuntime.WriteJson(needPath,need);runNeed=need;peer.Update(Inventory());}
+                Volatile.Write(ref published,CaptureStatus());
+            }
+            return Results.Ok(need);
         });
         app.MapPost("/assembly-manifest",(AssemblyManifest manifest)=>{
             if(native is null)return Results.BadRequest();
@@ -216,9 +243,11 @@ internal static class RenderNodeHost
         app.MapPost("/ui/pause",()=>{session.RequestHold(true);return Results.Accepted();});
         app.MapPost("/ui/resume",()=>{session.RequestHold(false);return Results.Accepted();});
         app.MapPost("/ui/stop",()=>{session.RequestStop();return Results.Accepted();});
+        app.MapPost("/ui/nodes/{node}/shutdown",(string node)=>{session.RequestShutdown(node);return Results.Accepted();});
         app.MapPost("/ui/restart",()=>{session.RequestRestart();return Results.Accepted();});
         app.MapGet("/ui/image/{node}/{job}",async(string node,string job)=>{
             if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();
+            var shared=session.SharedImagePath(node,job);if(shared is not null)return Results.File(shared,"image/png");
             var bytes=await http.GetByteArrayAsync(url+"/image/"+job);return Results.File(bytes,"image/png");
         });
         app.MapGet("/ui/video/{node}/{job}",async(string node,string job)=>{
@@ -227,6 +256,7 @@ internal static class RenderNodeHost
         });
         _=Task.Run(async()=>{
             await foreach(var p in outgoing.Reader.ReadAllAsync(stop))try{
+                if(peer.IsPeerWithdrawn(p.To))continue;
                 using var response=await http.PostAsJsonAsync(cfg.Peers[p.To]+"/messages",new MeshEnvelope(p.From,p.Message),Json,stop);
                 response.EnsureSuccessStatusCode();
             }catch(Exception e)when(e is HttpRequestException or TaskCanceledException){Console.Error.WriteLine("Peer delivery deferred: "+p.To);}
@@ -251,7 +281,7 @@ internal static class RenderNodeHost
                 lock(gate)Volatile.Write(ref published,CaptureStatus());
             }
         },stop);
-        _=Task.Run(async()=>{
+        if(cfg.ServeUi)_=Task.Run(async()=>{
             using var timer=new PeriodicTimer(TimeSpan.FromSeconds(2));
             do{await session.RefreshPeers();}while(await timer.WaitForNextTickAsync(stop));
         },stop);
@@ -279,6 +309,12 @@ internal static class RenderNodeHost
     private sealed class Transport(ChannelWriter<(string From,string To,PeerMessage Message)> q):IPeerMeshTransport
     {public void Send(string from,string to,PeerMessage message)=>q.TryWrite((from,to,message));}
 
+    /// <summary>Current-run view: jobs/attempts/results of one run prefix, plus every origin job and
+    /// attempt that is not finished yet, so ownership and "still active" checks see all live work.</summary>
+    internal static RenderPeerStatus ForRun(RenderPeerStatus s,string prefix)=>s with{
+        Jobs=s.Jobs.Where(j=>j.Request.Id.StartsWith(prefix,StringComparison.Ordinal)||j.Status is not ("accepted" or "cancelled")).ToArray(),
+        Attempts=s.Attempts.Where(a=>a.Attempt.Request.Id.StartsWith(prefix,StringComparison.Ordinal)||a.Phase!="released").ToArray(),
+        Results=s.Results.Where(r=>r.JobId.StartsWith(prefix,StringComparison.Ordinal)).ToArray()};
     internal static string PreparedProfile(string hash,int frame)=>"prepared-"+hash+"-"+frame;
     private sealed class ArtifactRuntime(IDockerCommands docker,string directory,string peer):IRenderRuntime
     {

@@ -50,27 +50,29 @@
   scheduling, sizing and economics of servers that heat a house}
 % Author order rotates among the team; this paper starts with Ennio.
 \author{Ennio Binder \and Jona Richartz \and Nikita Sosnovski}
-\date{21 November 2026}
+\date{22 November 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
 Heat-led computing promises two services from one electrical input, but heat demand and paid
-computing demand need not coincide. We combine an hourly Basel reference-house simulation with
-measured laptop jobs, an actor-specific economic audit and synthetic network experiments. Four
-abstract \qty{1}{kW} servers cover 58.0\% of annual house heat demand with no dumping and 64.7\%
-utilisation under the case's unlimited-work assumption; a local greedy rule matches the full-year
-heat upper bound. The case break-even of CHF~0.226 per sold server-hour credits heat value to the
-combined system. With free heat, that value accrues to the homeowner, while the operator pays
-electricity and equipment costs. A later-price L4 sensitivity requires about CHF~1.76 per sold
-hour for the four-server operator even if every heat-led hour is sold, before wear and installation.
-No contracted sales or target-hardware throughput establish this price. A separate, smaller
-four-L4 residential variant could fit under the constant hot-water base load, but remains an
-unmeasured hardware and sales hypothesis. On a synthetic 33-site network, routing deadline-bound
-work to year-round heat sinks reduces missed jobs in scenarios where residential sites alone
-cannot. These findings identify measurable conditions for a viable home installation; they do not
-claim realised profitability.
+computing demand need not coincide. We simulate the case's Basel reference house and labelled
+variants with an event-driven fleet model that draws finite job demand from sourced volumes and
+traces, schedules it with one shared heat-first policy, and settles every house with the case's
+lossless heat balance. With unlimited work, four abstract \qty{1}{kW} servers could cover 58.0\% of
+the house's heat at 64.7\% utilisation; with the sourced demand (scaled to one house), they cover
+22.8\% at 25.4\% utilisation, dump no heat and miss 8.9\% of job deadlines, mostly in summer when
+only hot water is drawn. Income exceeds the electricity cost, but four GPU servers lose about
+CHF~14,300 a year after hardware; one server earns almost the same income, and the combined system
+of operator and host keeps about CHF~5,250 a year (the operator alone CHF~4,470, payback 3.4 years). Calibrated to an organiser-provided real house and assuming 86\% boiler efficiency,
+the case formula's fitted design heating power (\qty{10.13}{kW}) is within 1.3\% of the case's \qty{10}{kW}, while summer heat use is three
+times the case's hot water and absorbs nearly all summer work. Routing to a year-round heat sink
+moves 76\% of July work to an indoor pool in a local scenario, and in synthetic 33-site experiments
+with earlier research strategies it reduces missed deadlines where houses alone cannot. A demonstrator shows the same scheduler
+freezing and resuming a real transcription and language-model container on the heat signal. These
+results state measurable conditions for a viable installation; they do not claim realised
+profitability.
 \end{abstract}
 
 \input{sections/01-introduction}

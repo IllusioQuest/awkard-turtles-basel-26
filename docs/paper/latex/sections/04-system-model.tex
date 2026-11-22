@@ -15,9 +15,31 @@ model. Gross heat demand (space heating and hot water) in hour $t$ is $D_{s,t}$ 
 function (\texttt{HeatBalance.Step}) on the \emph{actual} demand: server heat $a_s u_{s,t}$ first
 covers demand, then charges the tank, and only the rest is dumped; the tank discharges for the
 remaining demand, and the backup heater covers what is still missing. There is no second heat
-model: the year simulation, the network simulation and the tests share this function.
+model: the fleet simulation, the year and network simulations, the demonstrator and the tests share
+this function.
 
-\paragraph{Work.} We use two job types. \emph{Type~1} is paid batch LLM work
+\paragraph{Event-driven fleet model.} The house results in Section~\ref{sec:evaluation} come
+from the fleet simulation (\texttt{DigitalHeat.Fleet}). Time advances event by event with
+millisecond resolution; between events all rates are constant, so each house's tank is settled
+exactly with the same \texttt{HeatBalance.Step}. Demand per house is the case formula on that
+house's weather. Before a run, jobs are drawn with a fixed seed from three job types: transcription
+of medical dictations and LLM inference (Type~1, fixed sourced market prices) and a checkpointable
+research simulation (Type~2, priced by load at arrival, accepted with a constant-elasticity
+probability against a competitor price). Volumes come from sourced counts (Basel physicians,
+OpenRouter token volume with two labelled market shares, sciCORE usage), arrivals are Poisson with
+weekly shapes from public traces \cite{azure_llm_trace,alibaba_trace}, sizes come from traces, and deadlines are drawn between
+\qty{2}{h} and three days. Each job is split into chunks that run on one server at a set load;
+energy per work unit comes from GPU benchmarks scaled to a \qty{1}{kW} server. Income,
+electricity, heat value and missed deadlines are accounted per house and job; hardware cost is
+added after the run from the hardware profile. The full specification, every input with its source
+and all simplifications are in \texttt{docs/model/fleet-simulation.md}; every external source of
+the paper's inputs, with the place where it is used, is listed in \texttt{SOURCES.md} in the
+repository.
+
+The remainder of this section describes the hourly network model and its linear programme, used
+for the synthetic network experiments.
+
+\paragraph{Work in the network model.} The network experiments use two job types. \emph{Type~1} is paid batch LLM work
 (for example summarising public documents); it arrives in \emph{cohorts} $c \in \Coh$, one per
 origin site $o_c$ and day, at local 00:00, with an exclusive deadline $d_c$ \qty{24}{h} later and a
 remaining amount $W_c$ server-hours. Its volume in our experiments is a labelled scenario: a share

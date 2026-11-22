@@ -27,6 +27,7 @@ public sealed record ProposalOutcome(string Origin, string JobId, long Generatio
 public sealed record PeerJournal(string PeerId, long OfferSequence, OriginJob[] Jobs, ProposalOutcome[] Outcomes)
 {
     public bool OperatorHold { get; init; }
+    public string[] WithdrawnPeers { get; init; } = [];
     public string[] CancelledWorkloads { get; init; } = [];
 }
 
@@ -42,6 +43,8 @@ public sealed class MeshPeer : IDisposable
     private readonly IPeerMeshTransport transport;
     private readonly TimeProvider clock;
     private readonly TimeSpan offerLifetime;
+    private readonly TimeSpan minimumFreeze;
+    private readonly Dictionary<string, DateTimeOffset> frozenAt = new(StringComparer.Ordinal);
     private readonly string journalPath;
     private readonly HashSet<string> peers;
     private readonly Dictionary<string, PeerOffer> offers = new(StringComparer.Ordinal);
@@ -52,8 +55,10 @@ public sealed class MeshPeer : IDisposable
     public MeshPeer(string meshId, string id, string stateDirectory, WorkloadInventory inventory,
         RuntimeNode[] runtimeNodes, IReadOnlyDictionary<string, ContainerProfile> profiles,
         IEnumerable<string> peers, IPeerMeshTransport transport, IWorkloadRuntime runtime,
-        TimeProvider clock, TimeSpan offerLifetime)
+        TimeProvider clock, TimeSpan offerLifetime, TimeSpan minimumFreeze = default)
     {
+        if (minimumFreeze < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(minimumFreeze));
+        this.minimumFreeze = minimumFreeze;
         if (inventory.Sites.Length != 1 || inventory.Sites[0].Id != id || inventory.Domains.Length != 1
             || offerLifetime <= TimeSpan.Zero) throw new ArgumentException("One physical domain/site per peer and a positive offer lifetime are required.");
         Id = id; this.runtimeNodes = runtimeNodes; this.profiles = profiles; this.transport = transport;
@@ -77,7 +82,16 @@ public sealed class MeshPeer : IDisposable
 
     public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
     public AttemptRecord[] Attempts() => coordinator.Attempts();
+    public HeatCommitment[] HeatCommitments() => coordinator.HeatCommitments();
     public bool Held => journal.OperatorHold;
+    public bool IsPeerWithdrawn(string peerId)=>journal.WithdrawnPeers.Contains(peerId,StringComparer.Ordinal);
+    /// <summary>Explicit operator fencing only; not a health-timeout takeover mechanism.</summary>
+    public void WithdrawPeer(string peerId)
+    {
+        if(peerId==Id||!peers.Contains(peerId))throw new ArgumentException("Invalid withdrawal target");
+        if(!IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=[..journal.WithdrawnPeers,peerId]};Save();}
+        offers.Remove(peerId);
+    }
     public void CancelBatchWorkloads(string[] ids)
     {
         if(!journal.OperatorHold)throw new InvalidOperationException("Hold peer before cancelling frame jobs");
@@ -134,8 +148,7 @@ public sealed class MeshPeer : IDisposable
         var claims = coordinator.Allocations();
         // Remote planners have no local ownership ledger: advertise all retained hourly heat,
         // plus actual held resources. Pausing frees CPU, never GPU/RAM/slots or committed heat.
-        double committed = coordinator.Attempts().Where(a => a.CommittedHeatIntervalsUtc?.Contains(inventory.IntervalStartUtc) == true)
-            .Sum(a => a.Attempt.Reservation.RecoverableHeatKwhPerHour);
+        double committed = coordinator.CommittedHeatKwh(inventory.IntervalStartUtc);
         var snapshot = inventory with
         {
             Sites = [inventory.Sites[0] with { ExternalCommittedHeatKwh = inventory.Sites[0].ExternalCommittedHeatKwh + committed }],
@@ -149,32 +162,32 @@ public sealed class MeshPeer : IDisposable
         Save();
         var offer = new PeerOffer(Id, journal.OfferSequence, expiry, snapshot, profiles.Keys.Order(StringComparer.Ordinal).ToArray());
         offers[Id] = offer;
-        foreach (string peer in peers.Where(p => p != Id).Order(StringComparer.Ordinal)) transport.Send(Id, peer, offer);
+        foreach (string peer in peers.Where(p => p != Id&&!IsPeerWithdrawn(p)).Order(StringComparer.Ordinal)) transport.Send(Id, peer, offer);
     }
 
     public void Tick()
     {
         coordinator.Reconcile(runtimeNodes);
-        coordinator.EnforceDeadlines();
+        coordinator.EnforceDeadlinePolicies();
         bool changed = ApplyLocalHeat();
-        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "terminal" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowStop))
+        foreach (var row in coordinator.ActiveAttempts().Where(a => a.Phase == "terminal" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowStop))
         {
             coordinator.StopAndRelease(row.Attempt.Request.Id);
             changed = true;
         }
         if (changed) Publish();
         if (journal.OperatorHold) return;
-        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
+        foreach (var row in coordinator.ActiveAttempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
         foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
             j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
             if (job.Status is "accepted" or "cancelled") continue;
-            if (job.Target is not null) { Propose(job); continue; } // Lost reply: retry this target, never reassign.
+            if (job.Target is not null) { if(!IsPeerWithdrawn(job.Target))Propose(job); continue; } // Lost reply: retry this target, never reassign.
             if (!WorkloadPlacement.DeadlineOpen(job.Request, clock.GetUtcNow())) continue;
             var now = clock.GetUtcNow();
-            var available = offers.Values.Where(o => now < o.ExpiresAtUtc && o.Profiles.Contains(job.ProfileId)
+            var available = offers.Values.Where(o => !IsPeerWithdrawn(o.PeerId)&&now < o.ExpiresAtUtc && o.Profiles.Contains(job.ProfileId)
                 && o.Inventory.ResourceObservedAtUtc is {} observed && observed <= now
                 && o.Inventory.ResourceValidUntilUtc is {} resourcesUntil && now < resourcesUntil
                 && now >= o.Inventory.IntervalStartUtc && now < o.Inventory.IntervalEndUtc)
@@ -199,22 +212,49 @@ public sealed class MeshPeer : IDisposable
             Put(intent); // Durable intent MUST precede send; the transport may lose its reply.
             Propose(intent);
         }
-        coordinator.EnforceDeadlines();
+        coordinator.EnforceDeadlinePolicies();
     }
 
     private bool ApplyLocalHeat()
     {
         var scheduler = new HeatFirstScheduler(0);
         var heat = inventory.Sites[0].Heat;
+        var now = clock.GetUtcNow();
         bool noHeat = scheduler.Decide(heat).TargetLoadPerServer == 0;
         bool changed = false;
-        foreach (var row in coordinator.Attempts().Where(a => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
+        var attempts = coordinator.ActiveAttempts();
+        // Decision 0068: freeze-only batch containers run at their full declared heat, so the shared
+        // heat-first load is rounded down to whole jobs. The budget is the same useful heat the shared
+        // policy and admission use (HeatCapacity.RemainingKwh: demand plus tank room). Running heat
+        // above it would be dumped, so the lowest-priority jobs freeze until the rest fits.
+        double budget = HeatCapacity.RemainingKwh(heat) + HeatTolerance;
+        double load = attempts.Where(a => a.Phase == "running" && !Pausable(a)).Sum(Heat);
+        foreach (var row in attempts.Where(a => a.Phase == "running" && Pausable(a)).OrderBy(Priority))
         {
-            if (row.Phase == "running" && (noHeat || journal.OperatorHold) || row.Phase == "paused" && !noHeat && !journal.OperatorHold)
-                changed |= coordinator.ApplyBatchHeat(row.Attempt.Request.Id, heat, scheduler, clock.GetUtcNow());
+            string id = row.Attempt.Request.Id;
+            if (journal.OperatorHold) { coordinator.PauseBatch(id); changed = true; continue; }
+            if (noHeat) { changed |= coordinator.ApplyBatchHeat(id, heat, scheduler, now); MarkFrozen(id, now); continue; }
+            if (load + Heat(row) > budget) { coordinator.PauseBatch(id); MarkFrozen(id, now); changed = true; continue; }
+            load += Heat(row);
+        }
+        if (noHeat || journal.OperatorHold) return changed;
+        // Thaw in priority order, counting each thawed job, after at least the minimum freeze time.
+        foreach (var row in attempts.Where(a => a.Phase == "paused" && Pausable(a)).OrderBy(Priority))
+        {
+            string id = row.Attempt.Request.Id;
+            if (frozenAt.TryGetValue(id, out var since) && now - since < minimumFreeze) continue;
+            if (load + Heat(row) > budget) continue;
+            if (coordinator.ApplyBatchHeat(id, heat, scheduler, now)) { load += Heat(row); frozenAt.Remove(id); changed = true; }
         }
         return changed;
     }
+
+    private void MarkFrozen(string id, DateTimeOffset now) => frozenAt.TryAdd(id, now);
+    private const double HeatTolerance = 1e-9; // kWh; numerical tolerance only
+    private static double Heat(AttemptRecord a) => a.Attempt.Reservation.RecoverableHeatKwhPerHour;
+    private static bool Pausable(AttemptRecord a) => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause;
+    private static JobPriority Priority(AttemptRecord a) =>
+        new(a.Attempt.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, a.Attempt.Request.Id);
 
     private void Propose(OriginJob job) => transport.Send(Id, job.Target!, new PeerProposal(Id, job.Generation,
         Identity(job.Request, job.ProfileId), job.Request, job.ProfileId, job.InventoryRevision, job.HourStartUtc, job.Heat!));
@@ -224,7 +264,7 @@ public sealed class MeshPeer : IDisposable
         if (!peers.Contains(from)) throw new InvalidDataException("Unknown peer.");
         switch (message)
         {
-            case PeerOffer offer when offer.PeerId == from:
+            case PeerOffer offer when offer.PeerId == from&&!IsPeerWithdrawn(from):
                 if (!offers.TryGetValue(from, out var old) || offer.Sequence > old.Sequence)
                     offers[from] = WorkloadJson.Copy(offer);
                 break;
@@ -258,7 +298,7 @@ public sealed class MeshPeer : IDisposable
         try
         {
             coordinator.Reconcile(runtimeNodes);
-            coordinator.EnforceDeadlines();
+            coordinator.EnforceDeadlinePolicies();
             if (old is not null) { Reply(origin, old); return; }
             var prior = coordinator.Attempts().SingleOrDefault(a => a.Attempt.Request.Id == proposal.Request.Id);
             if (prior is not null)

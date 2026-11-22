@@ -14,7 +14,7 @@ import {
 } from 'recharts'
 import MockBanner from '../admin/MockBanner'
 import { axis, legend, tooltip } from '../admin/chartStyle'
-import { DAY_MS, alignHour, dec1, num, pct, pct1, runStartMs, wallMs } from '../admin/format'
+import { DAY_MS, alignHour, chf, dec1, num, pct, pct1, runStartMs, wallMs } from '../admin/format'
 import '../admin/admin.css'
 import { useAsync, useSource } from '../data/source'
 import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
@@ -88,6 +88,18 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
   const jobLog = useAsync(source ? `job-events:${run.id}:${house.id}:${fromMs}:${toMs}` : null,
     () => source!.jobEvents(run.id, house.id, fromMs, toMs))
 
+  // A single-house run: its missed-deadline share is the network count over all jobs that arrived,
+  // including jobs that never started (as in docs/model/fleet-simulation.md and the paper); the
+  // per-house count below counts only jobs that ran in the house.
+  const network = useAsync(source && run.houses === 1 ? `network:${run.id}` : null, () => source!.network(run.id))
+  const runMissed = useMemo(() => {
+    if (!network.data) return null
+    const h0 = fromMs / 3_600_000, h1 = toMs / 3_600_000
+    let misses = 0, arrivals = 0
+    for (const n of network.data) if (n.h >= h0 && n.h < h1) { misses += n.misses; arrivals += n.arrivals }
+    return arrivals > 0 ? { misses, arrivals } : null
+  }, [network.data, fromMs, toMs])
+
   const data = useMemo(() => householdSeries(run, house, periods, range.from, range.to), [run, house, periods, range])
   const sum = useMemo(() => totals(data, run.maxElectricKwPerServer), [data, run.maxElectricKwPerServer])
   const span = range.to - range.from
@@ -134,7 +146,6 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           <Link className="link back" to={`/admin/${encodeURIComponent(run.id)}?h=${selectedH}&house=${encodeURIComponent(house.id)}`}>
             ← Network
           </Link>
-          <span> · </span><Link className="link back" to="/live">Live request →</Link>
           <h1>{house.id}</h1>
           <span className="note">{[place, run.id].filter(Boolean).join(' · ')}</span>
         </div>
@@ -157,12 +168,16 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
         <Stat label="Heat delivered" value={`${num.format(sum.heatUsedKwh)} kWh`} />
         <Stat label="Heat demand covered" value={pct.format(sum.coveredShare)} note={`of ${num.format(sum.heatDemandKwh)} kWh`} />
         <Stat label="Power used by servers" value={`${num.format(sum.powerKwh)} kWh`} note="paid by DigitalHeat" />
+        <Stat label="Electricity cost" value={chf.format(sum.electricityCostChf)} note="paid by DigitalHeat" />
+        <Stat label="Computing income" value={chf.format(sum.incomeChf)} note="jobs run in this house" />
         <Stat label="Heat dumped" value={`${num.format(sum.heatDumpedKwh)} kWh`} />
         <Stat label="Outdoor temperature" value={`${dec1.format(sum.avgTemperatureC)} °C`} note="average" />
         <Stat
           label="Deadlines missed"
-          value={sum.missedShare === null ? '–' : pctSmall.format(sum.missedShare)}
-          note={sum.deadlinesKnown ? `${num.format(sum.deadlinesMissed)} of ${num.format(sum.jobsDue)} jobs` : 'not in this run (re-run or restart the API)'}
+          value={runMissed ? pctSmall.format(runMissed.misses / runMissed.arrivals) : sum.missedShare === null ? '–' : pctSmall.format(sum.missedShare)}
+          note={runMissed
+            ? `${num.format(runMissed.misses)} of ${num.format(runMissed.arrivals)} jobs, incl. never started`
+            : sum.deadlinesKnown ? `${num.format(sum.deadlinesMissed)} of ${num.format(sum.jobsDue)} jobs` : 'not in this run (re-run or restart the API)'}
         />
         <Stat
           label="Break even kWh price"

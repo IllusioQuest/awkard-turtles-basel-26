@@ -1,31 +1,33 @@
-# Fleet simulation: implementation spec
+# Fleet simulation: model and assumptions
 
-> **Status:** agreed with Ennio 2026-11-21; built 2026-11-21 (see §16 for choices made during the build). Ticket T-58, branch `feat/T-52-fleet-simulation`.
-> This file is the decision record for T-58 (design reviewed by Ennio 2026-11-21; no separate ADR).
-> Everything below is in scope for the first build. Values marked `TODO(source)` stay visible
-> parameters; never replace them with invented numbers.
+> **Status:** the team's simulation model for house and network results (the older `YearRun` year
+> model is no longer used for results). Designed and built 2026-11-21 (T-58), scheduler replaced by
+> the shared heat-first policy in PR #52 (decisions 0049–0051, 0056). Described as of `main`
+> `dc325db`, 2026-11-22. Values marked `TODO(source)` are visible parameters without a source; they
+> are never replaced by invented numbers. Every number in a result depends on the scenario file it
+> came from; §16 lists the current results and what each one assumes.
 
 ## 1. Goal
 
 Simulate many households with DigitalHeat servers over a period (default: the year 2025). Compute
-jobs arrive from customers. A pluggable **scheduler** (a mock for now) decides which job chunk runs on
-which server, at which load, and when. A pluggable **pricing function** quotes Type 2 jobs. The
+jobs arrive from customers. A pluggable **scheduler** (the shared heat-first policy, §9.2) decides
+which job chunk runs on which server, at which load, and when. A pluggable **pricing function** quotes Type 2 jobs. The
 outputs are per house, per job and per network: heat demand, heat used/dumped/backup, power and
 utilisation, missed deadlines, electricity cost, heat value, computing income and break-even. The
 server count per house is a function, so it can be optimised later.
 
 ## 2. Code layout and reuse
 
-- New projects in `src/`, added to `DigitalHeat.sln`: `DigitalHeat.Fleet` (library: engine, models,
-  generators, mock scheduler, mock pricing), `DigitalHeat.FleetRun` (CLI), `DigitalHeat.Fleet.Tests`
-  (xUnit, as the other test projects).
+- Projects in `src/`: `DigitalHeat.Fleet` (library: engine, models, generators, the heat-first
+  scheduler adapter, pricing), `DigitalHeat.FleetRun` (CLI), `DigitalHeat.Fleet.Tests` (xUnit).
 - Reuse from `DigitalHeat.Core`, do not copy: `HeatDemand.Build` (case formula),
   `HeatBalance.Step` (tank balance), `ReferenceParameters` / `config/reference-house.json`,
   `WeatherCsv`. No second heat model.
-- Do not change `DigitalHeat.Network` (T-12, Jona) or `DigitalHeat.Orchestration`. The real scheduler
-  is adapted to `IFleetScheduler` later.
-- Config: `config/fleet/` (scenarios, job types, clients). Output:
-  `data/derived/fleet/<run-id>/` (gitignored except small reference runs).
+- The scheduler is `HeatFirstFleetScheduler`, an adapter of the Core heat-first policy
+  (`HeatFirstScheduler`, `HeatCapacity`, `JobPriority`, `HeatShareRank`) that the Network and the
+  Orchestration mesh also use (`docs/model/unified-heat-first-mesh.md`).
+- Config: `config/fleet/` (scenarios, houses, job types, clients, generator specs). Output:
+  `data/derived/fleet/<run-id>/` (git-ignored; reproduce with the commands in §12).
 - Units in all names (`_kw`, `_kwh`, `_s`, `_chf_per_kwh`, ...).
 
 ## 3. Engine: event-driven, exact
@@ -54,9 +56,10 @@ server count per house is a function, so it can be optimised later.
 ### 4.1 House spec
 
 A house file (`.json` or `.csv`, one row per house) holds: `house_id, lat_deg, lon_deg, cell_id,
-bfs_municipality_nr, weather_ref, design_heating_kw, formula_divisor_c, hot_water_kwh_per_day,
-tank_kwh, tank_initial_kwh, electricity_price_chf_per_kwh, server_count`.
-`server_count` may be empty, in which case the server-count policy decides (§4.4).
+bfs_municipality_nr, canton, weather_ref, design_heating_kw, formula_divisor_c, hot_water_kwh_per_day,
+tank_kwh, tank_initial_kwh, electricity_price_chf_per_kwh, server_count`, and optionally `site_type`
+(display only, e.g. `pool`; JSON files, T-81). `server_count` may be empty, in which case the
+server-count policy decides (§4.4).
 
 Hourly demand per house: `HeatDemand.Build` with the house's weather and the parameters above.
 Houses that share `weather_ref` and parameters share one demand array (memory).
@@ -258,28 +261,31 @@ public interface IFleetActions
 - The engine does not model data transfer or latency; locality is entirely the scheduler's task.
   Moving work = `Stop` (checkpointable) + `Start` elsewhere, and both are counted.
 
-### 9.2 Mock scheduler (`MockHeatLedScheduler`)
+### 9.2 Heat-first scheduler (`HeatFirstFleetScheduler`, `scheduler.id = "mesh-heat-first"`)
 
-Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `chunk_target_s` (3600).
+The only scheduler (the earlier `MockHeatLedScheduler` with urgency overriding heat was removed in
+PR #52). Parameter: `chunk_target_s` (3600 in all scenarios).
 
-1. **Heat target per house.** Mode `charge` while tank < `high_share × cap`: target electric kW = all
-   servers at full power. Mode `hold` once tank ≥ high: target = `demand_kw ÷ heat_recovery_share`.
-   Switch back to `charge` when tank ≤ `low_share × cap`. The thresholds are registered with
-   `RegisterTankThreshold`.
-2. **Fill to target**, queue order: Type 1 earliest deadline first, then Type 2 earliest deadline
-   first.
-   - Chunk size = `min(remaining, units for chunk_target_s at load 1)`, within `max_chunks` and
-     `min_chunk_work_units`.
-   - Loads are set so the house hits its target exactly: full servers at load 1, one server at the
-     remainder (if ≥ its job's `min_load`, else 0).
-   - Too much power: lower loads, then pause chunks in reverse queue order.
-3. **Urgent:** a Type 1 job with slack (`deadline − now − remaining ÷ (active chunk rate)`) <
-   `urgent_margin_s` is started on the first house (by id) with a free server, regardless of heat.
-   If none is free, it stops a checkpointable Type 2 chunk there (its progress is kept) and uses that
-   server.
-4. **Cost per event is O(change):** keep the set of houses with power below target. `HourStart`
-   re-evaluates all houses (N × 8,760 per year).
-5. It ignores origin, latency, data size and forecasts.
+1. **Heat target per house:** Core `HeatFirstScheduler` (minimum load 0) on the house's current
+   demand, tank level and capacity: target server load = useful heat (demand + free tank room,
+   `HeatCapacity.RemainingKwh`) ÷ heat per server at full load, capped at the installed servers.
+2. **Hourly heat budget:** at each hour start every house gets a budget = its useful heat at that
+   moment. Each started or resumed chunk claims its heat for the rest of the hour; finishing or
+   pausing does not give the claim back within the hour (conservative, can leave capacity unused).
+3. **Queue:** one queue, earliest deadline first, then job ID (Core `JobPriority`). Type 1 and
+   Type 2 are not separated; a job with a passed deadline is not started.
+4. **Placement:** a job goes to the house with the most free share of its hourly heat budget, then
+   most free kWh, then house ID (Core `HeatShareRank`, decision 0056). A house that can run a server
+   at full load is preferred over a partial budget. Chunk size = `min(remaining, chunk_target_s` of
+   work at load 1), within `max_chunks` and `min_chunk_work_units`.
+5. **Running chunks follow heat:** when a house's target drops, pausable chunks are lowered and, at
+   load 0, paused (in reverse priority order); non-pausable work and checkpoint overhead continue
+   and their heat stays in the house balance.
+6. It does not use forecasts, latency or data size (pricing uses forecasts, §7).
+
+Consequence: no work runs without useful heat, so no heat is dumped. Jobs that arrive when a house
+has no useful heat wait, and miss their deadline if the heat does not come back in time (in summer
+with only hot-water demand, §16).
 
 ## 10. Accounting (per house, integrated per segment)
 
@@ -328,8 +334,7 @@ Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `ch
   "pricing":   { "id": "mock-load", "p_min_chf": 0.226, "p_max_chf": 1.20, "gamma": 1,
                  "p_ref_chf": 0.82, "p_ref_noise_sd": 0.079, "elasticity": -0.8 },
   "forecast":  { "kind": "archived" },
-  "scheduler": { "id": "mock-heat-led", "low_share": 0.3, "high_share": 0.9,
-                 "urgent_margin_s": 3600, "chunk_target_s": 3600 },
+  "scheduler": { "id": "mesh-heat-first", "chunk_target_s": 3600 },
   "logging":   { "house_timeseries": "hourly", "out_dir": "data/derived/fleet" }
 }
 ```
@@ -337,19 +342,27 @@ Parameters: `low_share` (0.3), `high_share` (0.9), `urgent_margin_s` (3600), `ch
 CLI (`dotnet run --project src/DigitalHeat.FleetRun --`): `generate-houses <spec> -o <file>`,
 `run <scenario>`, `post <run-dir> [--hardware <file>]`.
 
-Scenarios to ship:
-- `reference.json`: the case house, 4 servers, cross-check.
-- `basel-region-100.json`: BS+BL, 100 houses, tick-vs-event test.
-- `ch-100.json`: Switzerland, 100 houses, volume ×10 (map visualisation). (`ch-1000.json` was removed 2026-11-21.)
+Scenarios (`config/fleet/scenarios/`; each file's `_note` states what it changes):
+- `reference.json`: the case house, 4 servers, job volumes × 0.1 (§16).
+- `basel-region-100.json`: 100 houses in Basel-Landschaft, sourced volumes (× 1).
+- `ch-100.json`: 100 houses across Switzerland, volumes × 10 (map visualisation, not a sourced volume).
+- `dreispitz-5-pool.json` (T-67): 5 case houses and one indoor pool at FHNW Dreispitz, volumes × 1,
+  constant customer demand (elasticity 0). Houses: `scripts/make_local_fleet.py config/fleet/local/dreispitz.json`.
+- `alps-border-50.json` (T-67): 50 case houses in Interlaken, Brig-Goms and the Mittelland, volumes × 4
+  (visualisation, not sourced), elasticity 0. Houses: `scripts/make_climate_fleet.py config/fleet/regions/alps-border-50.json`.
+- `real-house.json` (T-82): the organisers' real house, calibrated to its measured 2025 gas use
+  (`scripts/calibrate_real_house.py` → `config/fleet/houses/real-house.json`); otherwise as `reference.json` (§16).
+- `reference-winter-jobs.json`, `reference-summer-jobs.json`: one-day job examples for the live
+  household page (T-68, T-72).
 
 ## 13. Tests (`DigitalHeat.Fleet.Tests`)
 
 1. **Case values:** reference house has 206 heating days, space heat 26,850.5 kWh (Core), 12.5
    servers needed in the coldest hour, 19.2 kWh per server-day.
-2. **Cross-check against Core:** `reference.json` with a Type 2 backlog that always fills, the mock
-   scheduler, `min_load` = 0 (continuous load, as Core). Server-hours and heat used must agree with Core's
-   22,661 h / 18,129 kWh within a tolerance stated in the test with its reason (hysteresis vs.
-   Core's per-hour greedy).
+2. **Cross-check against Core:** `reference.json` with a Type 2 backlog that always fills, the
+   heat-first scheduler, `min_load` = 0 (continuous load, as Core). Server-hours and heat used must
+   agree with Core's 22,661 h / 18,129 kWh within 1 %, the tolerance stated in the test
+   (`SpecTests.ReferenceHouseWithBacklogMatchesCore`).
 3. **Event = tick:** 1 month, 20 houses, the same `jobs-input.csv`, event mode vs. tick mode at
    `tick_ms` = 1000. Per house and per job the energy and work agree within a bound of
    `tick_ms × number of events × max power`, which the test computes.
@@ -388,16 +401,19 @@ Not used: solar irradiance (no PV yet), T-12 synthetic sites.
 - Servers are abstract 1 kW GPU servers with one load value; energy per work unit is from GPU
   benchmarks (research simulation: CPU placeholder) and independent of load.
 - No outages, no network or bandwidth model (transfer is the scheduler's task).
-- Hot water is flat; heat demand uses the case's linear formula; the tank is lossless.
+- Hot water is flat (12 kWh/day spread evenly over the hours); heat demand uses the case's linear
+  formula; the tank is lossless.
 - Arrivals are Poisson (real LLM traffic is burstier, BurstGPT CV 2.2 per minute).
 - Job sizes are known when a job arrives.
-- The mock scheduler and mock pricing are placeholders; the results describe them, not our real
-  policy.
+- Start, resume and checkpoint overheads and the minimum load are 0 (`TODO(source)` in the job types).
+- The Type 2 pricing function (`mock-load`) is our first placeholder; Type 1 prices are sourced
+  market prices.
+- One seeded run per scenario; no spread over seeds is reported.
 
-## 16. Implementation notes (build of 2026-11-21)
+## 16. Implementation notes and current results
 
 Code: `src/DigitalHeat.Fleet/` (`Contracts/`, `Engine/`, `Inputs/`, `Policies/`, `Output/`,
-`FleetSimulation.cs`), CLI `src/DigitalHeat.FleetRun`, tests `src/DigitalHeat.Fleet.Tests` (106).
+`FleetSimulation.cs`), CLI `src/DigitalHeat.FleetRun`, tests `src/DigitalHeat.Fleet.Tests` (107 pass).
 Commands and output columns: `data/derived/fleet/README.md`.
 
 Choices the spec left open, made during the build:
@@ -406,42 +422,146 @@ Choices the spec left open, made during the build:
   elapses at the current load, and its end is delivered as `OverheadDone` with the chunk in phase
   `Stopped`. Crossing times are rounded up to whole ms. A house's crossing events are only scheduled
   up to the next hour start (all houses are recomputed there). Within a batch: heap events, then
-  deadlines, then arrivals, so a chunk finishing exactly at its deadline is on time. `CommittedKwh`
-  has hour granularity and subtracts the progress of running chunks only at chunk end. A
+  deadlines, then arrivals, so a chunk finishing exactly at its deadline is on time. A
   non-checkpointable `Stop` loses its progress; its energy stays counted as work energy.
 - **Placement.** All houses are in CH (`country_allowlist`). `origin_site` is read as "same canton as
   the client" (clients are canton capitals, never houses).
 - **Income** is credited when units are kept (chunk end, checkpointed stop, run end). Late units
   are paid; misses are reported separately. A job counts as missed if it finished after its
-  deadline or is still open at run end with its deadline passed.
-- **Mock scheduler.** An urgent Type 1 job is evaluated once, then stays urgent (load 1, sorted
-  first in the queue); preemption victims come from a set of houses with checkpointable Type 2
-  chunks. A job that can neither pause nor has a `min_load` is floored at load 1e-3.
+  deadline or is still open at run end with its deadline passed. `houses-summary.csv` counts only
+  jobs attributed to the house that last ran them, so never-started jobs appear only in the network
+  count and in `jobs.csv`.
 - **Inputs.** LLM work unit = input + output token at 4.0e-8 kWh each (L4, 25 M tokens per server-hour, pessimistic reading); token
   sizes sum the input and output quantile tables with the same draw (comonotonic, mean 1,769 vs
   1,738 tokens in the trace). Research job sizes: Alibaba duration histogram, log-uniform within a
   bin, open ends 1 s and 7 d (`TODO(source)`). Resolved volumes at scale 1: transcription 428,
   LLM 1,566 (batches of 1,000 requests), research 135 jobs/day.
 - **Scenarios (team decision 2026-11-21).** `reference.json` runs at `volume_scale` 0.1: at full
-  volume one 4-server house gets the whole regional demand (≈ 16 kW of work on average), 97 % of
+  volume one 4-server house gets the whole regional demand (≈ 16 kW of work on average) and most
   jobs miss their deadline. `basel-region-100` contains BL houses only: the 10 km grid has no cell
   inside Basel-Stadt.
 
-Checks (§13): Core cross-check, server-hours 22,595.8 vs 22,661.0 and heat used 18,076.6 vs 18,128.8
-kWh (−0.29 %, tolerance 1 %, hysteresis vs Core's hourly greedy target); event vs tick (January,
-20 houses, 13,225 jobs) per-house deviation ≤ 2.9 kWh against a bound of 37.3 kWh; outputs
-byte-identical across runs; network energy balance closes to 1e-9 kWh.
+Checks (§13): Core cross-check within 1 % (`SpecTests.ReferenceHouseWithBacklogMatchesCore`; measured on `main`
+2026-11-22: 22,657.0 vs 22,661.0 server-hours and 18,125.6 vs 18,128.8 kWh heat used, −0.02 %);
+event vs tick per-house deviation within the bound computed by the test; outputs byte-identical
+across runs; network energy balance closes to 1e-9 kWh.
 
-First results (event mode, 2025, Release build, laptop; mock scheduler and mock pricing, §15):
+### Reference house, 2025 (`config/fleet/scenarios/reference.json`, `main` `dc325db`, 2026-11-22)
 
-| Scenario | Wall | Jobs done / missed | Heat used / demand | Income | Margin | Case break-even |
-|---|---|---|---|---|---|---|
-| reference (volume 0.1) | 0.9 s | 77,231 / 1,734 | 9,863 / 31,231 kWh | CHF 14,585 | CHF 11,750 | 0.227 CHF/server-h |
-| basel-region-100 | 4.2 s | 778,526 / 148 | 112,744 / 1,889,291 kWh | CHF 115,831 | CHF 85,988 | 0.212 |
+Reproduce: `dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/reference.json`,
+then `-- post data/derived/fleet/reference` for the hardware costs. Wall time ≈ 1 s.
 
-How to read it: the sourced job volumes (Basel physicians, 1 % × 1 % of OpenRouter, sciCORE) need
-≈ 140 MWh of electricity a year, so a fleet of 100 or 1,000 houses with 4 servers each is mostly
-idle (heat coverage 6 % and 0.6 %), and both fleets run the same jobs. Income per kWh is high
-because transcription sells at CHF 0.36 per audio hour while an L4 server does 469.9 audio hours
-per server-hour (≈ CHF 169 per server-hour, but only ≈ 36 kWh a year of work), and LLM tokens earn
-≈ CHF 1.5 per kWh. Demand, not heat, is the binding constraint at these volumes.
+**What it assumes:**
+
+| Input | Value | Source / status |
+|---|---|---|
+| House | case reference house: Basel 2025 weather, 10 kW design heat, divisor 25.6, 12 kWh/day hot water (flat), 35 kWh lossless tank starting empty, CHF 0.3325/kWh | `docs/case/challenge.md`, `config/fleet/houses/reference.json`, ElCom IWB Basel H4 2026 |
+| Servers | 4 × 1 kW, 80 % heat recovery, hardware profile L4 GPU (11.6 L4 cards + host per kW) | 4: comparison scenario, not an optimum; 1 kW and 80 %: case; L4 profile: `config/hardware/gpu-inference-l4.json` |
+| Transcription (Type 1) | 428 dictations/day × 0.1, median 6.5 audio min, CHF 0.36 per audio hour, Swiss-only | Basel-Stadt physicians (`docs/research/demand.md`), Bax et al. 2011, Infomaniak/kvant price; arrival shape: Azure LLM trace as a labelled proxy |
+| LLM inference (Type 1) | OpenRouter 194 × 10¹² tokens/week × 1 % Swiss share × 1 % market share × 0.1, Azure 2024 token sizes, 1,000 requests per job, Public AI Apertus 8B prices | OpenRouter volume and prices sourced; **Swiss and market share are unsourced scenario values**; batch size a scenario value |
+| Research simulation (Type 2) | sciCORE ≈ 80,000 server-h/year × 0.1, Alibaba 2020 durations and arrivals, dynamic price | sciCORE and Alibaba sourced; **energy per task is a CPU laptop placeholder** |
+| Deadlines | uniform 2 h – 3 days after arrival | team range 2026-11-21 |
+| Volume scale | 0.1 on every job type | team decision 2026-11-21 (scenario value) |
+| Type 2 price | CHF 0.226–1.20 by load, competitor price CHF 0.82 (CSCS), noise 7.9 %, elasticity −0.8 | §7.1; pricing function is our placeholder |
+| Scheduler, forecast | heat-first (§9.2), archived weather forecasts for pricing | §8, §9.2 |
+| Seed | 20261121 | fixed |
+
+**Result:**
+
+| Value | Result |
+|---|---:|
+| Jobs: arrived / done / never finished / rejected on price | 77,840 / 71,191 / 5,771 / 878 |
+| Jobs with a missed deadline (network count) | 6,905 (8.9 %) |
+| Heat used / demand (coverage) | 7,133 / 31,231 kWh (22.8 %) |
+| Heat dumped / backup heat | 0 / 24,097 kWh |
+| Server utilisation (mean load) | 25.4 % |
+| Electricity, Type 1 / Type 2 work | 3,749 / 5,167 kWh (8,917 kWh) |
+| Computing income, Type 1 / Type 2 | CHF 8,911 / CHF 4,449 (CHF 13,360) |
+| Electricity cost / value of heat used | CHF 2,965 / CHF 949 |
+| Margin (income + heat value − electricity) | CHF 11,344 |
+| Case break-even (electricity − heat value) ÷ server-hours | CHF 0.2261 per server-hour |
+| Hardware per year (4 × CHF 34,244 over 6 years + CHF 708 operations per server) | CHF 25,661 |
+| **Net after hardware** | **−CHF 14,317 per year** |
+
+How to read it: the house is limited by demand in winter (≈ 11,650 server-hours of work arrive per
+year against 35,040 installed) and by heat in summer. Of the 5,771 never-finished jobs, 5,763 arrived
+between May and September, when the house has only hot-water demand and the heat-first scheduler
+has no useful heat to run them on. A 6-server variant (same inputs, 2026-11-22) gave almost the same
+income (CHF 13,278) and misses (6,966) at CHF 12,831 more hardware per year: more servers do not
+help a house limited by demand and summer heat. The margin does not cover the L4 hardware at these
+volumes and prices.
+
+### When the reference house pays for its hardware (sweep, 2026-11-22)
+
+Copies of `reference.json` with one input changed at a time, run one by one with `FleetRun run`
+and `post` (L4 hardware CHF 6,415 per server-year). Net = margin − hardware per year.
+
+| Change | Break-even | At break-even |
+|---|---|---|
+| Job volume (all types together), 4 servers | `volume_scale` ≈ 0.28 (2.8 × today's 0.1) | 30 % of jobs miss their deadline (summer heat limit); above ≈ 0.3 the margin levels off near CHF 35k because the house cannot use more heat |
+| Type 1 prices only, volume 0.1, 4 servers | × 2.61 (LLM ≈ CHF 5.81 per L4 server-hour instead of 2.23) | Type 1 has no price response in the model, so this is optimistic |
+| Type 2 price band only | never (elasticity −0.8: revenue grows only with p^0.2 above the competitor price) | — |
+| **Fewer servers**, volume 0.1 | **1 server: net +CHF 5,252/year, payback 3.1 years**; 2 servers ≈ break-even (−CHF 621); 3 servers −CHF 7,654 | 1 server: 18.9 % coverage, 84.1 % utilisation, 7,366 server-hours, income CHF 13,333, margin CHF 11,667, heat value CHF 784, 4,622 missed deadlines (5.9 %), 1,250 Type 2 jobs rejected on price (878 with 4 servers) |
+
+Break-even volume by server count: 1 ≈ 0.05, 2 ≈ 0.11, 3 ≈ 0.19, 4 ≈ 0.28. At volume 0.1 the
+income barely depends on the server count (CHF 13.3k–14.1k), so the hardware decides the result.
+Caveats: the volume baseline (0.1, and the 1 % × 1 % LLM shares) is a scenario value; late work is
+paid in the model (without that, the 4-server break-even moves to ≈ 0.30); fewer servers get
+slightly higher Type 2 quotes through the pricing's capacity term (not traced further). The 1-server
+case was re-run independently and matches.
+
+### One server per house (scenarios `*-1-server.json`, 2026-11-22)
+
+| Run | Coverage | Utilisation | Late jobs | Income | Net after hardware (combined) |
+|---|---:|---:|---:|---:|---:|
+| `reference-1-server` | 18.9 % | 84.1 % | 4,622 (5.9 %) | CHF 13,333 | +CHF 5,252 (payback 3.1 y; operator +CHF 4,470, 3.4 y) |
+| `real-house-1-server` | 16.1 % | 95.0 % | 956 (1.2 %) | CHF 14,628 | +CHF 6,332 (payback 2.8 y; heat value CHF 885) |
+| `dreispitz-5-pool-1-server` | houses 17.9 %, pool 11.0 % | houses ≈ 80 %, pool 49 % | 126 of 778,536 (0.016 %) | CHF 170,564 (all sites) | houses ≈ +CHF 1,770 each; pool (20 servers) −CHF 24,937 |
+
+In the one-server neighbourhood the pool does 68 % of the work in January and 76 % in July.
+
+### Real house variant (`config/fleet/scenarios/real-house.json`, T-82, 2026-11-22)
+
+The hackathon organisers provided measured data of a real house (`data/raw/housedata/SOURCE.md`;
+the data itself stays local in `data/external/housedata/`). It heats with gas. Method
+(`python3 -I scripts/calibrate_real_house.py`): monthly gas of the main meter, January–September 2025
+(October–December are missing), × 0.86 boiler efficiency (EU 813/2013 minimum for new gas boilers
+≤ 70 kW; the real boiler is unknown) = useful heat. The case formula's two house parameters are fitted
+by least squares on those 9 months, `heat_m = design_kw × S_m + hot_water_kwh_per_day × days_m`, with
+`S_m` from the case formula on Basel 2025 weather. The script reproduces Core's 26,850.55 kWh with the
+case values (cross-check).
+
+| Fit | Real house | Case reference house |
+|---|---:|---:|
+| Design heating power | 10.13 kW | 10 kW |
+| Hot water per day (incl. summer losses) | 38.8 kWh | 12 kWh |
+| Fit quality | R² 0.996, monthly errors −5.9 % … +8.4 % | – |
+| Heat demand 2025 (Oct–Dec from the fit) | 41,356 kWh | 31,231 kWh |
+
+Space heating matches the case almost exactly; the summer use is three times the case's hot water.
+That summer value includes everything the boiler burns outside the heating season (hot water,
+circulation and standby losses), which monthly data cannot separate. Position, weather, price and the
+35 kWh tank are assumed as for the reference house (the address is anonymised).
+
+| Fleet result, 4 servers, same jobs and seed | Reference house | Real house |
+|---|---:|---:|
+| Heat used (coverage) | 7,133 kWh (22.8 %) | 8,931 kWh (21.6 %) |
+| Utilisation | 25.4 % | 31.9 % |
+| Jobs never finished / missed deadlines | 5,771 / 6,905 | 10 / 11 |
+| Rejected on price (Type 2) | 878 | 192 |
+| Computing income / electricity cost | CHF 13,360 / CHF 2,965 | CHF 13,780 / CHF 3,712 |
+| Margin / net after hardware | CHF 11,344 / −CHF 14,317 | CHF 11,256 / −CHF 14,406 |
+
+How to read it: with real summer heat use (≈ 1.6 kW around the clock) the house can absorb the
+summer jobs, so the summer deadline problem of the reference house almost disappears. More work is
+done, but mostly cheap Type 2 work, so the margin does not rise; the hardware is still not covered.
+
+### Other scenarios
+
+`dreispitz-5-pool` (re-run on `main` 2026-11-22): 778,536 jobs, 125 missed (0.02 %), houses cover
+about 30 % of their heat, the pool 7.9 %; the pool does 34 % of the work in January and 76 % in July.
+Net after L4 hardware is negative for every site (houses about −CHF 12,600, pool −CHF 54,500 per
+year). `alps-border-50` was last run on `main` `4e363d6`. Assumptions of both: their scenario
+`_note` and `docs/tickets/T-67-local-fleet-scenarios.md`.
+Local outputs of `basel-region-100` and `ch-100` date from the removed mock scheduler; re-run them
+before quoting any number.

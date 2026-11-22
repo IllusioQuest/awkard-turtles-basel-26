@@ -40,6 +40,7 @@ function houseInfo(s: Site): HouseInfo {
     servers: s.servers,
     tankKwh: s.tankKwh,
     electricityPriceChfPerKwh: 0,
+    siteType: 'house',
     summary: {
       heatDemandKwh: 0, heatUsedKwh: 0, heatDumpedKwh: 0, heatBackupKwh: 0, electricKwh: 0, coverage: 0, utilisation: 0,
       incomeChf: 0, electricityCostChf: 0, heatValueChf: 0, marginChf: 0, breakEvenChfPerServerHour: null, lateWorkKwh: 0, pauses: 0,

@@ -136,7 +136,8 @@ public sealed class RunStore
                 Num(t, r, "income_chf"), Num(t, r, "electricity_cost_chf"), Num(t, r, "heat_value_chf"), Num(t, r, "margin_chf"), be,
                 Num(t, r, "late_work_kwh"), Num(t, r, "pauses"));
             list.Add(new HouseInfo(id, gp?.Municipality ?? "", spec?.Canton ?? gp?.Canton ?? "", cell, spec?.LatDeg ?? gp?.LatDeg ?? 0,
-                spec?.LonDeg ?? gp?.LonDeg ?? 0, (int)Num(t, r, "servers"), spec?.TankKwh ?? 0, spec?.ElectricityPriceChfPerKwh ?? 0, s));
+                spec?.LonDeg ?? gp?.LonDeg ?? 0, (int)Num(t, r, "servers"), spec?.TankKwh ?? 0, spec?.ElectricityPriceChfPerKwh ?? 0, s,
+                spec?.SiteType ?? "house"));
         }
         return list;
     }

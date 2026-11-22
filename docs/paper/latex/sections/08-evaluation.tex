@@ -3,38 +3,67 @@
 
 We report the case's metrics: coverage (share of the total heat demand covered by server heat; the
 rest comes from the backup heater), dumped heat, utilisation (server running hours $\div$ (servers
-$\times$ 8{,}760)), missed deadlines in per cent of Type~1 jobs, and the work moved between sites.
+$\times$ 8{,}760)), missed deadlines in per cent of all jobs (fleet runs) or of Type~1 jobs (network experiments), and the work moved between sites.
 Commands and source files are listed in Appendix~\ref{app:repro}; network CSV rows also
 record their exact command lines.
 
 \subsection{Reference house}
 \label{sec:eval-house}
 
-Four servers cover \qty{58.0}{\percent} of the house's heat demand with no dumped heat at
-\qty{64.7}{\percent} utilisation (Table~\ref{tab:house-sizes}). Four is the reference
-baseline, chosen because two independent implementations reproduce it; it is \emph{not} an
-optimised server count. Three and five servers are shown for comparison.
+Table~\ref{tab:house-fleet} separates what the house could absorb from what it absorbs under
+sourced demand. With unlimited work, four servers cover \qty{58.05}{\percent} of the heat demand at
+\qty{64.7}{\percent} utilisation without dumping. This is the physical limit of the house; the
+fleet model reproduces it within \qty{0.02}{\percent} (\num{22657.0} against \num{22661.0}
+server-hours) when it is given a backlog that never runs out. With the sourced job demand, scaled
+to one house, the same four servers run \num{8917} server-hours: coverage falls to
+\qty{22.8}{\percent} and utilisation to \qty{25.4}{\percent}, still without dumping. Of
+\num{77840} jobs, 6,905 (\qty{8.9}{\percent}) miss their deadline, and \num{5763} of the
+\num{5771} jobs that never finished arrived between May and September: with only hot water to heat, the
+scheduler has no useful heat to run them on. Four servers is the case's comparison count, not an
+optimised one (Section~\ref{sec:eval-sizing}).
 
 \begin{table}[ht]
   \centering
-  \caption{Annual reference-house balance (Basel 2025, B1, unlimited work).
-    Server-hours are full-load equivalents, assumed sold.}
-  \label{tab:house-sizes}
-  \begin{tabular}{lrrr}
+  \caption{Reference house and real house in the fleet model (Basel 2025, L4 hardware profile). The
+    fleet columns use the same jobs and seed; the unlimited-work column is the case's physical
+    limit from the year model (cross-checked by the fleet model).}
+  \label{tab:house-fleet}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{lrrrr}
     \toprule
-    & 3 servers & \textbf{4 servers} & 5 servers \\
+    & \multicolumn{3}{c}{Reference house} & Real house \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-5}
+    & unlimited work & 4 servers & 1 server & 4 servers \\
     \midrule
-    Heat demand covered by server heat & \qty{45.5}{\percent} & \qty{58.0}{\percent} & \qty{69.9}{\percent} \\
-    Backup heat [kWh] & \num{17007} & \num{13102} & \num{9410} \\
-    Heat dumped [kWh] & 0 & 0 & 0 \\
-    Utilisation & \qty{67.7}{\percent} & \qty{64.7}{\percent} & \qty{62.3}{\percent} \\
-    Server-hours (full-load equivalent) & \num{17779} & \num{22661} & \num{27275} \\
-    Case break-even [CHF/server-h] & 0.2261 & 0.2261 & 0.2261 \\
+    Heat demand [kWh] & \num{31231} & \num{31231} & \num{31231} & \num{41356} \\
+    Heat demand covered & \qty{58.05}{\percent} & \qty{22.8}{\percent} & \qty{18.9}{\percent} & \qty{21.6}{\percent} \\
+    Heat dumped [kWh] & 0 & 0 & 0 & 0 \\
+    Utilisation & \qty{64.7}{\percent} & \qty{25.4}{\percent} & \qty{84.1}{\percent} & \qty{31.9}{\percent} \\
+    Server-hours sold & \num{22661} & \num{8917} & \num{7366} & \num{11164} \\
+    Missed deadlines & -- & \qty{8.9}{\percent} & \qty{5.9}{\percent} & \qty{0.01}{\percent} \\
+    Computing income [CHF] & -- & \num{13360} & \num{13333} & \num{13780} \\
+    Net after hardware [CHF/year] & -- & \num{-14317} & \num{5252} & \num{-14406} \\
+    Case break-even [CHF/server-h] & 0.2261 & 0.2261 & 0.2261 & 0.2261 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-On a single house the greedy rule B1 is optimal: it reaches the full-year upper bound exactly, and
+\paragraph{Real house.} The organisers provided the monthly gas readings of a real, anonymised
+house that heats with gas. We convert January to September 2025 (later months are missing) to heat
+with the 86\% minimum seasonal efficiency of new gas boilers \cite{eu813}, and fit the case
+formula's two house parameters by least squares on those nine months. The fit gives
+\qty{10.13}{kW} design heating power, against the case's \qty{10}{kW}, and \qty{38.8}{kWh} of heat
+per day outside the heating season, against the case's \qty{12}{kWh} of hot water ($R^2 = 0.996$,
+monthly errors $-5.9$ to $+8.4$\%). The case formula therefore describes this house's space heating
+well; its summer use, which includes circulation and boiler losses that monthly data cannot
+separate, is three times the case's hot water. Run with the same jobs, the real house misses 11
+deadlines instead of 6,905 (Table~\ref{tab:house-fleet}): its summer heat absorbs the summer work.
+Its income rises only slightly, because the extra work is mostly low-priced Type~2. The boiler's
+real efficiency and age are unknown; the 86\% is an upper value for a new appliance.
+
+\paragraph{Planning on one house.} The following comparison uses the network model with unlimited
+work (commit \texttt{1863f57}). On a single house the greedy rule B1 is optimal: it reaches the full-year upper bound exactly, and
 the rolling-horizon LP cannot improve on it (Table~\ref{tab:house-strategies}). The reason is that on
 the reference house the minimum load is zero, the tank is lossless and work is unlimited, so using
 heat now never reduces what can be used later; four servers are the limit in cold hours whatever the
@@ -69,36 +98,36 @@ for the forecast world and its plan can be slightly worse in reality.
 \subsection{Sizing}
 \label{sec:eval-sizing}
 
-The marginal-value sizing sweep runs the shared C\# year model for each count from zero
-through full heat coverage (Appendix~\ref{app:repro}).
-Its $n$th server adds progressively fewer heat-feasible hours: \num{7631} for the first,
-\num{4882} for the fourth, \num{3796} for the sixth, and only \num{5} for the thirteenth.
-These are upper bounds on sold hours because the sweep assumes unlimited buyers. In the
-documented L4 profile at its earlier CHF~34,244 purchase price and an assumed CHF~2.23 per
-sold hour, the combined-value marginal contribution rule selects six servers; at the adopted
-CHF~0.66 scenario price it selects zero for every listed hardware profile. The six-server
-answer is conditional on selling approximately \num{31071} heat-feasible hours at that
-price and credits the heat value to the combined system. It must not be read as the
-free-heat operator optimum under the later CHF~44,179 purchase sensitivity in
-Section~\ref{sec:economics}. Neither customer sales nor a physically installable
-11.63-card server have been established.
+Each additional server adds fewer heat-feasible hours. With unlimited work, the first server can run
+\num{7631} hours a year, the fourth \num{4882}, the sixth \num{3796} and the thirteenth only 5.
+Under sourced demand the binding limit is different: at the scaled demand, one to four servers
+earn almost the same income (CHF~13,300 to 14,100), because the work is limited by demand in winter
+and by heat in summer. One server then has the only positive net after hardware
+(Table~\ref{tab:breakeven}): $+$CHF~5,252 a year, against $-$CHF~14,317 for four. Its coverage is
+lower (\qty{18.9}{\percent} instead of \qty{22.8}{\percent}). It also misses fewer deadlines
+(\qty{5.9}{\percent}) while rejecting more Type~2 work on price (1,250 jobs instead of 878): with
+less capacity the load-based price quotes higher, so more summer heat remains for Type~1 work. Four servers would break even at 2.8 times the scaled demand. These results depend on the
+demand baseline, a labelled scenario value (Section~\ref{sec:limits}).
 
-\paragraph{Finite-work control experiment.} The mixed year-run implementation uses the same
-heat scheduler and adds finite Type~1 arrivals plus a sold Type~2 filler cap. Its current
-Type~1 input is a medical-dictation \emph{technical fixture}, not the proposed public-document
-LLM demand; no health record is run in a home. At a filler capacity cap of 1.0 it reproduces
-the unlimited reference result: \num{22661.03} sold server-hours, \qty{58.05}{\percent}
-coverage and zero dumping. At a cap of 0.35, achieved work falls to \num{9759.35}
-server-hours and coverage to \qty{25.00}{\percent}, still with zero dumping. The cap applies
-to installed capacity each hour; the resulting Type~2 hours are \num{9720.56}, not 35\% of
-the heat-led hours. Both runs complete the fixture's \num{156220} jobs without missed
-deadlines. The commands are listed in Appendix~\ref{app:repro}. The result demonstrates demand sensitivity and queue
-accounting, not a forecast of sold public-document work.
+\subsection{Local scenario: a pool as a summer heat sink}
+\label{sec:eval-local}
+
+A local fleet scenario places five case houses (four servers each, at the Münchenstein electricity
+price of CHF~0.3198/kWh) around FHNW Campus Dreispitz and one indoor pool (20 servers) with the
+annual heat demand of the renovated Allschwil indoor pool, \qty{627000}{kWh}, spread flat over the
+year. It uses sourced, unscaled Basel job volumes, and customers accept every Type~2 price
+(elasticity 0). Positions, the flat profile and the pool's 20 servers are scenario values. The same heat-first policy places work where the free share of the hourly
+heat budget is largest. In January the pool does 34\% of the work; in July, when the houses only
+need hot water, it does 76\%. Over the year 125 of \num{778536} jobs (\qty{0.02}{\percent}) miss
+their deadline. The houses cover about 30\% of their heat, the pool 7.9\%. Every site's net after
+hardware is still negative at four L4 servers per house (about $-$CHF~12,600 per house).
 
 \subsection{Strategy comparison on a Swiss test network}
 \label{sec:eval-network}
 
-The test network has 33 sites in nine Swiss cities:
+The synthetic experiments in this and the next subsections were computed with the research
+strategies of Section~\ref{sec:scheduling} at commit \texttt{1863f57}. The test network has 33 sites
+in nine Swiss cities:
 the reference house, single- and multi-family houses, nine hotels with spa and five indoor pools.
 Locations and sizes are \emph{synthetic test data}; heat demand comes from the case formula
 (houses) or from the profiles named in the scenario file. All results in this subsection are
@@ -191,7 +220,7 @@ arrival (``data staged at arrival'', a lower bound on friction). The delays are 
 sweep; no sourced delay exists. Even $\delta = \qty{12}{h}$ costs no deadline: B2 stays at
 \qty{0}{\percent} missed (Table~\ref{tab:exp-e}), because the year-round sinks have enough free
 summer capacity to finish the excess in the remaining \qty{12}{h}. B2 even moves less with a delay,
-from \num{102754} to \num{76680} and \num{61727} server-hours, i.e.\ from 1.57 to 0.95 moved
+from \num{102754} to \num{76680} and \num{61727} server-hours, i.e.\ from 1.57 to 0.94 moved
 server-hours per avoided missed job: without a delay, its persistence test sends work away that would
 still have finished at home. With $\delta \ge \qty{24}{h}$ (the deadline) no work can move and missed
 deadlines return to B1's level.
@@ -212,7 +241,7 @@ deadlines return to B1's level.
     \qty{0}{h} & \qty{0}{\percent} & \num{102754} & 1.57 & \num{64230} & 0.98 & Table~\ref{tab:exp-a} \\
     \qty{1}{h} & \qty{0}{\percent} & \num{102771} & 1.57 & \num{64230} & 0.98 & -- \\
     \qty{4}{h} & \qty{0}{\percent} & \num{76680} & 1.17 & \num{60527} & 0.93 & \qty{0}{\percent} / \num{49793} \\
-    \qty{12}{h} & \qty{0}{\percent} & \num{61727} & 0.95 & \num{58775} & 0.90 & \qty{0}{\percent} / \num{49847} \\
+    \qty{12}{h} & \qty{0}{\percent} & \num{61727} & 0.94 & \num{58775} & 0.90 & \qty{0}{\percent} / \num{49847} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -233,7 +262,8 @@ runs where heat is needed and filler would otherwise be missing.
 \begin{table}[ht]
   \centering
   \caption{Experiment B: filler availability $\varphi$ at \qty{30}{\percent} Type~1 share
-    (33 synthetic sites). The $\varphi=0.35$ scenario is from the demand audit.}
+    (33 synthetic sites). The $\varphi=0.35$ scenario is the filler-capacity analogy of the demand
+    research in the repository (\texttt{docs/research/demand.md}).}
   \label{tab:exp-b}
   \begin{tabular}{rrrrr}
     \toprule
@@ -276,10 +306,15 @@ Section~\ref{sec:economics}.
 \subsection{Summary of findings}
 
 \begin{enumerate}
-  \item[(i)] On one house the greedy rule is optimal: it reaches the full-year upper bound.
-  \item[(ii)] Value arises in the network: paid work with deadlines moves to year-round heat sinks;
-    without them deadlines are missed because every house is short at the same time.
-  \item[(iii)] Under the synthetic error process, network LP coverage decreases by 0.19
-    percentage points at $\sigma_{24}=\qty{20}{\percent}$ without missing deadlines.
-  \item[(iv)] The limits of these statements are listed in Section~\ref{sec:limits}.
+  \item[(i)] With unlimited work four servers cover 58\% of the reference house's heat; with sourced
+    demand they cover 22.8\%, dump nothing and miss 8.9\% of deadlines, mostly in summer.
+  \item[(ii)] At the sourced demand, hardware decides the result: one server covers its cost,
+    four need 2.8 times the demand or 2.6 times the Type~1 price.
+  \item[(iii)] Assuming 86\% boiler efficiency, the case formula fits a real house's space heating; the real house's larger summer
+    heat use removes most of the summer deadline misses.
+  \item[(iv)] On one house the greedy rule reaches the full-year upper bound. Value from routing
+    arises in a network with year-round heat sinks: the executable policy moves 76\% of July work
+    to the Dreispitz pool, and in the synthetic experiments greedy routing (B2) already removes the
+    missed deadlines; the LP mainly reduces the work moved.
+  \item[(v)] The limits of these statements are listed in Section~\ref{sec:limits}.
 \end{enumerate}

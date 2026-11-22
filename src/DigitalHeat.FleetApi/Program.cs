@@ -12,7 +12,19 @@ for (int i = 0; i < args.Length - 1; i++)
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+// The voice demo's phone page is hosted on Lovable (swiss-heat.lovable.app) and calls this API through
+// an ngrok tunnel, so the browser needs CORS. Allowed: that site, Lovable previews, and extra origins
+// from VOICE_DEMO_ORIGINS (comma-separated). Only GET and POST; the token header stays required.
+var extraOrigins = (Environment.GetEnvironmentVariable("VOICE_DEMO_ORIGINS") ?? "")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+bool AllowedOrigin(string origin) =>
+    Uri.TryCreate(origin, UriKind.Absolute, out var u) && u.Scheme == "https"
+    && (u.Host == "swiss-heat.lovable.app" || u.Host.EndsWith(".lovable.app", StringComparison.Ordinal)
+        || u.Host.EndsWith(".lovableproject.com", StringComparison.Ordinal) || extraOrigins.Contains(origin));
+builder.Services.AddCors(o => o.AddPolicy("voice", p => p.SetIsOriginAllowed(AllowedOrigin)
+    .WithMethods("GET", "POST").WithHeaders("Content-Type", "X-Voice-Token", "ngrok-skip-browser-warning")));
 var app = builder.Build();
+app.UseCors("voice");
 var store = new RunStore(runsDir, repoRoot);
 
 IResult Guard(Func<object> f)
@@ -34,6 +46,53 @@ app.MapGet("/api/live-household", () =>
     if (!File.Exists(path)) return Results.NotFound();
     try { return Results.Content(File.ReadAllText(path), "application/json"); }
     catch (IOException) { return Results.StatusCode(503); }
+});
+// T-78 voice demo: the phone page posts one recording (or typed text); DigitalHeat.VoiceDemo picks it
+// up from the inbox. Optional shared token (env VOICE_DEMO_TOKEN) when the page is exposed via a tunnel.
+app.MapPost("/api/voice-demo/requests", async (HttpRequest request) =>
+{
+    string? token = Environment.GetEnvironmentVariable("VOICE_DEMO_TOKEN");
+    if (!string.IsNullOrEmpty(token) && request.Headers["X-Voice-Token"] != token) return Results.StatusCode(401);
+    string type = (request.ContentType ?? "").Split(';')[0].Trim().ToLowerInvariant();
+    string? file = type switch
+    {
+        "text/plain" => "text.txt", "audio/webm" => "audio.webm", "audio/ogg" => "audio.ogg", "audio/mp4" => "audio.m4a",
+        "audio/mpeg" => "audio.mp3", "audio/wav" or "audio/x-wav" or "audio/wave" => "audio.wav", _ => null
+    };
+    if (file is null) return Results.StatusCode(415);
+    const long maxBytes = 20 * 1024 * 1024; // about 20 minutes of compressed speech; far above a spoken request
+    string id = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + "-" + Guid.NewGuid().ToString("N")[..8];
+    string dir = Path.Combine(repoRoot, "data", "external", "voice-demo", "inbox", id);
+    Directory.CreateDirectory(dir);
+    using (var output = File.Create(Path.Combine(dir, file)))
+    {
+        var buffer = new byte[81920]; long total = 0; int read;
+        while ((read = await request.Body.ReadAsync(buffer)) > 0)
+        {
+            total += read;
+            if (total > maxBytes) { output.Close(); Directory.Delete(dir, true); return Results.StatusCode(413); }
+            await output.WriteAsync(buffer.AsMemory(0, read));
+        }
+        if (total == 0) { output.Close(); Directory.Delete(dir, true); return Results.BadRequest(); }
+    }
+    File.WriteAllText(Path.Combine(dir, "ready"), "");
+    return Results.Ok(new { id });
+});
+// Pitch mode (decision 0069): the public https URL of a running ngrok tunnel, read from ngrok's
+// local inspection API, so the QR code always shows the current address. No token is returned.
+app.MapGet("/api/voice-demo/tunnel", async () =>
+{
+    try
+    {
+        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+        using var doc = System.Text.Json.JsonDocument.Parse(await http.GetStringAsync("http://127.0.0.1:4040/api/tunnels"));
+        foreach (var t in doc.RootElement.GetProperty("tunnels").EnumerateArray())
+            if (t.GetProperty("public_url").GetString() is { } url && url.StartsWith("https://", StringComparison.Ordinal))
+                return Results.Ok(new { url, addr = t.TryGetProperty("config", out var c) && c.TryGetProperty("addr", out var a) ? a.GetString() : null });
+        return Results.NotFound();
+    }
+    catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException)
+    { return Results.NotFound(); }
 });
 app.MapGet("/api/runs/{id}/houses/{houseId}/job-events", (string id, string houseId, long? fromMs, long? toMs) =>
     fromMs is null || toMs is null ? Results.Text("fromMs and toMs are required.", statusCode: 400) : Guard(() => store.JobEvents(id, houseId, fromMs.Value, toMs.Value)));

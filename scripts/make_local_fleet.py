@@ -6,7 +6,7 @@ optional named extra sites (pool, school, ...). Generic; one spec file per locat
 
 Spec format (every value needs an entry in spec["sources"]; example: config/fleet/local/dreispitz.json):
   centre {lat_deg, lon_deg}, rings_m [..], houses {count, prefix, <site fields>},
-  defaults {<site fields shared by all sites>}, extra_sites [{house_id, <site fields>, annual_heat_kwh?}],
+  defaults {<site fields shared by all sites>}, extra_sites [{house_id, <site fields>, annual_heat_kwh?, site_type?}],
   outputs [{file, include_extra_sites, description}].
 An extra site with annual_heat_kwh gets a flat demand: hot_water_kwh_per_day = annual / 365 and
 design_heating_kw = 0 (the fleet has no per-site demand profile; the flat shape is stated as synthetic).
@@ -34,7 +34,10 @@ def make_site(defaults, overrides, house_id, lat, lon):
     missing = [f for f in FIELDS if f not in s]
     if missing:
         raise SystemExit(f"site {house_id}: missing fields {missing}")
-    return {f: s[f] for f in FIELDS}
+    site = {f: s[f] for f in FIELDS}
+    if "site_type" in s:  # optional display category, e.g. "pool" (T-81); omitted means house
+        site["site_type"] = s["site_type"]
+    return site
 
 
 def ring_houses(spec):

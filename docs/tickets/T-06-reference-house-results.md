@@ -11,7 +11,7 @@ Produce the official key figures for the reference house, with every assumption 
 ## Tasks
 
 - [x] Run `YearRun` for 3, 4 and 5 server comparisons plus 1 and 13 as bounds; use 4 as the draft presentation baseline after user delegation, without claiming an optimized installation.
-- [x] Write `docs/results/reference-house.md` with all currently computable key figures, an explicitly undefined missed-deadline rate, a hardware-only sensitivity and the full-cost formula with missing inputs.
+- [x] Write `docs/results/reference-house.md` (deleted 2026-11-22: year model retired; Fleet results in `docs/model/fleet-simulation.md` §16) with all currently computable key figures, an explicitly undefined missed-deadline rate, a hardware-only sensitivity and the full-cost formula with missing inputs.
 - [x] List assumptions in `docs/assumptions.md` and the conditions under which the model does not pay off.
 - [x] Generate small result JSON files through `scripts/export_reference_house.py` under `data/derived/`.
 - [x] Re-run the C# model at the adopted CHF 0.66/server-hour price; normalize the user-approved Dell illustration to estimated 1 kW, and export a separate sourced finite-only deadline diagnostic.

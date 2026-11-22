@@ -35,17 +35,19 @@ public static class HouseFiles
         [JsonPropertyName("tank_initial_kwh")] public double TankInitialKwh { get; set; }
         [JsonPropertyName("electricity_price_chf_per_kwh")] public double ElectricityPriceChfPerKwh { get; set; }
         [JsonPropertyName("server_count")] public int? ServerCount { get; set; }
+        // Optional display category (T-81); omitted when null so existing files are unchanged.
+        [JsonPropertyName("site_type"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? SiteType { get; set; }
 
         public static HouseDto From(HouseSpec h) => new()
         {
             HouseId = h.HouseId, LatDeg = h.LatDeg, LonDeg = h.LonDeg, CellId = h.CellId, BfsMunicipalityNr = h.BfsMunicipalityNr,
             Canton = h.Canton, WeatherRef = h.WeatherRef, DesignHeatingKw = h.DesignHeatingKw, FormulaDivisorC = h.FormulaDivisorC,
             HotWaterKwhPerDay = h.HotWaterKwhPerDay, TankKwh = h.TankKwh, TankInitialKwh = h.TankInitialKwh,
-            ElectricityPriceChfPerKwh = h.ElectricityPriceChfPerKwh, ServerCount = h.ServerCount
+            ElectricityPriceChfPerKwh = h.ElectricityPriceChfPerKwh, ServerCount = h.ServerCount, SiteType = h.SiteType
         };
 
         public HouseSpec ToSpec() => new(HouseId, LatDeg, LonDeg, CellId, BfsMunicipalityNr, Canton, WeatherRef, DesignHeatingKw,
-            FormulaDivisorC, HotWaterKwhPerDay, TankKwh, TankInitialKwh, ElectricityPriceChfPerKwh, ServerCount);
+            FormulaDivisorC, HotWaterKwhPerDay, TankKwh, TankInitialKwh, ElectricityPriceChfPerKwh, ServerCount, SiteType);
     }
 
     private sealed class FileDto
@@ -123,7 +125,8 @@ public static class HouseFiles
         foreach (var h in houses)
             if (h.DesignHeatingKw < 0 || h.FormulaDivisorC <= 0 || h.HotWaterKwhPerDay < 0 || h.TankKwh < 0
                 || h.TankInitialKwh < 0 || h.TankInitialKwh > h.TankKwh || h.ElectricityPriceChfPerKwh < 0
-                || string.IsNullOrWhiteSpace(h.WeatherRef) || string.IsNullOrWhiteSpace(h.CellId))
+                || string.IsNullOrWhiteSpace(h.WeatherRef) || string.IsNullOrWhiteSpace(h.CellId)
+                || h.SiteType is not null && !System.Text.RegularExpressions.Regex.IsMatch(h.SiteType, "^[a-z][a-z_]*$"))
                 throw new InvalidDataException($"{path}: house {h.HouseId} has invalid values.");
     }
 }
