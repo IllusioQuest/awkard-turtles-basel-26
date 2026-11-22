@@ -155,3 +155,5 @@ T-84 follow-up dbfd5fb: requested duplicate node counts, Progress help, complete
 T-85 Nikita/Codex perf/T-85-active-bookkeeping: selective non-released snapshots and snapshot-free deadline ticks under ADR0071 review. UI unchanged; all heat/ownership/history semantics retained. Shared Orchestration changes; existing mesh/deadline tests and real renderer verification planned.
 
 T-85 PR76/967cf22 verified:141tests, full48-frame video84.9243s and24/16/8. UI unchanged. Active snapshots omit only released history; deadline actions share locked core without unused return copy. Retained heat/ownership/reconciliation intact. New whole-node GPU3shutdown request is a separate pending design; do not mix it into this PR.
+
+T-86 Nikita/Codex feat/T-86-node-shutdown dependsPR76. User approved hard GPU3controller+renderer shutdown, confirmed fencing, shared completed PNGs and new workload IDs for unfinished frames. Heat-first reallocation over remaining nodes. Only requested button added to UI. Remote unconfirmed power-off not covered. ADR0072 review pending.

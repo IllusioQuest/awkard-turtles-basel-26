@@ -97,3 +97,5 @@ later.
 - [0070 — Read-only heat summary](0070-read-only-heat-summary.md): proposed; T-83; user approved, review pending.
 
 - [0071 — Active-job bookkeeping](0071-active-job-bookkeeping.md): proposed; T-85; review pending.
+
+- [0072 — Node shutdown and frame retry](0072-node-shutdown-frame-retry.md): proposed; T-86; user-approved local fencing design, review pending.
