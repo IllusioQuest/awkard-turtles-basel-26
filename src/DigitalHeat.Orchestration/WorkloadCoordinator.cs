@@ -150,6 +150,10 @@ public sealed class WorkloadCoordinator : IDisposable
     }
     public AllocationView[] Allocations() { lock (gate) return placement.Allocations(); }
     public AttemptRecord[] Attempts() { lock (gate) return WorkloadJson.Copy(records.ToArray()); }
+    // Routine scans need every uncertain/live phase, but not released history. Ownership and heat use full records.
+    public AttemptRecord[] ActiveAttempts()
+    { lock(gate)return WorkloadJson.Copy(records.Where(r=>r.Phase!="released").ToArray()); }
+
     // Copy only heat fields for frequent monitoring; full ownership reconciliation stays unchanged.
     public HeatCommitment[] HeatCommitments()
     {
@@ -494,20 +498,24 @@ public sealed class WorkloadCoordinator : IDisposable
 
     /// <summary>Explicit owner tick; expiry alone never releases resources. Caller must keep polling.</summary>
     public AttemptRecord[] EnforceDeadlines()
+    { lock(gate){EnforceDeadlinesCore();return WorkloadJson.Copy(records.ToArray());} }
+
+    /// <summary>Same deadline actions without a discarded history snapshot; never skips enforcement.</summary>
+    public void EnforceDeadlinePolicies()
+    { lock(gate)EnforceDeadlinesCore(); }
+
+    // Caller holds gate through observations, persisted intent, stop and (when requested) snapshot.
+    private void EnforceDeadlinesCore()
     {
-        lock (gate)
+        RequireReconciled();
+        foreach (var record in records.Where(r => r.Attempt.Request.Deadline is not null && r.Phase != "released").ToArray())
         {
-            RequireReconciled();
-            foreach (var record in records.Where(r => r.Attempt.Request.Deadline is not null && r.Phase != "released").ToArray())
-            {
-                var a = record.Attempt;
-                CaptureDeadlineEvidence(a, runtime.Observe(a));
-                var result = CurrentRecord(a.Request.Id).Deadline;
-                if (result?.Status != "missed" || !a.Request.Deadline!.StopWhenOverdue || !a.Request.Lifecycle.AllowStop) continue;
-                if (!result.StopIntentPersisted) MarkDeadline(a, result with { StopIntentPersisted = true });
-                StopAndRelease(a.Request.Id);
-            }
-            return WorkloadJson.Copy(records.ToArray());
+            var a = record.Attempt;
+            CaptureDeadlineEvidence(a, runtime.Observe(a));
+            var result = CurrentRecord(a.Request.Id).Deadline;
+            if (result?.Status != "missed" || !a.Request.Deadline!.StopWhenOverdue || !a.Request.Lifecycle.AllowStop) continue;
+            if (!result.StopIntentPersisted) MarkDeadline(a, result with { StopIntentPersisted = true });
+            StopAndRelease(a.Request.Id);
         }
     }
     private void Save()

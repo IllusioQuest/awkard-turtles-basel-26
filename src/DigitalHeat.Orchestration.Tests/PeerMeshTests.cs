@@ -115,6 +115,8 @@ public class PeerMeshTests : IDisposable
         coordinator.Update(inventory, clock.Now); coordinator.Reconcile(nodes);
         var first = coordinator.TryStartAtSite(Request("a"), nodes, CoordinatorTests.Profile, clock.Now, "a", inventory.Sites[0].Heat, 1, inventory.IntervalStartUtc);
         Assert.NotNull(first); coordinator.StopAndRelease(first!.Attempt.Request.Id);
+        Assert.Empty(coordinator.ActiveAttempts());Assert.Single(coordinator.Attempts());
+        Assert.Equal(.8,coordinator.CommittedHeatKwh(inventory.IntervalStartUtc));
         Assert.Null(coordinator.TryStartAtSite(Request("a", "second"), nodes, CoordinatorTests.Profile, clock.Now, "a", inventory.Sites[0].Heat, 1, inventory.IntervalStartUtc));
     }
 
