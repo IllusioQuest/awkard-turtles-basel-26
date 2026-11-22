@@ -44,6 +44,17 @@ public class PeerMeshTests : IDisposable
         { OriginSiteId = origin, Lifecycle = new(false, true, false) };
     private void Publish() { foreach (var peer in peers) peer.Publish(); }
 
+    [Fact] public void WithdrawnPeerCannotBeSelectedFromStaleOffersAndWithdrawalSurvivesRestart()
+    {
+        var a=Add("a",.1);var b=Add("b",10);var c=Add("c",2);Publish();
+        var stale=bus.Messages.Select(m=>m.Message).OfType<PeerOffer>().First(o=>o.PeerId=="b");
+        a.WithdrawPeer("b");a.Receive("b",stale with{Sequence=stale.Sequence+100});
+        a.Submit(Request("a","first"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Equal("c",a.Jobs().Single().Target);Assert.Equal(0,runtimes["b"].Starts);
+        a.Dispose();peers.Remove(a);var recovered=Add("a",.1);
+        Assert.True(recovered.IsPeerWithdrawn("b"));
+    }
+
     [Fact] public void EveryOriginCanReachEveryPeerAndHeatWinsInsideLatencyLimit()
     {
         // Decision 0056: an idle eligible peer outranks a busy one, so a and c get too little heat
