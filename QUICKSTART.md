@@ -21,10 +21,15 @@ On Windows use `python` instead of `python3` in the commands below.
 ```bash
 dotnet build src/DigitalHeat.sln
 dotnet test src/DigitalHeat.sln
+dotnet test gaming/DigitalHeat.Gaming.sln
+python3 -m pytest -q scripts/tests
 ```
 
-Expected: all tests pass except `DeadlineTests.LegacyJournalRetainsExactPreDeadlineContainerHash`
-(Orchestration), which also fails on `main` and is unrelated to the results.
+`src/DigitalHeat.sln` includes the Orchestration tests and the render lab (`DigitalHeat.WorkloadRun`);
+the gaming lab has its own solution. Expected: all tests pass, except that
+`DeadlineTests.LegacyJournalRetainsExactPreDeadlineContainerHash` (Orchestration) fails on Linux and
+macOS: its expected job hash was taken on Windows, and job identities are pretty-printed JSON whose
+line endings follow the OS (ticket T-88). It is unrelated to the scored results.
 
 Check the committed data against the case (206 heating days, ElCom price, …):
 

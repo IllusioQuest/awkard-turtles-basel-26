@@ -1,0 +1,110 @@
+{
+ "ticket": "T-88",
+ "decision": "0074",
+ "date": "2026-11-22",
+ "environment": "Linux cloud container, 4 vCPU. Real C# five-node render lab (presentation profile, real 500 kWh, heat need per run), test-only Linux launcher; Blender 5.3.0 = bpy module behind a test-only native launcher; each frame render replaced by a fixed 2.0 s placeholder. NOT the presentation laptop.",
+ "method": "Fresh lab per side; 3 consecutive 48-frame runs through /ui/render; outcomes counted from the GPU peers' mesh journals, proposals from origin job generations; CPU = user+system seconds per .NET node process per run. BEFORE = checkout of origin/main 6f3ba99; AFTER = same plus ADR 0074 (before review fixes; final code then re-verified in the off/on runs).",
+ "before": {
+  "active_s": [
+   54.9,
+   54.9,
+   54.9
+  ],
+  "cpu_s_origin": [
+   9.0,
+   7.1,
+   8.7
+  ],
+  "cpu_s_gpu1": [
+   8.3,
+   6.5,
+   8.1
+  ],
+  "proposals": 1818,
+  "jobs": 150,
+  "re_proposed_jobs": 138,
+  "rejected": {
+   "gpu-1": 678,
+   "gpu-2": 702,
+   "gpu-3": 288
+  },
+  "mesh_journal_kb": {
+   "gpu-1": 174,
+   "gpu-2": 174,
+   "gpu-3": 72,
+   "origin": 550
+  }
+ },
+ "after": {
+  "active_s": [
+   54.9,
+   53.8,
+   53.9
+  ],
+  "cpu_s_origin": [
+   3.9,
+   2.4,
+   3.0
+  ],
+  "cpu_s_gpu1": [
+   4.2,
+   2.2,
+   2.7
+  ],
+  "proposals": 150,
+  "jobs": 150,
+  "re_proposed_jobs": 0,
+  "rejected": {
+   "gpu-1": 0,
+   "gpu-2": 0,
+   "gpu-3": 0
+  },
+  "mesh_journal_kb": {
+   "gpu-1": 16,
+   "gpu-2": 11,
+   "gpu-3": 5,
+   "origin": 550
+  }
+ },
+ "gpu3_off_on_final_code": [
+  {
+   "run": "power off GPU 3 at 12 frames",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 56.9,
+   "frames": {
+    "gpu-1": 25,
+    "gpu-2": 19,
+    "gpu-3": 4
+   }
+  },
+  {
+   "run": "next run, GPU 3 still off",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 64.9,
+   "frames": {
+    "gpu-1": 29,
+    "gpu-2": 19
+   }
+  },
+  {
+   "run": "after lab restart (GPU 3 back on)",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 55.0,
+   "frames": {
+    "gpu-1": 24,
+    "gpu-2": 16,
+    "gpu-3": 8
+   },
+   "proposals": 50,
+   "rejected": 0
+  }
+ ],
+ "off_on_rejections": "1 proposal rejected by GPU 3 while it was being fenced; re-planned once.",
+ "limits": "Wall time on Linux is unchanged because fsync is cheap here; the expected Windows gain (fewer forced journal writes per frame) is not measured."
+}

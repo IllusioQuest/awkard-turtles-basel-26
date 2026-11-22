@@ -48,6 +48,16 @@ public sealed class WorkloadPlacement
         return TryReserveCore(request, nowUtc, selectedSiteId, expectedInventoryRevision, expectedHourStartUtc, expectedHeatSignal);
     }
 
+    /// <summary>
+    /// Hold a claim at an already chosen site against this planner's own inventory, without a per-site
+    /// snapshot check. Mesh planning (ADR 0074) uses it to count its own unanswered proposals.
+    /// </summary>
+    public WorkloadReservation? TryReserveAtSite(WorkloadRequest request, string selectedSiteId, DateTimeOffset nowUtc)
+    {
+        if (string.IsNullOrWhiteSpace(selectedSiteId)) throw new ArgumentException("A selected site is required.", nameof(selectedSiteId));
+        return TryReserveCore(request, nowUtc, selectedSiteId);
+    }
+
     public bool MatchesSnapshot(string siteId, HeatSignal signal, long revision, DateTimeOffset hourStartUtc, DateTimeOffset nowUtc)
     { lock (gate) return MatchesSnapshotUnsafe(siteId, signal, revision, hourStartUtc, nowUtc); }
 

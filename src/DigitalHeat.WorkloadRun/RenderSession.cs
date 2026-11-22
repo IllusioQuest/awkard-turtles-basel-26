@@ -9,6 +9,8 @@ internal sealed record RenderSessionState(string Id,string Phase,bool Held,Rende
     public NodeShutdown? Shutdown { get; init; }
     public Dictionary<int,int> FrameGenerations { get; init; }=[];
     public RenderArtifact[] FencedFrames { get; init; }=[];
+    /// <summary>Original deadlines of retried frames from earlier power-offs in this render (ADR 0073).</summary>
+    public Dictionary<int,JobDeadline> RetryDeadlines { get; init; }=[];
     public RenderArtifact? Video { get; init; }
     public PreparedScene? Scene { get; init; }
     public DateTimeOffset? PreparationStartedUtc { get; init; }
@@ -112,6 +114,8 @@ internal sealed partial class RenderSession
     {
         await controls.WaitAsync();try{
             if(!CanStart)throw new InvalidOperationException("Stop the current run before starting another");
+            if(state.Shutdown is {Stage:"starting" or "started"} pending)
+                throw new InvalidOperationException("Finish powering on "+pending.Identity.PeerId+" before starting a render");
             await RefreshPeers();if(pollingError is not null||peers.Length!=ActivePeerCount)throw new IOException("Wait for all configured peers");
             if(peers.Any(p=>p.Attempts.Any(a=>a.Phase!="released")))throw new IOException("An owned peer job is still active; reconcile first");
             if(peers.Select(p=>p.Image).Distinct().Count()!=1||peers.Any(p=>p.Image!=cfg.Image))throw new InvalidDataException("Renderer recipe/image differs between peers");
@@ -147,7 +151,10 @@ internal sealed partial class RenderSession
     public async Task Hold(bool hold)
     {
         await controls.WaitAsync();try{
-            if(!hold&&state.Shutdown is {} pending&&pending.Stage!="ready"){await ShutdownCore(pending.Identity.PeerId);return;}
+            if(!hold&&state.Shutdown is {} pending&&pending.Stage is not ("ready" or "rejoined")){
+                if(pending.Stage is "starting" or "started")await StartupCore(pending.Identity.PeerId);else await ShutdownCore(pending.Identity.PeerId);
+                return;
+            }
             if(state.Phase is "idle" or "complete" or "cancelled")throw new InvalidOperationException("No resumable active run");
             Update(s=>s with{Held=true,Error=hold?"Pause pending: finishing active frame/preparation…":null});
             await SetPeersHold(hold);
@@ -176,7 +183,7 @@ internal sealed partial class RenderSession
     private async Task Submit(string route,string id,int frame,string backend="CPU",string? scene=null)
     {
         if(stopRequested)return;
-        using var reply=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+route,new FrameSubmit(id,frame,null,backend,scene,frame>0?state.Shutdown?.Plan?.Deadlines.GetValueOrDefault(frame):null),RenderNodeHost.Json);reply.EnsureSuccessStatusCode();
+        using var reply=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+route,new FrameSubmit(id,frame,null,backend,scene,frame>0?RetryDeadline(frame):null),RenderNodeHost.Json);reply.EnsureSuccessStatusCode();
     }
     private async Task Prepare()
     {
@@ -207,6 +214,13 @@ internal sealed partial class RenderSession
         // Every render node gets its share, including 0, so no node keeps a previous run's leftover need.
         // A failed registration fails the run visibly rather than splitting it over fewer GPUs silently.
         int frames=state.FrameCount??cfg.Frames;string prefix=RenderHeatNeed.RunPrefix(cfg.Id,state.Id);
+        if(state.Shutdown is {Stage:"rejoined"}){
+            // A powered-on node rejoined this render (ADR 0073): resend the rejoin split, not the power-off plan.
+            foreach(var need in RenderFailoverPlan.RejoinNeeds(frames,FrameIds(),peers,state.FencedFrames,prefix,cfg.FrameHeatKwh)){
+                using var r=await http.PostAsJsonAsync(cfg.Peers[need.Key]+"/run-need",need.Value,RenderNodeHost.Json);r.EnsureSuccessStatusCode();
+            }
+            return;
+        }
         foreach(var share in state.Shutdown?.Plan?.Needs??RenderHeatNeed.Allocate(frames,gpus)){
             using var r=await http.PostAsJsonAsync(cfg.Peers[share.Key]+"/run-need",new RunHeatNeed(prefix,share.Value,cfg.FrameHeatKwh),RenderNodeHost.Json);
             r.EnsureSuccessStatusCode();

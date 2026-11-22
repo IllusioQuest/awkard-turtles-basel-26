@@ -13,7 +13,7 @@ Results: rendering/TestResults/bench-frame-<utc>/bench-results.json plus a print
 Limits: sequential single-worker timings, not the three-concurrent presentation setup; one
 machine, few rounds. Use it to decide whether process recycling is worth building, not as an SLA.
 """
-import hashlib, json, os, statistics, subprocess, sys, time
+import hashlib, json, statistics, subprocess, sys, time
 from datetime import datetime, timezone
 from pathlib import Path
 

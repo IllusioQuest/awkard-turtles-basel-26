@@ -48,6 +48,8 @@ public sealed class MeshPeer : IDisposable
     private readonly string journalPath;
     private readonly HashSet<string> peers;
     private readonly Dictionary<string, PeerOffer> offers = new(StringComparer.Ordinal);
+    // ADR 0074: offer sequence each proposal was planned against (memory only; empty after restart).
+    private readonly Dictionary<string, long> plannedAgainst = new(StringComparer.Ordinal);
     private WorkloadInventory inventory;
     private PeerJournal journal;
     public string Id { get; }
@@ -90,6 +92,16 @@ public sealed class MeshPeer : IDisposable
     {
         if(peerId==Id||!peers.Contains(peerId))throw new ArgumentException("Invalid withdrawal target");
         if(!IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=[..journal.WithdrawnPeers,peerId]};Save();}
+        offers.Remove(peerId);
+    }
+    /// <summary>
+    /// Undo an operator withdrawal once the peer is proven back (ADR 0073). Its last offer is dropped so only a
+    /// fresh offer from the restarted peer can be planned against. Cancellation tombstones stay.
+    /// </summary>
+    public void ReadmitPeer(string peerId)
+    {
+        if(peerId==Id||!peers.Contains(peerId))throw new ArgumentException("Invalid readmission target");
+        if(IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=journal.WithdrawnPeers.Where(p=>p!=peerId).ToArray()};Save();}
         offers.Remove(peerId);
     }
     public void CancelBatchWorkloads(string[] ids)
@@ -180,6 +192,10 @@ public sealed class MeshPeer : IDisposable
         foreach (var row in coordinator.ActiveAttempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
+        // ADR 0074: one planner per pass and offer set. Its held claims make jobs planned in this pass, and
+        // this origin's unanswered proposals, use up capacity, instead of every waiting job being proposed to
+        // the same best peer and rejected there. Ranking and admission are the unchanged WorkloadPlacement.
+        var planners = new Dictionary<string, (WorkloadPlacement Placement, string[] PeerIds)>(StringComparer.Ordinal);
         foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
             j.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, j.Request.Id)).ToArray())
         {
@@ -193,26 +209,49 @@ public sealed class MeshPeer : IDisposable
                 && now >= o.Inventory.IntervalStartUtc && now < o.Inventory.IntervalEndUtc)
                 .OrderBy(o => o.PeerId, StringComparer.Ordinal).ToArray();
             if (available.Length == 0) continue;
-            var first = available[0].Inventory;
-            var planning = first with { Revision = 1,
-                Sites = available.SelectMany(o => o.Inventory.Sites).ToArray(),
-                Domains = available.SelectMany(o => o.Inventory.Domains).ToArray(),
-                Nodes = available.SelectMany(o => o.Inventory.Nodes).ToArray(),
-                ExternalAllocations = available.SelectMany(o => o.Inventory.ExternalAllocations).ToArray(),
-                ResourceObservedAtUtc = available.Max(o => o.Inventory.ResourceObservedAtUtc),
-                ResourceValidUntilUtc = available.Min(o => o.ExpiresAtUtc) };
-            var placement = new WorkloadPlacement();
-            placement.Update(planning, clock.GetUtcNow());
-            var chosen = placement.TryReserve(job.Request, clock.GetUtcNow());
+            string key = string.Join('\n', available.Select(o => o.PeerId));
+            if (!planners.TryGetValue(key, out var planner)) planners[key] = planner = (Planner(available, now), available.Select(o => o.PeerId).ToArray());
+            var chosen = planner.Placement.TryReserve(job.Request, now);
             if (chosen is null) continue;
             var selected = available.Single(o => o.PeerId == chosen.SiteId);
             var intent = job with { Target = chosen.SiteId, Generation = checked(job.Generation + 1), Status = "proposed",
                 InventoryRevision = selected.Inventory.Revision, HourStartUtc = selected.Inventory.IntervalStartUtc,
                 Heat = selected.Inventory.Sites[0].Heat };
             Put(intent); // Durable intent MUST precede send; the transport may lose its reply.
+            plannedAgainst[job.Request.Id] = selected.Sequence;
+            foreach (var other in planners.Values.Where(p => p.Placement != planner.Placement && p.PeerIds.Contains(chosen.SiteId)))
+                other.Placement.TryReserveAtSite(job.Request, chosen.SiteId, now);
             Propose(intent);
         }
         coordinator.EnforceDeadlinePolicies();
+    }
+
+    /// <summary>
+    /// Planning view over the given offers (unchanged merge), with this origin's own proposals that the
+    /// target's offer does not show yet held as claims at that target (ADR 0074). A proposal counts while
+    /// it is unanswered, or accepted but not yet followed by a newer offer from the target.
+    /// </summary>
+    private WorkloadPlacement Planner(PeerOffer[] available, DateTimeOffset now)
+    {
+        var first = available[0].Inventory;
+        var planning = first with { Revision = 1,
+            Sites = available.SelectMany(o => o.Inventory.Sites).ToArray(),
+            Domains = available.SelectMany(o => o.Inventory.Domains).ToArray(),
+            Nodes = available.SelectMany(o => o.Inventory.Nodes).ToArray(),
+            ExternalAllocations = available.SelectMany(o => o.Inventory.ExternalAllocations).ToArray(),
+            ResourceObservedAtUtc = available.Max(o => o.Inventory.ResourceObservedAtUtc),
+            ResourceValidUntilUtc = available.Min(o => o.ExpiresAtUtc) };
+        var placement = new WorkloadPlacement();
+        placement.Update(planning, now);
+        foreach (var pending in journal.Jobs.Where(j => j.Target is not null && j.Status is "proposed" or "accepted"))
+        {
+            var offer = Array.Find(available, o => o.PeerId == pending.Target);
+            if (offer is null || planning.ExternalAllocations.Any(a => a.Id == pending.Request.Id)) continue;
+            bool unanswered = pending.Status == "proposed";
+            bool acceptedNotYetOffered = plannedAgainst.TryGetValue(pending.Request.Id, out long sequence) && offer.Sequence <= sequence;
+            if (unanswered || acceptedNotYetOffered) placement.TryReserveAtSite(pending.Request, pending.Target!, now);
+        }
+        return placement;
     }
 
     private bool ApplyLocalHeat()
@@ -275,8 +314,13 @@ public sealed class MeshPeer : IDisposable
                 var job = journal.Jobs.SingleOrDefault(j => j.Request.Id == reply.JobId);
                 if (job is null || job.Status=="cancelled" || job.Target != from || job.Generation != reply.Generation
                     || Identity(job.Request, job.ProfileId) != reply.Identity) break;
-                if (reply.Status == "rejected") Put(job with { Target = null, Status = "waiting" });
-                else if (reply.Status == "accepted") Put(job with { Status = "accepted" });
+                if (reply.Status == "rejected") { plannedAgainst.Remove(job.Request.Id); Put(job with { Target = null, Status = "waiting" }); }
+                else if (reply.Status == "accepted")
+                {
+                    if (offers.TryGetValue(from, out var seen) && plannedAgainst.TryGetValue(job.Request.Id, out long planned))
+                        plannedAgainst[job.Request.Id] = Math.Max(planned, seen.Sequence);
+                    Put(job with { Status = "accepted" });
+                }
                 break;
         }
     }

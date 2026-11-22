@@ -31,13 +31,24 @@ internal sealed class LocalNodePowerControl(RenderConfig cfg)
         return new(peerId,lab,descriptor,pid,started,
             Environment.ProcessPath!,node.Native.Executable,target);
     }
+    // Windows reports a process start time exactly. Linux derives it from a boot time each .NET process computes for
+    // itself, so another process (launcher, origin) sees the same start a few milliseconds apart; an exact comparison
+    // there treats a live controller as gone and skips the kill. PID + executable + start within 1 s still identify it.
+    internal static readonly TimeSpan StartTimeTolerance=OperatingSystem.IsWindows()?TimeSpan.Zero:TimeSpan.FromSeconds(1);
     private static Process? ExactProcess(int pid,DateTimeOffset started,string executable)
     {
         Process p;try{p=Process.GetProcessById(pid);}catch(ArgumentException){return null;}
         try{
             _=p.SafeHandle;
-            if(p.HasExited||p.StartTime.ToUniversalTime()!=started.UtcDateTime){p.Dispose();return null;}
-            if(!SamePath(p.MainModule!.FileName,executable))throw new IOException("Process executable identity changed");
+            if(p.HasExited||(p.StartTime.ToUniversalTime()-started.UtcDateTime).Duration()>StartTimeTolerance){p.Dispose();return null;}
+            // A process that is already exiting (e.g. killed with its controller's tree, not yet reaped) has no
+            // readable executable. Give it a moment to finish; fail closed if it neither exits nor shows its module.
+            var module=p.MainModule;
+            if(module is null){
+                if(p.WaitForExit(2000)){p.Dispose();return null;}
+                throw new IOException("Process identity unreadable; fencing not confirmed");
+            }
+            if(!SamePath(module.FileName,executable))throw new IOException("Process executable identity changed");
             return p;
         }catch{p.Dispose();throw;}
     }
@@ -70,5 +81,42 @@ internal sealed class LocalNodePowerControl(RenderConfig cfg)
             Terminate(record.Pid.Value,record.StartedUtc.Value,identity.RendererExecutable);
         }
         // Retained handles verified exit. Do not edit the stopped node's uncertain ownership journal.
+    }
+    /// <summary>
+    /// Power a fenced worker back on (ADR 0073). First re-confirm with the verified stop above that nothing of the
+    /// recorded controller and renderer identities can still run, then start the same controller with the node's
+    /// unchanged config and state directory (journals, heat history, artifacts). <paramref name="launched"/> must
+    /// persist the exact PID/start before anything else; the launcher manifest is then updated so a later
+    /// power-off and Stop-RenderLab address the new process.
+    /// </summary>
+    internal LocalNodeIdentity Restart(LocalNodeIdentity fenced,Action<int,DateTimeOffset> launched)
+    {
+        StopAndConfirm(fenced);
+        var start=new ProcessStartInfo(fenced.ControllerExecutable){UseShellExecute=false,CreateNoWindow=true,WorkingDirectory=fenced.StateDirectory};
+        foreach(string arg in new[]{Path.Combine(AppContext.BaseDirectory,"DigitalHeat.WorkloadRun.dll"),"render-node",Path.Combine(fenced.StateDirectory,"config.json")})start.ArgumentList.Add(arg);
+        start.Environment["ASPNETCORE_URLS"]=cfg.Peers[fenced.PeerId]; // MESH_TOKEN is inherited from this lab process
+        start.Environment["RENDER_NODE_OWN_LOGS"]="1";
+        using var process=Process.Start(start)??throw new IOException("Controller did not start");
+        var started=new DateTimeOffset(process.StartTime.ToUniversalTime(),TimeSpan.Zero);
+        launched(process.Id,started);
+        RecordProcess(fenced.LabDirectory,fenced.PeerId,process.Id,started);
+        return Prepare(fenced.PeerId);
+    }
+    /// <summary>Replay after an interrupted power-on: the saved new process must still be the one running.</summary>
+    internal LocalNodeIdentity Adopt(string peerId,int pid,DateTimeOffset started)
+    {
+        string lab=Path.GetDirectoryName(Path.GetFullPath(cfg.Native!.AssetsDirectory))!;
+        using var process=ExactProcess(pid,started,Environment.ProcessPath!)??throw new IOException("The powered-on controller is no longer running; power it on again after a lab restart");
+        RecordProcess(lab,peerId,pid,started);
+        return Prepare(peerId);
+    }
+    private static void RecordProcess(string lab,string peerId,int pid,DateTimeOffset started)
+    {
+        string file=Path.Combine(lab,"processes.json");
+        var rows=JsonSerializer.Deserialize<JsonElement>(File.ReadAllBytes(file)).EnumerateArray()
+            .Select(r=>new{id=r.GetProperty("id").GetInt32(),started_utc=r.GetProperty("started_utc").GetString()!,node=r.GetProperty("node").GetString()!}).ToList();
+        if(rows.Count(r=>r.node==peerId)!=1)throw new InvalidDataException("Ambiguous controller identity");
+        rows=rows.Select(r=>r.node==peerId?new{id=pid,started_utc=started.UtcDateTime.ToString("o"),node=peerId}:r).ToList();
+        NativeRenderRuntime.WriteJson(file,rows);
     }
 }

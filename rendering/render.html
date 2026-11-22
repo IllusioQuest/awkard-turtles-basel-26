@@ -112,9 +112,18 @@ async function refresh(){
  try{
   const r=await fetch('/ui/status');if(!r.ok)throw Error('Status unavailable');const s=snapshot=await r.json();
   const gpu3=s.peers.filter(p=>p.worker_role==='render').sort((a,b)=>a.peer_id.localeCompare(b.peer_id))[2];
-  el('shutdownNode').hidden=!s.node_shutdown_enabled||!gpu3;el('shutdownNode').disabled=s.node_shutdown_busy||Boolean(gpu3?.powered_off)||!(s.phase==='rendering'||(s.node_shutdown&&s.node_shutdown!=='ready'&&['recovery-paused','failed'].includes(s.phase)));
-  el('shutdownNode').textContent=gpu3?.powered_off?'GPU 3 powered off':s.node_shutdown_busy?'Powering off GPU 3…':'Power off GPU 3';
-  el('shutdownNode').onclick=()=>action('nodes/'+encodeURIComponent(gpu3.peer_id)+'/shutdown');
+  // One button: Power off GPU 3 while rendering; once it is off, the same button powers it back on (ADR 0073).
+  const stage=s.node_shutdown,off=Boolean(gpu3?.powered_off),poweringOn=['starting','started'].includes(stage);
+  el('shutdownNode').hidden=!s.node_shutdown_enabled||!gpu3;
+  if(off){
+   el('shutdownNode').disabled=s.node_shutdown_busy||!(stage==='ready'||poweringOn)||!['rendering','idle','complete','cancelled'].includes(s.phase);
+   el('shutdownNode').textContent=s.node_shutdown_busy?(poweringOn?'Powering on GPU 3…':'Powering off GPU 3…'):'Power on GPU 3';
+   el('shutdownNode').onclick=()=>action('nodes/'+encodeURIComponent(gpu3.peer_id)+'/startup');
+  }else{
+   el('shutdownNode').disabled=s.node_shutdown_busy||!(s.phase==='rendering'||(stage&&!['ready','rejoined'].includes(stage)&&['recovery-paused','failed'].includes(s.phase)));
+   el('shutdownNode').textContent=s.node_shutdown_busy?'Powering off GPU 3…':'Power off GPU 3';
+   el('shutdownNode').onclick=()=>action('nodes/'+encodeURIComponent(gpu3.peer_id)+'/shutdown');
+  }
   el('device').textContent=s.device+' · '+s.engine+' · multiple nodes';renderTopology(s);
   el('error').textContent=s.error||s.peer_connection_error||'';el('error').className=s.phase==='failed'?'failure':'';
   el('render').disabled=s.restart_pending||!s.can_start_new||s.peers.length!==s.configured_peers;
