@@ -69,7 +69,8 @@ Do this the evening before and again one hour before the pitch.
 4. Close every other program (the LLM needs about 6 GB RAM). Laptop on power. Screen sleep off.
    Notifications off (Do Not Disturb).
 5. Start, in four terminals: FleetApi with `VOICE_DEMO_TOKEN`, `npm run dev` in `web/`, the voice
-   runner, `ngrok http 5173` (QUICKSTART §4).
+   runner, `ngrok http --url=<static-domain> 5080` (QUICKSTART §4; Lovable setup:
+   `docs/demo/lovable-integration.md`).
 6. Copy the cut film (`~/pitch/intro.mp4`, steps 1–2) to `web/public/pitch/intro.mp4`. Open
    `http://127.0.0.1:5173/pitch?t=<token>` in Chrome, press **H**: every line green (fix red ones),
    **H** again, **F** for fullscreen. The pitch starts with **→** (QUICKSTART §4b lists all keys).
@@ -102,6 +103,12 @@ for key **V** (set `fallback` per scene in `web/public/pitch/pitch.json`) (GNOME
 
 Before uploading: `dotnet test src/DigitalHeat.sln` passes (one known unrelated failure, see
 QUICKSTART §1), and the repository is public or shared with the jury.
+
+## 6b. Lovable phone page (owner: Ennio)
+
+The QR code opens `https://swiss-heat.lovable.app/?t=<token>`. Once: claim the free ngrok static
+domain, enter `https://<domain>` in Lovable as the API base URL, paste the prompt from
+[`docs/demo/lovable-integration.md`](../demo/lovable-integration.md), and test with the `curl` there.
 
 ## 7. Decisions left to the team
 

@@ -1,5 +1,6 @@
 {
-  "_about": "Pitch mode configuration (decision 0069). Edit scenes, runs, hours (since 2025-01-01 00:00) and texts here; the web app reloads it on start. Built-in defaults: web/src/pitch/config.ts.",
+  "_about": "Pitch mode configuration (decision 0069). Edit scenes, runs, hours (since 2025-01-01 00:00) and texts here; the web app reloads it on start. Built-in defaults: web/src/pitch/config.ts. qrUrl: the page the QR code opens ({token} = ?t= of the pitch URL).",
+  "qrUrl": "https://swiss-heat.lovable.app/?t={token}",
   "scenes": [
     {
       "id": "film",

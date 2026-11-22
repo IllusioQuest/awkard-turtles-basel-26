@@ -98,11 +98,12 @@ Every time, four terminals (close large programs first; the LLM needs about 6 GB
 VOICE_DEMO_TOKEN=pick-a-secret dotnet run -c Release --project src/DigitalHeat.FleetApi   # 1: API
 cd web && npm run dev                                                                    # 2: dashboard
 dotnet run -c Release --project src/DigitalHeat.VoiceDemo                                # 3: runner (left half of the screen)
-ngrok http 5173                                                                          # 4: phone tunnel (optional)
+ngrok http --url=<static-domain> 5080                                                    # 4: tunnel for the Lovable phone page
 ```
 
 - Laptop browser: <http://127.0.0.1:5173/live> (right half of the screen).
-- Phone: `https://<your-id>.ngrok-free.app/speak?t=pick-a-secret`, tap **Speak**, talk, tap **Stop & send**.
+- Phone: the QR code opens `https://swiss-heat.lovable.app/?t=pick-a-secret`, which sends to the tunnel
+  (setup and the URL to enter in Lovable: [`docs/demo/lovable-integration.md`](docs/demo/lovable-integration.md)).
 - No phone or no internet: type the question into terminal 3 and press Enter, or open
   <http://127.0.0.1:5173/speak> on the laptop.
 - Stage timing, language, answer length: `config/voice-demo.json`.
@@ -117,7 +118,7 @@ for r in reference-1-server reference real-house-1-server dreispitz-5-pool-1-ser
 done
 ```
 
-Copy the cut intro film to `web/public/pitch/intro.mp4` (not in git), start `ngrok http 5173`,
+Copy the cut intro film to `web/public/pitch/intro.mp4` (not in git), start `ngrok http --url=<static-domain> 5080`,
 then open <http://127.0.0.1:5173/pitch?t=pick-a-secret> (the same token as `VOICE_DEMO_TOKEN`).
 Press **H**: every line should be green. **F** fullscreen, **→** start. Keys: → / Space / PageDown
 next, ← back, 1–8 scene, G globe, B or . black, T type a request, V fallback recording, Q QR

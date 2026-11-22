@@ -39,6 +39,8 @@ export type Scene =
   | (SceneBase & { type: 'slide'; text: string; sub?: string })
 
 export interface PitchConfig {
+  /** Address in the QR code. {token} is replaced by ?t= of the pitch URL. Empty: the ngrok tunnel + /speak. */
+  qrUrl?: string
   scenes: Scene[]
   checks: NumberCheck[]
 }
@@ -47,6 +49,7 @@ const JAN_15_NOON = 14 * 24 + 12
 const JUL_15_NOON = 195 * 24 + 12
 
 export const DEFAULT_CONFIG: PitchConfig = {
+  qrUrl: 'https://swiss-heat.lovable.app/?t={token}',
   scenes: [
     {
       id: 'film', type: 'video', title: 'Intro film', src: '/pitch/intro.mp4',

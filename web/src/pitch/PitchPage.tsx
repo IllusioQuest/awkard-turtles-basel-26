@@ -43,7 +43,7 @@ export default function PitchPage() {
   const [hud, setHud] = useState(false)
   const [videoTime, setVideoTime] = useState(0)
   const [videoError, setVideoError] = useState(false)
-  const [qrUrl, setQrUrl] = useState(() => localStorage.getItem('digitalheat.pitch.qr') ?? '')
+  const [qrOverride, setQrOverride] = useState(() => localStorage.getItem('digitalheat.pitch.qr') ?? '')
   const [qrImage, setQrImage] = useState('')
   const [live, setLive] = useState<Live | null>(null)
   const [mapOnline, setMapOnline] = useState<boolean | null>(null)
@@ -65,13 +65,18 @@ export default function PitchPage() {
   useEffect(() => { loadConfig().then(({ config, fromFile }) => { setConfig(config); setFromFile(fromFile) }) }, [])
   useEffect(() => { window.location.hash = `s=${scene}.${step}` }, [scene, step])
 
-  // The QR address: a manual override, else the running ngrok tunnel, plus the speak page and token.
+  // The QR address: a manual override (Q), else the configured page (the Lovable site), else the
+  // running ngrok tunnel + /speak. {token} becomes the token of this page's URL.
+  const [tunnel, setTunnel] = useState<{ url: string; addr: string | null } | null>(null)
   useEffect(() => {
-    if (qrUrl) return
-    fetch('/api/voice-demo/tunnel').then((r) => (r.ok ? r.json() : null)).then((j: { url?: string } | null) => {
-      if (j?.url) setQrUrl(`${j.url}/speak${TOKEN ? `?t=${encodeURIComponent(TOKEN)}` : ''}`)
-    }).catch(() => {})
-  }, [qrUrl])
+    fetch('/api/voice-demo/tunnel').then((r) => (r.ok ? r.json() : null)).then(setTunnel).catch(() => setTunnel(null))
+  }, [help])
+  const qrUrl = useMemo(() => {
+    if (qrOverride) return qrOverride
+    const t = TOKEN ? encodeURIComponent(TOKEN) : ''
+    if (config.qrUrl) return t ? config.qrUrl.replace('{token}', t) : config.qrUrl.replace(/[?&]t=\{token\}/, '')
+    return tunnel?.url ? `${tunnel.url}/speak${t ? `?t=${t}` : ''}` : ''
+  }, [qrOverride, config.qrUrl, tunnel])
   useEffect(() => {
     if (!qrUrl) return
     QRCode.toDataURL(qrUrl, { margin: 1, width: 560, color: { dark: '#0d0d0d', light: '#ffffff' } }).then(setQrImage).catch(() => setQrImage(''))
@@ -166,7 +171,7 @@ export default function PitchPage() {
     else if (k === 't' || k === 'T') { e.preventDefault(); setTyping(true) }
     else if (k === 'q' || k === 'Q') {
       const u = window.prompt('QR address (empty = use the ngrok tunnel)', qrUrl)
-      if (u !== null) { localStorage.setItem('digitalheat.pitch.qr', u.trim()); setQrUrl(u.trim()) }
+      if (u !== null) { localStorage.setItem('digitalheat.pitch.qr', u.trim()); setQrOverride(u.trim()) }
     }
     else if (k === 'r' || k === 'R') {
       const url = current.type === 'page' ? current.url : current.type === 'demo' ? current.liveUrl : ''
@@ -238,7 +243,9 @@ export default function PitchPage() {
       }
       const fresh = live ? Date.now() - Date.parse(live.updatedUtc) < 15000 : false
       out.push({ name: 'Voice runner', ok: !!live && (fresh || live.status !== 'running'), detail: live ? `${live.status}, updated ${Math.round((Date.now() - Date.parse(live.updatedUtc)) / 1000)} s ago` : 'no live snapshot: start src/DigitalHeat.VoiceDemo' })
-      out.push({ name: 'QR address', ok: !!qrUrl, detail: qrUrl || 'no ngrok tunnel: run "ngrok http 5173", or press Q' })
+      out.push({ name: 'QR address', ok: !!qrUrl, detail: qrUrl || 'none: set qrUrl in pitch.json, or press Q' })
+      const apiTunnel = !!tunnel && /:?5080$/.test(tunnel.addr ?? '')
+      out.push({ name: 'Public API tunnel', ok: apiTunnel, detail: tunnel ? `${tunnel.url} → ${tunnel.addr ?? '?'}${apiTunnel ? '' : ' (should forward to port 5080)'}` : 'no ngrok tunnel: run "ngrok http --url=<your static domain> 5080"' })
       out.push({ name: 'Token in QR', ok: !TOKEN ? null : true, detail: TOKEN ? 'set (from ?t= of this page)' : 'none: open /pitch?t=<VOICE_DEMO_TOKEN> if the API uses one' })
       out.push({ name: 'Map style', ok: mapOnline, detail: mapOnline === null ? 'map not loaded yet' : mapOnline ? 'online (streets)' : 'offline (bundled land)' })
       out.push({ name: 'Config', ok: true, detail: fromFile ? '/pitch/pitch.json' : 'built-in defaults' })
@@ -253,7 +260,7 @@ export default function PitchPage() {
       if (!stop) setChecks(out)
     })()
     return () => { stop = true }
-  }, [help, scenes, config.checks, live, qrUrl, mapOnline, fromFile])
+  }, [help, scenes, config.checks, live, qrUrl, mapOnline, fromFile, tunnel])
 
   const sendTyped = async () => {
     const text = typed.trim()
@@ -302,7 +309,7 @@ export default function PitchPage() {
         <div className="pitch-qr on">
           {qrUrl && qrImage ? <img src={qrImage} alt="QR code" /> : <div className="pitch-qr-missing">No QR address yet</div>}
           <p className="pitch-qr-text">Ask Bob's house a question</p>
-          <p className="pitch-qr-url">{qrUrl.replace(/\?t=.*/, '')}</p>
+          <p className="pitch-qr-url">{qrUrl.replace(/[?&]t=.*/, '').replace(/^https:\/\//, '').replace(/\/$/, '')}</p>
         </div>
       )}
       {current.type === 'demo' && !currentStep.qr && (

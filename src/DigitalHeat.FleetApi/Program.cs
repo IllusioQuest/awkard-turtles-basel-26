@@ -12,7 +12,19 @@ for (int i = 0; i < args.Length - 1; i++)
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+// The voice demo's phone page is hosted on Lovable (swiss-heat.lovable.app) and calls this API through
+// an ngrok tunnel, so the browser needs CORS. Allowed: that site, Lovable previews, and extra origins
+// from VOICE_DEMO_ORIGINS (comma-separated). Only GET and POST; the token header stays required.
+var extraOrigins = (Environment.GetEnvironmentVariable("VOICE_DEMO_ORIGINS") ?? "")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+bool AllowedOrigin(string origin) =>
+    Uri.TryCreate(origin, UriKind.Absolute, out var u) && u.Scheme == "https"
+    && (u.Host == "swiss-heat.lovable.app" || u.Host.EndsWith(".lovable.app", StringComparison.Ordinal)
+        || u.Host.EndsWith(".lovableproject.com", StringComparison.Ordinal) || extraOrigins.Contains(origin));
+builder.Services.AddCors(o => o.AddPolicy("voice", p => p.SetIsOriginAllowed(AllowedOrigin)
+    .WithMethods("GET", "POST").WithHeaders("Content-Type", "X-Voice-Token", "ngrok-skip-browser-warning")));
 var app = builder.Build();
+app.UseCors("voice");
 var store = new RunStore(runsDir, repoRoot);
 
 IResult Guard(Func<object> f)
@@ -76,7 +88,7 @@ app.MapGet("/api/voice-demo/tunnel", async () =>
         using var doc = System.Text.Json.JsonDocument.Parse(await http.GetStringAsync("http://127.0.0.1:4040/api/tunnels"));
         foreach (var t in doc.RootElement.GetProperty("tunnels").EnumerateArray())
             if (t.GetProperty("public_url").GetString() is { } url && url.StartsWith("https://", StringComparison.Ordinal))
-                return Results.Ok(new { url });
+                return Results.Ok(new { url, addr = t.TryGetProperty("config", out var c) && c.TryGetProperty("addr", out var a) ? a.GetString() : null });
         return Results.NotFound();
     }
     catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException)
