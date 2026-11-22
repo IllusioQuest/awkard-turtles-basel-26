@@ -1,12 +1,14 @@
 # Build, render and encode the intro film (Windows PowerShell).
 #   .\video\blender\make_film.ps1                 # preview: 960x540, 4 samples, every 2nd frame
 #   .\video\blender\make_film.ps1 -Preset final   # 1920x1080, 64 samples, all frames
-# Optional: -Blender "C:\...\blender.exe"  -Python python
+# Optional: -Gpu OPTIX|CUDA|HIP|ONEAPI|CPU  -Blender "C:\...\blender.exe"  -Python python
 # Needs Blender 4.x, Python 3 with Pillow (pip install pillow) and ffmpeg on the PATH.
 param(
     [ValidateSet('preview', 'final')][string]$Preset = 'preview',
     [string]$Blender = $env:BLENDER,
-    [string]$Python = $(if ($env:PYTHON) { $env:PYTHON } else { 'python' })
+    [string]$Python = $(if ($env:PYTHON) { $env:PYTHON } else { 'python' }),
+    # GPU backend: auto (default), OPTIX or CUDA (NVIDIA), HIP (AMD), ONEAPI (Intel Arc), CPU
+    [ValidateSet('auto', 'OPTIX', 'CUDA', 'HIP', 'ONEAPI', 'CPU')][string]$Gpu = 'auto'
 )
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
@@ -22,6 +24,7 @@ if (-not $Blender) {
     }
 }
 Write-Host "Blender: $Blender"
+if ($Gpu -ne 'auto') { $env:DH_GPU = $Gpu } else { Remove-Item Env:DH_GPU -ErrorAction SilentlyContinue }
 
 if (-not (Test-Path data/film-data.json) -or -not (Test-Path numbers.json)) {
     & $Python prepare_data.py

@@ -28,6 +28,11 @@ On Windows (PowerShell), use the PowerShell script instead (it finds Blender und
 .\video\blender\make_film.ps1 -Preset final
 ```
 
+GPU: the script picks the first GPU backend Cycles finds (OptiX, CUDA, HIP, oneAPI, Metal) and prints
+`Cycles device: …` at the start. Force one with `-Gpu OPTIX` (NVIDIA RTX), `-Gpu CUDA` (older NVIDIA),
+`-Gpu HIP` (AMD) or `-Gpu ONEAPI` (Intel Arc); in bash set `DH_GPU=OPTIX`. Blender's own preference
+setting is not used because the film runs with `--factory-startup`.
+
 If PowerShell blocks the script: `powershell -ExecutionPolicy Bypass -File .\video\blender\make_film.ps1`.
 
 Set `BLENDER=/path/to/blender` if `blender` is not on the PATH (bash). Without a Blender install, a Python

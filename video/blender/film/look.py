@@ -50,20 +50,41 @@ def setup_render(scene, preset="preview"):
 
 
 def _has_gpu():
+    """Enable the first available GPU backend for Cycles and report it.
+
+    The film runs Blender with --factory-startup, so the GPU chosen in Blender's preferences is not
+    used; this picks one here instead. Force a backend with the environment variable DH_GPU
+    (OPTIX, CUDA, HIP, ONEAPI, METAL) or DH_GPU=CPU to render on the CPU.
+    """
+    import os
+    want = os.environ.get("DH_GPU", "").upper()
+    if want == "CPU":
+        print("Cycles device: CPU (DH_GPU=CPU)", flush=True)
+        return False
     try:
+        if "cycles" not in bpy.context.preferences.addons:
+            bpy.ops.preferences.addon_enable(module="cycles")
         prefs = bpy.context.preferences.addons["cycles"].preferences
-        for t in ("OPTIX", "CUDA", "HIP", "METAL", "ONEAPI"):
-            try:
-                prefs.compute_device_type = t
-                prefs.get_devices()
-                if any(d.type != "CPU" for d in prefs.devices):
-                    for d in prefs.devices:
-                        d.use = d.type != "CPU"
-                    return True
-            except TypeError:
-                continue
-    except Exception:
-        pass
+    except Exception as e:  # noqa: BLE001
+        print(f"Cycles device: CPU (cannot read Cycles preferences: {e})", flush=True)
+        return False
+    order = [want] if want else ["OPTIX", "CUDA", "HIP", "ONEAPI", "METAL"]
+    for t in order:
+        try:
+            prefs.compute_device_type = t
+        except TypeError:
+            continue
+        try:
+            prefs.refresh_devices()
+        except AttributeError:
+            prefs.get_devices()
+        gpus = [d for d in prefs.devices if d.type == t]
+        if gpus:
+            for d in prefs.devices:
+                d.use = d.type == t
+            print("Cycles device: GPU via " + t + ": " + ", ".join(d.name for d in gpus), flush=True)
+            return True
+    print("Cycles device: CPU (no GPU found for " + ", ".join(order) + ")", flush=True)
     return False
 
 
