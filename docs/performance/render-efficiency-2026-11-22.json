@@ -1,0 +1,268 @@
+{
+  "method": "Synthetic coordinator journal with100/500attempts.50warm read queries per path; compare existing deep Attempts copy+sum, compact detached projection+sum, direct scalar. Thread allocated bytes measured with GC.GetAllocatedBytesForCurrentThread; timing under xUnit concurrent activity is diagnostic, not an SLA or end-to-end render speedup.",
+  "heat_query_benchmark": [
+    {
+      "history": 500,
+      "queries": 50,
+      "old_ms": 1437.4218,
+      "old_bytes": 230632768,
+      "summary_ms": 11.1325,
+      "summary_bytes": 2607200,
+      "scalar_ms": 2.3625,
+      "scalar_bytes": 0
+    },
+    {
+      "history": 100,
+      "queries": 50,
+      "old_ms": 649.0732,
+      "old_bytes": 36117360,
+      "summary_ms": 0.8299,
+      "summary_bytes": 527200,
+      "scalar_ms": 0.2395,
+      "scalar_bytes": 0
+    }
+  ],
+  "renderer_benchmark": {
+    "status": "incomplete; process access violation during fresh round2",
+    "hardware": "Intel Iris Xe, Windows native OpenGL, Blender5.3.0",
+    "frames": [
+      1,
+      17,
+      32,
+      48
+    ],
+    "intended_rounds": 2,
+    "settings": "640x360,32samples,4CPUthreads; existing T-79 bench_frame.py",
+    "completed_reports": [
+      {
+        "mode_round": "fresh-r1",
+        "index_in_process": 0,
+        "frame": 1,
+        "call_seconds": 8.585854699951597,
+        "render_seconds": 8.554152500000782,
+        "scene_load_seconds": 0.024010099936276674,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "4d36d5f8776ede9563ebd751a728187b0f5cf26ab4df13b8a470ddf2baba86ea"
+      },
+      {
+        "mode_round": "fresh-r1",
+        "index_in_process": 0,
+        "frame": 17,
+        "call_seconds": 11.941063200007193,
+        "render_seconds": 11.908214999944903,
+        "scene_load_seconds": 0.024050600011833012,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "140c455140cdc2e35ad77d53e286b4546ebcf21bb3b445464b10cdca06059c2c"
+      },
+      {
+        "mode_round": "fresh-r1",
+        "index_in_process": 0,
+        "frame": 32,
+        "call_seconds": 13.221828199923038,
+        "render_seconds": 13.187860600068234,
+        "scene_load_seconds": 0.025395000004209578,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "72ed15eccdbcc6d9fbc4d08e00ebb462541ec0d73d3e2700243b235363b4d32e"
+      },
+      {
+        "mode_round": "fresh-r1",
+        "index_in_process": 0,
+        "frame": 48,
+        "call_seconds": 15.029601100017317,
+        "render_seconds": 14.998034399934113,
+        "scene_load_seconds": 0.023029299918562174,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "bc060e7a1b045bf2a8f1b1219c4bcf3d5f8935d520b0e5f90a7baba98870fa07"
+      },
+      {
+        "mode_round": "fresh-r2",
+        "index_in_process": 0,
+        "frame": 1,
+        "call_seconds": 12.734392800019123,
+        "render_seconds": 12.700761200045235,
+        "scene_load_seconds": 0.025063400040380657,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "4d36d5f8776ede9563ebd751a728187b0f5cf26ab4df13b8a470ddf2baba86ea"
+      },
+      {
+        "mode_round": "fresh-r2",
+        "index_in_process": 0,
+        "frame": 17,
+        "call_seconds": 13.287999699939974,
+        "render_seconds": 13.253286699997261,
+        "scene_load_seconds": 0.025836699991486967,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "140c455140cdc2e35ad77d53e286b4546ebcf21bb3b445464b10cdca06059c2c"
+      },
+      {
+        "mode_round": "warm-r1",
+        "index_in_process": 0,
+        "frame": 1,
+        "call_seconds": 8.572270600008778,
+        "render_seconds": 8.539071599952877,
+        "scene_load_seconds": 0.023968899971805513,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "4d36d5f8776ede9563ebd751a728187b0f5cf26ab4df13b8a470ddf2baba86ea"
+      },
+      {
+        "mode_round": "warm-r1",
+        "index_in_process": 1,
+        "frame": 17,
+        "call_seconds": 1.2807382000610232,
+        "render_seconds": 1.2727125999517739,
+        "scene_load_seconds": 0.0,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "140c455140cdc2e35ad77d53e286b4546ebcf21bb3b445464b10cdca06059c2c"
+      },
+      {
+        "mode_round": "warm-r1",
+        "index_in_process": 2,
+        "frame": 32,
+        "call_seconds": 1.237068299902603,
+        "render_seconds": 1.225296900025569,
+        "scene_load_seconds": 0.0,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "72ed15eccdbcc6d9fbc4d08e00ebb462541ec0d73d3e2700243b235363b4d32e"
+      },
+      {
+        "mode_round": "warm-r1",
+        "index_in_process": 3,
+        "frame": 48,
+        "call_seconds": 0.9929993000114337,
+        "render_seconds": 0.9848227000329643,
+        "scene_load_seconds": 0.0,
+        "device": "Intel(R) Iris(R) Xe Graphics",
+        "software_context": false,
+        "png_pixels_sha256": "bc060e7a1b045bf2a8f1b1219c4bcf3d5f8935d520b0e5f90a7baba98870fa07"
+      }
+    ],
+    "observed_crash": {
+      "native_exit_code_unsigned": 3221225477,
+      "hex": "C0000005",
+      "module": "igxelpicd64.dll",
+      "stage": "fresh-r2 frame17 after saved frame during process exit"
+    },
+    "conclusion": "Keep warm mode. Warm round1 later frames median1.225s versus fresh round1 median12.548s render calls, but second round aborted; no complete balanced performance/reliability claim."
+  },
+  "test_count": 132,
+  "unchanged": "Heat-first admission,24/16/8 need,3concurrentGPUworkers, image quality, all runtime discovery/reconciliation and ownership checks.",
+  "implementation_commit": "8a4e4ad",
+  "pull_request": 73,
+  "real_pipeline_runs": [
+    {
+      "run": 1,
+      "phase": "complete",
+      "error": null,
+      "completed": 48,
+      "active_seconds": 74.6993593,
+      "frames_by_worker": {
+        "demo-gpu-1": 24,
+        "demo-gpu-2": 16,
+        "demo-gpu-3": 8
+      },
+      "video": {
+        "job_id": "demo-cpu-prepare.c55bd23b2516-assemble",
+        "peer_id": "demo-cpu-video",
+        "metadata": {
+          "blender": "5.3.0",
+          "build_hash": "02f0899d78e3",
+          "completed_utc": "2026-11-22T03:59:53.255048+00:00",
+          "device": "CPU video encoding",
+          "dispatch_to_execute_seconds": 0.691959,
+          "encode_seconds": 0.8727346999803558,
+          "encoded_frames": 48,
+          "ffmpeg_available": true,
+          "fps": 12,
+          "frames": 48,
+          "height": 360,
+          "manifest_sha256": "f301c8b5858878d07fb30c9fc47b37b04a44e673be336ce9d0be20ba5a755ac7",
+          "recipe_id": "8c6c516716e3d10ca273690bcfc855c2080eabcdbe975ca79c901d58aa3fe013",
+          "samples": 32,
+          "scene_sha256": "aac54b2a7fa612a24d7eeeda85a5c7ef6444548b7326157eba91d371b316c4cb",
+          "seed": 66,
+          "stage": "assemble",
+          "width": 640,
+          "worker_seconds": 1.3474499000003561
+        }
+      },
+      "run_id": "c55bd23b2516"
+    },
+    {
+      "run": 2,
+      "run_id": "ff0b2f1144f0",
+      "phase": "complete",
+      "error": null,
+      "completed": 48,
+      "active_seconds": 78.2986362,
+      "frames_by_worker": {
+        "demo-gpu-3": 8,
+        "demo-gpu-2": 16,
+        "demo-gpu-1": 24
+      },
+      "video": {
+        "job_id": "demo-cpu-prepare.ff0b2f1144f0-assemble",
+        "peer_id": "demo-cpu-video",
+        "metadata": {
+          "blender": "5.3.0",
+          "build_hash": "02f0899d78e3",
+          "completed_utc": "2026-11-22T04:01:15.034499+00:00",
+          "device": "CPU video encoding",
+          "dispatch_to_execute_seconds": 0.597047,
+          "encode_seconds": 0.6490250999340788,
+          "encoded_frames": 48,
+          "ffmpeg_available": true,
+          "fps": 12,
+          "frames": 48,
+          "height": 360,
+          "manifest_sha256": "a55a418b724201c6d74c822e6274d17e034c43a18dfbc888e2cdf9bed132f461",
+          "recipe_id": "8c6c516716e3d10ca273690bcfc855c2080eabcdbe975ca79c901d58aa3fe013",
+          "samples": 32,
+          "scene_sha256": "aac54b2a7fa612a24d7eeeda85a5c7ef6444548b7326157eba91d371b316c4cb",
+          "seed": 66,
+          "stage": "assemble",
+          "width": 640,
+          "worker_seconds": 0.827791600022465
+        }
+      }
+    }
+  ],
+  "verified_generation_exit_evidence": [
+    {
+      "worker": "demo-gpu-1",
+      "activation": "9866863b717648a6996667e5c8430685",
+      "pid": 35184,
+      "started_utc": "2026-11-22T03:58:39.5361472Z",
+      "native_exit_code": 0,
+      "native_exit_code_hex": "00000000",
+      "observed_utc": "2026-11-22T04:03:12.0837321+00:00"
+    },
+    {
+      "worker": "demo-gpu-2",
+      "activation": "5ff2e510c3814edc8cbad97bb4f18191",
+      "pid": 24768,
+      "started_utc": "2026-11-22T03:58:39.6832767Z",
+      "native_exit_code": 0,
+      "native_exit_code_hex": "00000000",
+      "observed_utc": "2026-11-22T04:02:55.8638113+00:00"
+    },
+    {
+      "worker": "demo-gpu-3",
+      "activation": "a3c97d9d73244bc79d6bd484ea661382",
+      "pid": 40192,
+      "started_utc": "2026-11-22T03:58:39.8243529Z",
+      "native_exit_code": -1073741819,
+      "native_exit_code_hex": "C0000005",
+      "observed_utc": "2026-11-22T04:02:30.3001306+00:00"
+    }
+  ],
+  "end_to_end_caveat": "Two complete real runs74.6994/78.2986s versus prior unmatched153.7926s; hardware/driver cache and system load not controlled, so do not attribute a guaranteed percentage speedup to this change. Completed frames remain valid even if a later idle-process exit crashes."
+}

@@ -1,0 +1,79 @@
+{
+  "source_commit": "cdd7ac4",
+  "date": "2026-11-22",
+  "method": "Stop old lab preserving files; publish latest main with Start-PresentationRenderLab, 48frames, three native GPU workers on Iris Xe; assert heat_need_frames field; poll /ui/status every2seconds; inspect artifacts and download completed MP4. Repeat without restarting lab.",
+  "runs": [
+    {
+      "run": 1,
+      "phase": "complete",
+      "completed": 48,
+      "error": null,
+      "active_seconds": 153.7925815,
+      "heat_need_frames": {
+        "demo-gpu-2": 16,
+        "demo-gpu-1": 24,
+        "demo-gpu-3": 8
+      },
+      "frames_by_worker": {
+        "demo-gpu-1": 24,
+        "demo-gpu-2": 16,
+        "demo-gpu-3": 8
+      },
+      "gpu3_finished_before_whole_run": {
+        "phase": "rendering",
+        "total_frames": 23,
+        "frames_by_worker": {
+          "demo-gpu-1": 8,
+          "demo-gpu-2": 7,
+          "demo-gpu-3": 8
+        },
+        "active_peers": [
+          "demo-gpu-2",
+          "demo-gpu-1"
+        ]
+      },
+      "video": {
+        "job_id": "demo-cpu-prepare.f7a6716de10f-assemble",
+        "peer_id": "demo-cpu-video",
+        "metadata": {
+          "blender": "5.3.0",
+          "build_hash": "02f0899d78e3",
+          "completed_utc": "2026-11-22T03:35:56.436310+00:00",
+          "device": "CPU video encoding",
+          "dispatch_to_execute_seconds": 0.620498,
+          "encode_seconds": 0.6691152000566944,
+          "encoded_frames": 48,
+          "ffmpeg_available": true,
+          "fps": 12,
+          "frames": 48,
+          "height": 360,
+          "manifest_sha256": "2054840c594783aa8c0135e1fc1c5fad79d7c0fa3c5587b0c82d73ae07a2b2fd",
+          "recipe_id": "8c6c516716e3d10ca273690bcfc855c2080eabcdbe975ca79c901d58aa3fe013",
+          "samples": 32,
+          "scene_sha256": "4f86a09094eec9e3639594c8e754b2772d591458167b408d49e6304429150c1a",
+          "seed": 66,
+          "stage": "assemble",
+          "width": 640,
+          "worker_seconds": 0.8534683999605477
+        }
+      }
+    },
+    {
+      "run": 2,
+      "phase": "failed",
+      "completed": 0,
+      "error": "An owned job failed or expired; inspect retained logs",
+      "active_seconds": 12.9302439,
+      "heat_need_frames": {
+        "demo-gpu-2": 16,
+        "demo-gpu-1": 24,
+        "demo-gpu-3": 8
+      },
+      "frames_by_worker": {},
+      "gpu3_finished_before_whole_run": null,
+      "video": null
+    }
+  ],
+  "diagnosis": "Second run frame002 on demo-gpu-2 has native ownership released=true exit_code=1, no exit.json/result marker. Root cause of Blender process exit unknown. Current shared warm logs can be overwritten by later worker activations; no definitive exception retained.",
+  "limitations": "First full split verified on real hardware. Repeat-run reliability failed. No claim that an unlimited number of repeated runs is verified; no scheduler/renderer code changes made."
+}

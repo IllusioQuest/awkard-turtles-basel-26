@@ -58,8 +58,10 @@ internal sealed class VoiceDemoApp(string root, string voiceDir, string snapshot
         string imageId = docker.Run(["image", "inspect", "--format", "{{.Id}}", c.Image]).Trim();
         EnsureVolume();
         RemoveStaleDemoContainers();
-        clockTicks = long.Parse(Shell("getconf", "CLK_TCK").Trim(), CultureInfo.InvariantCulture);
-        string uid = Shell("id", "-u").Trim();
+        // Linux reports CPU time per container (cgroup v2) and CPU energy (RAPL); elsewhere (macOS/Windows Docker
+        // Desktop) the meter is off and the demo still runs. The container user is the host user on Linux.
+        clockTicks = OperatingSystem.IsLinux() ? long.Parse(Shell("getconf", "CLK_TCK").Trim(), CultureInfo.InvariantCulture) : 100;
+        string uid = OperatingSystem.IsWindows() ? "1000" : Shell("id", "-u").Trim();
         profile = new ContainerProfile("voice-assistant-" + imageId.Replace("sha256:", "", StringComparison.Ordinal)[..12], imageId, uid,
             [((int)c.RequestCpuCores).ToString(CultureInfo.InvariantCulture), ((int)c.MaxNewTokens).ToString(CultureInfo.InvariantCulture),
              c.Language, c.WhisperModel, c.LlmModel, c.SystemPrompt], null, [], [], []);
@@ -197,6 +199,7 @@ internal sealed class VoiceDemoApp(string root, string voiceDir, string snapshot
         int streamed = 0;
         bool done = false, failed = false; double? doneAtHour = null;
         ContainerEnergyMeter? meter = null;
+        bool meterUnavailable = false;
         while (true)
         {
             cancel.ThrowIfCancellationRequested();
@@ -210,10 +213,12 @@ internal sealed class VoiceDemoApp(string root, string voiceDir, string snapshot
             var attempt = peer.Attempts().Where(a => a.Attempt.Request.Id == globalId).LastOrDefault();
             string phase = attempt?.Phase ?? (peer.Jobs().Single(j => j.Request.Id == globalId).Status ?? "submitted");
             if (attempt is not null && container.Length == 0) container = DockerWorkloadRuntime.Name(attempt.Attempt)[..12];
-            if (meter is null && attempt is not null && phase == "running")
+            if (meter is null && !meterUnavailable && attempt is not null && phase == "running")
             {
                 string id = docker.Run(["inspect", "--format", "{{.Id}}", DockerWorkloadRuntime.Name(attempt.Attempt)]).Trim();
-                meter = new ContainerEnergyMeter(id, clockTicks);
+                try { meter = new ContainerEnergyMeter(id, clockTicks); }
+                catch (Exception e) when (e is FileNotFoundException or IOException or UnauthorizedAccessException)
+                { meterUnavailable = true; Log.Line("WARN", "meter", "no cgroup v2 CPU counter for the container: CPU time and energy not measured"); }
             }
             if (meter is not null && !done && !failed) meter.Sample();
             // The request's heat into the house: 80 % of its measured electrical power (case heat recovery).

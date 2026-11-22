@@ -125,3 +125,13 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | done; run-scoped status filter merged; heat stall and journal growth need decisions |
 
 | [T-81](T-81-site-type-icons.md) | Site-type icons on the admin network map | Ennio / Claude | done |
+
+| [T-82](T-82-real-house-variant.md) | Real house from the organisers as a Fleet variant | Ennio / Claude | done |
+
+| [T-83](T-83-render-efficiency.md) | Renderer efficiency and repeat-run diagnosis | Nikita / Codex | in review; PR #73 |
+
+| [T-84](T-84-render-copy.md) | Simplify renderer heat and explanatory labels | Nikita / Codex | in review; PR #74 |
+
+| [T-85](T-85-active-bookkeeping.md) | Reduce active-job bookkeeping | Nikita / Codex | in review; PR #76 |
+
+| [T-86](T-86-node-shutdown.md) | Whole-node shutdown and confirmed frame retry | Nikita / Codex | in progress |
