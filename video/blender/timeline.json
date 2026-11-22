@@ -1,0 +1,33 @@
+{
+  "_about": "Beat timing in seconds (24 fps). Edit times here to re-sync with docs/pitch/voiceover.md once it exists; build_film.py reads this file. 'vo' is the draft voice-over line the beat is cut for (see voiceover-draft.md); overlay texts are rendered by post.py.",
+  "fps": 24,
+  "duration": 112.0,
+  "beats": {
+    "street":   {"start": 0.0,   "end": 8.0,   "vo": "Basel. A January evening, minus three degrees."},
+    "cold":     {"start": 8.0,   "end": 21.0,  "vo": "This is Bob. His house needs heat. And this envelope says what it costs."},
+    "dc":       {"start": 21.0,  "end": 28.0,  "vo": "A few streets away, a data centre throws its heat into the night."},
+    "dive":     {"start": 28.0,  "end": 48.0,  "vo": "What if that computing ran where the heat is needed? Four servers in Bob's basement do paid work, and their heat goes into the water: the tank, the radiators, the room."},
+    "lapse":    {"start": 48.0,  "end": 58.0,  "vo": "Weeks pass. On the twenty-second of March the tank is full, and the servers pause by themselves. The house decides when the computers work."},
+    "figures":  {"start": 58.0,  "end": 68.0,  "vo": "Over the year 2025: four servers cover fifty-eight percent of the house's heat, without dumping a single kilowatt-hour."},
+    "rise":     {"start": 68.0,  "end": 80.0,  "vo": "But in summer one house needs little heat. So where does the work go?"},
+    "map":      {"start": 80.0,  "end": 106.0, "vo": "Across Basel, houses take work when they need heat. Near Dreispitz an indoor pool needs heat all year. In summer the work moves to the pool. The heat stays where it is made."},
+    "end":      {"start": 106.0, "end": 112.0, "vo": "Let us show you the scheduler doing this live."}
+  },
+  "marks": {
+    "cold_touch": 9.0,
+    "cold_open": 13.0,
+    "cold_read": 15.5,
+    "cold_react": 17.0,
+    "dive_down": 29.6,
+    "dive_alive": 31.6,
+    "dive_flow": 34.0,
+    "dive_up": 38.0,
+    "dive_room": 41.0,
+    "lapse_pause": 54.0,
+    "rise_map": 74.5,
+    "map_drop": 80.5,
+    "map_zoom": 86.0,
+    "map_year": 89.0,
+    "map_year_end": 103.0
+  }
+}

@@ -117,3 +117,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in review; PR #68 |
 
 | [T-77](T-77-render-runtime.md) | Measure and improve renderer runtime | Nikita / Codex | done; PR #69 and timeout follow-up on main |
+
+| [T-78](T-78-intro-film.md) | Intro film (Bob's house to the Basel map), Blender from Python scripts | Claude | in progress; preview render; branch `feat/T-78-intro-film` |
