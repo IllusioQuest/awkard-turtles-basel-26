@@ -66,39 +66,41 @@ public class DeadlineTests : IDisposable
         var result = c.TryStart(Request(), Nodes, CoordinatorTests.Profile, PlacementTests.Now)!;
         Assert.Equal("missed", result.Deadline!.Status); Assert.True(result.Deadline.StopIntentPersisted); Assert.Equal(1, r.Stops); Assert.Equal("released", result.Phase);
     }
-    [Theory] [InlineData(false)] [InlineData(true)]
-    public void RunningAndPausedOverdueJobsStopButNeverBecomeSuccess(bool pause)
+    private static void Enforce(WorkloadCoordinator c,bool snapshot)
+    { if(snapshot)c.EnforceDeadlines();else c.EnforceDeadlinePolicies(); }
+    [Theory] [InlineData(false,false)] [InlineData(false,true)] [InlineData(true,false)] [InlineData(true,true)]
+    public void RunningAndPausedOverdueJobsStopButNeverBecomeSuccess(bool pause,bool snapshot)
     {
         var clock = new Clock(); var r = new Runtime();
         using (var c = Start(r, clock))
         {
             c.TryStart(Request(), Nodes, CoordinatorTests.Profile, clock.Now);
-            if (pause) c.PauseBatch("timed"); clock.Advance(5); c.EnforceDeadlines();
+            if (pause) c.PauseBatch("timed"); clock.Advance(5); Enforce(c,snapshot);
             Assert.Equal("missed", c.Attempts().Single().Deadline!.Status); Assert.Equal(1, r.Stops); Assert.Empty(c.Allocations());
         }
         using var recovered = new WorkloadCoordinator(fleet, directory, r, clock); recovered.Reconcile(Nodes);
         Assert.Equal("missed", recovered.Attempts().Single().Deadline!.Status); Assert.Equal("released", recovered.Attempts().Single().Phase);
     }
-    [Fact] public void StopRequiresLifecyclePermissionAndLatenessPersists()
+    [Theory] [InlineData(false)] [InlineData(true)] public void StopRequiresLifecyclePermissionAndLatenessPersists(bool snapshot)
     {
         var clock = new Clock(); var r = new Runtime(); using var c = Start(r, clock);
-        c.TryStart(Request(stop: false), Nodes, CoordinatorTests.Profile, clock.Now); clock.Advance(10); c.EnforceDeadlines();
+        c.TryStart(Request(stop: false), Nodes, CoordinatorTests.Profile, clock.Now); clock.Advance(10); Enforce(c,snapshot);
         Assert.Equal(0, r.Stops); Assert.Single(c.Allocations()); Assert.Equal("missed", c.Attempts().Single().Deadline!.Status);
         Assert.False(c.ResumeBatch("timed", PlacementTests.Now));
     }
-    [Fact] public void UncertainStopRetainsResourcesAndResumesCleanupAfterRecovery()
+    [Theory] [InlineData(false)] [InlineData(true)] public void UncertainStopRetainsResourcesAndResumesCleanupAfterRecovery(bool snapshot)
     {
         var clock = new Clock(); var r = new Runtime { FailStop = true };
         using (var c = Start(r, clock))
         {
             c.TryStart(Request(), Nodes, CoordinatorTests.Profile, clock.Now); clock.Advance(6);
-            Assert.Throws<InvalidOperationException>(() => c.EnforceDeadlines()); Assert.Single(c.Allocations()); Assert.False(c.Reconciled);
+            Assert.Throws<InvalidOperationException>(() => Enforce(c,snapshot)); Assert.Single(c.Allocations()); Assert.False(c.Reconciled);
             Assert.True(c.Attempts().Single().Deadline!.StopIntentPersisted);
         }
         r.FailStop = false; using var recovered = new WorkloadCoordinator(fleet, directory, r, clock);
-        recovered.Reconcile(Nodes); recovered.EnforceDeadlines(); Assert.Empty(recovered.Allocations()); Assert.Equal("missed", recovered.Attempts().Single().Deadline!.Status);
+        recovered.Reconcile(Nodes); Enforce(recovered,snapshot); Assert.Empty(recovered.Allocations()); Assert.Equal("missed", recovered.Attempts().Single().Deadline!.Status);
     }
-    [Fact] public void SuccessfulEarlyCompletionSurvivesRestartPastDue()
+    [Theory] [InlineData(false)] [InlineData(true)] public void SuccessfulEarlyCompletionSurvivesRestartPastDue(bool snapshot)
     {
         var clock = new Clock(); var r = new Runtime { CompleteOnStart = true };
         using (var c = Start(r, clock))
@@ -106,15 +108,15 @@ public class DeadlineTests : IDisposable
             var result = c.TryStart(Request(), Nodes, CoordinatorTests.Profile, clock.Now)!;
             Assert.Equal("terminal", result.Phase); Assert.Equal("on_time", result.Deadline!.Status);
         }
-        clock.Advance(10); using var recovered = new WorkloadCoordinator(fleet, directory, r, clock); recovered.Reconcile(Nodes); recovered.EnforceDeadlines();
+        clock.Advance(10); using var recovered = new WorkloadCoordinator(fleet, directory, r, clock); recovered.Reconcile(Nodes); Enforce(recovered,snapshot);
         Assert.Equal("on_time", recovered.Attempts().Single().Deadline!.Status); Assert.Equal(0, r.Stops);
     }
-    [Fact] public void FirstTerminalObservationAfterDueCannotClaimOnTimeFromRemoteClock()
+    [Theory] [InlineData(false)] [InlineData(true)] public void FirstTerminalObservationAfterDueCannotClaimOnTimeFromRemoteClock(bool snapshot)
     {
         var clock = new Clock(); var r = new Runtime(); using var c = Start(r, clock);
         var attempt = c.TryStart(Request(), Nodes, CoordinatorTests.Profile, clock.Now)!.Attempt;
         r.States[attempt.AttemptId] = new("exited", "abcdef123456", false) { ExitCode = 0, ReportedFinishedAtUtc = clock.Now.AddSeconds(1) };
-        clock.Advance(10); c.EnforceDeadlines(); Assert.Equal("unknown", c.Attempts().Single().Deadline!.Status); Assert.Equal(0, r.Stops);
+        clock.Advance(10); Enforce(c,snapshot); Assert.Equal("unknown", c.Attempts().Single().Deadline!.Status); Assert.Equal(0, r.Stops);
     }
     [Fact] public void RetriesCannotExtendDeadlineAndGamesCannotAcquireOne()
     {

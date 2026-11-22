@@ -159,16 +159,16 @@ public sealed class MeshPeer : IDisposable
     public void Tick()
     {
         coordinator.Reconcile(runtimeNodes);
-        coordinator.EnforceDeadlines();
+        coordinator.EnforceDeadlinePolicies();
         bool changed = ApplyLocalHeat();
-        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "terminal" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowStop))
+        foreach (var row in coordinator.ActiveAttempts().Where(a => a.Phase == "terminal" && a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowStop))
         {
             coordinator.StopAndRelease(row.Attempt.Request.Id);
             changed = true;
         }
         if (changed) Publish();
         if (journal.OperatorHold) return;
-        foreach (var row in coordinator.Attempts().Where(a => a.Phase == "created"))
+        foreach (var row in coordinator.ActiveAttempts().Where(a => a.Phase == "created"))
             coordinator.TryStartAtSite(row.Attempt.Request, runtimeNodes, row.Attempt.Profile, clock.GetUtcNow(),
                 Id, inventory.Sites[0].Heat, inventory.Revision, inventory.IntervalStartUtc);
         foreach (var job in journal.Jobs.OrderBy(j => new JobPriority(
@@ -203,7 +203,7 @@ public sealed class MeshPeer : IDisposable
             Put(intent); // Durable intent MUST precede send; the transport may lose its reply.
             Propose(intent);
         }
-        coordinator.EnforceDeadlines();
+        coordinator.EnforceDeadlinePolicies();
     }
 
     private bool ApplyLocalHeat()
@@ -213,7 +213,7 @@ public sealed class MeshPeer : IDisposable
         var now = clock.GetUtcNow();
         bool noHeat = scheduler.Decide(heat).TargetLoadPerServer == 0;
         bool changed = false;
-        var attempts = coordinator.Attempts();
+        var attempts = coordinator.ActiveAttempts();
         // Decision 0068: freeze-only batch containers run at their full declared heat, so the shared
         // heat-first load is rounded down to whole jobs. The budget is the same useful heat the shared
         // policy and admission use (HeatCapacity.RemainingKwh: demand plus tank room). Running heat
@@ -289,7 +289,7 @@ public sealed class MeshPeer : IDisposable
         try
         {
             coordinator.Reconcile(runtimeNodes);
-            coordinator.EnforceDeadlines();
+            coordinator.EnforceDeadlinePolicies();
             if (old is not null) { Reply(origin, old); return; }
             var prior = coordinator.Attempts().SingleOrDefault(a => a.Attempt.Request.Id == proposal.Request.Id);
             if (prior is not null)
