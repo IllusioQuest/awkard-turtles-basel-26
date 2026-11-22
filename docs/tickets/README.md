@@ -120,4 +120,4 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-79](T-79-warm-render-penalty.md) | Measure the warm-process render penalty on the presentation GPU | Nikita / Claude | in progress; benchmark ready, laptop run pending |
 
-| [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | in review; run-scoped status filter; heat stall and journal growth need decisions |
+| [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | done; run-scoped status filter merged; heat stall and journal growth need decisions |

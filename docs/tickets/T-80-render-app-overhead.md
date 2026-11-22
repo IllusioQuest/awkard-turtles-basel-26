@@ -1,6 +1,6 @@
 # T-80 — Measure and reduce C# render-app overhead
 
-Owner: Nikita / Claude. Status: in review (branch claude/beautiful-allen-ukjq15).
+Owner: Nikita / Claude. Status: done (merged to main from claude/beautiful-allen-ukjq15).
 Scope: the C# render lab app (`RenderNodeHost`, `RenderSession`, `/ui`), not Blender (T-79).
 No change to the heat-first policy, five roles, GPU budgets, concurrency or quality.
 
