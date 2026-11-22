@@ -304,6 +304,7 @@ internal sealed class VoiceDemoApp(string root, string voiceDir, string snapshot
     private void Write(Snapshot s)
     {
         s.UpdatedUtc = DateTimeOffset.UtcNow;
+        s.Voice.Console = Log.Lines();
         string tmp = snapshotPath + ".tmp";
         File.WriteAllText(tmp, JsonSerializer.Serialize(s, Snapshot.Json));
         File.Move(tmp, snapshotPath, true);
@@ -394,6 +395,15 @@ internal static class Log
     public static Func<double> Clock { get; set; } = () => 0;
     private static bool midLine;
     private static readonly object Gate = new();
+    private const int MaxLines = 120;
+    // The same lines as the terminal, kept for the live snapshot (pitch mode shows them as a console).
+    private static readonly List<Snapshot.ConsoleLine> Recent = [];
+    public static Snapshot.ConsoleLine[] Lines() { lock (Gate) return [.. Recent]; }
+    private static void Keep(Snapshot.ConsoleLine line)
+    {
+        Recent.Add(line);
+        if (Recent.Count > MaxLines) Recent.RemoveAt(0);
+    }
     private static string Stamp() { int min = (int)Math.Floor(Clock() * 60 + 1e-6); return $"{min / 60:00}:{min % 60:00}"; }
 
     public static void Line(string level, string component, string message)
@@ -404,6 +414,7 @@ internal static class Log
             string lvl = level.PadRight(5);
             lvl = level switch { "WARN" => Ansi.Yellow(lvl), "ERROR" => Ansi.Red(lvl), _ => Ansi.Green(lvl) };
             Console.WriteLine($"{Ansi.Dim(Stamp())} {lvl} {component,-6} {message}");
+            Keep(new(level.ToLowerInvariant(), $"{Stamp()} {level,-5} {component,-6} {message}"));
         }
     }
 
@@ -411,9 +422,11 @@ internal static class Log
     {
         lock (Gate)
         {
+            string name = (container.Length > 0 ? container : "job") + " | ";
             string prefix = Ansi.Cyan((container.Length > 0 ? container : "job") + " |") + " ";
-            if (newLine) { if (midLine) Console.WriteLine(); Console.WriteLine(prefix + text); midLine = false; return; }
-            if (!midLine) { Console.Write(prefix); midLine = true; }
+            if (newLine) { if (midLine) Console.WriteLine(); Console.WriteLine(prefix + text); midLine = false; Keep(new("out", name + text)); return; }
+            if (!midLine) { Console.Write(prefix); midLine = true; Keep(new("out", name + text)); }
+            else Recent[^1] = Recent[^1] with { Text = Recent[^1].Text + text };
             Console.Write(text);
         }
     }

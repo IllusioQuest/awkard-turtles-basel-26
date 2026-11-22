@@ -1,4 +1,4 @@
-# T-87 — Repository hygiene: one test command, lint, identity-hash finding
+# T-88 — Repository hygiene: one test command, lint, identity-hash finding
 
 Owner: Nikita / Claude. Status: in progress. Branch: claude/beautiful-allen-ukjq15.
 User-approved scope (2026-11-22): no changes in areas other agents are working on (renderer,

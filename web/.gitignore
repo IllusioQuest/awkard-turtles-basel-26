@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Pitch mode media (large, local only): the intro film and fallback screen recordings
+public/pitch/*.mp4

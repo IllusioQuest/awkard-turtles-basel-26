@@ -136,4 +136,6 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-86](T-86-node-shutdown.md) | Whole-node shutdown and confirmed frame retry | Nikita / Codex | in review; PR #77 |
 
-| [T-87](T-87-repo-hygiene.md) | Repository hygiene: one test command, lint, identity-hash finding | Nikita / Claude | in progress |
+| [T-87](T-87-node-rejoin.md) | Restart fenced GPU worker and rejoin current render | Nikita / Codex | in progress |
+
+| [T-88](T-88-repo-hygiene.md) | Repository hygiene: one test command, lint, identity-hash finding | Nikita / Claude | in progress |
