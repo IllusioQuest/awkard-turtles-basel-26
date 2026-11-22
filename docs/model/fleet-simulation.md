@@ -528,7 +528,10 @@ done, but mostly cheap Type 2 work, so the margin does not rise; the hardware is
 
 ### Other scenarios
 
-`dreispitz-5-pool` and `alps-border-50` (T-67) were last run on `main` `4e363d6` with the current
-scheduler; their assumptions and results are in `docs/tickets/T-67-local-fleet-scenarios.md`.
+`dreispitz-5-pool` (re-run on `main` 2026-11-22): 778,536 jobs, 125 missed (0.02 %), houses cover
+about 30 % of their heat, the pool 7.9 %; the pool does 34 % of the work in January and 76 % in July.
+Net after L4 hardware is negative for every site (houses about −CHF 12,600, pool −CHF 54,500 per
+year). `alps-border-50` was last run on `main` `4e363d6`. Assumptions of both: their scenario
+`_note` and `docs/tickets/T-67-local-fleet-scenarios.md`.
 Local outputs of `basel-region-100` and `ch-100` date from the removed mock scheduler; re-run them
 before quoting any number.
