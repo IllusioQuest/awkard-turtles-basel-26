@@ -6,8 +6,8 @@ full-load-equivalent hour, the case server consumes \qty{1}{kWh} of electricity 
 CHF~0.3325/kWh and delivers \qty{0.8}{kWh} of useful heat worth
 CHF~$0.3325/2.5=0.133$ per kWh. If all that heat displaces heat-pump operation, the combined
 electricity cost net of heat value is $0.3325-0.8(0.133)=\text{CHF}~0.2261$ per hour.
-For the four-server reference run, the same calculation is
-$(\text{CHF}~7{,}534.79-\text{CHF}~2{,}411.13)/22{,}661.03
+For the four-server fleet run of the reference house, the same calculation is
+$(\text{CHF}~2{,}964.84-\text{CHF}~948.75)/8{,}916.80
 =\text{CHF}~0.2261$ per sold server-hour
 (Appendix~\ref{app:repro}). This number excludes equipment and operation.
 
@@ -15,44 +15,82 @@ $(\text{CHF}~7{,}534.79-\text{CHF}~2{,}411.13)/22{,}661.03
 owns the hardware, sells the computing and pays or reimburses its electricity. The homeowner
 receives the useful heat and retains a backup heat source. With free heat, the host's potential
 avoided heat-pump expense is $Q_{\mathrm{use}}v$, while DigitalHeat's cash balance is computing
-receipts minus electricity, depreciation, operations, wear and installation. The CHF~2,411 heat
+receipts minus electricity, depreciation, operations, wear and installation. The CHF~949 heat
 value in the four-server run belongs to the host; it is not also operator income. If the host pays
 a fee $h$ per useful kWh, $Q_{\mathrm{use}}h$ transfers from host to operator without changing
 combined surplus. A positive combined surplus alone does not establish a viable offer for both.
 
-\paragraph{Four-server cost boundary.} The modelled L4 profile uses a normalised
-\qty{1}{kW} server, not a quoted installable chassis. The later card-price sensitivity implies
-CHF~44,179 per such server; with six-year depreciation and CHF~708 yearly operations per server,
-the four-server, all-sold, free-heat operator needs an average realised compute price of
-approximately
+\paragraph{Full cost under sourced demand.} With the sourced job demand of the fleet model, the
+four-server reference house earns CHF~13,360 a year (CHF~8,911 from Type~1, CHF~4,449 from
+Type~2). Electricity costs CHF~2,965, so the margin, which includes the heat value, is CHF~11,344. The
+L4 hardware profile, normalised to a \qty{1}{kW} server at CHF~34,244 over a six-year accounting
+life plus CHF~708 yearly operations, costs CHF~6,415 per server-year, or CHF~25,661 for four
+servers. The net after hardware is $-\text{CHF}~14{,}317$ per year. Table~\ref{tab:breakeven}
+changes one input at a time to find where the net reaches zero.
+
+\begin{table}[ht]
+  \centering
+  \caption{Hardware break-even of the reference house in the fleet model (Basel 2025, L4 profile,
+    sourced demand scaled by 0.1 unless stated). Net = income + heat value $-$ electricity $-$
+    hardware per year.}
+  \label{tab:breakeven}
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.38\linewidth}>{\raggedright\arraybackslash}p{0.54\linewidth}}
+    \toprule
+    Change & Result \\
+    \midrule
+    Servers per house & 1: $+$CHF~5,252, payback 3.1 years, 18.9\% coverage, 5.9\% missed deadlines;
+      2: $-$CHF~621; 3: $-$CHF~7,654; 4: $-$CHF~14,317 \\
+    Job volume (all types), 4 servers & break-even at 2.8 times the scaled demand; 30\% of jobs then
+      miss their deadline, and above about 3 times the margin levels off near CHF~35,000 because the
+      house cannot use more heat \\
+    Type~1 prices, 4 servers & break-even at 2.61 times the sourced prices (LLM inference about
+      CHF~5.81 per L4 server-hour instead of CHF~2.23) \\
+    Type~2 price band only & no break-even: with elasticity $-0.8$, the accepted volume falls almost
+      as fast as the price rises, so revenue above the competitor price grows only with $p^{0.2}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+At the scaled demand, income hardly depends on the number of servers (CHF~13,300 to 14,100 for one
+to four), because work is limited by demand in winter and by heat in summer, not by computing
+capacity. The hardware therefore decides the result, and the single-server house is the only
+configuration that covers it at this demand. All nets credit the heat value to the combined system; for the operator alone,
+who gives the heat away, they are lower by that value (CHF~949 with four servers, CHF~784 with one,
+so the single-server operator keeps about CHF~4,470). The price route is optimistic: Type~1
+customers do not react to price in the model. The volume baseline is itself a scenario value (Section~\ref{sec:limits}).
+
+\paragraph{Upper bound with unlimited work.} Two L4 purchase costs appear in this section: the
+hardware profile's CHF~34,244 per normalised \qty{1}{kW} server, used by the fleet results above,
+and a later card-price sensitivity of CHF~44,179. Neither is a quoted installable chassis. If every
+heat-feasible hour were sold (the case's unlimited-work assumption, \num{22661} server-hours for four
+servers), the four-server, free-heat operator would need an average realised compute price of
 \begin{equation}
   p_{\mathrm{op}}^{*}
   =0.3325+\frac{4(44{,}179/6+708)}{22{,}661}
-  \simeq \text{CHF}~1.76\text{/server-hour}.
+  \simeq \text{CHF}~1.76\text{/server-hour}
   \label{eq:operator-break-even}
 \end{equation}
-The calculation still excludes installation, cooling, financing, platform fees, idle power and
-wear. The earlier CHF~0.956 consumer-GPU threshold was a lower-cost sensitivity, not an operator
-threshold for a deployable L4 system. Consumer-card deployment is excluded from the proposed
-architecture pending licence clarification; the cost ledger is identified in
-Appendix~\ref{app:repro}.
+at the later cost, or about CHF~1.46 at the profile's cost, with six-year depreciation and CHF~708
+yearly operations per server. The calculation excludes installation, cooling, financing, platform
+fees, idle power and wear. Consumer-card deployment is excluded from the proposed architecture
+pending licence clarification; the cost ledger is identified in Appendix~\ref{app:repro}.
 
-The hypothetical L4 throughput yields CHF~1.81 per server-hour at an 8B competitor's list
-token price, but only about CHF~0.90 at its batch price. Neither is a DigitalHeat sale: the
-throughput transfers a benchmark for a different model and GPU, and no recurring Type~1 order is
-documented. At the later L4 purchase price, the four-server, all-Type~1 list-price scenario leaves
-about CHF~1,172 per year before wear and installation. A central wear sensitivity of
-CHF~0.473 per sold hour would subtract roughly CHF~10,719, changing that row to about
-$-\text{CHF}~9{,}547$ (Appendix~\ref{app:repro}). The wear allowance is an
-extrapolation, not an observed L4 replacement bill. The CPU-only measured research kernel is
-also not evidence of a full-power, billable GPU filler workload. Hence the favourable mixed
-Type~1/Type~2 rows remain technical price scenarios.
+Two token-price bases give different hourly revenue. The fleet job type uses \num{25} million tokens
+per L4 server-hour and the Public AI Apertus~8B price, about CHF~2.23 per server-hour. An earlier
+benchmark for another 8B model (\num{14.36} million tokens per server-hour) gives CHF~1.81 at that
+competitor's list price and about CHF~0.90 at its batch price. Neither is a DigitalHeat sale: both
+transfer benchmarks for a different model and GPU, and no recurring Type~1 order is documented. In
+the unlimited-work scenario at the later purchase price, with all hours sold at that list price,
+four servers would leave about CHF~1,172 per year before wear and installation; this is not a fleet
+result. Wear is not included: the available wear estimate was derived for a different card count
+and utilisation and cannot be applied per sold hour here. The CPU-only measured research kernel is
+also not evidence of a full-power, billable GPU filler workload.
 
 \paragraph{Market comparison.} The dated price comparison in Appendix~\ref{app:repro}
 provides a screening test, not a sales
-forecast. At the older L4 hardware cost, full heat credit and \qty{64.7}{\percent} assumed
+forecast. At the profile's L4 hardware cost, full heat credit and the unlimited-work \qty{64.7}{\percent} assumed
 sold hours, it estimates CHF~0.054 per million 8B-class tokens; at \qty{35}{\percent} sold
-hours, CHF~0.093. A listed Swiss 8B offer was CHF~0.034 per million tokens on the same
+hours (above the fleet model's 25.4\%, Section~\ref{sec:eval-house}), CHF~0.093. A listed Swiss 8B offer was CHF~0.034 per million tokens on the same
 date. The estimates use benchmark throughput for a different GPU workload, compare models
 with unequal quality and omit the operator/host split. Under free heat and the later L4
 purchase sensitivity above, they cannot establish a profitable or price-leading offer.

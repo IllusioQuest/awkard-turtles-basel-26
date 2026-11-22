@@ -16,31 +16,38 @@ case must consequently be tested against both the heat balance and the price of 
 
 We study the following questions:
 \begin{description}
-  \item[Q1] What heat coverage and server utilisation can a case-compliant single house achieve,
-    and does planning improve on a local heat-following rule?
-  \item[Q2] Which additional conditions could make the single-house system viable after hardware
-    and operating costs, and how do those conditions compare with observed compute prices?
-  \item[Q3] In a multi-site scenario, can routing deadline-bound work to sites with year-round heat
+  \item[Q1] What heat coverage, utilisation and deadline performance can a case-compliant single
+    house achieve, first with unlimited work and then with finite, sourced job demand?
+  \item[Q2] Under which conditions does the single-house system cover its hardware, and how many
+    servers per house does that favour?
+  \item[Q3] In a multi-site setting, can moving deadline-bound work to sites with year-round heat
     demand reduce missed deadlines?
 \end{description}
 
-\paragraph{Approach.} We use the case's fixed Basel reference house and hourly weather, then extend
-the same heat balance to a labelled synthetic network. A transparent greedy baseline is compared
-with rolling-horizon planning and a full-year upper bound. For economics, we separate the case
-break-even (electricity net of heat value) from full-cost break-even, and expose the required
-compute price rather than treating heat reuse as automatic profitability. The network experiments
-are scenario analyses: their sites and workload shares are not forecasts of a deployed market.
+\paragraph{Approach.} We use the case's fixed Basel reference house and hourly weather, and add
+labelled variants: a house calibrated to an organiser-provided gas record, a local scenario with an
+indoor pool and a synthetic Swiss network. An event-driven fleet model draws jobs from sourced
+volumes and traces, quotes prices and schedules work with one heat-first policy shared by the
+simulation and the real-container controller. A rolling-horizon linear programme and a full-year
+upper bound serve as analytical comparisons. For economics, we separate the case break-even
+(electricity net of heat value) from full cost after hardware, and expose the volume, price and
+server count at which the house breaks even. Network results are scenario analyses, not forecasts
+of a deployed market.
 
-\paragraph{Contributions.} This paper makes three claims, each limited to the evidence available.
+\paragraph{Contributions.} This paper makes four claims, each limited to the evidence available.
 \begin{enumerate}
-  \item A reproducible reference-house analysis that separates physical heat utilisation from
-    economic viability and shows the boundary at which a single-house system can cover full cost
-    (Sections~\ref{sec:case}, \ref{sec:economics} and~\ref{sec:evaluation}).
-  \item A shared heat-led scheduling model, with the greedy rule as a baseline and a rolling-horizon
-    linear programme for multi-site work allocation (Sections~\ref{sec:model} and~\ref{sec:scheduling}).
-  \item A controlled network scenario showing when routing changes deadline outcomes, alongside a
-    demonstrator that applies scheduler decisions to real containerised work
-    (Sections~\ref{sec:evaluation} and~\ref{sec:demonstrator}).
+  \item A reproducible reference-house analysis that separates the physical limit (unlimited work)
+    from the result under sourced finite demand, and locates the full-cost boundary in volume,
+    price and server count (Sections~\ref{sec:case}, \ref{sec:economics} and~\ref{sec:evaluation}).
+  \item One heat-first scheduling policy used by the fleet simulation and a real-container controller,
+    with greedy, network-greedy and linear-programme strategies as research comparisons
+    (Sections~\ref{sec:model} and~\ref{sec:scheduling}).
+  \item A check of the case's house model against a real house's measured gas use, and network
+    scenarios showing when routing to year-round heat sinks changes deadline outcomes
+    (Section~\ref{sec:evaluation}).
+  \item A demonstrator in which the same scheduler freezes and resumes a real transcription and
+    language-model container on the heat signal, with measured CPU time and energy
+    (Section~\ref{sec:demonstrator}).
 \end{enumerate}
 
 The paper's practical target is not to claim that any server makes a house cheaper to heat. It is

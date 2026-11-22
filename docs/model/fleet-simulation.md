@@ -441,7 +441,8 @@ Choices the spec left open, made during the build:
   jobs miss their deadline. `basel-region-100` contains BL houses only: the 10 km grid has no cell
   inside Basel-Stadt.
 
-Checks (§13): Core cross-check within 1 % (`SpecTests.ReferenceHouseWithBacklogMatchesCore`);
+Checks (§13): Core cross-check within 1 % (`SpecTests.ReferenceHouseWithBacklogMatchesCore`; measured on `main`
+2026-11-22: 22,657.0 vs 22,661.0 server-hours and 18,125.6 vs 18,128.8 kWh heat used, −0.02 %);
 event vs tick per-house deviation within the bound computed by the test; outputs byte-identical
 across runs; network energy balance closes to 1e-9 kWh.
 
@@ -500,7 +501,7 @@ and `post` (L4 hardware CHF 6,415 per server-year). Net = margin − hardware pe
 | Job volume (all types together), 4 servers | `volume_scale` ≈ 0.28 (2.8 × today's 0.1) | 30 % of jobs miss their deadline (summer heat limit); above ≈ 0.3 the margin levels off near CHF 35k because the house cannot use more heat |
 | Type 1 prices only, volume 0.1, 4 servers | × 2.61 (LLM ≈ CHF 5.81 per L4 server-hour instead of 2.23) | Type 1 has no price response in the model, so this is optimistic |
 | Type 2 price band only | never (elasticity −0.8: revenue grows only with p^0.2 above the competitor price) | — |
-| **Fewer servers**, volume 0.1 | **1 server: net +CHF 5,252/year, payback 3.1 years**; 2 servers ≈ break-even (−CHF 621); 3 servers −CHF 7,654 | 1 server: 18.9 % coverage, 84 % utilisation, 4,622 missed deadlines (5.9 %) |
+| **Fewer servers**, volume 0.1 | **1 server: net +CHF 5,252/year, payback 3.1 years**; 2 servers ≈ break-even (−CHF 621); 3 servers −CHF 7,654 | 1 server: 18.9 % coverage, 84.1 % utilisation, 7,366 server-hours, income CHF 13,333, margin CHF 11,667, heat value CHF 784, 4,622 missed deadlines (5.9 %), 1,250 Type 2 jobs rejected on price (878 with 4 servers) |
 
 Break-even volume by server count: 1 ≈ 0.05, 2 ≈ 0.11, 3 ≈ 0.19, 4 ≈ 0.28. At volume 0.1 the
 income barely depends on the server count (CHF 13.3k–14.1k), so the hardware decides the result.
@@ -508,6 +509,16 @@ Caveats: the volume baseline (0.1, and the 1 % × 1 % LLM shares) is a scenario 
 paid in the model (without that, the 4-server break-even moves to ≈ 0.30); fewer servers get
 slightly higher Type 2 quotes through the pricing's capacity term (not traced further). The 1-server
 case was re-run independently and matches.
+
+### One server per house (scenarios `*-1-server.json`, 2026-11-22)
+
+| Run | Coverage | Utilisation | Late jobs | Income | Net after hardware (combined) |
+|---|---:|---:|---:|---:|---:|
+| `reference-1-server` | 18.9 % | 84.1 % | 4,622 (5.9 %) | CHF 13,333 | +CHF 5,252 (payback 3.1 y; operator +CHF 4,470, 3.4 y) |
+| `real-house-1-server` | 16.1 % | 95.0 % | 956 (1.2 %) | CHF 14,628 | +CHF 6,332 (payback 2.8 y; heat value CHF 885) |
+| `dreispitz-5-pool-1-server` | houses 17.9 %, pool 11.0 % | houses ≈ 80 %, pool 49 % | 126 of 778,536 (0.016 %) | CHF 170,564 (all sites) | houses ≈ +CHF 1,770 each; pool (20 servers) −CHF 24,937 |
+
+In the one-server neighbourhood the pool does 68 % of the work in January and 76 % in July.
 
 ### Real house variant (`config/fleet/scenarios/real-house.json`, T-82, 2026-11-22)
 

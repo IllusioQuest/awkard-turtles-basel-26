@@ -2,8 +2,8 @@
 \label{sec:limits}
 
 \paragraph{Physical model.} The case-defined reference house assumes a lossless tank, 80\% heat
-recovery, constant daily hot-water demand, flat electricity price and abstract \qty{1}{kW}
-servers. The smaller four-L4 variant uses host-power estimates and GPU TDP rather than measured
+recovery, constant daily hot-water demand spread evenly over the hours, flat electricity price and
+abstract \qty{1}{kW} servers. Only the demonstrator uses a time-of-day draw profile. The smaller four-L4 variant uses host-power estimates and GPU TDP rather than measured
 wall power or a quoted liquid-cooled build. Its calculated heat fits the constant hot-water
 base load; actual draw timing, delivery temperature, thermal losses and water hygiene require
 engineering validation. Neither normalised 1~kW L4 profile nor the candidate four-card host is
@@ -21,19 +21,37 @@ start over finite time and may need discrete on/off decisions. Their electricity
 switching constraints require a measured node profile and a mixed-integer extension before
 the model can predict shoulder-season operation.
 
-\paragraph{Work and markets.} The reference-house maximum assumes unlimited paid work. The
-mixed-queue run uses a medical-dictation arrival fixture for technical validation, not the
-proposed public-document LLM market; sensitive health records are not placed in homes. Its
-0.35 filler capacity cap is an analogy, not observed sales. The laptop Apertus measurement is
-CPU-package energy, not L4 throughput or whole-node power. The research simulation was measured
-on a CPU laptop; a billable GPU-compatible filler has not been demonstrated. Competitor list
-prices and retail GPU rates are buyer prices, not DigitalHeat contracts or net receipts. GPU wear
-and purchase prices are sensitivity inputs. Cooling integration, idle energy, connectivity,
-maintenance, insurance, financing, tax bases and sales costs remain incompletely priced. The
-consumer-GPU cost case is excluded from the proposed deployment pending licence clarification.
+\paragraph{Work and markets.} The unlimited-work column is a physical limit, not a sales
+forecast. The sourced demand of the fleet model is scaled by 0.1 for a single house, a team choice;
+the LLM volume rests on two unsourced market shares (1\% Swiss share and 1\% market share of a
+global token volume), and the transcription arrivals use an LLM trace as a labelled proxy.
+Arrivals are Poisson, which is smoother than observed LLM traffic, and job sizes are known at
+arrival. Late work is paid; without that, the four-server volume break-even moves from 2.8 to
+about 3.0 times the scaled demand. Type~1 customers do not react to price, which makes the price
+route to break-even optimistic, and the Type~2 pricing function is our own placeholder. Start,
+resume and checkpoint overheads and a minimum load are set to zero for lack of sources. Each
+scenario is one seeded run without a spread over seeds. The research simulation's energy per task
+is a CPU laptop value used as a placeholder for a GPU filler workload. Competitor list prices and
+retail GPU rates are buyer prices, not DigitalHeat contracts or net receipts. GPU wear and purchase
+prices are sensitivity inputs. Cooling integration, idle energy, connectivity, maintenance,
+insurance, financing, tax bases and sales costs remain incompletely priced. The consumer-GPU cost
+case is excluded from the proposed deployment pending licence clarification.
+
+\paragraph{Real house.} The gas record lacks October to December 2025, July and August read
+identical values that may be estimated, and the boiler's efficiency and age are unknown. The
+calibrated house keeps the reference house's location, weather, electricity price and tank, because
+the address is anonymised.
+
+\paragraph{Demonstrator.} The live request runs on a laptop: its measured energy is the
+processor package's share, not that of a \qty{1}{kW} server or a whole machine, and its heat is not
+recovered. The demonstrator replays the summer day at ten seconds per simulated hour, so the
+freeze is a property of the modelled house's heat budget; the freeze of the process itself is
+measured.
 
 \paragraph{Network inference.} The 33-site locations and sizes and Type~1 arrival shares are
-synthetic. Unless a forecast-error sweep is explicitly stated, planning uses perfect heat
+synthetic, and the research strategies are reproducible only at the commit stated in
+Section~\ref{sec:evaluation}. In the local scenario, the pool's annual demand and all positions
+are scenario values. Unless a forecast-error sweep is explicitly stated, planning uses perfect heat
 foresight while knowing only arrived jobs. Uniform transfer delay assumes data staged at arrival;
 transfer cost and distance-dependent delay are absent. The experiments therefore compare
 algorithms under controlled inputs rather than predict an operating Swiss network.

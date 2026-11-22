@@ -7,9 +7,29 @@ tank, \qty{80}{\percent} recovery, backup heater for the rest) and one actuation
 scheduler that computes the year is the one that drives a real container in the demonstrator
 (Section~\ref{sec:demonstrator}).
 
-\subsection{Five strategies}
+\subsection{One executable heat-first policy}
+\label{sec:policy}
 
-We compare strategies of increasing intelligence.
+All executable code paths use one policy. Its load rule is the local greedy rule B1 below: run what
+the site can use now or store, never dump. Pending work is ordered earliest deadline first, then by
+ID. A job goes to the eligible site with the largest free share of its hourly heat budget, then the
+most free heat, then the site ID. The fleet adapter sets each house's heat budget at the start of
+every hour from its settled demand and tank. Each started or resumed chunk claims its heat for the
+rest of that hour, so finishing or pausing does not reopen the budget. Pausable chunks are lowered
+or paused when the target falls, and non-pausable work continues. The same rules run in the
+real-container mesh. A frozen container can only run at full load or not at all, so its share of
+the heat-first load is rounded down to whole jobs: when the running batch heat exceeds the site's
+useful heat (demand plus free tank room), the lowest-priority jobs freeze until the rest fits, and
+they thaw in priority order when their heat fits again.
+
+\subsection{Research strategies}
+
+For the network experiments we compare strategies of increasing intelligence. They were implemented
+before the policy above was unified, and all of them, B1 included, are research comparators: the
+executable policy shares B1's load rule but places work across sites by free heat share, so it
+matches neither B1 nor B2 exactly. Their results in Section~\ref{sec:evaluation} were computed at
+repository commit \texttt{1863f57} and are not selectable on the current main branch
+(Appendix~\ref{app:repro}).
 
 \textbf{B0 (always on)} runs every server all the time, $u_{s,t} = N_s$, and dumps what the house
 cannot take.
@@ -20,7 +40,7 @@ tank, and never dumps:
   u_{s,t} = \operatorname{clamp}\!\left(\frac{D_{s,t} + B_s - S_{s,t}}{a_s},\ \mu_s N_s,\ N_s\right).
   \label{eq:greedy}
 \end{equation}
-This is the scheduler that produces the reference-house figures. With jobs, each site
+This is the load rule of the executable policy. In the network experiments each site
 first serves its own Type~1 work in earliest-deadline-first order and then fills the rest with
 filler; it never moves work.
 

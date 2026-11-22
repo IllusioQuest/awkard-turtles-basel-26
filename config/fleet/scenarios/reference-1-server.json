@@ -1,0 +1,51 @@
+{
+  "_note": "Variant of reference.json (team answer to 'servers per house', 2026-11-22): the same case reference house, jobs, demand (x 0.1), pricing, scheduler and seed, with 1 instead of 4 servers. Break-even sweep: docs/model/fleet-simulation.md section 16.",
+  "run": {
+    "start_local": "2025-01-01T00:00",
+    "end_local": "2026-01-01T00:00",
+    "mode": "event",
+    "tick_ms": 1000,
+    "seed": 20261121
+  },
+  "houses": {
+    "file": "config/fleet/houses/reference.json"
+  },
+  "servers": {
+    "policy": "fixed",
+    "n": 1,
+    "hardware_profile": "config/hardware/gpu-inference-l4.json"
+  },
+  "jobTypes": [
+    "config/fleet/job-types/transcription-whisper-large-v3.json",
+    "config/fleet/job-types/llm-inference-apertus-8b.json",
+    "config/fleet/job-types/research-sim-montecarlo.json"
+  ],
+  "demand": {
+    "from_file": null,
+    "volume_scale": {
+      "transcription-whisper-large-v3": 0.1,
+      "llm-inference-apertus-8b": 0.1,
+      "research-sim-montecarlo": 0.1
+    }
+  },
+  "pricing": {
+    "id": "mock-load",
+    "p_min_chf": 0.226,
+    "p_max_chf": 1.2,
+    "gamma": 1,
+    "p_ref_chf": 0.82,
+    "p_ref_noise_sd": 0.079,
+    "elasticity": -0.8
+  },
+  "forecast": {
+    "kind": "archived"
+  },
+  "scheduler": {
+    "id": "mesh-heat-first",
+    "chunk_target_s": 3600
+  },
+  "logging": {
+    "house_timeseries": "hourly",
+    "out_dir": "data/derived/fleet"
+  }
+}
