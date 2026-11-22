@@ -11,7 +11,7 @@ if (Test-Path $tunnelPidFile) {
 $tokenFile = Join-Path $state 'operator-token.txt'
 if (Test-Path $tokenFile) {
     try {
-        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:18970/api/operator/shutdown' -Headers @{'X-Operator-Token'=[IO.File]::ReadAllText($tokenFile)} -TimeoutSec 30 | Out-Null
+        Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:18970/api/operator/shutdown' -Headers @{'X-Operator-Token'=[IO.File]::ReadAllText($tokenFile)} -TimeoutSec 120 | Out-Null
     } catch {
         Write-Warning 'The tunnel is closed, but the local service did not confirm workload cleanup. Inspect app-error.log and the owned Docker containers before restarting.'
         throw

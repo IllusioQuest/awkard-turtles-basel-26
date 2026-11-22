@@ -4,5 +4,7 @@
   "reference_recoverable_heat_kwh_per_hour": 0.8,
   "reference_heat_source": "docs/case/key-figures.md: 1 kW reference server, 80% recovered to water = 0.8 kWh per server-hour.",
   "worker_ram_mib": 7168,
-  "worker_ram_source": "Decision 0068 provisional per-container memory cap; four containers have not yet been benchmarked concurrently."
+  "worker_ram_source": "Decision 0068 provisional per-container memory cap; four concurrent Apertus jobs completed on this laptop on 2026-11-22 (docs/jobs/audience-apertus-demo.md).",
+  "worker_cpu_cores": 4,
+  "worker_cpu_source": "This presentation laptop reports 16 logical processors (2026-11-22); four equal CPU partitions. Four-answer timing is recorded in docs/jobs/audience-apertus-demo.md."
 }
