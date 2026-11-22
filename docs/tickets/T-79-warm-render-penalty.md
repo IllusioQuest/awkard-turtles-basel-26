@@ -15,3 +15,8 @@ propose (ADR, user decision) recycling warm workers every K frames or a fresh pr
 
 Done when the laptop result is in `docs/performance/` and summarised in
 `docs/jobs/render-warm-penalty.md`, with a recommendation.
+
+Hardware follow-up by Nikita/Codex under T-83: existing benchmark ran4frames x2
+intended rounds on Iris Xe. Warm round1 later median1.225s; fresh round1 median
+12.548s. Fresh round2 crashed in igxelpicd64.dll(C0000005); complete balanced
+benchmark remains pending. No warm-mode switch. Evidence in docs/performance/render-efficiency-2026-11-22.json.

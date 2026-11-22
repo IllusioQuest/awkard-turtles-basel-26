@@ -142,3 +142,6 @@ T-80 real laptop follow-up, Nikita/Codex: rebuilt main cdd7ac4 at18950. Run1 com
 
 
 T-83 Nikita/Codex perf/T-83-render-efficiency: user requests speed; running existing T-79 warm/fresh hardware benchmark and retaining per-generation native logs. Possible scalar heat-summary API awaits user decision/review. Heat-first policy,24/16/8 need,3GPU workers, quality and Minecraft unchanged. No separate T-79 benchmark implementation.
+
+
+T-83 PR73 /8a4e4ad,60fbc70: approved/reviewed compact heat snapshots and zero-allocation scalar sum; unchanged placement/ownership.132tests plus16native recheck.50queries/500attempts:230.63MB old vs2.61MB compact; scalar0B. Two distinct real48-frame MP4 runs74.6994/78.2986s, both24/16/8. No matched end-to-end speedup guarantee. T79 existing hardware probe warm fast, fresh round2C0000005 in Intel driver; no mode change. New generation logs retain exit evidence (also verified after later idle-process crash). Three concurrent GPU workers, quality and Minecraft preserved. Docs/jobs/render-efficiency.md.
