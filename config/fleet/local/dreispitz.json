@@ -29,7 +29,8 @@
     {
       "house_id": "pool-dreispitz",
       "annual_heat_kwh": 627000,
-      "server_count": 20
+      "server_count": 20,
+      "site_type": "pool"
     }
   ],
   "outputs": [
@@ -53,6 +54,7 @@
     "tank_kwh": "35 kWh, case reference house; pool: same 35 kWh, synthetic (the pool water as a buffer is not modelled)",
     "tank_initial_kwh": "0: tank starts empty as in Core",
     "electricity_price_chf_per_kwh": "Münchenstein H4 2026, Primeo Netz AG, 31.977 Rp./kWh (data/raw/elcom/municipalities-2026/H4.json)",
-    "server_count": "Houses: 4, case reference house; pool: 20, synthetic scenario value (T-67); its flat heat could absorb 89.5 servers (71.6 kW / 0.8)"
+    "server_count": "Houses: 4, case reference house; pool: 20, synthetic scenario value (T-67); its flat heat could absorb 89.5 servers (71.6 kW / 0.8)",
+    "extra_sites.site_type": "Display category for the admin map icon (T-81): the extra site is the indoor pool described above."
   }
 }

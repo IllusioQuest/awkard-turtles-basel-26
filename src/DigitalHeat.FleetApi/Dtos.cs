@@ -10,7 +10,7 @@ public sealed record HouseSummary(double HeatDemandKwh, double HeatUsedKwh, doub
     double MarginChf, double? BreakEvenChfPerServerHour, double LateWorkKwh, double Pauses);
 
 public sealed record HouseInfo(string Id, string Municipality, string Canton, string CellId, double Lat, double Lon, int Servers,
-    double TankKwh, double ElectricityPriceChfPerKwh, HouseSummary Summary);
+    double TankKwh, double ElectricityPriceChfPerKwh, HouseSummary Summary, string SiteType = "house");
 
 public sealed record NetworkHour(int H, double HeatDemandKwh, double HeatProducedKwh, double HeatUsedKwh, double HeatDumpedKwh,
     double HeatBackupKwh, double ElectricKwh, double Load, double IncomeChf, double ElectricityCostChf, double Arrivals,

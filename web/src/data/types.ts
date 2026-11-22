@@ -49,6 +49,7 @@ export interface HouseInfo {
   tankKwh: number
   electricityPriceChfPerKwh: number
   summary: HouseSummary
+  siteType: string // display category from the house file ("house" if not set, "pool", ...)
 }
 
 /** One hour of the whole network (network-hourly.csv). Energies are kWh in that hour. */

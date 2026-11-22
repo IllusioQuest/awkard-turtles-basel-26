@@ -205,7 +205,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
   const dumpedShare = totals.dumped / Math.max(1, totals.used + totals.dumped)
   const missedShare = totals.misses / Math.max(1, totals.completions + totals.misses)
-  const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers })), [houses])
+  const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers, siteType: h.siteType })), [houses])
   const wall = wallMs(run, t)
 
   return (
