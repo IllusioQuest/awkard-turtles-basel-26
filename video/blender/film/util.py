@@ -11,7 +11,8 @@ from mathutils import Vector
 
 FPS = 24
 HERE = Path(__file__).resolve().parent.parent
-FONT_DIRS = ["/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter", os.path.expanduser("~/.fonts")]
+FONT_DIRS = ["/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter", os.path.expanduser("~/.fonts"),
+             os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts"), "C:/Windows/Fonts", "/Library/Fonts", os.path.expanduser("~/Library/Fonts")]
 
 
 def sec(t: float) -> int:
@@ -334,9 +335,10 @@ def look_at(obj, target):
 
 def font(weight="Regular"):
     for d in FONT_DIRS:
-        p = Path(d) / f"Inter-{weight}.otf"
-        if p.exists():
-            return bpy.data.fonts.load(str(p), check_existing=True)
+        for name in (f"Inter-{weight}.otf", f"Inter-{weight}.ttf"):
+            p = Path(d) / name
+            if p.exists():
+                return bpy.data.fonts.load(str(p), check_existing=True)
     return None  # Blender's built-in font
 
 

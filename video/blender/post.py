@@ -26,18 +26,26 @@ B = {k: (v["start"], v["end"]) for k, v in TL["beats"].items()}
 MK = TL["marks"]
 INK, INK2, MUTED = (240, 239, 236), (195, 194, 183), (137, 135, 129)
 SERIES1, HEAT = (57, 135, 229), (255, 138, 42)
-FONT_DIRS = ["/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter"]
+FONT_DIRS = ["/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter",
+             str(Path.home() / "AppData/Local/Microsoft/Windows/Fonts"), "C:/Windows/Fonts",
+             "/Library/Fonts", str(Path.home() / "Library/Fonts")]
+FALLBACK = {"Light": ["segoeuil.ttf", "HelveticaNeue.ttc", "DejaVuSans.ttf"], "Regular": ["segoeui.ttf", "Helvetica.ttc", "DejaVuSans.ttf"],
+            "Medium": ["seguisb.ttf", "segoeui.ttf", "Helvetica.ttc", "DejaVuSans.ttf"]}
 
 
 def font(weight, px):
     for d in FONT_DIRS:
-        p = Path(d) / f"Inter-{weight}.otf"
-        if p.exists():
-            return ImageFont.truetype(str(p), px)
-    try:
-        return ImageFont.truetype("DejaVuSans.ttf", px)
-    except OSError:
-        return ImageFont.load_default()
+        for name in (f"Inter-{weight}.otf", f"Inter-{weight}.ttf"):
+            p = Path(d) / name
+            if p.exists():
+                return ImageFont.truetype(str(p), px)
+    for name in FALLBACK.get(weight, FALLBACK["Regular"]):
+        for d in [""] + FONT_DIRS:
+            try:
+                return ImageFont.truetype(str(Path(d) / name) if d else name, px)
+            except OSError:
+                continue
+    return ImageFont.load_default(px)
 
 
 def smooth(x):
@@ -176,7 +184,7 @@ class Overlay:
         o = fade(t, B["lapse"][0] + 0.3, MK["lapse_pause"] + 0.2, 0.4, 0.3)
         if o > 0:
             dd = date_at(t)
-            self.text(d, (self.w - int(96 * self.s), int(80 * self.s)), dd.strftime("%-d %B 2025"), self.f_big, INK, o, anchor="ra")
+            self.text(d, (self.w - int(96 * self.s), int(80 * self.s)), f"{dd.day} {dd.strftime('%B')} 2025", self.f_big, INK, o, anchor="ra")
         self.caption(d, t, [(f"{n('first_full_tank')} 2025 · tank full ({n('tank_kwh')})", True), ("The servers pause by themselves. The house decides.", False)], MK["lapse_pause"] + 0.8, B["lapse"][1] + 0.3)
         # 6 figures: source line
         o = fade(t, B["figures"][0] + 0.8, B["figures"][1] - 0.3)

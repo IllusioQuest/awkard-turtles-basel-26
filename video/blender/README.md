@@ -20,7 +20,17 @@ Cycles finds one):
 video/blender/make_film.sh final
 ```
 
-Set `BLENDER=/path/to/blender` if `blender` is not on the PATH. Without a Blender install, a Python
+On Windows (PowerShell), use the PowerShell script instead (it finds Blender under
+`C:\Program Files\Blender Foundation\` automatically; otherwise pass `-Blender`):
+
+```powershell
+.\video\blender\make_film.ps1
+.\video\blender\make_film.ps1 -Preset final
+```
+
+If PowerShell blocks the script: `powershell -ExecutionPolicy Bypass -File .\video\blender\make_film.ps1`.
+
+Set `BLENDER=/path/to/blender` if `blender` is not on the PATH (bash). Without a Blender install, a Python
 3.11 with the `bpy` module works too (`pip install bpy==4.5.*`, then `BLENDER=/path/to/python3.11`).
 `post.py` needs Python 3 with Pillow, plus ffmpeg. Rendering is resumable: frames that already exist in
 `out/<preset>/frames/` are skipped, so an interrupted run continues where it stopped. Delete that folder
