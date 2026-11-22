@@ -9,8 +9,8 @@
 <svg id="networkMap" class="network-svg" viewBox="0 0 900 340" role="img" aria-label="Configured peer links from this UI node; planned servers are dashed"></svg><div id="hostMap" class="hosts"></div><p id="topologyNote"></p><div id="frameMap" class="frame-map" role="list" aria-label="Frame placement and progress"></div>
 <div class="legend"><span><i class="done"></i>Completed</span><span><i class="busy"></i>Executing</span><span><i></i>Pending</span></div><small>Node borders show active work or completed contributions. Frame colors show work state, not GPU utilization.</small></section>
 <div class="grid"><main><div class="card"><div class="row"><h2>Rendered landscape</h2><span class="muted" id="frameLabel">Waiting for the first completed frame</span></div><a id="downloadVideo" hidden download="landscape.mp4">Download final video</a><video id="animation" controls hidden style="width:100%"></video><div id="empty" class="placeholder">Mountains · lake · forest · moving camera<br><br>48 frames · 640 × 360 · 32 samples</div><img id="preview" alt="Completed Blender landscape frame" hidden><input id="scrub" type="range" min="0" max="0" value="0" aria-label="Preview frame"><button id="play">Play completed frames</button></div>
-<div class="card"><h2>Measured render time</h2><div class="row"><span>CPU scene preparation</span><b id="prepTime">—</b></div><div class="row"><span>Active render workflow</span><b class="big" id="activeTime">—</b></div><div class="row"><span>Mean completed-frame render</span><b id="meanFrame">—</b></div><small id="frameRange"></small><div class="row"><span>Confirmed pause</span><b id="pausedTime">—</b></div><div class="row"><span>Total render elapsed</span><b id="elapsedTime">—</b></div><small>Preparation is measured separately. Render time includes queueing, startup, shaders and result collection.</small></div></main>
-<aside><div class="card"><h2>Progress</h2><div class="row"><b id="count">0 / 48 frames</b><span class="pill">heat-first placement</span></div><progress id="progress" max="48" value="0"></progress><p class="muted">CPU 1 prepares the scene. GPU workers render its frames. CPU 2 assembles the final video.</p><small>Frames appear when each render completes. Timers continue while a frame is rendering. The first GPU frame may take longer while shaders compile.</small></div></aside></div>
+<div class="card"><h2>Measured render time</h2><div class="row"><span>CPU scene preparation</span><b id="prepTime">—</b></div><div class="row"><span>Active render workflow</span><b class="big" id="activeTime">—</b></div><div class="row"><span>Mean completed-frame render</span><b id="meanFrame">—</b></div><div class="row"><span>Confirmed pause</span><b id="pausedTime">—</b></div></div></main>
+<aside><div class="card"><h2>Progress</h2><div class="row"><b id="count">0 / 48 frames</b><span class="pill">heat-first placement</span></div><progress id="progress" max="48" value="0"></progress><p class="muted">CPU 1 prepares the scene. GPU workers render its frames. CPU 2 assembles the final video.</p></div></aside></div>
 </div>
 <script>
 let snapshot,frames=[],playing=false,idx=0,refreshing=false;const el=id=>document.getElementById(id);const seconds=n=>Number(n||0).toFixed(1)+' s';
@@ -87,7 +87,6 @@ function renderTopology(s){
    let state=stale?'Status stale — waiting for peers':n.error?'Worker error':busy?active.map(a=>a.attempt.profile.command[0]==='prepare'?'Preparing shared scene':a.attempt.profile.command[0]==='assemble'?'Assembling video':'Frame '+Number(a.attempt.profile.command[0])+' · '+a.phase).join(', '):s.held&&!ended?'Paused · no executing job':done.length?'Idle · contributed to this run':'Idle · no contribution yet';
    if(busy&&s.pause_pending)state+=' · pause pending';
    card.append(element('div','node-state',state));
-   card.append(element('div','node-detail',preparations+' scene preparation(s) · '+frameCount+' frame(s) · '+done.filter(f=>f.metadata.stage==='assemble').length+' video(s)'));
    const roleTotal=n.worker_role==='prepare'||n.worker_role==='assemble'?1:(n.heat_need_frames??s.frames_per_run);
    const workCount=n.worker_role==='prepare'?preparations:n.worker_role==='assemble'?done.filter(f=>f.metadata.stage==='assemble').length:frameCount;
    const meter=element('div','node-meter');const fill=element('span');fill.style.width=(100*Math.min(workCount,roleTotal)/Math.max(1,roleTotal))+'%';meter.append(fill);card.append(meter);
@@ -107,7 +106,6 @@ function renderTopology(s){
  }
  const durations=(s.frames||[]).map(f=>f.metadata.render_seconds).filter(v=>typeof v==='number'&&Number.isFinite(v));
  el('meanFrame').textContent=durations.length?seconds(durations.reduce((a,b)=>a+b,0)/durations.length):'—';
- el('frameRange').textContent=durations.length?durations.length+' completed frames · range '+seconds(Math.min(...durations))+'–'+seconds(Math.max(...durations))+'. Blender render calls only; excludes pauses, process startup and queueing.'+((s.frames||[]).some(f=>'warm_scene_reused' in f.metadata)?' Cached scene reused for '+s.frames.filter(f=>f.metadata.warm_scene_reused===true).length+' frame(s).':''):'Available after the first measured frame completes.';
 }
 async function refresh(){
  if(refreshing)return;refreshing=true;
@@ -122,7 +120,7 @@ async function refresh(){
   if(s.video){el('animation').hidden=false;el('downloadVideo').hidden=false;const videoUrl='/ui/video/'+encodeURIComponent(s.video.peer_id)+'/'+encodeURIComponent(s.video.job_id);el('downloadVideo').href=videoUrl;if(el('animation').getAttribute('src')!==videoUrl)el('animation').src=videoUrl}else{el('animation').hidden=true;el('animation').removeAttribute('src');el('downloadVideo').hidden=true;el('downloadVideo').removeAttribute('href')}
   el('count').textContent=s.completed+' / '+s.frames_per_run+' frames';el('progress').max=s.frames_per_run;el('progress').value=s.completed;
   el('prepTime').textContent=seconds(s.preparation_seconds)+(s.preparation_finished_utc?' · complete':s.preparation_started_utc?' · in progress':'');
-  el('activeTime').textContent=seconds(s.active_seconds);el('pausedTime').textContent=seconds(s.paused_seconds);el('elapsedTime').textContent=seconds(s.elapsed_seconds);
+  el('activeTime').textContent=seconds(s.active_seconds);el('pausedTime').textContent=seconds(s.paused_seconds);
   frames=s.frames||[];el('scrub').max=Math.max(0,frames.length-1);if(!playing)image();
 
  }catch(e){el('error').textContent=e.message}finally{refreshing=false}
