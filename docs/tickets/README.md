@@ -118,6 +118,8 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 
 | [T-77](T-77-render-runtime.md) | Measure and improve renderer runtime | Nikita / Codex | done; PR #69 and timeout follow-up on main |
 
+| [T-78](T-78-voice-request-demo.md) | Live voice request on the summer reference house (pitch demo) | Ennio / Claude | done; decision 0068 |
+
 | [T-79](T-79-warm-render-penalty.md) | Measure the warm-process render penalty on the presentation GPU | Nikita / Claude | in progress; benchmark ready, laptop run pending |
 
 | [T-80](T-80-render-app-overhead.md) | Measure and reduce C# render-app overhead | Nikita / Claude | done; run-scoped status filter merged; heat stall and journal growth need decisions |

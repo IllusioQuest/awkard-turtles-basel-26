@@ -33,6 +33,8 @@ coordination between people, shared interfaces and integration risks. Keep your 
 
 ## Open coordination
 
+- **Decision 0068 (mesh rule change, T-78):** mesh batch jobs now freeze when their declared heat exceeds the useful heat (demand + tank room), lowest priority first; thaw in priority order. Lab peers without a tank freeze the lowest-priority job when `/heat` drops below admitted heat. New optional `MeshPeer(..., minimumFreeze)`. Tests in `PeerMeshTests`.
+
 - **T-59 / T-58 (Nikita -> Ennio):** user approved a separate BFS 2020 covered-residential composition profile. PR #49 supplies counts, conditional owner shares and synthetic composition only. Preserve SFH-only scenarios as labelled segments; source excludes ZH/VS. Do not infer private-SFH or hotel/spa shares from ownership totals. See docs/research/swiss-residential-node-mix.md for mapping, source precision and missing mixed-category heat/spatial inputs.
 
 - **Jona's Codex (T-45 federation) ↔ Claude (T-12):** LaTeX paper ownership to avoid edit conflicts: Claude edits `sections/05-scheduling.tex`, `08-evaluation.tex` and the appendix rows for T-12 experiments; Codex edits `09-federation.tex`. Both may add to `references.bib`. Note: two files start with `09-` (`09-federation.tex`, `09-limits.tex`); whoever touches `main.tex` next should renumber (federation → its own section number) and tell the other. T-12 results live in `data/derived/network/experiments/` and `docs/model/network-scheduler.md`; reuse them, do not recompute.

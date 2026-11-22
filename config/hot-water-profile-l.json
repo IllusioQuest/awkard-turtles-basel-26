@@ -1,0 +1,31 @@
+{
+  "source": "Commission Regulation (EU) No 814/2013, Annex III, Table 1 'Load profiles of water heaters', load profile L (OJ L 239, 6.9.2013, p. 174-176). https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32013R0814, accessed 2026-11-22. Qtap values transcribed from the PDF; they sum to the printed Qref 11.655 kWh.",
+  "use": "Time-of-day shape of hot-water use for the T-78 live demo (labelled variant). Scaled to the case's 12 kWh/day (docs/case/challenge.md); the daily total of the reference house is unchanged.",
+  "qref_kwh": 11.655,
+  "tappings": [
+    { "time": "07:00", "qtap_kwh": 0.105 },
+    { "time": "07:05", "qtap_kwh": 1.4 },
+    { "time": "07:30", "qtap_kwh": 0.105 },
+    { "time": "07:45", "qtap_kwh": 0.105 },
+    { "time": "08:05", "qtap_kwh": 3.605 },
+    { "time": "08:25", "qtap_kwh": 0.105 },
+    { "time": "08:30", "qtap_kwh": 0.105 },
+    { "time": "08:45", "qtap_kwh": 0.105 },
+    { "time": "09:00", "qtap_kwh": 0.105 },
+    { "time": "09:30", "qtap_kwh": 0.105 },
+    { "time": "10:30", "qtap_kwh": 0.105 },
+    { "time": "11:30", "qtap_kwh": 0.105 },
+    { "time": "11:45", "qtap_kwh": 0.105 },
+    { "time": "12:45", "qtap_kwh": 0.315 },
+    { "time": "14:30", "qtap_kwh": 0.105 },
+    { "time": "15:30", "qtap_kwh": 0.105 },
+    { "time": "16:30", "qtap_kwh": 0.105 },
+    { "time": "18:00", "qtap_kwh": 0.105 },
+    { "time": "18:15", "qtap_kwh": 0.105 },
+    { "time": "18:30", "qtap_kwh": 0.105 },
+    { "time": "19:00", "qtap_kwh": 0.105 },
+    { "time": "20:30", "qtap_kwh": 0.735 },
+    { "time": "21:00", "qtap_kwh": 3.605 },
+    { "time": "21:30", "qtap_kwh": 0.105 }
+  ]
+}

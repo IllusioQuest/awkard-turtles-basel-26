@@ -42,6 +42,8 @@ public sealed class MeshPeer : IDisposable
     private readonly IPeerMeshTransport transport;
     private readonly TimeProvider clock;
     private readonly TimeSpan offerLifetime;
+    private readonly TimeSpan minimumFreeze;
+    private readonly Dictionary<string, DateTimeOffset> frozenAt = new(StringComparer.Ordinal);
     private readonly string journalPath;
     private readonly HashSet<string> peers;
     private readonly Dictionary<string, PeerOffer> offers = new(StringComparer.Ordinal);
@@ -52,8 +54,10 @@ public sealed class MeshPeer : IDisposable
     public MeshPeer(string meshId, string id, string stateDirectory, WorkloadInventory inventory,
         RuntimeNode[] runtimeNodes, IReadOnlyDictionary<string, ContainerProfile> profiles,
         IEnumerable<string> peers, IPeerMeshTransport transport, IWorkloadRuntime runtime,
-        TimeProvider clock, TimeSpan offerLifetime)
+        TimeProvider clock, TimeSpan offerLifetime, TimeSpan minimumFreeze = default)
     {
+        if (minimumFreeze < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(minimumFreeze));
+        this.minimumFreeze = minimumFreeze;
         if (inventory.Sites.Length != 1 || inventory.Sites[0].Id != id || inventory.Domains.Length != 1
             || offerLifetime <= TimeSpan.Zero) throw new ArgumentException("One physical domain/site per peer and a positive offer lifetime are required.");
         Id = id; this.runtimeNodes = runtimeNodes; this.profiles = profiles; this.transport = transport;
@@ -206,15 +210,42 @@ public sealed class MeshPeer : IDisposable
     {
         var scheduler = new HeatFirstScheduler(0);
         var heat = inventory.Sites[0].Heat;
+        var now = clock.GetUtcNow();
         bool noHeat = scheduler.Decide(heat).TargetLoadPerServer == 0;
         bool changed = false;
-        foreach (var row in coordinator.Attempts().Where(a => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause))
+        var attempts = coordinator.Attempts();
+        // Decision 0068: freeze-only batch containers run at their full declared heat, so the shared
+        // heat-first load is rounded down to whole jobs. The budget is the same useful heat the shared
+        // policy and admission use (HeatCapacity.RemainingKwh: demand plus tank room). Running heat
+        // above it would be dumped, so the lowest-priority jobs freeze until the rest fits.
+        double budget = HeatCapacity.RemainingKwh(heat) + HeatTolerance;
+        double load = attempts.Where(a => a.Phase == "running" && !Pausable(a)).Sum(Heat);
+        foreach (var row in attempts.Where(a => a.Phase == "running" && Pausable(a)).OrderBy(Priority))
         {
-            if (row.Phase == "running" && (noHeat || journal.OperatorHold) || row.Phase == "paused" && !noHeat && !journal.OperatorHold)
-                changed |= coordinator.ApplyBatchHeat(row.Attempt.Request.Id, heat, scheduler, clock.GetUtcNow());
+            string id = row.Attempt.Request.Id;
+            if (journal.OperatorHold) { coordinator.PauseBatch(id); changed = true; continue; }
+            if (noHeat) { changed |= coordinator.ApplyBatchHeat(id, heat, scheduler, now); MarkFrozen(id, now); continue; }
+            if (load + Heat(row) > budget) { coordinator.PauseBatch(id); MarkFrozen(id, now); changed = true; continue; }
+            load += Heat(row);
+        }
+        if (noHeat || journal.OperatorHold) return changed;
+        // Thaw in priority order, counting each thawed job, after at least the minimum freeze time.
+        foreach (var row in attempts.Where(a => a.Phase == "paused" && Pausable(a)).OrderBy(Priority))
+        {
+            string id = row.Attempt.Request.Id;
+            if (frozenAt.TryGetValue(id, out var since) && now - since < minimumFreeze) continue;
+            if (load + Heat(row) > budget) continue;
+            if (coordinator.ApplyBatchHeat(id, heat, scheduler, now)) { load += Heat(row); frozenAt.Remove(id); changed = true; }
         }
         return changed;
     }
+
+    private void MarkFrozen(string id, DateTimeOffset now) => frozenAt.TryAdd(id, now);
+    private const double HeatTolerance = 1e-9; // kWh; numerical tolerance only
+    private static double Heat(AttemptRecord a) => a.Attempt.Reservation.RecoverableHeatKwhPerHour;
+    private static bool Pausable(AttemptRecord a) => a.Attempt.Request.Kind == "batch" && a.Attempt.Request.Lifecycle.AllowPause;
+    private static JobPriority Priority(AttemptRecord a) =>
+        new(a.Attempt.Request.Deadline?.DueAtUtc.UtcTicks ?? long.MaxValue, a.Attempt.Request.Id);
 
     private void Propose(OriginJob job) => transport.Send(Id, job.Target!, new PeerProposal(Id, job.Generation,
         Identity(job.Request, job.ProfileId), job.Request, job.ProfileId, job.InventoryRevision, job.HourStartUtc, job.Heat!));
