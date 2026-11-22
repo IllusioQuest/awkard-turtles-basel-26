@@ -51,7 +51,7 @@ internal sealed class RenderSession
             // Planned peers are intentionally absent here: only runtime Peers are probed.
             // Keep execution's all-or-nothing snapshot; independent probe results are UI facts.
             // Ask for the current run only (plus unfinished work); older released history is not needed here.
-            string query=state.Id==""?"":"?job_prefix="+Uri.EscapeDataString(cfg.Id+"."+state.Id+"-");
+            string query=state.Id==""?"":"?job_prefix="+Uri.EscapeDataString(RenderHeatNeed.RunPrefix(cfg.Id,state.Id));
             var checkedPeers=await Task.WhenAll(cfg.Peers.Select(async p=>{
                 try{
                     using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
@@ -194,6 +194,21 @@ internal sealed class RenderSession
         if(stopRequested)return;
         foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/prepared-scene",state.Scene,RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
     }
+    /// <summary>ADR 0069: give each GPU node its weighted share of this run as heat need before frames are
+    /// submitted. Idempotent: resume re-sends the same split. Placement itself stays with MeshPeer.</summary>
+    private async Task RegisterRunNeed()
+    {
+        await RefreshPeers();if(pollingError is not null)throw new IOException(pollingError);
+        var gpus=peers.Where(p=>p.WorkerRole=="render").Select(p=>(Id:p.PeerId,Weight:p.WorkWeight)).ToArray();
+        if(gpus.Length==0)return;
+        // Every render node gets its share, including 0, so no node keeps a previous run's leftover need.
+        // A failed registration fails the run visibly rather than splitting it over fewer GPUs silently.
+        int frames=state.FrameCount??cfg.Frames;string prefix=RenderHeatNeed.RunPrefix(cfg.Id,state.Id);
+        foreach(var share in RenderHeatNeed.Allocate(frames,gpus)){
+            using var r=await http.PostAsJsonAsync(cfg.Peers[share.Key]+"/run-need",new RunHeatNeed(prefix,share.Value,cfg.FrameHeatKwh),RenderNodeHost.Json);
+            r.EnsureSuccessStatusCode();
+        }
+    }
     private async Task Assemble()
     {
         Update(s=>s with{Phase="assembling"});
@@ -235,6 +250,7 @@ internal sealed class RenderSession
         try{
             if(state.RecipeImage!=cfg.Image||state.FrameCount!=cfg.Frames)throw new InvalidDataException("Saved recipe/frame settings changed; retain ownership");
             await SetPeersHold(false);await Prepare();if(stopRequested)return;
+            if(cfg.HeatNeedPerRun)await RegisterRunNeed();if(stopRequested)return;
             Update(s=>s with{Phase="rendering",StartedUtc=s.StartedUtc??DateTimeOffset.UtcNow,Held=false});
             string prefix=cfg.Id+"."+state.Id+"-";
             string[] ids=Enumerable.Range(1,cfg.Frames).Select(f=>prefix+f.ToString("D3")).ToArray();

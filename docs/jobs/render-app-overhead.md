@@ -74,8 +74,13 @@ quotas 150/100/50 kWh admit about 187/125/62 frames per hour. Frames per GPU wor
 
 Run 8 stopped at 38/48 with all GPU workers idle until the next hour. On the laptop (about 93 s
 per run) GPU 3 would drop out after about 4 runs in one clock hour. This is the configured
-synthetic heat model, not a bug; changing it (budget, or charging heat by frame duration) is a
-team decision.
+synthetic heat model, not a bug.
+
+**Follow-up (ADR 0069, user decision):** the GPU weights now mean heat *need* per run. Each run is
+split by weight (48 frames -> 24/16/8) and each GPU node's `DemandKwh` is its share of the current
+run plus heat it already committed this hour; placement code is unchanged. On the replica (2 s
+placeholder frames, real 500 kWh profile) every run gave 24/16/8 in about 56-58 s (about 38 s before,
+when the split was 16/16/16), and runs no longer stall within the hour.
 
 ## Not changed
 

@@ -91,3 +91,5 @@ later.
 - [0067 — Verified scene reuse](0067-verified-prepared-scene-reuse.md): proposed; T-77; user approved and reviewer changes applied.
 
 - [0068 — Mesh freezes batch work whose heat cannot be used or stored](0068-freeze-batch-heat-surplus.md): proposed; T-78; team-approved direction, reviewed go with changes (applied).
+
+- [0069 — Render heat need per run](0069-render-heat-need-per-run.md): proposed; T-80; user approved; GPU weights 1.5/1/0.5 are heat need per run (48 frames → 24/16/8); reviewed go with changes, applied.

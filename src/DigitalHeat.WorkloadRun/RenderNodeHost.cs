@@ -25,6 +25,9 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     public GpuBinding? Gpu { get; init; }
     public string? GpuBackend { get; init; }
     public double GpuFrameShare { get; init; } = .8; // User-approved workload mix; not a utilization promise.
+    /// <summary>ADR 0069: a render node's heat demand is its weighted share of the current run (heat NEED),
+    /// not a fixed hourly allowance. The origin uses it to register each run's need with the GPU nodes.</summary>
+    public bool HeatNeedPerRun { get; init; }
 }
 internal sealed record FrameSubmit(string JobId, int Frame, string? PinnedNode, string Backend="CPU",string? SceneSha256=null);
 internal sealed record RenderHold(bool Hold);
@@ -46,6 +49,8 @@ internal sealed record RenderPeerStatus(string PeerId, string PhysicalHostId, st
     public string[] VerifiedBackends { get; init; } = ["CPU"];
     public string? PhysicalGpuId { get; init; }
     public RenderGpuStats? GpuStats { get; init; }
+    /// <summary>Frames of the current run this node needs (ADR 0069); null when the hourly allowance applies.</summary>
+    public int? HeatNeedFrames { get; init; }
 }
 
 /// <summary>Trusted renderer adapter, not a second scheduler: all frame placement/ownership uses MeshPeer.</summary>
@@ -97,11 +102,16 @@ internal static class RenderNodeHost
             }
         }
         long revision=0;
+        bool needMode=cfg.HeatNeedPerRun&&cfg.WorkerRole=="render";
+        string needPath=Path.Combine(cfg.StateDirectory,"run-heat-need.json");
+        RunHeatNeed? runNeed=needMode&&File.Exists(needPath)?JsonSerializer.Deserialize<RunHeatNeed>(File.ReadAllText(needPath),Json):null;
+        MeshPeer? meshPeer=null; // Set once constructed; its committed-heat records feed the demand below.
         WorkloadInventory Inventory(){
             var now=DateTimeOffset.UtcNow;var hour=new DateTimeOffset(now.Year,now.Month,now.Day,now.Hour,0,0,TimeSpan.Zero);
             var res=new ResourceAmount(cfg.CpuCores,cfg.RamMib,1);
+            double demand=needMode?RenderHeatNeed.DemandKwh(runNeed,meshPeer?.Attempts()??[],hour,cfg.HeatDemandKwh):cfg.HeatDemandKwh;
             return new(++revision,hour,hour.AddHours(1),cfg.Source,
-                [new(cfg.Id,"CH",new(cfg.HeatDemandKwh,0,0,1,.8),0)],
+                [new(cfg.Id,"CH",new(demand,0,0,1,.8),0)],
                 [new(cfg.PhysicalHostId+"-"+cfg.Id,res,gpuBackend is null?[]:[new(cfg.Gpu!.DeviceId,gpuBackend)])],
                 [new(cfg.Id+"-worker",cfg.Id,cfg.PhysicalHostId+"-"+cfg.Id,true,true,res,cfg.PreparedSceneMode?(cfg.WorkerRole=="prepare"?["scene_prepare"]:cfg.WorkerRole=="assemble"?["video_assemble"]:cfg.WorkerRole=="render"?[]:["scene_prepare"]):[],gpuBackend is null?[]:[cfg.Gpu!.DeviceId],[],[])],[])
                 {ResourceObservedAtUtc=now,ResourceValidUntilUtc=now.AddSeconds(30)};
@@ -109,12 +119,13 @@ internal static class RenderNodeHost
         using var peer=new MeshPeer("landscape",cfg.Id,Path.Combine(cfg.StateDirectory,"owner"),Inventory(),
             [new(cfg.Id+"-worker","default","none",gpuBackend is null?[]:[cfg.Gpu!],[])],profiles,cfg.Peers.Keys,
             new Transport(outgoing.Writer),runtime,TimeProvider.System,TimeSpan.FromSeconds(20));
+        meshPeer=peer;if(needMode&&runNeed is not null)peer.Update(Inventory());
         // On restart operator must explicitly resume: no unattended session continuation.
         peer.SetHold(true);
         object gate=new();string? error=null;JsonElement? stats=null;RenderGpuStats? gpuStats=null;
-        RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,cfg.HeatDemandKwh,
+        RenderPeerStatus CaptureStatus()=>new(cfg.Id,cfg.PhysicalHostId,cfg.Image,peer.Held,needMode&&runNeed is not null?runNeed.Frames*runNeed.FrameHeatKwh:cfg.HeatDemandKwh,
             gpuBackend is null?(cfg.PreparedSceneMode?gpuDiagnostic:"CPU fallback: "+gpuDiagnostic):gpuBackend+" verified GPU; "+(cfg.Native is {EnableGpu:true,KeepGpuWarm:true}?"warm frame process":"CPU available"),error,peer.Jobs(),peer.Attempts(),runtime.Results(),stats)
-            {WorkWeight=cfg.WorkWeight,WorkerRole=cfg.WorkerRole,SharedGpuGroup=cfg.SharedGpuGroup,SharedGpuLimit=cfg.SharedGpuLimit,RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
+            {HeatNeedFrames=needMode?runNeed?.Frames:null,WorkWeight=cfg.WorkWeight,WorkerRole=cfg.WorkerRole,SharedGpuGroup=cfg.SharedGpuGroup,SharedGpuLimit=cfg.SharedGpuLimit,RendererBuildHash=gpuProbe.Devices.TryGetProperty("build_hash",out var build)?build.GetString():null,RecipeId=native?.RecipeId,FrameBoundaryPause=native is not null,VerifiedBackends=backends,PhysicalGpuId=gpuBackend is null?null:cfg.Gpu!.DeviceId,GpuStats=gpuStats};
         var published=CaptureStatus();
         RenderPeerStatus Status()=>Volatile.Read(ref published);
         var builder=WebApplication.CreateBuilder();builder.Logging.SetMinimumLevel(LogLevel.Warning);
@@ -180,6 +191,17 @@ internal static class RenderNodeHost
                 peer.Publish();
             }
             return Results.Ok(scene);
+        });
+        // ADR 0069: the origin registers this node's need for the run before submitting its frames.
+        app.MapPost("/run-need",(RunHeatNeed need)=>{
+            if(!needMode)return Results.BadRequest();
+            if(!System.Text.RegularExpressions.Regex.IsMatch(need.RunPrefix,"^[a-z0-9.-]{1,120}$")||need.Frames<0||need.Frames>cfg.Frames
+               ||!double.IsFinite(need.FrameHeatKwh)||need.FrameHeatKwh<=0)return Results.BadRequest();
+            lock(gate){
+                if(runNeed!=need){NativeRenderRuntime.WriteJson(needPath,need);runNeed=need;peer.Update(Inventory());}
+                Volatile.Write(ref published,CaptureStatus());
+            }
+            return Results.Ok(need);
         });
         app.MapPost("/assembly-manifest",(AssemblyManifest manifest)=>{
             if(native is null)return Results.BadRequest();
