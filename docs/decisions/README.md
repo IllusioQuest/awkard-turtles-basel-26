@@ -89,3 +89,5 @@ later.
 - [0066 — Renderer runtime profiling](0066-render-runtime-profiling.md): proposed; T-77; reviewed go with changes, unchanged heat-first mesh and default concurrency.
 
 - [0067 — Verified scene reuse](0067-verified-prepared-scene-reuse.md): proposed; T-77; user approved and reviewer changes applied.
+
+- [0068 — Render heat need per run](0068-render-heat-need-per-run.md): proposed; T-80; user approved; GPU weights 1.5/1/0.5 are heat need per run (48 frames → 24/16/8); reviewed go with changes, applied.

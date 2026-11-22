@@ -9,9 +9,12 @@ peer `/status` takes an optional `job_prefix` run filter that the render owner u
 polling and `/ui/status` stay O(current run). A 250 ms poll trial was measured and reverted.
 Write-up: `docs/jobs/render-app-overhead.md`.
 
-Open (need a decision, not started):
-- Heat budget: each frame commits 0.8 kWh for the whole clock hour, so GPU 3 drops out after
-  about 4 runs per hour and the lab stalls after about 8. Team/user decision.
+Done (follow-up, user decision 2026-11-22, ADR 0068): GPU weights 1.5/1/0.5 are heat NEED per
+run. Each run's frames are split by weight (48 -> 24/16/8) and each GPU node's existing
+`DemandKwh` is its share of the current run, so the unchanged heat-first placement follows the need
+and repeated runs no longer stall within the hour.
+
+Open:
 - Host CPU still grows with runs per lab session (shared Orchestration journals are saved and
   deep-copied in full; reconcile re-reads every past attempt). Needs an ADR with the
   Orchestration owners. Workaround: relaunch the lab (each launch starts with empty state).
