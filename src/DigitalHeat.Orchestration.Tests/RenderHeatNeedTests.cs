@@ -7,11 +7,9 @@ public class RenderHeatNeedTests
     private static readonly DateTimeOffset Hour = new(2026, 11, 22, 10, 0, 0, TimeSpan.Zero);
     private const string Run = "origin.run2-";
 
-    private static AttemptRecord Frame(string id, double heatKwh, params DateTimeOffset[] hours) => Frame(id, heatKwh, "released", hours);
-    private static AttemptRecord Frame(string id, double heatKwh, string phase, params DateTimeOffset[] hours) => new(
-        new("fixture", Guid.NewGuid().ToString("N"), PlacementTests.Request("batch", "batch", 0.5) with { Id = id },
-            new("w", "site", "node", "domain", null, heatKwh, 100), CoordinatorTests.Node("b"), CoordinatorTests.Profile), phase)
-        { CommittedHeatIntervalsUtc = hours };
+    private static HeatCommitment Frame(string id,double heatKwh,params DateTimeOffset[] hours)=>Frame(id,heatKwh,"released",hours);
+    private static HeatCommitment Frame(string id,double heatKwh,string phase,params DateTimeOffset[] hours)
+        =>new(id,heatKwh,hours,phase is "released" or "terminal");
 
     [Fact] public void PresentationWeightsSplitFortyEightFramesTwentyFourSixteenEight()
     {
@@ -36,7 +34,7 @@ public class RenderHeatNeedTests
         var attempts = new[] { Frame("origin.run1-001", .8, Hour), Frame("origin.run1-002", .8, Hour), Frame("origin.run1-003", .8, Hour),
             Frame(Run + "001", .8, Hour), Frame(Run + "002", .8, Hour) };
         double demand = RenderHeatNeed.DemandKwh(new(Run, 8, .8), attempts, Hour, 150);
-        double committed = attempts.Sum(a => a.Attempt.Reservation.RecoverableHeatKwhPerHour);
+        double committed = attempts.Sum(a => a.HeatKwhPerHour);
         Assert.Equal(6 * .8, demand - committed, 5); // six frames of need remain
         Assert.True(demand - committed - 6 * .8 > 0); // epsilon lets the last frame fit
     }

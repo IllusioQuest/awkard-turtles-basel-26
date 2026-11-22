@@ -81,6 +81,7 @@ public sealed class MeshPeer : IDisposable
 
     public OriginJob[] Jobs() => WorkloadJson.Copy(journal.Jobs);
     public AttemptRecord[] Attempts() => coordinator.Attempts();
+    public HeatCommitment[] HeatCommitments() => coordinator.HeatCommitments();
     public bool Held => journal.OperatorHold;
     public void CancelBatchWorkloads(string[] ids)
     {
@@ -138,8 +139,7 @@ public sealed class MeshPeer : IDisposable
         var claims = coordinator.Allocations();
         // Remote planners have no local ownership ledger: advertise all retained hourly heat,
         // plus actual held resources. Pausing frees CPU, never GPU/RAM/slots or committed heat.
-        double committed = coordinator.Attempts().Where(a => a.CommittedHeatIntervalsUtc?.Contains(inventory.IntervalStartUtc) == true)
-            .Sum(a => a.Attempt.Reservation.RecoverableHeatKwhPerHour);
+        double committed = coordinator.CommittedHeatKwh(inventory.IntervalStartUtc);
         var snapshot = inventory with
         {
             Sites = [inventory.Sites[0] with { ExternalCommittedHeatKwh = inventory.Sites[0].ExternalCommittedHeatKwh + committed }],

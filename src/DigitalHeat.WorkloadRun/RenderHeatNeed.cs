@@ -36,19 +36,19 @@ internal static class RenderHeatNeed
     /// other work, plus the current run's need not yet covered by frames that finished in earlier hours. Free heat is
     /// then exactly the run's remaining need. Without a registered run the configured demand applies.
     /// </summary>
-    internal static double DemandKwh(RunHeatNeed? need,IEnumerable<AttemptRecord> attempts,DateTimeOffset hourStartUtc,double configuredDemandKwh)
+    internal static double DemandKwh(RunHeatNeed? need,IEnumerable<HeatCommitment> attempts,DateTimeOffset hourStartUtc,double configuredDemandKwh)
     {
         if(need is null)return configuredDemandKwh;
         double otherThisHour=0,currentEarlierHours=0;
         foreach(var a in attempts){
-            var hours=a.CommittedHeatIntervalsUtc??[];if(hours.Length==0)continue;
-            double heat=a.Attempt.Reservation.RecoverableHeatKwhPerHour;
-            bool current=a.Attempt.Request.Id.StartsWith(need.RunPrefix,StringComparison.Ordinal);
+            var hours=a.HourStartsUtc;if(hours.Length==0)continue;
+            double heat=a.HeatKwhPerHour;
+            bool current=a.WorkloadId.StartsWith(need.RunPrefix,StringComparison.Ordinal);
             bool thisHour=hours.Contains(hourStartUtc);
             if(!current&&thisHour)otherThisHour+=heat;
             // Only finished frames count as covered: a frame still running or paused across the hour
             // needs heat again in the new hour (and is committed there once the coordinator updates).
-            else if(current&&!thisHour&&a.Phase is "released" or "terminal")currentEarlierHours+=heat;
+            else if(current&&!thisHour&&a.Finished)currentEarlierHours+=heat;
         }
         return otherThisHour+Math.Max(0,need.Frames*need.FrameHeatKwh-currentEarlierHours)+EpsilonKwh;
     }

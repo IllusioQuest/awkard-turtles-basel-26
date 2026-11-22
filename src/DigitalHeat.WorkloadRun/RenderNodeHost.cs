@@ -109,7 +109,7 @@ internal static class RenderNodeHost
         WorkloadInventory Inventory(){
             var now=DateTimeOffset.UtcNow;var hour=new DateTimeOffset(now.Year,now.Month,now.Day,now.Hour,0,0,TimeSpan.Zero);
             var res=new ResourceAmount(cfg.CpuCores,cfg.RamMib,1);
-            double demand=needMode?RenderHeatNeed.DemandKwh(runNeed,meshPeer?.Attempts()??[],hour,cfg.HeatDemandKwh):cfg.HeatDemandKwh;
+            double demand=needMode?RenderHeatNeed.DemandKwh(runNeed,meshPeer?.HeatCommitments()??[],hour,cfg.HeatDemandKwh):cfg.HeatDemandKwh;
             return new(++revision,hour,hour.AddHours(1),cfg.Source,
                 [new(cfg.Id,"CH",new(demand,0,0,1,.8),0)],
                 [new(cfg.PhysicalHostId+"-"+cfg.Id,res,gpuBackend is null?[]:[new(cfg.Gpu!.DeviceId,gpuBackend)])],
