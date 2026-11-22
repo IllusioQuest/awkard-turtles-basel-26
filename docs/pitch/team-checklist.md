@@ -69,18 +69,23 @@ Do this the evening before and again one hour before the pitch.
 4. Close every other program (the LLM needs about 6 GB RAM). Laptop on power. Screen sleep off.
    Notifications off (Do Not Disturb).
 5. Start, in four terminals: FleetApi with `VOICE_DEMO_TOKEN`, `npm run dev` in `web/`, the voice
-   runner, `ngrok http --url=<static-domain> 5080` (QUICKSTART §4; Lovable setup:
-   `docs/demo/lovable-integration.md`).
+   runner, `ngrok http 5173` (QUICKSTART §4).
 6. Copy the cut film (`~/pitch/intro.mp4`, steps 1–2) to `web/public/pitch/intro.mp4`. Open
    `http://127.0.0.1:5173/pitch?t=<token>` in Chrome, press **H**: every line green (fix red ones),
    **H** again, **F** for fullscreen. The pitch starts with **→** (QUICKSTART §4b lists all keys).
 7. Phone hotspot ready as internet fallback for ngrok (venue Wi-Fi often blocks it).
-8. Test the full chain once with a phone: scan the QR, ask, see freeze and thaw.
+8. Test the full chain once with the operator's phone: open `/speak` (QR in the checks screen,
+   key **H**), ask, see freeze and thaw.
+9. Optional audience demo (after the pitch, decision 0074): on the laptop that runs it,
+   `scripts/Start-AudienceApertus.ps1`, then set the printed tunnel URL as `DEMO_BASE_URL` in the
+   Lovable page and republish (`docs/jobs/audience-apertus-demo.md`). The pitch app shows its
+   operator view at `http://127.0.0.1:18970/operator` (scene 10), so it must run on the pitch laptop,
+   or change `url` of scene `audience` in `web/public/pitch/pitch.json`.
 
 ## 4. Rehearsal (all)
 
 1. Two full run-throughs with a stopwatch; target 4:50.
-2. One run-through where the QR fails (operator presses **T** and types the backup question).
+2. One run-through where the phone fails (operator presses **T** and types the question).
 3. One run-through where the laptop fails: play the screen recording (step 5).
 
 ## 5. Fallback recording (owner: operator O)
@@ -103,12 +108,6 @@ for key **V** (set `fallback` per scene in `web/public/pitch/pitch.json`) (GNOME
 
 Before uploading: `dotnet test src/DigitalHeat.sln` passes (one known unrelated failure, see
 QUICKSTART §1), and the repository is public or shared with the jury.
-
-## 6b. Lovable phone page (owner: Ennio)
-
-The QR code opens `https://swiss-heat.lovable.app/?t=<token>`. Once: claim the free ngrok static
-domain, enter `https://<domain>` in Lovable as the API base URL, paste the prompt from
-[`docs/demo/lovable-integration.md`](../demo/lovable-integration.md), and test with the `curl` there.
 
 ## 7. Decisions left to the team
 
