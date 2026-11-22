@@ -53,7 +53,10 @@ an already reserved full-hour claim. This conservative admission model can under
 for short chunks. A subsequent hour resets claims and reserves continuing work first.
 
 No useful heat means no new batch/urgent start. Interruptible running batch pauses when useful
-heat disappears. Noninterruptible interactive work and checkpoint overhead can continue; their
+heat disappears. Freeze-only containers run at their full declared heat, so the shared heat-first
+load is rounded down to whole jobs (decision 0068): when running batch heat exceeds the useful heat
+(`HeatCapacity.RemainingKwh`, demand plus tank room), the lowest-priority jobs freeze until the rest
+fits, and they thaw in priority order when their heat fits again (optional minimum freeze time). Noninterruptible interactive work and checkpoint overhead can continue; their
 power occupies capacity and their heat, including surplus, remains in the physical balances.
 Games are not moved or restarted automatically. Deadlines order pending work and exclude new
 expired starts. Existing live-job expiry/stop rules remain in the coordinator; Fleet's deadline

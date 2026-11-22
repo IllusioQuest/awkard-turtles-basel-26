@@ -35,6 +35,37 @@ app.MapGet("/api/live-household", () =>
     try { return Results.Content(File.ReadAllText(path), "application/json"); }
     catch (IOException) { return Results.StatusCode(503); }
 });
+// T-78 voice demo: the phone page posts one recording (or typed text); DigitalHeat.VoiceDemo picks it
+// up from the inbox. Optional shared token (env VOICE_DEMO_TOKEN) when the page is exposed via a tunnel.
+app.MapPost("/api/voice-demo/requests", async (HttpRequest request) =>
+{
+    string? token = Environment.GetEnvironmentVariable("VOICE_DEMO_TOKEN");
+    if (!string.IsNullOrEmpty(token) && request.Headers["X-Voice-Token"] != token) return Results.StatusCode(401);
+    string type = (request.ContentType ?? "").Split(';')[0].Trim().ToLowerInvariant();
+    string? file = type switch
+    {
+        "text/plain" => "text.txt", "audio/webm" => "audio.webm", "audio/ogg" => "audio.ogg", "audio/mp4" => "audio.m4a",
+        "audio/mpeg" => "audio.mp3", "audio/wav" or "audio/x-wav" or "audio/wave" => "audio.wav", _ => null
+    };
+    if (file is null) return Results.StatusCode(415);
+    const long maxBytes = 20 * 1024 * 1024; // about 20 minutes of compressed speech; far above a spoken request
+    string id = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + "-" + Guid.NewGuid().ToString("N")[..8];
+    string dir = Path.Combine(repoRoot, "data", "external", "voice-demo", "inbox", id);
+    Directory.CreateDirectory(dir);
+    using (var output = File.Create(Path.Combine(dir, file)))
+    {
+        var buffer = new byte[81920]; long total = 0; int read;
+        while ((read = await request.Body.ReadAsync(buffer)) > 0)
+        {
+            total += read;
+            if (total > maxBytes) { output.Close(); Directory.Delete(dir, true); return Results.StatusCode(413); }
+            await output.WriteAsync(buffer.AsMemory(0, read));
+        }
+        if (total == 0) { output.Close(); Directory.Delete(dir, true); return Results.BadRequest(); }
+    }
+    File.WriteAllText(Path.Combine(dir, "ready"), "");
+    return Results.Ok(new { id });
+});
 app.MapGet("/api/runs/{id}/houses/{houseId}/job-events", (string id, string houseId, long? fromMs, long? toMs) =>
     fromMs is null || toMs is null ? Results.Text("fromMs and toMs are required.", statusCode: 400) : Guard(() => store.JobEvents(id, houseId, fromMs.Value, toMs.Value)));
 app.MapGet("/api/weather/points", () => Guard(() => store.WeatherPoints()));

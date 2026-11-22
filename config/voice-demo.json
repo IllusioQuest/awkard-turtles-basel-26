@@ -1,0 +1,67 @@
+{
+  "source": "T-78 pitch demo scenario on the reference house (config/reference-house.json) with the hot-water time profile of config/hot-water-profile-l.json (labelled variant, same 12 kWh/day). Values marked 'demo setting' are stage choices, not measurements or scored figures.",
+  "image": "digitalheat/voice-assistant:latest",
+  "docker_volume": "dh-voice-demo",
+  "date_local": "2025-07-15",
+  "hot_water_profile": "config/hot-water-profile-l.json",
+  "replay_start_local_hour": {
+    "value": 11.5,
+    "unit": "h",
+    "source": "Demo setting: every request (spoken or typed) is replayed from 11:30 on 15 July. EU profile L has no tapping from 12:45 to 14:30, so the 13:00-14:00 hour has no hot-water demand; at 10 s/h it arrives 15 s after the start, usually during text generation."
+  },
+  "replay_end_local_hour": {
+    "value": 18,
+    "unit": "h",
+    "source": "Demo setting: latest end of the replay."
+  },
+  "seconds_per_simulated_hour": {
+    "value": 10,
+    "unit": "s/h",
+    "source": "Demo setting: stage speed; simulated time is not physical time."
+  },
+  "control_interval_seconds": {
+    "value": 0.5,
+    "unit": "s",
+    "source": "Demo setting: how often the house signal is sent to the mesh scheduler and the container is observed."
+  },
+  "request_declared_heat_kwh_per_h": {
+    "value": 0.02,
+    "unit": "kWh/h",
+    "source": "Declared to the scheduler for admission: 25.1 W measured CPU package power of the LLM job (docs/jobs/llm-summary.md) x 0.8 heat recovery (docs/case/challenge.md) = 0.020 kWh/h. The house model uses the live measured power instead."
+  },
+  "minimum_freeze_seconds": {
+    "value": 3,
+    "unit": "s",
+    "source": "Demo setting: MeshPeer minimumFreeze (decision 0068); a frozen job stays frozen at least this long."
+  },
+  "request_cpu_cores": {
+    "value": 12,
+    "unit": "CPU cores",
+    "source": "Demo setting: Docker CPU limit on the 16-thread demo laptop."
+  },
+  "request_ram_mib": {
+    "value": 9000,
+    "unit": "MiB",
+    "source": "Whisper large-v3 (3.1 GB) and Apertus 8B Q4_K_M (5.1 GB) run one after the other; docs/jobs/transcription.md, docs/jobs/llm-summary.md."
+  },
+  "request_deadline_seconds": {
+    "value": 600,
+    "unit": "s",
+    "source": "Experimental research-job target, config/live-job-deadlines.json."
+  },
+  "language": "en",
+  "whisper_model": "ggml-large-v3.bin",
+  "llm_model": "Apertus-8B-Instruct-2509-Q4_K_M.gguf",
+  "system_prompt": "You are the assistant of DigitalHeat, running on a server in the basement of a family home in Basel; the heat of this computation warms the home's water. Facts you may use: one DigitalHeat server draws 1 kW of electricity and about 0.8 kW of it is recovered as useful heat; the home needs about 27,000 kWh of heat per year, 12 kWh per day of it for hot water; its hot-water tank stores 35 kWh. Answer briefly, in at most three short sentences, in English.",
+  "system_prompt_source": "Figures from docs/case/challenge.md (reference house, 1 kW server, 80 % heat recovery, 35 kWh tank, 12 kWh/day hot water, about 27,000 kWh/year).",
+  "max_new_tokens": {
+    "value": 80,
+    "unit": "tokens",
+    "source": "Demo setting: short spoken-style answer (about 20 s at the measured 4 tokens/s)."
+  },
+  "model_sources": {
+    "ggml-large-v3.bin": "data/external/transcription/models (docs/jobs/transcription.md)",
+    "ggml-base.bin": "data/external/transcription/models (docs/jobs/transcription.md)",
+    "Apertus-8B-Instruct-2509-Q4_K_M.gguf": "data/external/llm/models (docs/jobs/llm-summary.md)"
+  }
+}

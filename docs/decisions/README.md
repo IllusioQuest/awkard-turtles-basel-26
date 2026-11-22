@@ -89,3 +89,5 @@ later.
 - [0066 — Renderer runtime profiling](0066-render-runtime-profiling.md): proposed; T-77; reviewed go with changes, unchanged heat-first mesh and default concurrency.
 
 - [0067 — Verified scene reuse](0067-verified-prepared-scene-reuse.md): proposed; T-77; user approved and reviewer changes applied.
+
+- [0068 — Mesh freezes batch work whose heat cannot be used or stored](0068-freeze-batch-heat-surplus.md): proposed; T-78; team-approved direction, reviewed go with changes (applied).

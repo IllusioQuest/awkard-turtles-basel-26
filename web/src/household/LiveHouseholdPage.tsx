@@ -14,6 +14,9 @@ type LiveState = {
   tankCapacityKwh: number; targetLoad: number; tasksDone: number; latestEnergyPerSpin: number | null
   waitingJobs: number; runningJobs: number; pausedJobs: number; eventsTruncated: boolean
   lagSeconds: number; updatedUtc: string; history: Point[]; events: LiveEvent[]
+  // T-78 voice demo (DigitalHeat.VoiceDemo): container output, CPU time and energy are measured.
+  voice?: { stage: string; transcript: string; answer: string; usefulHeatKwh: number; requestDeclaredHeatKwhPerHour: number
+    requestPowerW: number; requestCpuSeconds: number; requestEnergyKwh: number | null; hotWaterProfile: string; scheduler: string }
 }
 
 const clock = new Intl.DateTimeFormat('de-CH', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' })
@@ -55,7 +58,11 @@ export default function LiveHouseholdPage() {
         <LiveStat label="Replay" value={state.status} />
         <LiveStat label="Real request" value={state.processStatus} />
         <LiveStat label="Real CPU limit" value={state.cpuCores == null ? '–' : `${dec1.format(state.cpuCores)} cores`} />
-        <LiveStat label="Tasks completed" value={String(state.tasksDone)} />
+        {state.voice
+          ? <LiveStat label="Job power (measured)" value={`${Math.round(state.voice.requestPowerW)} W`} />
+          : <LiveStat label="Tasks completed" value={String(state.tasksDone)} />}
+        {state.voice && <LiveStat label="Job energy (measured)" value={state.voice.requestEnergyKwh == null ? '–' : `${state.voice.requestEnergyKwh.toFixed(6)} kWh`} />}
+        {state.voice && <LiveStat label="Useful heat now" value={`${state.voice.usefulHeatKwh.toFixed(3)} kWh`} />}
         <LiveStat label="Modelled heat demand" value={`${dec1.format(state.demandKw)} kW`} />
         <LiveStat label="Modelled tank" value={`${dec1.format(state.tankKwh)} / ${dec1.format(state.tankCapacityKwh)} kWh`} />
         <LiveStat label="Requested server load" value={`${Math.round(state.targetLoad * 100)}%`} />
@@ -63,7 +70,7 @@ export default function LiveHouseholdPage() {
         {state.busy && <LiveStat label={state.status === 'completed' ? 'Model jobs active at end' : 'Model jobs running'} value={String(state.runningJobs)} />}
         {state.busy && <LiveStat label={state.status === 'completed' ? 'Model jobs paused at end' : 'Model jobs paused'} value={String(state.pausedJobs)} />}
       </section>
-      <p className="note">Heat, tank and time are simulated. The real request runs until the replay ends; its task count is observed, and electrical power is not measured.</p>
+      {!state.voice && <p className="note">Heat, tank and time are simulated. The real request runs until the replay ends; its task count is observed, and electrical power is not measured.</p>}
       <section className="charts">
         <div className="card"><span className="label">Modelled tank (kWh)</span>
           <ResponsiveContainer width="100%" height={220}><ComposedChart data={state.history}>
