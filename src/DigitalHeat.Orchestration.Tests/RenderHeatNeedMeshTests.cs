@@ -63,7 +63,7 @@ public class RenderHeatNeedMeshTests : IDisposable
     private void Refresh() { foreach (var (id, p) in peers) p.Update(Inventory(id, ++revision)); }
 
     /// <summary>Registers the weighted need (like RenderSession), submits the frames and runs until all finish.</summary>
-    private Dictionary<string, int> Run(string runId, int frames = 48, bool registerNeed = true)
+    private Dictionary<string, int> Run(string runId, int frames = 48, bool registerNeed = true, int stepsPerFrame = 1, int stepSeconds = 1)
     {
         string prefix = RenderHeatNeed.RunPrefix("o", runId);
         if (registerNeed)
@@ -72,16 +72,17 @@ public class RenderHeatNeedMeshTests : IDisposable
         for (int f = 1; f <= frames; f++)
             peers["o"].Submit(PlacementTests.Request($"{runId}-{f:D3}", "batch") with { OriginSiteId = "o", Lifecycle = new(false, true, false) },
                 CoordinatorTests.Profile.Id);
-        for (int step = 0; step < 10 * frames; step++)
+        for (int step = 0; step < 10 * frames * stepsPerFrame; step++)
         {
-            clock.Now = clock.Now.AddSeconds(1);
+            clock.Now = clock.Now.AddSeconds(stepSeconds);
             Refresh();
             peers["o"].Tick();
-            // Every running frame finishes; the GPU peer releases it and publishes its new free heat.
+            // Running frames finish every stepsPerFrame steps; the GPU peer releases them and publishes its new free heat.
             foreach (string g in Gpus)
             {
-                foreach (var a in peers[g].Attempts().Where(a => a.Phase == "running"))
-                    runtimes[g].States[a.Attempt.AttemptId] = new("exited", "abcdef123456", false) { ExitCode = 0 };
+                if (step % stepsPerFrame == stepsPerFrame - 1)
+                    foreach (var a in peers[g].Attempts().Where(a => a.Phase == "running"))
+                        runtimes[g].States[a.Attempt.AttemptId] = new("exited", "abcdef123456", false) { ExitCode = 0 };
                 peers[g].Tick();
             }
             if (peers["o"].Jobs().Where(j => j.Request.Id.StartsWith(prefix, StringComparison.Ordinal)).All(j => j.Status == "accepted")
@@ -106,5 +107,19 @@ public class RenderHeatNeedMeshTests : IDisposable
         var split = Run("plain", registerNeed: false);
         Assert.Equal(48, split.Values.Sum());
         Assert.All(split.Values, n => Assert.InRange(n, 15, 17));
+    }
+
+    [Fact] public void RunCrossingTheHourStillSplitsByNeed()
+    {
+        clock.Now = PlacementTests.Now.AddMinutes(59); // starts one minute before the hour; frames take 3 s
+        var split = Run("cross", stepsPerFrame: 3);
+        Assert.Equal(PlacementTests.Now.Hour + 1, clock.Now.Hour);
+        Assert.Equal(new Dictionary<string, int> { ["g1"] = 24, ["g2"] = 16, ["g3"] = 8 }, split);
+    }
+
+    [Fact] public void SlowFramesStillSplitByNeed()
+    {
+        var split = Run("slow", stepsPerFrame: 5, stepSeconds: 4); // 20 s per frame, longer than the offer lifetime
+        Assert.Equal(new Dictionary<string, int> { ["g1"] = 24, ["g2"] = 16, ["g3"] = 8 }, split);
     }
 }
