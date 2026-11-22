@@ -4,7 +4,7 @@
 # Optional: -Gpu OPTIX|CUDA|HIP|ONEAPI|CPU  -Blender "C:\...\blender.exe"  -Python python
 # Needs Blender 4.x, Python 3 with Pillow (pip install pillow) and ffmpeg on the PATH.
 param(
-    [ValidateSet('preview', 'final')][string]$Preset = 'preview',
+    [ValidateSet('preview', 'final', 'eevee-preview', 'eevee')][string]$Preset = 'preview',
     [string]$Blender = $env:BLENDER,
     [string]$Python = $(if ($env:PYTHON) { $env:PYTHON } else { 'python' }),
     # GPU backend: auto (default), OPTIX or CUDA (NVIDIA), HIP (AMD), ONEAPI (Intel Arc), CPU

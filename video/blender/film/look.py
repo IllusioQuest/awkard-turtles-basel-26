@@ -10,11 +10,16 @@ PRESETS = {
     "preview": dict(res=(960, 540), samples=4, bounces=3, denoise=True, motion_blur=False),
     # final delivery
     "final": dict(res=(1920, 1080), samples=64, bounces=6, denoise=True, motion_blur=True),
+    # Eevee: runs on GPUs that Cycles cannot use (e.g. Intel Iris Xe); slightly less refined light
+    "eevee-preview": dict(res=(960, 540), samples=16, engine="EEVEE", motion_blur=False),
+    "eevee": dict(res=(1920, 1080), samples=48, engine="EEVEE", motion_blur=True),
 }
 
 
 def setup_render(scene, preset="preview"):
     p = PRESETS[preset]
+    if p.get("engine") == "EEVEE":
+        return _setup_eevee(scene, p)
     r = scene.render
     r.engine = "CYCLES"
     r.resolution_x, r.resolution_y = p["res"]
@@ -46,6 +51,32 @@ def setup_render(scene, preset="preview"):
     scene.view_settings.exposure = 0.0
     r.image_settings.file_format = "PNG"
     r.image_settings.color_mode = "RGB"
+    return scene
+
+
+def _setup_eevee(scene, p):
+    r = scene.render
+    r.engine = "BLENDER_EEVEE_NEXT" if bpy.app.version < (5, 0, 0) else "BLENDER_EEVEE"
+    r.resolution_x, r.resolution_y = p["res"]
+    r.resolution_percentage = 100
+    r.fps = U.FPS
+    r.use_motion_blur = p["motion_blur"]
+    r.film_transparent = False
+    e = scene.eevee
+    e.taa_render_samples = p["samples"]
+    for attr, val in (("use_shadows", True), ("use_raytracing", True), ("shadow_ray_count", 2), ("shadow_step_count", 8),
+                      ("use_volumetric_shadows", False), ("fast_gi_method", "GLOBAL_ILLUMINATION")):
+        if hasattr(e, attr):
+            try:
+                setattr(e, attr, val)
+            except (TypeError, ValueError):
+                pass
+    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.look = "AgX - Medium High Contrast"
+    r.image_settings.file_format = "PNG"
+    r.image_settings.color_mode = "RGB"
+    U.EEVEE = True
+    print("Render engine: Eevee (uses the graphics card through OpenGL/Vulkan)", flush=True)
     return scene
 
 

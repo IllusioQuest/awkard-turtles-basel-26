@@ -241,9 +241,9 @@ def main():
     last = int(round(TL["duration"] * FPS))
     first = Image.open(next(iter(sorted(frames_dir.glob("*.png"))))).convert("RGB")
     w, h = first.size
-    name = "digitalheat-intro-preview.mp4" if preset == "preview" else "digitalheat-intro.mp4"
+    name = {"preview": "digitalheat-intro-preview.mp4", "final": "digitalheat-intro.mp4"}.get(preset, f"digitalheat-intro-{preset}.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}", "-r", str(FPS), "-i", "-",
-           "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20" if preset == "preview" else "16", "-preset", "medium", "-movflags", "+faststart", str(out / name)]
+           "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20" if "preview" in preset else "16", "-preset", "medium", "-movflags", "+faststart", str(out / name)]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     ov = Overlay(w, h)
     cur = first

@@ -183,7 +183,7 @@ def _breath_material():
     l.new(t.outputs[0], mx.inputs[1])
     l.new(d.outputs[0], mx.inputs[2])
     l.new(mx.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     return m
 
 

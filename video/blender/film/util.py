@@ -15,6 +15,17 @@ FONT_DIRS = ["/usr/share/fonts/opentype/inter", "/usr/share/fonts/truetype/inter
              os.path.expanduser("~/AppData/Local/Microsoft/Windows/Fonts"), "C:/Windows/Fonts", "/Library/Fonts", os.path.expanduser("~/Library/Fonts")]
 
 
+EEVEE = False
+
+
+def blended(m):
+    """Mark a material as alpha-blended (Cycles ignores this; Eevee needs it for soft glows)."""
+    m.blend_method = "BLEND"
+    if hasattr(m, "surface_render_method"):
+        m.surface_render_method = "BLENDED"
+    return m
+
+
 def sec(t: float) -> int:
     """Film time in seconds -> frame number (frame 1 = 0 s)."""
     return int(round(t * FPS)) + 1
@@ -179,7 +190,7 @@ def emission(name, color, strength=1.0, transparent_mix=None):
         l.new(t.outputs[0], mx.inputs[1])
         l.new(e.outputs[0], mx.inputs[2])
         l.new(mx.outputs[0], out.inputs["Surface"])
-        m.blend_method = "BLEND"
+        blended(m)
     m["emit"] = e.name
     return m
 

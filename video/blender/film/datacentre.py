@@ -66,7 +66,7 @@ def plume_material():
     l.new(t.outputs[0], add.inputs[0])
     l.new(e.outputs[0], add.inputs[1])
     l.new(add.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     return m
 
 

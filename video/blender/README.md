@@ -100,6 +100,12 @@ Font: Inter (system font, OFL); Blender's built-in font is used if Inter is miss
 - Later globe ending (after the live demo): the map is a plane in local metres; for a globe zoom-out, swap
   `ground()` for a sphere and keep the same camera language.
 
+## Eevee presets (untested look)
+
+For GPUs that Cycles cannot use (e.g. Intel Iris Xe): `--preset eevee-preview` / `--preset eevee`
+(PowerShell: `.\video\blender\make_film.ps1 -Preset eevee-preview`). The scene builds with Eevee, but no
+frame has been checked yet; expect differences in glows and transparency compared with Cycles.
+
 ## Sound (voice-over, score, effects)
 
 ```bash

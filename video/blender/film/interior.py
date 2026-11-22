@@ -321,7 +321,7 @@ def _glow_card(name, loc, size, coll):
     l.new(t.outputs[0], add.inputs[0])
     l.new(e.outputs[0], add.inputs[1])
     l.new(add.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     o = U.box(name, (size[0], 0.01, size[1]), loc, m, coll=coll)
     o.visible_shadow = False
     o.visible_diffuse = False
@@ -380,7 +380,7 @@ def _tank_glow(coll, base, r, h):
     l.new(t.outputs[0], mx.inputs[1])
     l.new(e.outputs[0], mx.inputs[2])
     l.new(mx.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     o = U.cylinder("tank glow", r, h, (base[0], base[1], base[2] + h / 2), m, verts=48, coll=coll)
     o.visible_shadow = False
     return o

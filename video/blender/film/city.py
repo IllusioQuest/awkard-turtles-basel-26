@@ -262,7 +262,7 @@ def _halo_material(name, color_hex, ctrl):
     l.new(t.outputs[0], add.inputs[0])
     l.new(e.outputs[0], add.inputs[1])
     l.new(add.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     return m
 
 
@@ -317,7 +317,7 @@ def flow_arc(coll, name, a, b, height, ctrl, color_hex=SERIES1, radius=6.0):
     l.new(t.outputs[0], mx.inputs[1])
     l.new(e.outputs[0], mx.inputs[2])
     l.new(mx.outputs[0], n["Material Output"].inputs["Surface"])
-    m.blend_method = "BLEND"
+    U.blended(m)
     o = U.tube_path(name, pts, radius, m, coll, res=4)
     o.visible_shadow = False
     return o

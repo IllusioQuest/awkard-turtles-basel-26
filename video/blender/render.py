@@ -7,7 +7,8 @@ or with the `bpy` module (pip install bpy==4.5.*, Python 3.11):
   python video/blender/render.py --preset preview
 
 Options:
-  --preset preview|final   960x540 low samples / 1920x1080 production
+  --preset preview|final   960x540 low samples / 1920x1080 production (Cycles)
+  --preset eevee-preview|eevee   the same with Eevee, for GPUs Cycles cannot use (Intel Iris Xe)
   --stills                 render only the look-development stills (STILLS below)
   --step N                 render every Nth frame (preview default 2: 12 fps, held by post.py)
   --frames A-B             limit to a frame range
@@ -61,7 +62,7 @@ def args():
             o["save_blend"] = True
         i += 1
     if o["step"] is None:
-        o["step"] = 2 if o["preset"] == "preview" else 1
+        o["step"] = 2 if "preview" in o["preset"] else 1
     return o
 
 
