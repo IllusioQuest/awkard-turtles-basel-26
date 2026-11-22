@@ -1,4 +1,85 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ask Swiss AI · DigitalHeat</title>
-<style>body{font:18px system-ui;background:#111a20;color:#f4f4f0;margin:0;display:grid;place-items:center;min-height:100vh}main{width:min(620px,90vw)}h1{font-size:clamp(36px,8vw,64px);line-height:1.05}button{border:0;border-radius:12px;padding:15px 20px;background:#79cdbb;color:#102322;font:inherit;font-weight:700;cursor:pointer;margin:8px 8px 8px 0}textarea{display:block;width:95%;min-height:100px;background:#1d2b32;color:white;border:1px solid #53706f;border-radius:10px;padding:12px;font:inherit}small{color:#aabbb7}pre{white-space:pre-wrap;word-break:break-word;background:#1b282f;padding:15px;border-radius:10px}#status{font-weight:700}</style>
-<main><small>DIGITALHEAT · LIVE AUDIENCE DEMO</small><h1>Ask Swiss AI.</h1><p>Send one short, public question to Apertus running on the presentation laptop.</p><button id="preset">Why do servers produce heat?</button><textarea id="question" maxlength="240" placeholder="Or ask your own short question"></textarea><button id="send">Send my question</button><p><small>Questions and answers are visible on the presentation screen. Do not enter personal or confidential information. Four logical workers share one laptop; displayed heat is an illustrative reference-server equivalent, not measured laptop heat.</small></p><p id="status"></p><pre id="answer" hidden></pre></main>
-<script>const $=s=>document.querySelector(s);const visitorId=sessionStorage.getItem('visitorId')||crypto.randomUUID();sessionStorage.setItem('visitorId',visitorId);$('#preset').onclick=()=>{$('#question').value='Why do servers produce heat?';send()};$('#send').onclick=send;async function send(){const q=$('#question').value.trim();if(!q)return;$('#send').disabled=true;$('#preset').disabled=true;$('#status').textContent='Submitting…';try{const r=await fetch('/api/jobs',{method:'POST',headers:{'Content-Type':'application/json','X-Visitor-Id':visitorId},body:JSON.stringify({question:q})});if(!r.ok)throw Error(r.status===429?'Please wait a moment before sending another question.':'Submission unavailable: '+r.status);const {id}=await r.json();$('#status').textContent='Queued · '+id.slice(0,8);const poll=setInterval(async()=>{try{const x=await fetch('/api/jobs/'+id);const j=await x.json();$('#status').textContent=j.state+' · worker '+(j.node??'pending');if(['completed','failed'].includes(j.state)){clearInterval(poll);$('#answer').hidden=false;$('#answer').textContent=j.answer||'No answer was produced.';$('#send').disabled=false;$('#preset').disabled=false}}catch{}},2000)}catch(e){$('#status').textContent=e.message;$('#send').disabled=false;$('#preset').disabled=false}}if(new URLSearchParams(location.search).get('preset')==='1'){$('#question').value='Why do servers produce heat?';send()}</script></html>
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ask Swiss AI · DigitalHeat</title>
+<style>
+body{font:18px system-ui;background:#111a20;color:#f4f4f0;margin:0;display:grid;place-items:center;min-height:100vh}
+main{width:min(620px,90vw)}
+h1{font-size:clamp(36px,8vw,64px);line-height:1.05}
+button{border:0;border-radius:12px;padding:15px 20px;background:#79cdbb;color:#102322;font:inherit;font-weight:700;cursor:pointer;margin:8px 8px 8px 0}
+textarea{display:block;width:95%;min-height:100px;background:#1d2b32;color:white;border:1px solid #53706f;border-radius:10px;padding:12px;font:inherit}
+small{color:#aabbb7}
+pre{white-space:pre-wrap;word-break:break-word;background:#1b282f;padding:15px;border-radius:10px}
+#status{font-weight:700}
+</style>
+<main>
+  <small>DIGITALHEAT · LIVE AUDIENCE DEMO</small>
+  <h1>Ask Swiss AI.</h1>
+  <p>Send one short, public question to Apertus running on the presentation laptop.</p>
+  <button id="preset">Why do servers produce heat?</button>
+  <textarea id="question" maxlength="240" placeholder="Or ask your own short question"></textarea>
+  <button id="send">Send my question</button>
+  <p><small>Questions and answers are visible on the presentation screen. Do not enter personal or confidential information. Four logical workers share one laptop; displayed heat is an illustrative reference-server equivalent, not measured laptop heat.</small></p>
+  <p id="status"></p>
+  <pre id="answer" hidden></pre>
+</main>
+<script>
+// Keep empty for the laptop's own /ask route. Set once in the Lovable-hosted copy.
+const DEMO_BASE_URL = '';
+const apiUrl = path => DEMO_BASE_URL.replace(/\/+$/, '') + path;
+const $ = selector => document.querySelector(selector);
+const visitorId = sessionStorage.getItem('visitorId') || crypto.randomUUID();
+sessionStorage.setItem('visitorId', visitorId);
+const needsConfig = location.pathname !== '/ask' && !DEMO_BASE_URL;
+if (needsConfig) {
+  $('#status').textContent = 'Demo starts shortly. The presentation laptop is not connected yet.';
+  $('#preset').disabled = true;
+  $('#send').disabled = true;
+}
+$('#preset').onclick = () => { $('#question').value = 'Why do servers produce heat?'; send(); };
+$('#send').onclick = send;
+async function send() {
+  if (needsConfig) return;
+  const question = $('#question').value.trim();
+  if (!question) return;
+  $('#send').disabled = true;
+  $('#preset').disabled = true;
+  $('#status').textContent = 'Submitting…';
+  try {
+    const response = await fetch(apiUrl('/api/jobs'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Visitor-Id': visitorId },
+      body: JSON.stringify({ question })
+    });
+    if (!response.ok) throw Error(response.status === 429
+      ? 'Please wait a moment before sending another question.'
+      : 'Submission unavailable: ' + response.status);
+    const { id } = await response.json();
+    $('#status').textContent = 'Queued · ' + id.slice(0, 8);
+    const poll = setInterval(async () => {
+      try {
+        const jobResponse = await fetch(apiUrl('/api/jobs/' + id));
+        const job = await jobResponse.json();
+        $('#status').textContent = job.state + ' · worker ' + (job.node ?? 'pending');
+        if (['completed', 'failed'].includes(job.state)) {
+          clearInterval(poll);
+          $('#answer').hidden = false;
+          $('#answer').textContent = job.answer || 'No answer was produced.';
+          $('#send').disabled = false;
+          $('#preset').disabled = false;
+        }
+      } catch {}
+    }, 2000);
+  } catch (error) {
+    $('#status').textContent = error.message;
+    $('#send').disabled = false;
+    $('#preset').disabled = false;
+  }
+}
+if (new URLSearchParams(location.search).get('preset') === '1') {
+  $('#question').value = 'Why do servers produce heat?';
+  send();
+}
+</script>
+</html>
