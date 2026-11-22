@@ -1,6 +1,6 @@
-# T-82 — Renderer efficiency and repeat-run diagnosis
+# T-83 — Renderer efficiency and repeat-run diagnosis
 
-Owner: Nikita/Codex. Status: in progress. Branch: perf/T-82-render-efficiency.
+Owner: Nikita/Codex. Status: in progress. Branch: perf/T-83-render-efficiency.
 User requests faster rendering. Preserve heat-first placement, per-run24/16/8
 need, three concurrent GPU workers, quality and Minecraft. Coordinate with T-79
 by running its existing warm/fresh benchmark on the actual laptop, not inventing
