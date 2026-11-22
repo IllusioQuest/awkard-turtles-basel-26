@@ -1,0 +1,24 @@
+{
+  "_about": "Voice-over lines for the intro film. 'at' = start in seconds (film time, see ../timeline.json); 'say' = text sent to the voice (phonetic spelling where needed), 'text' = the line as written. Numbers come from ../numbers.json: evening_temperature_c, servers_per_house, coverage, dumped_kwh, first_full_tank.",
+  "lines": [
+    {"at": 0.9,   "until": 7.6,   "text": "Basel. A January evening. Minus three degrees."},
+    {"at": 8.4,   "until": 12.6,  "text": "This is Bob. His house needs heat."},
+    {"at": 14.6,  "until": 17.0,  "text": "And this is what it costs."},
+    {"at": 21.7,  "until": 27.6,  "text": "A few streets away, a data centre throws its heat into the night."},
+    {"at": 28.4,  "until": 31.4,  "text": "What if that computing ran where the heat is needed?"},
+    {"at": 32.0,  "until": 34.9,  "text": "Four servers in Bob's basement do paid work."},
+    {"at": 35.3,  "until": 40.6,  "text": "Their heat goes into the water: first to the radiators, and the tank keeps the rest."},
+    {"at": 41.6,  "until": 44.6,  "text": "The room warms up."},
+    {"at": 48.6,  "until": 53.6,  "text": "Weeks pass. The servers work whenever the house needs heat."},
+    {"at": 54.2,  "until": 58.15,  "text": "March twenty-second: the tank is full. The servers pause."},
+    {"at": 58.35, "until": 60.2,  "text": "The house decides."},
+    {"at": 60.6,  "until": 67.6,  "text": "Over the simulated year, four servers cover fifty-eight percent of the house's heat, and not a single kilowatt-hour is dumped."},
+    {"at": 69.0,  "until": 73.2,  "text": "But in summer, one house needs very little heat."},
+    {"at": 74.2,  "until": 77.0,  "text": "So where does the work go?"},
+    {"at": 80.8,  "until": 85.6,  "text": "Across the Basel region, houses take on work when they need heat."},
+    {"at": 86.6,  "until": 90.6,  "text": "Near Dreispitz, an indoor pool needs heat all year round.", "say": "Near Dry-shpits, an indoor pool needs heat all year round."},
+    {"at": 95.0,  "until": 98.6,  "text": "In summer, the work moves to the pool."},
+    {"at": 100.2, "until": 104.6, "text": "The heat stays where it is made."},
+    {"at": 106.6, "until": 111.0, "text": "Let us show you the scheduler doing this. Live."}
+  ]
+}

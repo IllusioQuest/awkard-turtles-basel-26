@@ -99,3 +99,19 @@ Font: Inter (system font, OFL); Blender's built-in font is used if Inter is miss
   in the repository; point us to it and it can replace this.
 - Later globe ending (after the live demo): the map is a plane in local metres; for a globe zoom-out, swap
   `ground()` for a sphere and keep the same camera language.
+
+## Sound (voice-over, score, effects)
+
+```bash
+pip install piper-tts numpy scipy   # Python 3.10/3.11
+python video/blender/audio/make_audio.py --video path/to/film.mp4
+```
+
+Writes `out/audio/<video>-with-sound.mp4` plus the stems `voiceover.wav`, `score.wav` and `mix.wav`
+(−16 LUFS). Voice lines and their start times: [`audio/voiceover.json`](audio/voiceover.json) (numbers as
+in `numbers.json`); beat times from `timeline.json`. The voice is Piper (offline neural TTS) with the
+"Ryan" voice, downloaded once from the rhasspy/piper GitHub release (dataset licence CC BY-NC-SA 4.0:
+non-commercial, credit "Voice: Piper / RyanSpeech"); `--voice libritts` uses a CC BY 4.0 voice instead.
+The score and effects (wind, cold radiator, envelope, server spin-up, water, clock, map pulses) are
+synthesised in the script; no samples or music are downloaded. `--no-voice` gives music and effects
+only, e.g. to record a human voice over it.
