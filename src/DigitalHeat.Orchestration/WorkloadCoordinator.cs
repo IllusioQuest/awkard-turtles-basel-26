@@ -150,6 +150,7 @@ public sealed class WorkloadCoordinator : IDisposable
     }
     public AllocationView[] Allocations() { lock (gate) return placement.Allocations(); }
     public AttemptRecord[] Attempts() { lock (gate) return WorkloadJson.Copy(records.ToArray()); }
+    // Copy only heat fields for frequent monitoring; full ownership reconciliation stays unchanged.
     public HeatCommitment[] HeatCommitments()
     {
         lock(gate)return records.Select(r=>new HeatCommitment(r.Attempt.Request.Id,
@@ -159,6 +160,7 @@ public sealed class WorkloadCoordinator : IDisposable
     public double CommittedHeatKwh(DateTimeOffset hourStartUtc)
     {
         lock(gate){
+            // Preserve record order and every phase: retained heat outlives job completion.
             double total=0;
             foreach(var r in records)if(r.CommittedHeatIntervalsUtc?.Contains(hourStartUtc)==true)
                 total+=r.Attempt.Reservation.RecoverableHeatKwhPerHour;
