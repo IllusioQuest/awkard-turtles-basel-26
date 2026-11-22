@@ -22,6 +22,7 @@ export interface Bucket {
   tankLevel: number
   temperatureC: number
   electricityCostChf: number
+  incomeChf: number
   heatValueChf: number
   jobsOnTime: number
   deadlinesMissed: number
@@ -39,7 +40,7 @@ export function householdSeries(run: RunInfo, house: HouseInfo, periods: HousePe
     if (!b) {
       b = {
         t: start, load: 0, powerKwh: 0, heatUsedKwh: 0, heatDemandKwh: 0, heatDumpedKwh: 0, tankLevel: 0, temperatureC: 0,
-        electricityCostChf: 0, heatValueChf: 0, jobsOnTime: 0, deadlinesMissed: 0, n: 0,
+        electricityCostChf: 0, incomeChf: 0, heatValueChf: 0, jobsOnTime: 0, deadlinesMissed: 0, n: 0,
       }
       buckets.set(start, b)
     }
@@ -51,6 +52,7 @@ export function householdSeries(run: RunInfo, house: HouseInfo, periods: HousePe
     b.tankLevel += house.tankKwh > 0 ? p.tankEndKwh / house.tankKwh : 0
     b.temperatureC += p.temperatureC
     b.electricityCostChf += p.electricityCostChf
+    b.incomeChf += p.incomeChf
     b.heatValueChf += p.heatValueChf
     b.jobsOnTime += p.jobsOnTime
     b.deadlinesMissed += p.deadlinesMissed
@@ -83,6 +85,8 @@ export function totals(buckets: Bucket[], maxElectricKw: number) {
     heatDumpedKwh: sum((b) => b.heatDumpedKwh),
     coveredShare: heatDemandKwh > 0 ? Math.min(1, heatUsedKwh / heatDemandKwh) : 0,
     powerKwh: sum((b) => b.powerKwh),
+    electricityCostChf: sum((b) => b.electricityCostChf),
+    incomeChf: sum((b) => b.incomeChf),
     avgLoad: buckets.length ? sum((b) => b.load) / buckets.length : 0,
     avgTemperatureC: buckets.length ? sum((b) => b.temperatureC) / buckets.length : 0,
   }

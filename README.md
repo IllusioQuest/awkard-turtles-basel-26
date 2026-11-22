@@ -25,7 +25,7 @@ personal data, no model download); details in [`docs/jobs/research-sim.md`](docs
    ```
 
    Prints coverage, server-hours and the case break-even; writes `results/reference-house/`.
-   Published draft figures: [`docs/results/reference-house.md`](docs/results/reference-house.md).
+   Current reference-house results (Fleet model): [`docs/model/fleet-simulation.md`](docs/model/fleet-simulation.md) §16.
 
 2. **Build and start the real job** in its own container:
 

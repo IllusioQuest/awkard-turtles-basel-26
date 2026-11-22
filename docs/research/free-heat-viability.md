@@ -17,7 +17,7 @@ establish a sellable sweet spot.** No paid DigitalHeat Type 1 or Type 2 hours, s
 contract price, or repeatable public-document job arrival rate are documented in the repository.
 That is a missing observation, **not a claim that market demand is zero**. The heat-led capacity
 of 22,661 server-hours for four case servers is a technical maximum under unlimited work, not
-booked sales ([reference-house result](../results/reference-house.md)).
+booked sales (year-model result, retired 2026-11-22; Fleet: [`fleet-simulation.md`](../model/fleet-simulation.md) §16).
 
 At the **unmeasured L4 throughput proxy** used in T-14, an 8B batch-API competitor price is too
 low for the operator to break even, even if all heat-led hours are sold. The published 8B list

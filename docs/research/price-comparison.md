@@ -13,7 +13,7 @@ Per 1 kW server-hour (the case's reference server):
 - **Case cost** = electricity − value of the heat used = 0.3325 − 0.8 × 0.3325 ÷ 2.5 = **0.2261 CHF**
   (heat fully used, as in the case break-even).
 - **Full cost** = case cost + (purchase price ÷ lifetime + operations per year) ÷ sold server-hours
-  per year. Sold hours: 64.7 % of the year (reference house, 4 servers, `docs/results/reference-house.md`)
+  per year. Sold hours: 64.7 % of the year (reference house, 4 servers, year model, retired 2026-11-22; Fleet: `docs/model/fleet-simulation.md` §16)
   or 35 % (fill rate of filler marketplaces, `filler-demand.md`).
 - **Cost per unit** = cost per server-hour ÷ units per server-hour.
 
