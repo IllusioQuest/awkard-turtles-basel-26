@@ -6,11 +6,10 @@ numbers: [`pitch-flow.md`](pitch-flow.md). Commands for everything: [`QUICKSTART
 
 ## 1. Intro film (owner: whoever has the rendered MP4)
 
-The film is rendered from `feat/T-78-intro-film` (`video/blender/`). We use **0:00–0:48** only
-(**decided**: the next two beats show year-model numbers that contradict the dashboard).
+The film is rendered from `feat/T-78-intro-film` (`video/blender/`). Use 0:00-0:38 only; this is the agreed handoff into the live house view. The first seven seconds show the current one-server reference-house figures. Let music carry that slate; Bob's line is the first spoken audio.
 
 1. Put the rendered film (without sound) next to the repo, e.g. `~/pitch/film.mp4`.
-2. Music and effects only, no voice:
+2. Add music and effects only, no generated voice:
    ```bash
    git switch feat/T-78-intro-film
    pip install piper-tts numpy scipy
@@ -18,39 +17,32 @@ The film is rendered from `feat/T-78-intro-film` (`video/blender/`). We use **0:
    git switch main
    ```
    Result: `video/blender/out/audio/film-with-sound.mp4`.
-3. Cut to 48 s with a one-second fade (video and sound):
+3. Cut to 38 seconds with a one-second fade (video and sound):
    ```bash
-   ffmpeg -i video/blender/out/audio/film-with-sound.mp4 -t 48 \
-     -vf "fade=t=out:st=47:d=1" -af "afade=t=out:st=46.5:d=1.5" \
-     -c:v libx264 -crf 18 -c:a aac ~/pitch/intro-48s-novoice.mp4
+   ffmpeg -i video/blender/out/audio/film-with-sound.mp4 -t 38 \
+     -vf "fade=t=out:st=37:d=1" -af "afade=t=out:st=36.5:d=1.5" \
+     -c:v libx264 -crf 18 -c:a aac ~/pitch/intro-38s-novoice.mp4
    ```
 
 ## 2. Record the voice-over for the film (owner: speaker A)
 
 **Decided:** a human voice instead of the TTS voice. It is warmer, matches the live speakers, and
-avoids the TTS voice's non-commercial licence (CC BY-NC-SA). Fallback: run step 2 above without
-`--no-voice` and cut that file instead.
-
-Record in a quiet room, phone close to the mouth, while watching the muted 48-second cut. Lines and
-when they start (film time):
+avoids the TTS voice's non-commercial licence (CC BY-NC-SA). Record in a quiet room, phone close to
+the mouth, while watching the muted 38-second cut. The opening figures strip stays visible for the
+first seven seconds; no one speaks over it. Bob's line is the first spoken line.
 
 | Start | Line |
 |---|---|
-| 0:01 | Basel. A January evening. Minus three degrees. |
-| 0:08 | This is Bob. His house needs heat. |
-| 0:15 | And this is what it costs. |
-| 0:22 | A few streets away, a data centre throws its heat into the night. |
-| 0:28 | What if that computing ran where the heat is needed? |
-| 0:32 | Four servers in Bob's basement do paid work. |
-| 0:35 | Their heat goes into the water: first to the radiators, and the tank keeps the rest. |
-| 0:42 | The room warms up. |
+| 0:08 | **A / Bob:** "This is Bob. Bob is cold. And Bob is shivering. Bob just received his heating bill." |
+| 0:20 | **B / narrator:** "A few streets away, a data centre throws its heat into the night." |
+| 0:28 | **B / narrator:** "DigitalHeat schedules local AI when heat is useful. Swiss AI in your Swiss home." |
 
 Save it as one WAV (`~/pitch/vo.wav`) that starts at film time 0:00, then mix:
 
 ```bash
-ffmpeg -i ~/pitch/intro-48s-novoice.mp4 -i ~/pitch/vo.wav \
+ffmpeg -i ~/pitch/intro-38s-novoice.mp4 -i ~/pitch/vo.wav \
   -filter_complex "[0:a]volume=0.6[m];[m][1:a]amix=inputs=2:duration=first[a]" \
-  -map 0:v -map "[a]" -c:v copy -c:a aac ~/pitch/intro-48s.mp4
+  -map 0:v -map "[a]" -c:v copy -c:a aac ~/pitch/intro-38s.mp4
 ```
 
 ## 3. Demo laptop (owner: operator O)
