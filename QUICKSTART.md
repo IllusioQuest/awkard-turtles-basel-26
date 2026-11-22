@@ -112,25 +112,6 @@ ngrok http 5173                                                                 
   <http://127.0.0.1:5173/speak> on the laptop.
 - Stage timing, language, answer length: `config/voice-demo.json`.
 
-## 4b. Pitch mode (the whole pitch in one browser tab)
-
-Needs the API, the dashboard and the voice runner from §4 running, and the Fleet runs of the pitch:
-
-```bash
-for r in reference-1-server reference real-house-1-server dreispitz-5-pool-1-server; do
-  dotnet run -c Release --project src/DigitalHeat.FleetRun -- run config/fleet/scenarios/$r.json
-done
-```
-
-Copy the cut intro film to `web/public/pitch/intro.mp4` (not in git), start `ngrok http 5173`,
-then open <http://127.0.0.1:5173/pitch?t=pick-a-secret> (the same token as `VOICE_DEMO_TOKEN`).
-Press **H**: every line should be green. **F** fullscreen, **→** start. Keys: → / Space / PageDown
-next, ← back, 1–9 scene, G globe, B or . black, T type a request, V fallback recording, Q speak
-page address, R reload the page on screen. Scenes, runs and texts: `web/public/pitch/pitch.json`.
-The presenter opens `/speak` on their phone by scanning the small code in the checks screen (H).
-Scenes 9–10 are the optional audience demo after the pitch (`docs/jobs/audience-apertus-demo.md`):
-a QR to the Lovable page and the operator view of `DigitalHeat.AudienceDemo` on port 18970.
-
 ## 5. Real house calibration (organisers' data)
 
 Needs the organisers' data in `data/external/housedata/` (not in git; see

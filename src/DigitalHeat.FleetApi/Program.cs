@@ -66,22 +66,6 @@ app.MapPost("/api/voice-demo/requests", async (HttpRequest request) =>
     File.WriteAllText(Path.Combine(dir, "ready"), "");
     return Results.Ok(new { id });
 });
-// Pitch mode (decision 0069): the public https URL of a running ngrok tunnel, read from ngrok's
-// local inspection API, so the QR code always shows the current address. No token is returned.
-app.MapGet("/api/voice-demo/tunnel", async () =>
-{
-    try
-    {
-        using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
-        using var doc = System.Text.Json.JsonDocument.Parse(await http.GetStringAsync("http://127.0.0.1:4040/api/tunnels"));
-        foreach (var t in doc.RootElement.GetProperty("tunnels").EnumerateArray())
-            if (t.GetProperty("public_url").GetString() is { } url && url.StartsWith("https://", StringComparison.Ordinal))
-                return Results.Ok(new { url, addr = t.TryGetProperty("config", out var c) && c.TryGetProperty("addr", out var a) ? a.GetString() : null });
-        return Results.NotFound();
-    }
-    catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException)
-    { return Results.NotFound(); }
-});
 app.MapGet("/api/runs/{id}/houses/{houseId}/job-events", (string id, string houseId, long? fromMs, long? toMs) =>
     fromMs is null || toMs is null ? Results.Text("fromMs and toMs are required.", statusCode: 400) : Guard(() => store.JobEvents(id, houseId, fromMs.Value, toMs.Value)));
 app.MapGet("/api/weather/points", () => Guard(() => store.WeatherPoints()));

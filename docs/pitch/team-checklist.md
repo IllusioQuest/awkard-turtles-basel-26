@@ -62,28 +62,27 @@ Do this the evening before and again one hour before the pitch.
    Notifications off (Do Not Disturb).
 5. Start, in four terminals: FleetApi with `VOICE_DEMO_TOKEN`, `npm run dev` in `web/`, the voice
    runner, `ngrok http 5173` (QUICKSTART §4).
-6. Copy the cut film (`~/pitch/intro.mp4`, steps 1–2) to `web/public/pitch/intro.mp4`. Open
-   `http://127.0.0.1:5173/pitch?t=<token>` in Chrome, press **H**: every line green (fix red ones),
-   **H** again, **F** for fullscreen. The pitch starts with **→** (QUICKSTART §4b lists all keys).
+6. Open the film (`~/pitch/intro.mp4`, steps 1–2) in a full-screen player and, in Chrome, the tabs
+   in script order: household `reference-1-server`, household `real-house-1-server`, the map of
+   `dreispitz-5-pool-1-server`, and `/live` (next to the runner's terminal).
 7. Phone hotspot ready as internet fallback for ngrok (venue Wi-Fi often blocks it).
-8. Test the full chain once with the operator's phone: open `/speak` (QR in the checks screen,
-   key **H**), ask, see freeze and thaw.
-9. Optional audience demo (after the pitch, decision 0074): on the laptop that runs it,
+8. Test the full chain once with the operator's phone: open
+   `https://<ngrok-id>.ngrok-free.app/speak?t=<token>`, ask, see freeze and thaw.
+9. Optional audience demo (after the pitch, decision 0074), on Jona's Windows laptop:
    `scripts/Start-AudienceApertus.ps1`, then set the printed tunnel URL as `DEMO_BASE_URL` in the
-   Lovable page and republish (`docs/jobs/audience-apertus-demo.md`). The pitch app shows its
-   operator view at `http://127.0.0.1:18970/operator` (scene 10), so it must run on the pitch laptop,
-   or change `url` of scene `audience` in `web/public/pitch/pitch.json`.
+   Lovable page and republish (`docs/jobs/audience-apertus-demo.md`). The QR (Lovable `/present`)
+   and the four-worker operator view run on Jona's laptop: plan the projector switch
+   (second HDMI input or a quick cable swap) and rehearse it once.
 
 ## 4. Rehearsal (all)
 
 1. Two full run-throughs with a stopwatch; target 4:50.
-2. One run-through where the phone fails (operator presses **T** and types the question).
+2. One run-through where the phone fails (operator types the question into the runner's terminal).
 3. One run-through where the laptop fails: play the screen recording (step 5).
 
 ## 5. Fallback recording (owner: operator O)
 
-Record one complete good run of scenes 2–7 as a screen video, and, if you like, one per scene
-for key **V** (set `fallback` per scene in `web/public/pitch/pitch.json`) (GNOME: `Ctrl+Shift+Alt+R`; macOS:
+Record one complete good run of the screens after the film as a screen video (GNOME: `Ctrl+Shift+Alt+R`; macOS:
 `Cmd+Shift+5`). Keep it on the desktop and on a USB stick.
 
 ## 6. Submission

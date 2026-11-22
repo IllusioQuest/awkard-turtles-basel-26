@@ -1,6 +1,6 @@
 # 0069: Pitch mode as one route of the web dashboard
 
-- **Status:** proposed
+- **Status:** withdrawn (2026-11-22, Ennio): the pitch app was removed from the code; the pitch uses the normal dashboard pages.
 - **Date:** 2026-11-22
 - **Decided by:** Claude (delegated by Ennio: "one software that combines the complete pitch flow in
   the browser; foolproof at the presentation, flexible on request")
