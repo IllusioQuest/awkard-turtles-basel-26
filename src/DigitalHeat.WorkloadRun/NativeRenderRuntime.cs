@@ -5,7 +5,7 @@ using System.Text.Json;
 using DigitalHeat.Orchestration;
 
 internal sealed record NativeRenderOptions(string Executable,string ScriptsDirectory,string AssetsDirectory,
-    string GraphicsApi="opengl",string ExpectedVersion="5.3.0",int Threads=1,bool EnableGpu=false,bool KeepGpuWarm=false,double WarmIdleTimeoutSeconds=120);
+    string GraphicsApi="opengl",string ExpectedVersion="5.3.0",int Threads=1,bool EnableGpu=false,bool KeepGpuWarm=false,double WarmIdleTimeoutSeconds=120,bool ReusePreparedScene=false);
 internal sealed record PreparedScene(string SceneSha256,string RecipeId,string Blender,string BuildHash);
 internal interface IRenderRuntime:IWorkloadRuntime { RenderArtifact[] Results(); }
 internal sealed record NativeOwnership(string FleetId,string AttemptId,string SpecHash,string Activation,
@@ -20,6 +20,7 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
     private readonly string root;
     private readonly string scriptsDirectory;
     private readonly Dictionary<string,Process> children=[];
+    private readonly Dictionary<string,RenderArtifact> completedResults=[];
     private readonly Dictionary<int,(DateTimeOffset At,TimeSpan Cpu)> samples=[];
     private string? blenderBuildHash;
     private readonly FileSystemWatcher? completionWatcher;
@@ -60,7 +61,7 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
     {
         string temp=path+".tmp";
         using(var stream=new FileStream(temp,FileMode.Create,FileAccess.Write,FileShare.None)){JsonSerializer.Serialize(stream,value,RenderNodeHost.Json);stream.Flush(true);}
-        File.Move(temp,path,true);
+        JournalReplace.Move(temp,path);
     }
     private NativeOwnership Read(RuntimeAttempt a)
     {
@@ -102,8 +103,27 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         WriteJson(Path.Combine(cfg.StateDirectory,"registered-scene-"+scene.SceneSha256+".json"),scene);
         return scene;
     }
-    public PreparedScene[] SavedScenes()=>Directory.GetFiles(cfg.StateDirectory,"registered-scene-*.json")
-        .Select(p=>JsonSerializer.Deserialize<PreparedScene>(File.ReadAllText(p),RenderNodeHost.Json)!).Where(s=>s.RecipeId==RecipeId).ToArray();
+    public PreparedScene[] SavedScenes()
+    {
+        var scenes=new List<PreparedScene>();
+        foreach(string path in Directory.GetFiles(cfg.StateDirectory,"registered-scene-*.json")){
+            try{
+                var scene=JsonSerializer.Deserialize<PreparedScene>(File.ReadAllText(path),RenderNodeHost.Json);
+                if(scene is not null&&scene.RecipeId==RecipeId&&scene.SceneSha256 is not null&&System.Text.RegularExpressions.Regex.IsMatch(scene.SceneSha256,"^[a-f0-9]{64}$"))scenes.Add(scene);
+                else Console.Error.WriteLine("Ignoring incompatible scene cache registration: "+Path.GetFileName(path));
+            }catch(JsonException){Console.Error.WriteLine("Ignoring malformed scene cache registration: "+Path.GetFileName(path));}
+        }
+        return scenes.ToArray();
+    }
+    private PreparedScene? ReusableScene()
+    {
+        foreach(var scene in SavedScenes().OrderBy(s=>s.SceneSha256,StringComparer.Ordinal)){
+            if(scene.Blender!=options.ExpectedVersion||scene.BuildHash!=blenderBuildHash)continue;
+            string path=AssetPath(scene.SceneSha256);
+            if(File.Exists(path)&&new FileInfo(path).Length<=MaximumSceneBytes&&Hash(File.ReadAllBytes(path))==scene.SceneSha256)return scene;
+        }
+        return null;
+    }
     private string AssetPath(string hash)
     {
         if(!System.Text.RegularExpressions.Regex.IsMatch(hash,"^[a-f0-9]{64}$"))throw new InvalidDataException("Invalid scene content identity");
@@ -137,9 +157,11 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         var r=Read(a);if(r.LaunchRequested)throw new IOException("Native launch already requested; reconcile ownership first");
         r=r with{LaunchRequested=true};WriteJson(RecordPath(a),r); // Durable uncertainty BEFORE spawning.
         string dir=Path.GetFullPath(DirectoryFor(a));var cmd=a.Profile.Command;
+        var cachedScene=cmd[0]=="prepare"&&options.ReusePreparedScene?ReusableScene():null;
         WriteJson(Path.Combine(dir,"spec.json"),new{mode=cmd[0]=="prepare"?"prepare":cmd[0]=="assemble"?"assemble":"frame",directory=dir,activation=r.Activation,
-            recipe_id=RecipeId,settings_file=Path.Combine(scriptsDirectory,"scene_settings.json"),
+            dispatched_utc=DateTimeOffset.UtcNow,recipe_id=RecipeId,settings_file=Path.Combine(scriptsDirectory,"scene_settings.json"),
             frame=cmd[0] is "prepare" or "assemble"?0:int.Parse(cmd[0]),expected_frames=cfg.Frames,
+            reusable_scene_path=cachedScene is null?null:AssetPath(cachedScene.SceneSha256),reusable_scene_sha256=cachedScene?.SceneSha256,
             manifest_path=cmd[0]=="assemble"?AssemblyPath(cmd[1]):null,scene_sha256=cmd.Length==3?cmd[2]:null,scene_path=cmd.Length==3?AssetPath(cmd[2]):null});
         if(IsWarm(a)){StartWarm(a,r);return;}
         var p=new Process{StartInfo=StartInfo(dir),EnableRaisingEvents=true};p.Exited+=(_,_)=>Wake?.Invoke();p.Start();children[a.AttemptId]=p;
@@ -189,7 +211,9 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
             if(metadata.GetProperty("stage").GetString()=="prepare"){
                 string hash=metadata.GetProperty("scene_sha256").GetString()!;string source=Path.Combine(dir,"scene.blend");
                 if(new FileInfo(source).Length>MaximumSceneBytes||Hash(File.ReadAllBytes(source))!=hash)throw new InvalidDataException("Prepared scene output mismatch");
-                string target=AssetPath(hash),temp=target+"."+a.AttemptId+".tmp";File.Copy(source,temp,true);File.Move(temp,target,true);
+                string target=AssetPath(hash);
+                if(File.Exists(target)){if(Hash(File.ReadAllBytes(target))!=hash)throw new InvalidDataException("Immutable scene asset changed");}
+                else{string temp=target+"."+a.AttemptId+".tmp";File.Copy(source,temp,true);JournalReplace.Move(temp,target);}
             }else if(metadata.GetProperty("stage").GetString()=="assemble"){if(!File.Exists(Path.Combine(dir,"video.mp4"))||new FileInfo(Path.Combine(dir,"video.mp4")).Length==0)throw new InvalidDataException("Video output missing");}
             else if(!File.Exists(Path.Combine(dir,"frame.png")))throw new InvalidDataException("Native output PNG missing");
         }
@@ -198,10 +222,22 @@ internal sealed partial class NativeRenderRuntime : IRenderRuntime,IDisposable
         if(children.Remove(a.AttemptId,out var child))child.Dispose();
     }
     public double ApplyBatchLoad(RuntimeAttempt a,double load)=>throw new NotSupportedException("Native jobs pause only at frame boundaries");
-    public RenderArtifact[] Results()=>Directory.GetDirectories(root).Where(d=>File.Exists(Path.Combine(d,"owned.json")))
-        .Where(d=>{var r=JsonSerializer.Deserialize<NativeOwnership>(File.ReadAllText(Path.Combine(d,"owned.json")),RenderNodeHost.Json)!;return r.Released&&r.ExitCode==0;})
-        .Select(d=>new RenderArtifact(JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"job.json"))).GetProperty("job_id").GetString()!,cfg.Id,
-            JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"result.json"))))).ToArray();
+    public RenderArtifact[] Results()
+    {
+        // Released successful artifacts are immutable. Rebuild lazily after owner restart;
+        // never cache pending/failed attempts, and never replace ownership reconciliation.
+        var results=new List<RenderArtifact>();
+        foreach(string dir in Directory.GetDirectories(root)){
+            if(completedResults.TryGetValue(dir,out var cached)){results.Add(cached);continue;}
+            string record=Path.Combine(dir,"owned.json");if(!File.Exists(record))continue;
+            var owned=JsonSerializer.Deserialize<NativeOwnership>(File.ReadAllText(record),RenderNodeHost.Json)!;
+            if(!owned.Released||owned.ExitCode!=0)continue;
+            var artifact=new RenderArtifact(JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(dir,"job.json"))).GetProperty("job_id").GetString()!,cfg.Id,
+                JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(dir,"result.json"))));
+            completedResults.Add(dir,artifact);results.Add(artifact);
+        }
+        return results.ToArray();
+    }
     public string? ImagePath(string job)=>Directory.GetDirectories(root).FirstOrDefault(d=>File.Exists(Path.Combine(d,"job.json"))&&JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Path.Combine(d,"job.json"))).GetProperty("job_id").GetString()==job) is {} dir?Path.Combine(dir,"frame.png"):null;
     private string AssemblyPath(string hash)
     {

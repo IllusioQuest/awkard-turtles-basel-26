@@ -125,3 +125,12 @@ T-75 Nikita/Codex, fix/T-75-compact-render-map: bottom Physical hosts footer rem
 T-76 Nikita/Codex, fix/T-76-gpu-worker-shades: user-approved related GPU shades and weights1.5/1/.5. Preserves synthetic total500kWh, heat-first policy, CPU roles and prior outputs. Renderer-only restart/validation underway; Minecraft untouched. Depends PR67.
 
 T-76 verified PR68 /21b0769: 48-frame pipeline and MP4 complete in133.7017 active seconds, GPU counts17/15/16. Approved work budgets1.5/1/.5 live (GPU150/100/50 of total500kWh). Accent shades and GPU identity labels served; no visual preview access. Docs/evidence on main.
+
+
+T-77 Nikita/Codex perf/T-77-render-runtime: profiling native scene/load/render and monitoring overhead, then measured warm/concurrency improvements. Five roles and heat-first admission preserved; default concurrency changes require user decision. Depends PR68. Minecraft excluded.
+
+
+T-77 PR69/593fe8b,0abf3e1:117 tests; native timings, immutable released-result cache, bounded per-GPU submission waves, no unchanged session rewrites, verified scene reuse and native journal replacement fix. Two48-frame MP4 runs93.3555/131.3246s; preparation0.99469->0.00972worker-seconds, scene identity preserved. Benchmark1/2 medians9.9772/7.8012s for6frames;3-worker warmup timed out60s and owned diagnostic jobs cancelled. User explicitly keeps3 simultaneous renders. Do not claim stable overall speedup or change concurrency. Docs/performance evidence on main, Minecraft unchanged.
+
+
+T-77 integration complete: PR69 merged at c205fc7; user requested pull/push main and the post-merge timeout follow-up0abf3e1 is now included.117 tests previously passed; follow-up changes only diagnostic timeout configuration, Python syntax rechecked. Runtime unchanged by this Git synchronization.

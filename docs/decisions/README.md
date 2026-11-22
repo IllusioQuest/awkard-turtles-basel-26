@@ -86,4 +86,8 @@ later.
 
 - [0065 — Shared GPU presentation](0065-shared-gpu-presentation.md): proposed; user-approved five roles, reviewed with changes; hardware verification pending.
 
+- [0066 — Renderer runtime profiling](0066-render-runtime-profiling.md): proposed; T-77; reviewed go with changes, unchanged heat-first mesh and default concurrency.
+
+- [0067 — Verified scene reuse](0067-verified-prepared-scene-reuse.md): proposed; T-77; user approved and reviewer changes applied.
+
 - [0068 — Temporary public audience demo](0068-public-audience-apertus-demo.md): proposed; T-78; four logical Apertus workers, illustrative heat, Lovable question page and temporary public tunnel; reviewed with changes.

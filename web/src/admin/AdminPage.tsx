@@ -70,7 +70,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const [params] = useSearchParams()
   const step = run.periodHours
   const maxT = lastHour(run)
-  const [t, setT] = useState(() => alignHour(run, Number(params.get('h') ?? 0)))
+  const [t, setT] = useState(() => alignHour(run, Number(params.get('h') ?? run.hours)))
   const [heatLayer, setHeatLayer] = useState<HeatLayer>('none')
   const [showWeather, setShowWeather] = useState(false)
   const [rangeId, setRangeId] = useState<RangeId>('24h')

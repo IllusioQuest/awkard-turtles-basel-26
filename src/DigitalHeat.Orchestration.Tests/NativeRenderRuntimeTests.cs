@@ -73,6 +73,36 @@ public sealed class NativeRenderRuntimeTests:IDisposable
         using var worker=new NativeRenderRuntime(config with{WorkerRole="assemble"});
         Assert.Throws<InvalidDataException>(()=>worker.Preflight(Attempt()));
     }
+    [Fact] public void MalformedOptionalSceneCacheDoesNotInvalidateOwnership()
+    {
+        File.WriteAllText(Path.Combine(root,"registered-scene-broken.json"),"{broken");
+        var valid=new PreparedScene(new string('a',64),runtime.RecipeId,"fixture","build");
+        NativeRenderRuntime.WriteJson(Path.Combine(root,"registered-scene-valid.json"),valid);
+        Assert.Equal(valid,Assert.Single(runtime.SavedScenes()));
+        var a=Attempt();runtime.Create(a);Assert.Equal("created",runtime.Observe(a).State);
+    }
+    [Fact] public void ResultsWaitForSuccessfulReleaseAndRebuildAfterRestart()
+    {
+        var a=Attempt();runtime.Create(a);
+        string dir=Path.Combine(root,"native-attempts",a.AttemptId);
+        NativeRenderRuntime.WriteJson(Path.Combine(dir,"result.json"),new{stage="frame",frame=1});
+        Assert.Empty(runtime.Results()); // A result file alone is not a committed success.
+        string path=Path.Combine(dir,"owned.json");
+        var owned=JsonSerializer.Deserialize<NativeOwnership>(File.ReadAllText(path),RenderNodeHost.Json)!;
+        NativeRenderRuntime.WriteJson(path,owned with{Released=true,ExitCode=0});
+        Assert.Equal(a.Request.Id,Assert.Single(runtime.Results()).JobId);
+        using var recovered=new NativeRenderRuntime(config);
+        Assert.Equal(a.Request.Id,Assert.Single(recovered.Results()).JobId);
+    }
+    [Fact] public void FailedReleaseNeverPublishesResultMetadata()
+    {
+        var a=Attempt();runtime.Create(a);
+        string dir=Path.Combine(root,"native-attempts",a.AttemptId),path=Path.Combine(dir,"owned.json");
+        NativeRenderRuntime.WriteJson(Path.Combine(dir,"result.json"),new{stage="frame",frame=1});
+        var owned=JsonSerializer.Deserialize<NativeOwnership>(File.ReadAllText(path),RenderNodeHost.Json)!;
+        NativeRenderRuntime.WriteJson(path,owned with{Released=true,ExitCode=1});
+        Assert.Empty(runtime.Results());Assert.Empty(runtime.Results());
+    }
     private (NativeRenderRuntime Runtime,RuntimeAttempt Attempt,NativeOwnership Owned) WarmFrame()
     {
         var warm=new NativeRenderRuntime(config with{Native=config.Native! with{EnableGpu=true,KeepGpuWarm=true}});
