@@ -76,7 +76,7 @@ Run 8 stopped at 38/48 with all GPU workers idle until the next hour. On the lap
 per run) GPU 3 would drop out after about 4 runs in one clock hour. This is the configured
 synthetic heat model, not a bug.
 
-**Follow-up (ADR 0068, user decision):** the GPU weights now mean heat *need* per run. Each run is
+**Follow-up (ADR 0069, user decision):** the GPU weights now mean heat *need* per run. Each run is
 split by weight (48 frames -> 24/16/8) and each GPU node's `DemandKwh` is its share of the current
 run plus heat it already committed this hour; placement code is unchanged. On the replica (2 s
 placeholder frames, real 500 kWh profile) every run gave 24/16/8 in about 56-58 s (about 38 s before,

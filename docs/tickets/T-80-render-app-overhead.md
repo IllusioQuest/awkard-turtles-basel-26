@@ -9,7 +9,7 @@ peer `/status` takes an optional `job_prefix` run filter that the render owner u
 polling and `/ui/status` stay O(current run). A 250 ms poll trial was measured and reverted.
 Write-up: `docs/jobs/render-app-overhead.md`.
 
-Done (follow-up, user decision 2026-11-22, ADR 0068): GPU weights 1.5/1/0.5 are heat NEED per
+Done (follow-up, user decision 2026-11-22, ADR 0069): GPU weights 1.5/1/0.5 are heat NEED per
 run. Each run's frames are split by weight (48 -> 24/16/8) and each GPU node's existing
 `DemandKwh` is its share of the current run, so the unchanged heat-first placement follows the need
 and repeated runs no longer stall within the hour.

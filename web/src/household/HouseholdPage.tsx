@@ -14,7 +14,7 @@ import {
 } from 'recharts'
 import MockBanner from '../admin/MockBanner'
 import { axis, legend, tooltip } from '../admin/chartStyle'
-import { DAY_MS, alignHour, dec1, num, pct, pct1, runStartMs, wallMs } from '../admin/format'
+import { DAY_MS, alignHour, chf, dec1, num, pct, pct1, runStartMs, wallMs } from '../admin/format'
 import '../admin/admin.css'
 import { useAsync, useSource } from '../data/source'
 import type { HouseInfo, HousePeriod, RunInfo } from '../data/types'
@@ -134,7 +134,6 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
           <Link className="link back" to={`/admin/${encodeURIComponent(run.id)}?h=${selectedH}&house=${encodeURIComponent(house.id)}`}>
             ← Network
           </Link>
-          <span> · </span><Link className="link back" to="/live">Live request →</Link>
           <h1>{house.id}</h1>
           <span className="note">{[place, run.id].filter(Boolean).join(' · ')}</span>
         </div>
@@ -157,6 +156,8 @@ function HouseView({ run, house, periods }: { run: RunInfo; house: HouseInfo; pe
         <Stat label="Heat delivered" value={`${num.format(sum.heatUsedKwh)} kWh`} />
         <Stat label="Heat demand covered" value={pct.format(sum.coveredShare)} note={`of ${num.format(sum.heatDemandKwh)} kWh`} />
         <Stat label="Power used by servers" value={`${num.format(sum.powerKwh)} kWh`} note="paid by DigitalHeat" />
+        <Stat label="Electricity cost" value={chf.format(sum.electricityCostChf)} note="paid by DigitalHeat" />
+        <Stat label="Computing income" value={chf.format(sum.incomeChf)} note="jobs run in this house" />
         <Stat label="Heat dumped" value={`${num.format(sum.heatDumpedKwh)} kWh`} />
         <Stat label="Outdoor temperature" value={`${dec1.format(sum.avgTemperatureC)} °C`} note="average" />
         <Stat

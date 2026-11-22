@@ -145,3 +145,4 @@
 .job-log-message { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
 .job-log-entry time { flex: none; text-align: right; }
 @media (max-width: 560px) { .job-log-entry { align-items: flex-start; flex-wrap: wrap; } .job-log-entry time { margin-left: 21px; } }
+

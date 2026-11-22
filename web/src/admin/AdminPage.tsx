@@ -73,7 +73,10 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const [t, setT] = useState(() => alignHour(run, Number(params.get('h') ?? run.hours)))
   const [heatLayer, setHeatLayer] = useState<HeatLayer>('none')
   const [showWeather, setShowWeather] = useState(false)
-  const [rangeId, setRangeId] = useState<RangeId>('24h')
+  const [rangeId, setRangeId] = useState<RangeId>(() => {
+    const stored = localStorage.getItem('digitalheat.admin.rangeId')
+    return RANGES.some((r) => r.id === stored) ? (stored as RangeId) : '24h'
+  })
   const { hours: rangeHours } = RANGES.find((r) => r.id === rangeId)!
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     const id = params.get('house')
@@ -82,6 +85,8 @@ function RunView({ source, run, runs, houses, network }: Props) {
   const [playing, setPlaying] = useState(false)
 
   const [speed, setSpeed] = useState<number>(PLAY_SPEEDS[1])
+  useEffect(() => { localStorage.setItem('digitalheat.admin.runId', run.id) }, [run.id])
+  useEffect(() => { localStorage.setItem('digitalheat.admin.rangeId', rangeId) }, [rangeId])
   useEffect(() => {
     if (!playing) return
     // Advance by elapsed wall time, not by tick count: when drawing is slow, ticks come late and
@@ -200,7 +205,7 @@ function RunView({ source, run, runs, houses, network }: Props) {
 
   const dumpedShare = totals.dumped / Math.max(1, totals.used + totals.dumped)
   const missedShare = totals.misses / Math.max(1, totals.completions + totals.misses)
-  const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers })), [houses])
+  const mapHouses = useMemo(() => houses.map((h) => ({ id: h.id, name: `${h.municipality || 'House'} ${h.id}`, lat: h.lat, lon: h.lon, servers: h.servers, siteType: h.siteType })), [houses])
   const wall = wallMs(run, t)
 
   return (

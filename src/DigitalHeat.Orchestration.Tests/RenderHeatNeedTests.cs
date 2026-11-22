@@ -1,7 +1,7 @@
 using Xunit;
 namespace DigitalHeat.Orchestration.Tests;
 
-/// <summary>ADR 0068: render GPU weights are heat need per run, expressed through HeatSignal.DemandKwh.</summary>
+/// <summary>ADR 0069: render GPU weights are heat need per run, expressed through HeatSignal.DemandKwh.</summary>
 public class RenderHeatNeedTests
 {
     private static readonly DateTimeOffset Hour = new(2026, 11, 22, 10, 0, 0, TimeSpan.Zero);

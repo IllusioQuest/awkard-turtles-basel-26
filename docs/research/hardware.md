@@ -65,7 +65,7 @@ How to read it: each column is the same 1 kW heater built from different hardwar
 server-hour" spreads the yearly fixed cost over the 5,665 hours the house actually buys heat. If
 the income row is above the break-even row, that hardware pays its full cost in the heat-led
 draft scenario (installation and water cooling still excluded). Case break-even without hardware
-is CHF 0.226 for every profile (`docs/results/reference-house.md`).
+is CHF 0.226 for every profile (year model, retired 2026-11-22; Fleet: `docs/model/fleet-simulation.md` §16).
 
 Transcription throughput uses **different models** (CPU: `whisper.cpp base`, our own measurement;
 L4: `whisper-large-v3-turbo`; RTX 4090: `faster-whisper large-v2` measured on a slower RTX 3070 Ti
@@ -81,7 +81,7 @@ CHF 0.48–1.49. Hardware cost per kW, not efficiency, decides the full-cost cas
 - `cpu-server` is the worst per kW because the only sourced rack server is an 8-core entry box
   (≈ 0.16 kW), so a 1 kW CPU heater needs six of them. A denser CPU server would be much cheaper
   per kW (`TODO(source)`: quote). **Caveat for T-06:** the depreciation sensitivity in
-  `docs/results/reference-house.md` counts one R570 per 1 kW server (CHF 0.243 per server-hour);
+  the retired year-model results page counted one R570 per 1 kW server (CHF 0.243 per server-hour);
   by this power estimate it is about 6× that.
 - `gpu-inference-l4` has the highest value per kWh: datacentre spot capacity for 11.6 L4s
   (CHF 2.23) is above its full-cost break-even (CHF 1.36). It is the only profile where a market

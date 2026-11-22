@@ -25,7 +25,7 @@ internal sealed record RenderConfig(string Id, string Image, string StateDirecto
     public GpuBinding? Gpu { get; init; }
     public string? GpuBackend { get; init; }
     public double GpuFrameShare { get; init; } = .8; // User-approved workload mix; not a utilization promise.
-    /// <summary>ADR 0068: a render node's heat demand is its weighted share of the current run (heat NEED),
+    /// <summary>ADR 0069: a render node's heat demand is its weighted share of the current run (heat NEED),
     /// not a fixed hourly allowance. The origin uses it to register each run's need with the GPU nodes.</summary>
     public bool HeatNeedPerRun { get; init; }
 }
@@ -49,7 +49,7 @@ internal sealed record RenderPeerStatus(string PeerId, string PhysicalHostId, st
     public string[] VerifiedBackends { get; init; } = ["CPU"];
     public string? PhysicalGpuId { get; init; }
     public RenderGpuStats? GpuStats { get; init; }
-    /// <summary>Frames of the current run this node needs (ADR 0068); null when the hourly allowance applies.</summary>
+    /// <summary>Frames of the current run this node needs (ADR 0069); null when the hourly allowance applies.</summary>
     public int? HeatNeedFrames { get; init; }
 }
 
@@ -192,7 +192,7 @@ internal static class RenderNodeHost
             }
             return Results.Ok(scene);
         });
-        // ADR 0068: the origin registers this node's need for the run before submitting its frames.
+        // ADR 0069: the origin registers this node's need for the run before submitting its frames.
         app.MapPost("/run-need",(RunHeatNeed need)=>{
             if(!needMode)return Results.BadRequest();
             if(!System.Text.RegularExpressions.Regex.IsMatch(need.RunPrefix,"^[a-z0-9.-]{1,120}$")||need.Frames<0||need.Frames>cfg.Frames

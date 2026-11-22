@@ -6,7 +6,7 @@
       "soldShareOfHours": {
         "value": 0.6467,
         "unit": "fraction",
-        "source": "results of dotnet run --project src/DigitalHeat.YearRun -- . : 22,661 server-hours / (4 servers x 8,760 h), docs/results/reference-house.md"
+        "source": "results of dotnet run --project src/DigitalHeat.YearRun -- . : 22,661 server-hours / (4 servers x 8,760 h) (year model, retired 2026-11-22; current Fleet results: docs/model/fleet-simulation.md section 16)"
       }
     },
     {

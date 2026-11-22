@@ -129,7 +129,7 @@ Two control strategies (decision 0029) separate *local timing* from *the network
 *Draft text; tables in `docs/model/network-scheduler.md`, data in `data/derived/network/experiments/`.*
 
 **8.1 Reference house.** Four servers cover 58.0 % of the house's heat demand with no dumped heat at
-64.7 % utilisation ([`results/reference-house.md`](../results/reference-house.md)). On a single house
+64.7 % utilisation (year model, retired 2026-11-22; current Fleet results in [`model/fleet-simulation.md`](../model/fleet-simulation.md) §16). On a single house
 the greedy rule B1 is optimal: it reaches the full-year upper bound exactly, and the LP cannot improve
 on it. Planning on imperfect forecasts costs little (coverage 58.05 % → 57.82 % at σ24 = 20 %).
 *Message: on one house, intelligence does not pay; heat physics decides.*

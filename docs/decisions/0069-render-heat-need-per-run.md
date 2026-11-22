@@ -1,4 +1,4 @@
-# 0068: Render GPU weights are heat need per run
+# 0069: Render GPU weights are heat need per run
 
 - **Status:** proposed (user approved, 2026-11-22)
 - **Date:** 2026-11-22

@@ -24,7 +24,8 @@ public sealed record HouseSpec(
     double TankKwh,
     double TankInitialKwh,
     double ElectricityPriceChfPerKwh,
-    int? ServerCount);
+    int? ServerCount,
+    string? SiteType = null); // optional display category ("pool", ...); null = house (T-81)
 
 /// <summary>
 /// Hourly heat demand of a house over the run, one value per run hour (index 0 = run start).

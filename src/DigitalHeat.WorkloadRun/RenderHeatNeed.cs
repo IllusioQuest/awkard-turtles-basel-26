@@ -1,10 +1,10 @@
 using DigitalHeat.Orchestration;
 
-/// <summary>One render run's heat need on one GPU node: its weighted share of the run's frames (ADR 0068).</summary>
+/// <summary>One render run's heat need on one GPU node: its weighted share of the run's frames (ADR 0069).</summary>
 internal sealed record RunHeatNeed(string RunPrefix, int Frames, double FrameHeatKwh);
 
 /// <summary>
-/// Render-lab heat need per run (ADR 0068). Node weights describe how much heat each node NEEDS, not an
+/// Render-lab heat need per run (ADR 0069). Node weights describe how much heat each node NEEDS, not an
 /// hourly allowance. Each GPU node publishes, through the existing <c>HeatSignal.DemandKwh</c>, its share
 /// of the current run plus whatever it already committed this hour, so the unchanged heat-first placement
 /// (free-share rank, hard heat cap; ADR 0056) splits the run in proportion to need and the need starts

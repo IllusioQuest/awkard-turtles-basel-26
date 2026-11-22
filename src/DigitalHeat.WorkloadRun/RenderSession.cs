@@ -194,7 +194,7 @@ internal sealed class RenderSession
         if(stopRequested)return;
         foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/prepared-scene",state.Scene,RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
     }
-    /// <summary>ADR 0068: give each GPU node its weighted share of this run as heat need before frames are
+    /// <summary>ADR 0069: give each GPU node its weighted share of this run as heat need before frames are
     /// submitted. Idempotent: resume re-sends the same split. Placement itself stays with MeshPeer.</summary>
     private async Task RegisterRunNeed()
     {

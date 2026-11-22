@@ -43,7 +43,7 @@ heater covers them (decision 0018).
 
 ## Numbers for the reference house (4 servers, draft baseline)
 
-From [`results/reference-house.md`](results/reference-house.md): 58.0 % of the heat demand covered,
+From the year model (retired 2026-11-22; current Fleet results in [`model/fleet-simulation.md`](model/fleet-simulation.md) §16): 58.0 % of the heat demand covered,
 0 kWh dumped, 22,661 server-hours, 18,129 kWh of heat used (= CHF 2,411 ÷ 0.133). Case break-even
 **CHF 0.2261 per server-hour**.
 

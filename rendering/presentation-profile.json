@@ -41,5 +41,5 @@
   "graphics_api": "opengl",
   "reuse_prepared_scene": true,
   "gpu_heat_need_per_run": true,
-  "gpu_heat_need_source": "ADR 0068: GPU weights 1.5/1/.5 are heat NEED, not an hourly allowance. Each run's frames are split by weight (48 -> 24/16/8) and each GPU node's heat demand is its share of the current run (frames x frame_heat_kwh) plus heat it already committed this hour. Unchanged heat-first placement then fills nodes in proportion to need; need starts again with every run. Synthetic lab input, NOT measured heat. CPU roles keep their hourly allowance."
+  "gpu_heat_need_source": "ADR 0069: GPU weights 1.5/1/.5 are heat NEED, not an hourly allowance. Each run's frames are split by weight (48 -> 24/16/8) and each GPU node's heat demand is its share of the current run (frames x frame_heat_kwh) plus heat it already committed this hour. Unchanged heat-first placement then fills nodes in proportion to need; need starts again with every run. Synthetic lab input, NOT measured heat. CPU roles keep their hourly allowance."
 }

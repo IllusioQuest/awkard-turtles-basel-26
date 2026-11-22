@@ -16,6 +16,7 @@ export interface MapHouse {
   lat: number
   lon: number
   servers: number
+  siteType?: string // "house" (default), "pool", ...
 }
 
 /** State of one house at the selected time; heat in kW, tank as a share of its capacity. */
@@ -54,6 +55,11 @@ const SWITZERLAND_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 const HOUSE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg>'
+// Pool ladder over water (T-81).
+const POOL_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15V6a2 2 0 0 1 4 0M15 15V6a2 2 0 0 1 4 0M7 9h8M7 12.5h8"/><path d="M2 19.5c1.7 0 2.5-1.2 4-1.2s2.3 1.2 4 1.2 2.5-1.2 4-1.2 2.3 1.2 4 1.2 2.5-1.2 4-1.2"/></svg>'
+/** Marker icon by site type from the house file; unknown types fall back to the house. */
+const SITE_ICONS: Record<string, string> = { house: HOUSE_ICON, pool: POOL_ICON }
+const siteIcon = (type?: string) => SITE_ICONS[type ?? 'house'] ?? HOUSE_ICON
 
 const ring = (load: number) => `conic-gradient(var(--series-1) ${Math.round(load * 360)}deg, rgba(255,255,255,0.14) 0)`
 
@@ -225,7 +231,7 @@ function renderMarkers(map: MlMap | null, props: Props, markers: { current: Mark
       const s = c.houses[0]
       const detail = map.getZoom() >= DETAIL_ZOOM
       el.className = `mk mk-site${detail ? ' mk-detail' : ''}${s.id === selectedId ? ' selected' : ''}`
-      el.innerHTML = `<span class="mk-ring" style="background:${ring(load)}"><span class="mk-icon">${HOUSE_ICON}</span></span>${
+      el.innerHTML = `<span class="mk-ring" style="background:${ring(load)}"><span class="mk-icon">${siteIcon(s.siteType)}</span></span>${
         detail ? `<span class="mk-label">${s.servers} servers · ${pct}</span>` : ''
       }`
       el.title = `${s.name} · ${s.servers} servers · ${pct}`
