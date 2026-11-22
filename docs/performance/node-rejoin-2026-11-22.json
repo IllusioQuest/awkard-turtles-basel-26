@@ -1,0 +1,88 @@
+{
+ "ticket": "T-87",
+ "decision": "0073",
+ "date": "2026-11-22",
+ "environment": "Linux cloud container, 4 vCPU. Real C# five-node render lab (presentation profile, real 500 kWh, heat need per run, ADR 0074 planner), test-only Linux launcher that writes processes.json like Start-PresentationRenderLab.ps1; Blender 5.3.0 = bpy module behind a test-only native launcher; each frame render replaced by a fixed 2.0 s placeholder. NOT the presentation laptop.",
+ "scenarios": [
+  {
+   "name": "A: power off at 12 frames, power on at 22 (one render)",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 74.5,
+   "frames": {
+    "gpu-1": 22,
+    "gpu-2": 18,
+    "gpu-3": 8
+   },
+   "checks": "old GPU 3 controller confirmed gone; new controller recorded in processes.json and alive"
+  },
+  {
+   "name": "B: two off/on cycles in one render (off 6, on 14, off 27, on 34)",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 92.4,
+   "frames": {
+    "gpu-1": 21,
+    "gpu-2": 19,
+    "gpu-3": 8
+   },
+   "checks": "second power-off fenced the restarted controller"
+  },
+  {
+   "name": "C1: power off at 12 frames, power on after the render finished",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 56.3,
+   "frames": {
+    "gpu-1": 25,
+    "gpu-2": 19,
+    "gpu-3": 4
+   }
+  },
+  {
+   "name": "C2: normal render afterwards",
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "active_s": 54.9,
+   "frames": {
+    "gpu-1": 24,
+    "gpu-2": 16,
+    "gpu-3": 8
+   }
+  },
+  {
+   "name": "Browser: button off -> on during a render",
+   "button_text": [
+    "Power off GPU 3",
+    "Power on GPU 3",
+    "Powering on GPU 3\u2026",
+    "Power off GPU 3"
+   ],
+   "phase": "complete",
+   "completed": 48,
+   "video": true,
+   "frames": {
+    "gpu-1": 22,
+    "gpu-2": 17,
+    "gpu-3": 9
+   },
+   "page_errors": 0
+  }
+ ],
+ "after_all": {
+  "render_node_controllers_running": 5,
+  "proposals": 205,
+  "jobs": 204,
+  "rejected": 1,
+  "rejected_note": "one proposal rejected while GPU 3 was being fenced"
+ },
+ "bugs_found_and_fixed": [
+  "T-86 fencing compared process start times exactly; on Linux a start time read by another process differs by milliseconds, so power-off skipped the kill (old controller kept running and held the node lock; the restarted controller then failed). Tolerance 1 s on Linux only, exact on Windows.",
+  "T-86 fencing read MainModule of a renderer killed with its controller's process tree while it was exiting (null) -> NullReferenceException; now waits up to 2 s for exit, else fails closed."
+ ],
+ "limits": "Not run on the Windows laptop with real Blender. Power-on waits up to 3 minutes for the restarted node (Blender probe/startup)."
+}
