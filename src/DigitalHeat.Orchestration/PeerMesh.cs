@@ -94,6 +94,16 @@ public sealed class MeshPeer : IDisposable
         if(!IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=[..journal.WithdrawnPeers,peerId]};Save();}
         offers.Remove(peerId);
     }
+    /// <summary>
+    /// Undo an operator withdrawal once the peer is proven back (ADR 0073). Its last offer is dropped so only a
+    /// fresh offer from the restarted peer can be planned against. Cancellation tombstones stay.
+    /// </summary>
+    public void ReadmitPeer(string peerId)
+    {
+        if(peerId==Id||!peers.Contains(peerId))throw new ArgumentException("Invalid readmission target");
+        if(IsPeerWithdrawn(peerId)){journal=journal with{WithdrawnPeers=journal.WithdrawnPeers.Where(p=>p!=peerId).ToArray()};Save();}
+        offers.Remove(peerId);
+    }
     public void CancelBatchWorkloads(string[] ids)
     {
         if(!journal.OperatorHold)throw new InvalidOperationException("Hold peer before cancelling frame jobs");

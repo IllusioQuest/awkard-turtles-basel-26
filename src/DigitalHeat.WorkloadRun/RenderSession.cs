@@ -9,6 +9,8 @@ internal sealed record RenderSessionState(string Id,string Phase,bool Held,Rende
     public NodeShutdown? Shutdown { get; init; }
     public Dictionary<int,int> FrameGenerations { get; init; }=[];
     public RenderArtifact[] FencedFrames { get; init; }=[];
+    /// <summary>Original deadlines of retried frames from earlier power-offs in this render (ADR 0073).</summary>
+    public Dictionary<int,JobDeadline> RetryDeadlines { get; init; }=[];
     public RenderArtifact? Video { get; init; }
     public PreparedScene? Scene { get; init; }
     public DateTimeOffset? PreparationStartedUtc { get; init; }
@@ -147,7 +149,10 @@ internal sealed partial class RenderSession
     public async Task Hold(bool hold)
     {
         await controls.WaitAsync();try{
-            if(!hold&&state.Shutdown is {} pending&&pending.Stage!="ready"){await ShutdownCore(pending.Identity.PeerId);return;}
+            if(!hold&&state.Shutdown is {} pending&&pending.Stage is not ("ready" or "rejoined")){
+                if(pending.Stage is "starting" or "started")await StartupCore(pending.Identity.PeerId);else await ShutdownCore(pending.Identity.PeerId);
+                return;
+            }
             if(state.Phase is "idle" or "complete" or "cancelled")throw new InvalidOperationException("No resumable active run");
             Update(s=>s with{Held=true,Error=hold?"Pause pending: finishing active frame/preparation…":null});
             await SetPeersHold(hold);
@@ -176,7 +181,7 @@ internal sealed partial class RenderSession
     private async Task Submit(string route,string id,int frame,string backend="CPU",string? scene=null)
     {
         if(stopRequested)return;
-        using var reply=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+route,new FrameSubmit(id,frame,null,backend,scene,frame>0?state.Shutdown?.Plan?.Deadlines.GetValueOrDefault(frame):null),RenderNodeHost.Json);reply.EnsureSuccessStatusCode();
+        using var reply=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+route,new FrameSubmit(id,frame,null,backend,scene,frame>0?RetryDeadline(frame):null),RenderNodeHost.Json);reply.EnsureSuccessStatusCode();
     }
     private async Task Prepare()
     {

@@ -5,7 +5,7 @@ internal sealed partial class RenderSession
 {
     private readonly SemaphoreSlim dispatch=new(1);
     private int shutdownBusy;
-    private bool Fenced=>state.Shutdown is {} n&&n.Stage!="intent";
+    private bool Fenced=>state.Shutdown is {} n&&n.Stage is not ("intent" or "rejoined");
     private IEnumerable<KeyValuePair<string,string>> ActivePeerUrls=>cfg.Peers.Where(p=>!Fenced||p.Key!=state.Shutdown!.Identity.PeerId);
     private int ActivePeerCount=>cfg.Peers.Count-(Fenced?1:0);
     private string LocalFrameJob(int frame)=>RenderFailoverPlan.LocalJob(state.Id,frame,state.FrameGenerations.GetValueOrDefault(frame));
@@ -37,8 +37,11 @@ internal sealed partial class RenderSession
     private async Task ShutdownCore(string peerId)
     {
         if(state.Shutdown is {Stage:"ready"})return;
-        if(state.Shutdown is null){
+        if(state.Shutdown is {Stage:"starting" or "started"})throw new InvalidOperationException("Power on is still in progress");
+        if(state.Shutdown is null or {Stage:"rejoined"}){
             if(state.Phase!="rendering"||state.Scene is null)throw new InvalidOperationException("Power off is available during frame rendering");
+            // A second power-off in the same render keeps the earlier retries' original deadlines (ADR 0073).
+            if(state.Shutdown?.Plan?.Deadlines is {Count:>0} earlier)Update(s=>s with{RetryDeadlines=Merge(s.RetryDeadlines,earlier)});
             await RefreshPeers(true);
             var target=peers.Single(p=>p.PeerId==peerId&&p.WorkerRole=="render");
             var identity=new LocalNodePowerControl(cfg).Prepare(peerId);

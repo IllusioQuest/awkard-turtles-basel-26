@@ -68,6 +68,11 @@ internal static class RenderNodeHost
         ThreadPool.GetMinThreads(out var workers,out var completionPorts);
         ThreadPool.SetMinThreads(Math.Max(workers,MinimumControlWorkers),completionPorts);
         var cfg=JsonSerializer.Deserialize<RenderConfig>(File.ReadAllText(path),Json)!;
+        // A node restarted by the origin (ADR 0073) has no launcher redirect; it appends to its own logs.
+        if(Environment.GetEnvironmentVariable("RENDER_NODE_OWN_LOGS")=="1"){
+            Console.SetOut(new StreamWriter(new FileStream(Path.Combine(cfg.StateDirectory,"host.stdout.log"),FileMode.Append,FileAccess.Write,FileShare.ReadWrite)){AutoFlush=true});
+            Console.SetError(new StreamWriter(new FileStream(Path.Combine(cfg.StateDirectory,"host.stderr.log"),FileMode.Append,FileAccess.Write,FileShare.ReadWrite)){AutoFlush=true});
+        }
         string token=Environment.GetEnvironmentVariable("MESH_TOKEN") ?? throw new InvalidDataException("Missing lab token");
         var docker=new DockerCommands();
         Directory.CreateDirectory(cfg.StateDirectory);
@@ -153,6 +158,7 @@ internal static class RenderNodeHost
         });
         app.MapPost("/hold",(RenderHold h)=>{lock(gate){peer.SetHold(h.Hold);Volatile.Write(ref published,CaptureStatus());return Results.Json(Status(),Json);}});
         app.MapPost("/withdraw",(RenderWithdraw w)=>{lock(gate){peer.WithdrawPeer(w.PeerId);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
+        app.MapPost("/readmit",(RenderWithdraw w)=>{lock(gate){peer.ReadmitPeer(w.PeerId);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
         app.MapPost("/cancel",(RenderCancel c)=>{lock(gate){peer.CancelBatchWorkloads(c.JobIds);Volatile.Write(ref published,CaptureStatus());return Results.Ok();}});
         app.MapPost("/frames",(FrameSubmit f)=>{
             if(f.Frame<1||f.Frame>cfg.Frames||!manifestBackends.Contains(f.Backend)||(cfg.PreparedSceneMode&&(f.SceneSha256 is null||!profiles.ContainsKey(PreparedProfile(f.SceneSha256,f.Frame))))||!System.Text.RegularExpressions.Regex.IsMatch(f.JobId,"^[a-z0-9-]{1,80}$"))return Results.BadRequest();
@@ -202,7 +208,7 @@ internal static class RenderNodeHost
             if(!System.Text.RegularExpressions.Regex.IsMatch(need.RunPrefix,"^[a-z0-9.-]{1,120}$")||need.Frames<0||need.Frames>cfg.Frames
                ||!double.IsFinite(need.FrameHeatKwh)||need.FrameHeatKwh<=0)return Results.BadRequest();
             lock(gate){
-                if(runNeed!=need){NativeRenderRuntime.WriteJson(needPath,need);runNeed=need;peer.Update(Inventory());}
+                if(runNeed is null||JsonSerializer.Serialize(runNeed,Json)!=JsonSerializer.Serialize(need,Json)){NativeRenderRuntime.WriteJson(needPath,need);runNeed=need;peer.Update(Inventory());}
                 Volatile.Write(ref published,CaptureStatus());
             }
             return Results.Ok(need);
@@ -244,6 +250,7 @@ internal static class RenderNodeHost
         app.MapPost("/ui/resume",()=>{session.RequestHold(false);return Results.Accepted();});
         app.MapPost("/ui/stop",()=>{session.RequestStop();return Results.Accepted();});
         app.MapPost("/ui/nodes/{node}/shutdown",(string node)=>{session.RequestShutdown(node);return Results.Accepted();});
+        app.MapPost("/ui/nodes/{node}/startup",(string node)=>{session.RequestStartup(node);return Results.Accepted();});
         app.MapPost("/ui/restart",()=>{session.RequestRestart();return Results.Accepted();});
         app.MapGet("/ui/image/{node}/{job}",async(string node,string job)=>{
             if(!cfg.Peers.TryGetValue(node,out var url)||!System.Text.RegularExpressions.Regex.IsMatch(job,"^[a-z0-9.-]{1,100}$"))return Results.BadRequest();

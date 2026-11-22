@@ -69,6 +69,19 @@ public class PeerMeshTests : IDisposable
         Assert.True(recovered.IsPeerWithdrawn("b"));
     }
 
+    [Fact] public void ReadmittedPeerNeedsAFreshOfferAndRestartKeepsReadmission()
+    {
+        // ADR 0073: power-on readmits a withdrawn peer, but its offer from before the power-off is not trusted.
+        var a=Add("a",.1);var b=Add("b",10);var c=Add("c",2);Publish();
+        a.WithdrawPeer("b");a.ReadmitPeer("b");Assert.False(a.IsPeerWithdrawn("b"));
+        a.Submit(Request("a","first"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Equal("c",a.Jobs().Single().Target);           // b's old offer was dropped
+        b.Publish();                                           // the restarted peer announces itself again
+        a.Submit(Request("a","second"),CoordinatorTests.Profile.Id);a.Tick();
+        Assert.Equal("b",a.Jobs().Single(j=>j.Request.Id=="a.second").Target);
+        a.Dispose();peers.Remove(a);Assert.False(Add("a",.1).IsPeerWithdrawn("b"));
+    }
+
     [Fact] public void EveryOriginCanReachEveryPeerAndHeatWinsInsideLatencyLimit()
     {
         // Decision 0056: an idle eligible peer outranks a busy one, so a and c get too little heat

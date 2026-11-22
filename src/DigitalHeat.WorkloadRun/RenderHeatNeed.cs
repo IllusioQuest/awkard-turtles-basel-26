@@ -1,7 +1,12 @@
 using DigitalHeat.Orchestration;
 
 /// <summary>One render run's heat need on one GPU node: its weighted share of the run's frames (ADR 0069).</summary>
-internal sealed record RunHeatNeed(string RunPrefix, int Frames, double FrameHeatKwh);
+internal sealed record RunHeatNeed(string RunPrefix, int Frames, double FrameHeatKwh)
+{
+    /// <summary>Run-prefixed attempts that were superseded (e.g. killed at power-off, ADR 0073). Their heat stays
+    /// committed, but it counts as other work, not as frames of this run's need.</summary>
+    public string[] SupersededIds { get; init; } = [];
+}
 
 /// <summary>
 /// Render-lab heat need per run (ADR 0069). Node weights describe how much heat each node NEEDS, not an
@@ -43,7 +48,7 @@ internal static class RenderHeatNeed
         foreach(var a in attempts){
             var hours=a.HourStartsUtc;if(hours.Length==0)continue;
             double heat=a.HeatKwhPerHour;
-            bool current=a.WorkloadId.StartsWith(need.RunPrefix,StringComparison.Ordinal);
+            bool current=a.WorkloadId.StartsWith(need.RunPrefix,StringComparison.Ordinal)&&!need.SupersededIds.Contains(a.WorkloadId,StringComparer.Ordinal);
             bool thisHour=hours.Contains(hourStartUtc);
             if(!current&&thisHour)otherThisHour+=heat;
             // Only finished frames count as covered: a frame still running or paused across the hour
