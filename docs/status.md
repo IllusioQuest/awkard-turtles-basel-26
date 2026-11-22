@@ -151,3 +151,5 @@ T-84 Nikita/Codex fix/T-84-render-copy PR74: user-approved Heat needed: xx kWh l
 
 
 T-84 follow-up dbfd5fb: requested duplicate node counts, Progress help, completed-frame range note, preparation timing note and Total render elapsed row removed. Live page verified; remaining node names/progress/heat and backend behavior intact. PR74 merged; follow-up in review.
+
+T-85 Nikita/Codex perf/T-85-active-bookkeeping: selective non-released snapshots and snapshot-free deadline ticks under ADR0071 review. UI unchanged; all heat/ownership/history semantics retained. Shared Orchestration changes; existing mesh/deadline tests and real renderer verification planned.

@@ -95,3 +95,5 @@ later.
 - [0069 — Render heat need per run](0069-render-heat-need-per-run.md): proposed; T-80; user approved; GPU weights 1.5/1/0.5 are heat need per run (48 frames → 24/16/8); reviewed go with changes, applied.
 
 - [0070 — Read-only heat summary](0070-read-only-heat-summary.md): proposed; T-83; user approved, review pending.
+
+- [0071 — Active-job bookkeeping](0071-active-job-bookkeeping.md): proposed; T-85; review pending.
