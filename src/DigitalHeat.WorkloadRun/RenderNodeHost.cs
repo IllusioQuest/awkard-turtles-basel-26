@@ -131,7 +131,8 @@ internal static class RenderNodeHost
             await next(ctx);
         });
         app.MapGet("/",()=>Results.Redirect("/ui"));
-        app.MapGet("/status",()=>Results.Json(Status(),Json));
+        // Optional run filter keeps owner polling O(current run) instead of O(all runs); unfiltered stays the default.
+        app.MapGet("/status",([Microsoft.AspNetCore.Mvc.FromQuery(Name="job_prefix")] string? jobPrefix)=>Results.Json(jobPrefix is null?Status():ForRun(Status(),jobPrefix),Json));
         app.MapPost("/messages",(MeshEnvelope packet)=>{
             if(!cfg.Peers.ContainsKey(packet.Sender))return Results.BadRequest();
             return inbox.Writer.TryWrite(()=>peer.Receive(packet.Sender,packet.Message))?Results.Accepted():Results.StatusCode(503);
@@ -279,6 +280,12 @@ internal static class RenderNodeHost
     private sealed class Transport(ChannelWriter<(string From,string To,PeerMessage Message)> q):IPeerMeshTransport
     {public void Send(string from,string to,PeerMessage message)=>q.TryWrite((from,to,message));}
 
+    /// <summary>Current-run view: jobs/attempts/results of one run prefix, plus every origin job and
+    /// attempt that is not finished yet, so ownership and "still active" checks see all live work.</summary>
+    internal static RenderPeerStatus ForRun(RenderPeerStatus s,string prefix)=>s with{
+        Jobs=s.Jobs.Where(j=>j.Request.Id.StartsWith(prefix,StringComparison.Ordinal)||j.Status is not ("accepted" or "cancelled")).ToArray(),
+        Attempts=s.Attempts.Where(a=>a.Attempt.Request.Id.StartsWith(prefix,StringComparison.Ordinal)||a.Phase!="released").ToArray(),
+        Results=s.Results.Where(r=>r.JobId.StartsWith(prefix,StringComparison.Ordinal)).ToArray()};
     internal static string PreparedProfile(string hash,int frame)=>"prepared-"+hash+"-"+frame;
     private sealed class ArtifactRuntime(IDockerCommands docker,string directory,string peer):IRenderRuntime
     {

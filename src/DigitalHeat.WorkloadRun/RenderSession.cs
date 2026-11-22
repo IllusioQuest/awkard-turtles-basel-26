@@ -50,10 +50,12 @@ internal sealed class RenderSession
         try{
             // Planned peers are intentionally absent here: only runtime Peers are probed.
             // Keep execution's all-or-nothing snapshot; independent probe results are UI facts.
+            // Ask for the current run only (plus unfinished work); older released history is not needed here.
+            string query=state.Id==""?"":"?job_prefix="+Uri.EscapeDataString(cfg.Id+"."+state.Id+"-");
             var checkedPeers=await Task.WhenAll(cfg.Peers.Select(async p=>{
                 try{
                     using var limit=new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                    var status=await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status",RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
+                    var status=await http.GetFromJsonAsync<RenderPeerStatus>(p.Value+"/status"+query,RenderNodeHost.Json,limit.Token)??throw new IOException("Empty peer status");
                     if(status.PeerId!=p.Key)throw new IOException("Peer identity mismatch");
                     return (Status:(RenderPeerStatus?)status,Connection:new RenderPeerConnection(p.Key,"reachable",DateTimeOffset.UtcNow));
                 }catch{
