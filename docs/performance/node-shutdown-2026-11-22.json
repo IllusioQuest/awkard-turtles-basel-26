@@ -1,0 +1,62 @@
+{
+  "run": "5d4f95fca8ad",
+  "elapsed_seconds": 79.45299999997951,
+  "active_seconds": 76.9981448,
+  "contributions": {
+    "demo-cpu-prepare": 0,
+    "demo-gpu-1": 28,
+    "demo-cpu-video": 0,
+    "demo-gpu-2": 19,
+    "demo-gpu-3": 1
+  },
+  "retry_generations": {
+    "5": 1
+  },
+  "needs": {
+    "demo-gpu-1": 28,
+    "demo-gpu-2": 19
+  },
+  "retained_gpu3_frames": 1,
+  "png_bytes": 253886,
+  "mp4_bytes": 119440,
+  "original_retry_deadline_equal": true,
+  "videos": [
+    {
+      "frames": 48,
+      "bytes": 119440
+    },
+    {
+      "frames": 48,
+      "bytes": 119440
+    }
+  ],
+  "controller_exited": true,
+  "renderer_exited": true,
+  "controller_port_closed": true,
+  "source_commit": "6119140",
+  "date": "2026-11-22",
+  "test_count": 148,
+  "physical_gpus": 1,
+  "logical_gpu_workers_before": 3,
+  "logical_gpu_workers_after": 2,
+  "method": "48 frames at configured 640x360 Eevee settings; poll UI API, power off GPU3 with a running frame after its first completed frame; verify process exit, shared PNG hash, original retry deadline and MP4 stsz sample counts. Separate new run: restart origin during rendering, explicitly resume durable session.",
+  "new_run_origin_restart": {
+    "run": "900d591aa803",
+    "frames": 48,
+    "active_seconds": 65.1650327,
+    "contributions": {
+      "demo-cpu-prepare": 0,
+      "demo-gpu-1": 29,
+      "demo-cpu-video": 0,
+      "demo-gpu-2": 19,
+      "demo-gpu-3": 0
+    },
+    "recovery_paused_verified": true
+  },
+  "limitations": [
+    "Local process-manifest fencing and shared laptop storage; not remote outage recovery.",
+    "One physical Iris Xe GPU, three logical workers.",
+    "Heat values use the documented synthetic 0.8 kWh per frame-hour assumption, not measured electrical/thermal energy.",
+    "Timing is one observation per scenario, not a controlled speed comparison."
+  ]
+}
