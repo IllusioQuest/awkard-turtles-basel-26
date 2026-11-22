@@ -117,3 +117,5 @@ T-00 ─┬─ T-01 ─ T-05 ─ T-06 ─ T-07 (draft 15:00)
 | [T-76](T-76-gpu-worker-shades.md) | Related GPU shades and larger work-budget differences | Nikita / Codex | in review; PR #68 |
 
 | [T-77](T-77-render-runtime.md) | Measure and improve renderer runtime | Nikita / Codex | done; PR #69 and timeout follow-up on main |
+
+| [T-79](T-79-warm-render-penalty.md) | Measure the warm-process render penalty on the presentation GPU | Nikita / Claude | in progress; benchmark ready, laptop run pending |
