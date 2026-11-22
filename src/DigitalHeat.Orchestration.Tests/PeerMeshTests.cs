@@ -21,21 +21,35 @@ public class PeerMeshTests : IDisposable
         public readonly Dictionary<string, MeshPeer> Peers = [];
         public readonly List<(string From, string To, PeerMessage Message)> Messages = [];
         public Func<string, string, PeerMessage, bool>? Drop;
+        /// <summary>Queue messages until Deliver(), like the asynchronous HTTP channel between real peers.</summary>
+        public bool Queued;
+        private readonly Queue<(string From, string To, PeerMessage Message)> pending = new();
         public void Send(string from, string to, PeerMessage message)
         {
             Messages.Add((from, to, message));
+            if (Queued) { pending.Enqueue((from, to, message)); return; }
             if (Drop?.Invoke(from, to, message) != true && Peers.TryGetValue(to, out var peer)) peer.Receive(from, message);
         }
+        /// <summary>Deliver queued messages in order; with <paramref name="stopAfter"/>, stop after the first match.</summary>
+        public void Deliver(Func<PeerMessage, bool>? stopAfter = null)
+        {
+            for (int n = pending.Count; n > 0; n--)
+            {
+                var (from, to, message) = pending.Dequeue();
+                if (Drop?.Invoke(from, to, message) != true && Peers.TryGetValue(to, out var peer)) peer.Receive(from, message);
+                if (stopAfter?.Invoke(message) == true) return;
+            }
+        }
     }
-    private WorkloadInventory Inventory(string id, double heat, long revision = 1, bool ready = true) =>
+    private WorkloadInventory Inventory(string id, double heat, long revision = 1, bool ready = true, int slots = 2) =>
         new(revision, PlacementTests.Now, PlacementTests.Now.AddHours(1), "Synthetic mesh fixture, not hardware/game measurements",
-            [new(id, "CH", new(heat, 0, 0, 1, .8), 0)], [new("domain-" + id, new(2, 256, 2), [])],
-            [new("node-" + id, id, "domain-" + id, ready, true, new(2, 256, 2), [], [], [], [new("player", id == "a" ? 5 : 20)])], [])
+            [new(id, "CH", new(heat, 0, 0, 1, .8), 0)], [new("domain-" + id, new(2, 256, slots), [])],
+            [new("node-" + id, id, "domain-" + id, ready, true, new(2, 256, slots), [], [], [], [new("player", id == "a" ? 5 : 20)])], [])
         { ResourceObservedAtUtc = clock.Now, ResourceValidUntilUtc = clock.Now.AddMinutes(1) };
-    private MeshPeer Add(string id, double heat, long revision = 1, TimeSpan minimumFreeze = default)
+    private MeshPeer Add(string id, double heat, long revision = 1, TimeSpan minimumFreeze = default, int slots = 2)
     {
         if (!runtimes.TryGetValue(id, out var runtime)) runtimes[id] = runtime = new();
-        var peer = new MeshPeer(fleet, id, Path.Combine(root, id), Inventory(id, heat, revision),
+        var peer = new MeshPeer(fleet, id, Path.Combine(root, id), Inventory(id, heat, revision, slots: slots),
             [CoordinatorTests.Node("node-" + id)], new Dictionary<string, ContainerProfile> { [CoordinatorTests.Profile.Id] = CoordinatorTests.Profile },
             ["a", "b", "c"], bus, runtime, clock, TimeSpan.FromSeconds(20), minimumFreeze);
         peers.Add(peer); bus.Peers[id] = peer; return peer;
@@ -65,6 +79,54 @@ public class PeerMeshTests : IDisposable
         c.Submit(Request("c", "other"), CoordinatorTests.Profile.Id); c.Tick();
         Assert.Contains(bus.Messages, m => m.From == "c" && m.To == "b" && m.Message is PeerProposal);
         Assert.Equal(2, runtimes["b"].Starts);
+    }
+
+    [Fact] public void QueuedMeshDoesNotProposeMoreThanAPeerCanTake()
+    {
+        // ADR 0074. With asynchronous delivery, replies and new offers arrive after the origin's next pass.
+        // Each pass must count work it already proposed instead of sending every waiting job to the same
+        // single-slot peer, which then rejects all but one (and journals every rejection).
+        bus.Queued = true;
+        var a = Add("a", 0); var b = Add("b", 50, slots: 1); var c = Add("c", 50, slots: 1);
+        Publish(); bus.Deliver();
+        for (int i = 1; i <= 12; i++)
+            a.Submit(PlacementTests.Request($"job-{i:D2}", "batch") with { OriginSiteId = "a", Lifecycle = new(false, true, false) }, CoordinatorTests.Profile.Id);
+        for (int step = 0; step < 200 && a.Jobs().Any(j => j.Status != "accepted"); step++)
+        {
+            clock.Now = clock.Now.AddSeconds(1);
+            a.Tick(); bus.Deliver(); bus.Deliver();
+            foreach (var (peer, id) in new[] { (b, "b"), (c, "c") })
+            {
+                foreach (var row in peer.Attempts().Where(r => r.Phase == "running"))
+                    runtimes[id].States[row.Attempt.AttemptId] = new("exited", "abcdef123456", false) { ExitCode = 0 };
+                peer.Tick();
+            }
+            bus.Deliver();
+        }
+        Assert.All(a.Jobs(), j => Assert.Equal("accepted", j.Status));
+        Assert.Equal(6, b.Attempts().Length); Assert.Equal(6, c.Attempts().Length); // free-share spread unchanged
+        int rejected = bus.Messages.Count(m => m.Message is PeerReply { Status: "rejected" });
+        Assert.True(rejected == 0, $"{rejected} proposals were rejected");
+    }
+
+    [Fact] public void AcceptedJobStillHoldsTheSlotWhenARoutineOfferOvertakesTheProposal()
+    {
+        // ADR 0074 review: B publishes a routine offer before it sees A's proposal. A then gets B's
+        // "accepted" reply, but not yet B's next offer. B's routine offer still shows the slot free.
+        bus.Queued = true;
+        var a = Add("a", 0); var b = Add("b", 50, slots: 1); var c = Add("c", 50, slots: 1);
+        Publish(); bus.Deliver();
+        Job(a, "one"); a.Tick();                         // proposed to B (tie broken by site ID)
+        b.Publish();                                     // routine offer, queued before B sees the proposal
+        bus.Deliver();                                   // B accepts; reply and B's new offer are queued
+        bus.Deliver(m => m is PeerReply);                // only the reply reaches A
+        Assert.Equal("accepted", a.Jobs().Single(j => j.Request.Id == "a.one").Status);
+        Job(a, "two"); a.Tick();
+        Assert.Equal("c", a.Jobs().Single(j => j.Request.Id == "a.two").Target);
+        Assert.DoesNotContain(bus.Messages, m => m.Message is PeerReply { Status: "rejected" });
+
+        static void Job(MeshPeer origin, string id) => origin.Submit(PlacementTests.Request(id, "batch")
+            with { OriginSiteId = "a", Lifecycle = new(false, true, false) }, CoordinatorTests.Profile.Id);
     }
 
     [Fact] public void RequiredGamingLatencyCanExcludeHotterPeers()
@@ -133,19 +195,23 @@ public class PeerMeshTests : IDisposable
 
     [Fact] public void CompetingOriginsUsingStaleOffersCannotOversubscribeTarget()
     {
-        var a = Add("a", 1); var b = Add("b", 8); var c = Add("c", 6); Publish();
+        // B has one slot. Origins A and C each plan from B's stale offer and propose to it; neither can see
+        // the other's proposal. B must admit one and reject the other. (An origin's own unanswered proposals
+        // already hold capacity in its planner since ADR 0074, so A's second job goes straight to C.)
+        var a = Add("a", 1); var b = Add("b", 8, slots: 1); var c = Add("c", 6); Publish();
         bus.Drop = (_, _, message) => message is PeerProposal;
         a.Submit(Request("a", "one"), CoordinatorTests.Profile.Id); a.Tick();
         c.Submit(Request("c", "two"), CoordinatorTests.Profile.Id); c.Tick();
         a.Submit(Request("a", "three"), CoordinatorTests.Profile.Id); a.Tick();
         var proposals = bus.Messages.Where(m => m.To == "b" && m.Message is PeerProposal)
             .Select(m => (PeerProposal)m.Message).DistinctBy(p => p.Request.Id).ToArray();
-        Assert.Equal(3, proposals.Length);
+        Assert.Equal(new[] { "a", "c" }, proposals.Select(p => p.Origin).Order().ToArray());
         foreach (var proposal in proposals) b.Receive(proposal.Origin, proposal);
-        Assert.Equal(2, runtimes["b"].Starts);
-        bus.Drop = null; a.Tick();
-        Assert.Equal(1, runtimes["c"].Starts);
-        Assert.All(a.Jobs(), j => Assert.Equal("accepted", j.Status));
+        Assert.Equal(1, runtimes["b"].Starts);
+        bus.Drop = null; a.Tick(); c.Tick();
+        // The rejected job is re-planned to a peer with room (free-share rank, ADR 0056), never back onto B.
+        Assert.Equal(2, runtimes["a"].Starts + runtimes["c"].Starts); Assert.Single(b.Attempts());
+        Assert.All(a.Jobs().Concat(c.Jobs()), j => Assert.Equal("accepted", j.Status));
     }
 
     [Fact] public void PeerHeatUpdatePausesBatchThroughSharedControllerButProtectsGame()
