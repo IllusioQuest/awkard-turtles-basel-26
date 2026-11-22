@@ -28,8 +28,6 @@ internal sealed class RenderSession
     private readonly object stateGate=new();
     private readonly SemaphoreSlim controls=new(1),poll=new(1);
     private RenderSessionState state;
-    // Workflow poll cadence: short enough that a finished frame or video is noticed promptly.
-    internal static readonly TimeSpan WorkflowPoll=TimeSpan.FromMilliseconds(250);
     private RenderPeerStatus[] peers=[];
     private string? pollingError;
     private RenderPeerConnection[] connections=[];
@@ -191,7 +189,7 @@ internal sealed class RenderSession
             }
             CheckFailure([global],[]);
             if(!peers.SelectMany(p=>p.Jobs).Any(j=>j.Request.Id==global))try{await Submit("/prepare",id,0);}catch(HttpRequestException){/* Reconcile this same durable ID next poll. */}
-            await Task.Delay(WorkflowPoll);
+            await Task.Delay(1000);
         }
         if(stopRequested)return;
         foreach(var url in cfg.Peers.Values){using var r=await http.PostAsJsonAsync(url+"/prepared-scene",state.Scene,RenderNodeHost.Json);r.EnsureSuccessStatusCode();}
@@ -223,7 +221,7 @@ internal sealed class RenderSession
             if(!peers.SelectMany(p=>p.Jobs).Any(j=>j.Request.Id==global)){
                 using var r=await http.PostAsJsonAsync(cfg.Peers[cfg.Id]+"/assemble",new AssemblySubmit(id,identity),RenderNodeHost.Json);r.EnsureSuccessStatusCode();
             }
-            await Task.Delay(WorkflowPoll);
+            await Task.Delay(500);
         }
     }
     private void CheckFailure(string[] ids,RenderArtifact[] done)
@@ -257,7 +255,7 @@ internal sealed class RenderSession
                     string backend=cfg.PreparedSceneMode?"EEVEE":RenderDeviceAllocation.Backend(frame,cfg.Frames,cfg.GpuFrameShare,peers.SelectMany(p=>p.VerifiedBackends).FirstOrDefault(b=>b!="CPU"));
                     try{await Submit("/frames",id,frame,backend,state.Scene?.SceneSha256);remaining--;}catch(Exception e)when(e is HttpRequestException or TaskCanceledException){pollingError="Submission uncertain; reconciling the same frame ID";break;}
                 }
-                await Task.Delay(WorkflowPoll);
+                await Task.Delay(1000);
             }
         }catch(Exception e){
             if(stopRequested)return;
